@@ -1,0 +1,30 @@
+o) we have had some problems, but they are solved now
+     ---> tests/wgt-himed.R etc	  {MM, Dec.2005}
+
+2) I think its wrong in principle to only work with *integer* weights
+      for 'whimed'.
+      Further note, that *because* of the integer weights, we need type
+      'long long' {because otherwise integer overflow kills everything}.
+
+   Using C Macro, we now have both, integer and double weights;
+   and I have tests of consistency in ./tests/
+   --> using wgt.himedian() as an R function {MM, Dec.2005}
+
+   Note however that a more general function (weighted quantiles) might be
+   of interest, see file ./TODO
+
+3) Data Sets --- Valentin Todorov has several of Rousseeuw's
+	     in his "rrov" package
+
+   --> got them, and dropped all *.x and *.y data sets
+       -- as part of the loaded data -- but kept a definition
+        <foo>.x <- as.matrix(.....)
+      in the examples section.	 {MM & VT,  Dec.2005/Jan.2006}
+
+4) covMcd( * ):  replace 'print.it'  by  'trace'  which is more appropriate
+   	         and common in S
+
+5) renamed  tolellipse() to tolEllipsePlot()
+   all these plotting functions may *NOT* set  par(mfrow = c(1,1)) !
+
+6) considerable simplification in the  correction factor computations

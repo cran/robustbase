@@ -1,0 +1,132 @@
+2006-02-09  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.1-2 ready for CRAN "baby release"
+
+	* man/vaso.Rd: fix longstanding typo:  con*s*triction
+
+	* R/glmrob.R (glmrob): Oops! the *.control() function must only
+	have one "." and must be *called*
+
+2006-02-08  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/glmrob.R,......: added 'glmrob' and 'nlrob' from Andreas Ruckstuhl
+
+2006-02-02  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/covMcd.R: all moved from 'rrcov' after Valentin's
+	* R/ltsReg.R: "green light"
+	..........
+
+2006-01-25  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.0-1  "prerelease" ready
+
+	* man/psi_func-class.Rd: version "checked in" and ready for pre-release
+	* man/chgDefaults-methods.Rd: dito
+
+2006-01-17  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* NAMESPACE: added name space
+
+	* R/OGK.R (covOGK): added this; even though, the default scale
+		estimate is *not* consistent
+	* tests/tests-OGK.R: minimal 'test'
+
+2006-01-16  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* man/starsCYG.Rd: clean up of documentation for the Rousseeuw data
+	* man/aircraft.Rd: from Valentin
+	* ....
+
+--------------- all these are for those things from 'rrcov' -------------------
+
+2005-12-28  Valentin Todorov  <valentin.todorov@chello.at>
+    * 0.2-11
+    * added more data sets from Rousseeuw & Leroy: telef, lactic,
+        pension, pilot, cloud, education, airmay
+    * fixed codoc discrepancies in the data sets stars and wood
+    * ltsReg & covMcd - added control parameter for the small sample correction factors
+    * ltsReg & covMcd - output of the consistency and the small sample correction factors
+
+2005-10-24  Valentin Todorov  <valentin.todorov@chello.at>
+    * 0.2-10
+    * minor corrections in the help of covPlot
+    * fixed bug in covPlot in case of class=TRUE
+    * tolellipse - both robust and classical ellipse are superimposed
+    * added directory inst/bm containing benchmarks comparing covMcd and ltsReg
+        to the corresponding functions in MASS, S-PLUS and Matlab
+2005-10-17  Valentin Todorov  <valentin.todorov@chello.at>
+    * 0.2-9
+    * minor corrections in the help of covMcd
+    * minor correction in ltsReg (false corrected to FALSE)
+    * covMcd - fixed the limitation on the number of variables <= 50
+    * ltsReg - fixed the limitation on the number of variables <= 50
+    * added function summary.mcd which prints (additionally to the output
+        of print.mcd) the correlation matrix (if requested), the eigenvalues
+        of the covariance or correlation matrix and the robust distances.
+    * added control object for the estimation options rrcov.control and
+        used in covMcd and ltsReg
+
+2005-09-20  Valentin Todorov  <valentin.todorov@chello.at>
+    * 0.2-8
+    * ltsReg: added formula interface
+    * ltsReg: adde generic functions summary.lts and print.summary.lts
+    * ltsReg: fixed a problem with reordering of the coeficients even in case
+        without intercept
+
+2005-04-16  Valentin Todorov  <valentin.todorov@chello.at>
+    * 0.2-7
+    * ltsReg: fixed a bug related to nsamp -> it was hard-coded = 500
+        in Fortran
+    * ltsPlot: default for id.n changed - instead of 3, now it is the
+        number of identified outliers
+    * ltsPlot: help enhanced
+    * covMcd, covPlot, tolellipse: tol.inv parameter changed to tol,
+        according the change in mahalanobis() in 2.1.0
+
+2004-12-26  Valentin Todorov  <valentin.todorov@chello.at>
+    * 0.2-6
+    * a bug in ltsReg (rsquared) fixed
+    * fixed CRLF line endings in FORTRAN sources
+    * fixed a problem in covMcd: in case of p=1 and cov=[0], the cov matrix was
+        a double instead of a matrix, which resulted in errors in subsequent
+        calls (e.g. determinant(mcd$cov) expects a matrix)
+    * fixed a problem in ltsReg when p==1 and Intercept==FALSE - the vectors of
+        coefficients ans$coefficients and ans$raw.coefficients were of size 2
+    * error handling added in ltsReg in case of scale=0
+
+2004-09-16  Valentin Todorov  <valentin.todorov@chello.at>
+    * 0.2-5
+    * several errors in doc fixed (ltsPlot.Rd, covPlot.Rd, aircraft.Rd)
+
+2004-09-16 Valentin Todorov  <valentin.todorov@chello.at>
+    * 0.2-4
+    * added Regression Diagnostic Plots - function ltsPlot()
+    * ...added Normal QQ Plot of the residuals
+    * ...added Standardized Residuals versus index plot
+    * ...added Standardized Residuals versus fitted values plot
+    * ...added Regression diagnostic plot
+    * ltsReg: the responce variable Y added to the result object
+    * covMcd: fixed a bug related to nsamp -> it was hard-coded = 500 in Fortran
+    * covMcd: fixed a bug - in case of alpha=1
+    * added S3 methods plot.mcd and plot.lts
+    * the S3 methods print.mcd and print.lts moved to separate R files
+    * added the stars data set (Hertzsprung-Russell diagram)
+
+2004-07-13  Valentin Todorov  <valentin.todorov@chello.at>
+    * 0.2-3
+    * improved documentation of the datasets
+    * added datasets aircraft and delivery
+    * added Covariance Plots - function covPlot()
+    * ...added Distance Plot - function distplot()
+    * ...added Distance-Distance Plot - function ddplot()
+    * ...added Chisquare QQ-Plot - function chi2qqplot()
+    * ...added Tolerance Ellipse Plot - function tolellipse()
+    * added function print.lts (for ltsReg result); included in the test tlts.R
+    * added function print.mcd (for covMcd result); included in the test tmcd.R
+
+2004-06-26  Valentin Todorov  <valentin.todorov@chello.at>
+    * 0.2-2
+    * fixed bug in Fortran: rfltsreg.f, xrfnbreak()
+    * Depends >= 1.8 (it was >= 1.9, because of the bug above)
+    * Parameter, controlling whether to perform intercept adjustment at each step added to ltsReg and its default value set to FALSE

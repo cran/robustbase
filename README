@@ -1,0 +1,38 @@
+
+1) we have had some problems, but they are solved now
+     ---> tests/C-BUG-whimed.R
+
+2) I think its wrong in principle to only work with *integer* weights
+      for 'whimed'.
+      Further note, that *because* of the integer weights, we need type
+      'long long' {because otherwise integer overflow kills everything}.
+
+   --> Change this `everywhere' and make  wgt.himedian() an R function
+
+   NOTE: There is  'weighted.median()' in limma
+   	 and I have generalized it ---> inst/ex-funs.R
+
+   But see more general code (different 'tie' strategies;
+			      weighted *quantile*s)
+   in /u/maechler/R/MM/STATISTICS/robust/weighted-median.R
+
+
+3) Data Sets --- Valentin Todorov has several of Rousseeuw's
+	     in his "rrov" package
+	     (and promised me "the rest" when needed)
+
+   I don't like the *.x, *.y  sub datasets:
+   They shouldn't be needed when use a *formula*
+
+   In his lts tests, he uses these "data sets from the literature":
+   (Note that 'stackloss' is already in "datasets") :
+    heart.x,heart.y,	   data(heart)
+    stars.x,stars.y,	   data(stars)
+    phosphor.x,phosphor.y, data(phosphor)
+    stack.x,stack.loss,	   data(stackloss)
+    coleman.x,coleman.y,   data(coleman)
+    salinity.x,salinity.y, data(salinity)
+    aircraft.x,aircraft.y, data(aircraft)
+    delivery.x,delivery.y, data(delivery)
+    wood.x,wood.y,	   data(wood)
+    hbk.x,hbk.y,	   data(hbk)

@@ -1,0 +1,71 @@
+TO DO
+------
+
+o  Generalizing  'wgt.himedian':  We'd want a C API on which R builds.
+
+   There are pure R implementations:
+    - 'weighted.median()' in limma
+    	 and I have generalized it ---> inst/ex-funs.R
+
+    - more general code (different 'tie' strategies; weighted *quantile*s)
+      in /u/maechler/R/MM/STATISTICS/robust/weighted-median.R
+
+o covOGK(): is *inconsistent* (by a constant factor, depending on n)
+  	    as long as it is used with the inconsistent scale.tau2()
+	    {the one that was proposed in the paper}.
+  The argument name 'weight.fn' is pretty ugly and the default function
+  name 'hard.rejection()' is just awful (we need a globally available
+  function as 'role model'.
+
+  - Consider making 'hard rejection'  the default though!
+  -   "        "    n.iter = 1 or = 2 the default.
+
+--- rrcov etc ---
+
+o rrcov.control() __ NEEDS  name change ! ______
+   probably use  mcd.control() and lts.control()
+
+   or forget about *control() completely?
+   since there are only a few in each ??????/
+
+o tolellipse() --> renamed to tolEllipsePlot()
+     - maybe use  cluster::ellipsoidPoints()
+     - allow other percentiles than just  97.5%
+     - maybe *return* something
+
+o summary.mcd() should *return* and object of class "summary.mcd"
+  and then  print.summary.mcd() should print it !!!
+
+o plot(mcd. ) : should show the call !
+
+--- glmrob --
+
+o glmrob(*, weights.on.x = "robCov")  currently uses  MASS::cov.rob(), i.e.
+  "MVE" and Andreas had a comment that "mcd" is worse.
+  But still, I (MM) strongly believe we should use  covMcd() instead.
+
+o MM wonders if 'family = binomial' is a good default, when OTOH,
+  glm() has  'family = gaussian' as a default.
+  MM's proposal: have *NO* default, so users need to set family explicitly.
+
+o Maybe  we should consider  'family = gaussian'  {analogy to glm()}
+  as a possible setting (*not* as default);
+  and just divert to  lmrob() in that case
+
+o psi.*(....,  rho = FALSE/TRUE)   functions from Andreas
+  should be replaced by using the new  psi_func  objects
+  --> ./R/psi-funs-AR.R  &  ./man/pkg-internal.Rd
+
+o glmrob() -> "glmrob" class needs
+  predict() and probably also residuals(..., type = "*")
+
+o glmrob() needs tests in ./tests/ -- taking from man/glmrob.Rd
+
+o summary.glmrob() should be better documented;
+  we should decide if the current return value is fine.
+
+--- nlrob ---
+
+o nlrob() needs tests in ./tests/ -- you can take some from man/nlrob.Rd
+
+o man/fitted.nlrob.Rd  seems completely superfluous to MM
