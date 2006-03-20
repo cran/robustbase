@@ -1,5 +1,6 @@
 \name{summary.glmrob}
 \alias{summary.glmrob}
+\alias{vcov.glmrob}
 \alias{print.summary.glmrob}
 \title{Summarizing Robust Fits of Generalized Linear Models}
 \description{
@@ -8,7 +9,8 @@
   models.
 }
 \usage{
-\method{summary}{glmrob}(object, correlation = FALSE, symbolic.cor = FALSE, ...)
+\method{summary}{glmrob}(object, correlation = FALSE, symbolic.cor = FALSE, \dots)
+\method{vcov}{glmrob}(object, \dots)
 
 \method{print}{summary.glmrob}(x, digits = max(3, getOption("digits") - 3),
       symbolic.cor = x$symbolic.cor,

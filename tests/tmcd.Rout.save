@@ -1,6 +1,6 @@
 
 R : Copyright 2006, The R Foundation for Statistical Computing
-Version 2.2.1 Patched (2006-02-01 r37236)
+Version 2.2.1 Patched (2006-02-18 r37405)
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -16,6 +16,7 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > library(robustbase)
+Loading required package: MASS
 > library(MASS)
 > 
 > dodata <- function(nrep = 1, time = FALSE, short = FALSE, full = TRUE,
@@ -61,7 +62,8 @@ Type 'q()' to quit R.
 + 
 +         if(time) {
 +             xtime <- system.time(dorep(x, nrep, method))[1]/nrep
-+             xres <- sprintf("%3d %3d %3d %12.6f %10.3f\n", dim(x)[1], dim(x)[2], quan, crit, xtime)
++             xres <- sprintf("%3d %3d %3d %12.6f %10.3f\n",
++                             dim(x)[1], dim(x)[2], quan, crit, xtime)
 +         }
 +         else {
 +             xres <- sprintf("%3d %3d %3d %12.6f\n", dim(x)[1], dim(x)[2], quan, crit)
@@ -215,21 +217,11 @@ Type 'q()' to quit R.
 > 
 > pad.right <- function(z, pads)
 + {
-+ ### Pads spaces to right of text
++     ## Pads spaces to right of text
 +     padding <- paste(rep(" ", pads), collapse = "")
 +     paste(z, padding, sep = "")
 + }
 > 
-> whatis <- function(x) {
-+     if(is.data.frame(x))
-+         cat("Type: data.frame\n")
-+     else if(is.matrix(x))
-+         cat("Type: matrix\n")
-+     else if(is.vector(x))
-+         cat("Type: vector\n")
-+     else
-+         cat("Type: don't know\n")
-+ }
 > 
 > ## -- now do it:
 > dodata()
@@ -508,4 +500,7 @@ V4   -653.2   -394.3   4212.9   1109.7    866.7
 V5   -532.8   -333.3   3347.9    866.7    682.6
 --------------------------------------------------------
 ========================================================
+> 
+> cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
+Time elapsed:  1.57 0.15 2.57 0 0 
 > 

@@ -24,3 +24,5 @@ for(i in 1:100) {
     cat(formatC(range(x), wid = 6, flag="-"), "",
         formatC(whim,     wid = 6, flag="+"), "\n")
 }
+
+cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''

@@ -1,0 +1,355 @@
+
+R : Copyright 2006, The R Foundation for Statistical Computing
+Version 2.3.0 Under development (unstable) (2006-02-21 r37407)
+ISBN 3-900051-07-0
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> #### Test special cases  for  covMcd()
+> 
+> library(robustbase)
+Loading required package: MASS
+> 
+> ### 1) p = 1 ----------------------------------------------------
+> set.seed(1)
+> x <- c(rnorm(50),100, 1e10)
+> (r1 <- covMcd(x))
+Call:
+covMcd(x = x)
+
+
+Log(det):  -2.130 
+
+
+Robust Estimate of Location: 
+     x  
+0.1922  
+
+Robust Estimate of Covariance: 
+   x     
+x  0.7642
+> str(r1)
+List of 14
+ $ method    : chr "Univariate location and scale estimation."
+ $ call      : language covMcd(x = x)
+ $ cov       : num [1, 1] 0.764
+  ..- attr(*, "dimnames")=List of 2
+  .. ..$ : chr "x"
+  .. ..$ : chr "x"
+ $ center    : Named num 0.192
+  ..- attr(*, "names")= chr "x"
+ $ n.obs     : int 52
+ $ alpha     : num 0.5
+ $ quan      : num 27
+ $ raw.cov   : Named num 0.839
+  ..- attr(*, "names")= chr "x"
+ $ raw.center: Named num 0.325
+  ..- attr(*, "names")= chr "x"
+ $ crit      : num 0.119
+ $ mcd.wt    : num [1:52] 1 1 1 1 1 1 1 1 1 1 ...
+ $ X         : num [1:52, 1] -0.626  0.184 -0.836  1.595  0.330 ...
+  ..- attr(*, "dimnames")=List of 2
+  .. ..$ : chr [1:52] "1" "2" "3" "4" ...
+  .. ..$ : NULL
+ $ raw.cnp2  : num [1:2] 6.45 1.14
+ $ cnp2      : num [1:2] 1.47 1.01
+ - attr(*, "class")= chr "mcd"
+> summary(r1)
+Call:
+covMcd(x = x)
+
+
+Robust Estimate of Covariance: 
+   x     
+x  0.7642
+
+Robust Estimate of Location: 
+     x  
+0.1922  
+
+Eigenvalues: 
+[1]  0.7642
+> ## with alpha = 1
+> (r1.1 <- covMcd(x, alpha = 1))
+Call:
+covMcd(x = x, alpha = 1)
+
+
+Log(det):  42.1 
+
+
+Robust Estimate of Location: 
+    x  
+2.059  
+
+Robust Estimate of Covariance: 
+   x    
+x  228.4
+> str(r1.1)
+List of 14
+ $ method    : chr "Minimum Covariance Determinant Estimator. \nThe minimum covariance determinant estimates based on 52 observations \nare equal t"| __truncated__
+ $ call      : language covMcd(x = x, alpha = 1)
+ $ cov       : num [1, 1] 228
+  ..- attr(*, "dimnames")=List of 2
+  .. ..$ : chr "x"
+  .. ..$ : chr "x"
+ $ center    : Named num 2.06
+  ..- attr(*, "names")= chr "x"
+ $ n.obs     : int 52
+ $ alpha     : num 1
+ $ quan      : num 52
+ $ raw.cov   : num [1, 1] 1.92e+18
+  ..- attr(*, "dimnames")=List of 2
+  .. ..$ : chr "x"
+  .. ..$ : chr "x"
+ $ raw.center: Named num 1.92e+08
+  ..- attr(*, "names")= chr "x"
+ $ crit      : num 1.92e+18
+ $ mcd.wt    : num [1:52] 1 1 1 1 1 1 1 1 1 1 ...
+ $ X         : num [1:52, 1] -0.626  0.184 -0.836  1.595  0.330 ...
+  ..- attr(*, "dimnames")=List of 2
+  .. ..$ : chr [1:52] "1" "2" "3" "4" ...
+  .. ..$ : NULL
+ $ raw.cnp2  : num [1:2] 1 1
+ $ cnp2      : num [1:2] 1.14 1.00
+ - attr(*, "class")= chr "mcd"
+> summary(r1.1)
+Call:
+covMcd(x = x, alpha = 1)
+
+
+Robust Estimate of Covariance: 
+   x    
+x  228.4
+
+Robust Estimate of Location: 
+    x  
+2.059  
+
+Eigenvalues: 
+[1]  228.4
+> 
+> ### 1b) p = 1, constant scale
+> (rc <- covMcd(rep(1,12)))
+Call:
+covMcd(x = rep(1, 12))
+
+
+Log(det):  -Inf 
+
+
+Robust Estimate of Location: 
+rep(1, 12)  
+         1  
+
+Robust Estimate of Covariance: 
+      [,1]
+[1,]  0   
+> str(rc)
+List of 14
+ $ method    : chr "Univariate location and scale estimation. \nMore than 7 of the observations are identical."
+ $ call      : language covMcd(x = rep(1, 12))
+ $ cov       : num [1, 1] 0
+  ..- attr(*, "names")= chr "rep(1, 12)"
+ $ center    : Named num 1
+  ..- attr(*, "names")= chr "rep(1, 12)"
+ $ n.obs     : int 12
+ $ alpha     : num 0.5
+ $ quan      : num 7
+ $ raw.cov   : num [1, 1] 0
+  ..- attr(*, "names")= chr "rep(1, 12)"
+ $ raw.center: Named num 1
+  ..- attr(*, "names")= chr "rep(1, 12)"
+ $ crit      : num 0
+ $ mcd.wt    : num [1:12] 1 1 1 1 1 1 1 1 1 1 ...
+ $ X         : num [1:12, 1] 1 1 1 1 1 1 1 1 1 1 ...
+  ..- attr(*, "dimnames")=List of 2
+  .. ..$ : chr [1:12] "1" "2" "3" "4" ...
+  .. ..$ : NULL
+ $ raw.cnp2  : num [1:2] 4.97 1.41
+ $ cnp2      : num [1:2] 1 1
+ - attr(*, "class")= chr "mcd"
+> summary(rc)
+Call:
+covMcd(x = rep(1, 12))
+
+
+Robust Estimate of Covariance: 
+      [,1]
+[1,]  0   
+
+Robust Estimate of Location: 
+rep(1, 12)  
+         1  
+
+Eigenvalues: 
+[1]  0
+> ## with alpha = 1
+> (rc1 <- covMcd(rep(1,12), alpha = 1))
+The classical covariance matrix is singular. 
+Call:
+covMcd(x = rep(1, 12), alpha = 1)
+
+
+Log(det):  -Inf 
+
+
+Robust Estimate of Location: 
+rep(1, 12)  
+         1  
+
+Robust Estimate of Covariance: 
+            rep(1, 12)
+rep(1, 12)  0         
+> str(rc1)
+List of 14
+ $ method    : chr "Minimum Covariance Determinant Estimator.\nThe classical covariance matrix is singular. \nThe minimum covariance determinant es"| __truncated__
+ $ call      : language covMcd(x = rep(1, 12), alpha = 1)
+ $ cov       : num [1, 1] 0
+  ..- attr(*, "dimnames")=List of 2
+  .. ..$ : chr "rep(1, 12)"
+  .. ..$ : chr "rep(1, 12)"
+ $ center    : Named num 1
+  ..- attr(*, "names")= chr "rep(1, 12)"
+ $ n.obs     : int 12
+ $ alpha     : num 1
+ $ quan      : num 12
+ $ raw.cov   : num [1, 1] 0
+  ..- attr(*, "dimnames")=List of 2
+  .. ..$ : chr "rep(1, 12)"
+  .. ..$ : chr "rep(1, 12)"
+ $ raw.center: Named num 1
+  ..- attr(*, "names")= chr "rep(1, 12)"
+ $ crit      : num 0
+ $ mcd.wt    : num [1:12] 1 1 1 1 1 1 1 1 1 1 ...
+ $ X         : num [1:12, 1] 1 1 1 1 1 1 1 1 1 1 ...
+  ..- attr(*, "dimnames")=List of 2
+  .. ..$ : chr [1:12] "1" "2" "3" "4" ...
+  .. ..$ : NULL
+ $ raw.cnp2  : num [1:2] 1 1
+ $ cnp2      : num [1:2] 1 1
+ - attr(*, "class")= chr "mcd"
+> summary(rc1)
+Call:
+covMcd(x = rep(1, 12), alpha = 1)
+
+
+Robust Estimate of Covariance: 
+            rep(1, 12)
+rep(1, 12)  0         
+
+Robust Estimate of Location: 
+rep(1, 12)  
+         1  
+
+Eigenvalues: 
+[1]  0
+> 
+> ### 2)  constant observations  { multivariate scale == 0 } -----------
+> (X <- matrix(rep(2*(1:4), 12), nrow = 12, byrow = TRUE))
+      [,1] [,2] [,3] [,4]
+ [1,]    2    4    6    8
+ [2,]    2    4    6    8
+ [3,]    2    4    6    8
+ [4,]    2    4    6    8
+ [5,]    2    4    6    8
+ [6,]    2    4    6    8
+ [7,]    2    4    6    8
+ [8,]    2    4    6    8
+ [9,]    2    4    6    8
+[10,]    2    4    6    8
+[11,]    2    4    6    8
+[12,]    2    4    6    8
+> (rC  <- covMcd(X))
+The covariance matrix of the data is singular. 
+There are 12  observations in the entire dataset of
+ 12 observations that lie on the hyperplane with equation 
+a_1*(x_i1-m_1)+...+a_p*(x_ip-m_p)=0 
+with (m_1,...,m_p) the mean
+of these observations and coefficients a_i equal to: 
+[1] 1 0 0 0
+Call:
+covMcd(x = X)
+
+
+Log(det):  -Inf 
+
+
+Robust Estimate of Location: 
+[1]  2  4  6  8
+
+Robust Estimate of Covariance: 
+      [,1]  [,2]  [,3]  [,4]
+[1,]  0     0     0     0   
+[2,]  0     0     0     0   
+[3,]  0     0     0     0   
+[4,]  0     0     0     0   
+> summary(rC)
+Call:
+covMcd(x = X)
+
+
+Robust Estimate of Covariance: 
+      [,1]  [,2]  [,3]  [,4]
+[1,]  0     0     0     0   
+[2,]  0     0     0     0   
+[3,]  0     0     0     0   
+[4,]  0     0     0     0   
+
+Robust Estimate of Location: 
+[1]  2  4  6  8
+
+Eigenvalues: 
+[1]  0  0  0  0
+> (rC1 <- covMcd(X, alpha = 1))
+The classical covariance matrix is singular. 
+Call:
+covMcd(x = X, alpha = 1)
+
+
+Log(det):  -Inf 
+
+
+Robust Estimate of Location: 
+[1]  2  4  6  8
+
+Robust Estimate of Covariance: 
+      [,1]  [,2]  [,3]  [,4]
+[1,]  0     0     0     0   
+[2,]  0     0     0     0   
+[3,]  0     0     0     0   
+[4,]  0     0     0     0   
+> summary(rC1)
+Call:
+covMcd(x = X, alpha = 1)
+
+
+Robust Estimate of Covariance: 
+      [,1]  [,2]  [,3]  [,4]
+[1,]  0     0     0     0   
+[2,]  0     0     0     0   
+[3,]  0     0     0     0   
+[4,]  0     0     0     0   
+
+Robust Estimate of Location: 
+[1]  2  4  6  8
+
+Eigenvalues: 
+[1]  0  0  0  0
+> 
+> ### 3)  alpha = 1 : classical estimates --- for general cases --------
+> 
+> 
+> cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
+Time elapsed:  1.74 0.12 2.19 0 0 
+> 

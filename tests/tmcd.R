@@ -44,7 +44,8 @@ dodata <- function(nrep = 1, time = FALSE, short = FALSE, full = TRUE,
 
         if(time) {
             xtime <- system.time(dorep(x, nrep, method))[1]/nrep
-            xres <- sprintf("%3d %3d %3d %12.6f %10.3f\n", dim(x)[1], dim(x)[2], quan, crit, xtime)
+            xres <- sprintf("%3d %3d %3d %12.6f %10.3f\n",
+                            dim(x)[1], dim(x)[2], quan, crit, xtime)
         }
         else {
             xres <- sprintf("%3d %3d %3d %12.6f\n", dim(x)[1], dim(x)[2], quan, crit)
@@ -198,21 +199,13 @@ gendata <- function(n,p,eps = 0,b = 10) {
 
 pad.right <- function(z, pads)
 {
-### Pads spaces to right of text
+    ## Pads spaces to right of text
     padding <- paste(rep(" ", pads), collapse = "")
     paste(z, padding, sep = "")
 }
 
-whatis <- function(x) {
-    if(is.data.frame(x))
-        cat("Type: data.frame\n")
-    else if(is.matrix(x))
-        cat("Type: matrix\n")
-    else if(is.vector(x))
-        cat("Type: vector\n")
-    else
-        cat("Type: don't know\n")
-}
 
 ## -- now do it:
 dodata()
+
+cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''

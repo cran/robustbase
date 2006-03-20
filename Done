@@ -28,3 +28,24 @@ o) we have had some problems, but they are solved now
    all these plotting functions may *NOT* set  par(mfrow = c(1,1)) !
 
 6) considerable simplification in the  correction factor computations
+
+7) glmrob(): trailing "..." argument is now passed to glmrob<FOO>control()
+
+8) make tests/wgt-himed-xtra.R an order of magnitude faster (less
+   simulations)
+
+9) man/fitted.nlrob.Rd merged into man/nlrob.Rd
+
+10) glmrob() now works when the internal glm.fit() returns NA coefficients
+    by dropping the corresponding columns (as Martin's "robGLM1" did).
+
+11) 'family = binomial' is a problematic default, when OTOH,
+  glm() has  'family = gaussian' as a default.
+  ==> have *NO* default, so users need to set family explicitly.
+
+12) Instead of modsel.glmrob() [ R/modsel.glmrob.R ]
+    Andreas has provided anova.glmrob()
+
+13) covOGK() is now consistent per default
+    because it is used with scaleTau2() which has now a constant
+    consistency factor by default.

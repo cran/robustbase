@@ -42,9 +42,9 @@ Sn  (c(1.1, -0.93, -0.11, -0.74))# 0.9329471
 ## gave segmentation fault at Sat Mar 16 23:54:30 2002
 ## not anymore but 0.9329471
 
-### Check validity of basic algorithm few
+### Check validity of basic algorithm few times
 set.seed(471)
-for(sim in 1:500) {
+for(sim in 1:100) { # had '500'
     cat(".")
     x <- rnorm(rpois(1, lam=80))# not too large the *n0R() use time!
     ##--> Sn0R() "fails" for  odd n
@@ -61,7 +61,8 @@ for(sim in 1:500) {
 ## Large x with 1% outliers
 N <- 1e5
 n.o <- round(0.01 * N)
-nSim <- 24
+nSim <- 24## interesting
+nSim <- 4 ## for package testing
 estim.lst <- c("mad", "Sn", "Qn")
 Res <- array(NA, dim = c(nSim, length(estim.lst), 1 + 2),
              dimnames= list(NULL,estim.lst, c("Tx","cpu1", "cpu3")))
@@ -79,6 +80,12 @@ for(i in 1:nSim) {
 options(digits = 5)
 
 (Tx <- Res[,, "Tx"])
+stopifnot(abs(range(Tx - 1)) < 0.03)
+
+q()
+
+### -- Rest: rather for demo -- keep here for reference
+
 apply(Res, c(2,3), mean)
 
 ## Variation: robust or not:

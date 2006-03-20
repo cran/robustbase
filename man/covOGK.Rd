@@ -1,7 +1,6 @@
 \name{covOGK}
 \alias{covOGK}
 \alias{covGK}
-\alias{scaleTau2}
 \alias{hard.rejection}
 %
 \title{Orthogonalized Gnanadesikan-Kettenring (OGK) Covariance Matrix Estimation}
@@ -26,7 +25,9 @@ covOGK(X, n.iter, sigmamu, rcov = covGK, weight.fn,
     return a numeric vector of length 2 containing robust location and
     scale estimates.  See \code{\link{scaleTau2}} for an example.}
   \item{rcov}{function that computes a robust covariance estimate
-    between two vectors.}
+    between two vectors.  The default, Gnanadesikan-Kettenring's
+    \code{covGK}, is simply \eqn{(s^2(X+Y) - s^2(X-Y))/4} where
+    \eqn{s()} is the scale estimate \code{sigmamu()}.}
   \item{weight.fn}{a function of the robust distances and the number of
     variables \eqn{p} to compute the weights used in the reweighting step.}
   \item{keep.data}{logical indicating if the (untransformed) data matrix
@@ -44,8 +45,8 @@ covOGK(X, n.iter, sigmamu, rcov = covGK, weight.fn,
 \value{
   currently a list with components
   \item{center}{robust location: numeric vector of length \eqn{p}.}
-  \item{cov}{robust covariance matrix estimate: \eqn{p\times p}{p x
-    p} matrix.}
+  \item{cov}{robust covariance matrix estimate: \eqn{p\times p}{p x p}
+    matrix.}
   \item{wcenter, wcov}{re-\bold{w}eighted versions of \code{center} and
     \code{cov}.}
   \item{weights}{the robustness weights used.}
@@ -68,11 +69,8 @@ covOGK(X, n.iter, sigmamu, rcov = covGK, weight.fn,
 }
 \author{Kjell Konis \email{konis@stats.ox.ac.uk}, with modifications by
     Martin Maechler.}
-% \note{ ~~further notes~~
-
-%  ~Make other sections like Warning with \section{Warning }{....} ~
-% }
-\seealso{\code{\link{covMcd}}, \code{\link[MASS]{cov.rob}}.
+\seealso{\code{\link{scaleTau2}},
+  \code{\link{covMcd}}, \code{\link[MASS]{cov.rob}}.
 }
 \examples{
 data(hbk)

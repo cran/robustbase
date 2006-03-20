@@ -36,8 +36,9 @@ Qn(x, constant = 2.2219, finite.corr = missing(constant))
   also available from
   \url{http://win-www.uia.ac.be/u/statis/abstract/Timeff92.htm}.
 }
-\seealso{\code{\link{mad}} for the `most robust' but much less efficient
-  scale estimator; \code{\link{Sn}} for another alternative.
+\seealso{\code{\link{mad}} for the \sQuote{most robust} but much less efficient
+  scale estimator; \code{\link{Sn}} for a similar faster but less
+  efficient alternative; \code{\link{scaleTau2}}.
 }
 \author{Original Fortran code:
   Christophe Croux and Peter Rousseeuw \email{rousse@wins.uia.ac.be}.

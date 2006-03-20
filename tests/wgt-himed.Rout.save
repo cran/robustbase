@@ -1,6 +1,6 @@
 
-R : Copyright 2005, The R Foundation for Statistical Computing
-Version 2.2.0 Patched (2005-11-20 r36405)
+R : Copyright 2006, The R Foundation for Statistical Computing
+Version 2.2.1 Patched (2006-02-01 r37236)
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -12,7 +12,7 @@ Type 'contributors()' for more information and
 'citation()' on how to cite R or R packages in publications.
 
 Type 'demo()' for some demos, 'help()' for on-line help, or
-'help.start()' for a HTML browser interface to help.
+'help.start()' for an HTML browser interface to help.
 Type 'q()' to quit R.
 
 > himed <- function(x) { n2 <- 1 + length(x) %/% 2; sort(x, partial = n2)[n2] }
@@ -23,6 +23,7 @@ Type 'q()' to quit R.
 > 
 > 
 > library(robustbase)
+Loading required package: MASS
 > 
 > options(digits = 7)# single precision!
 > set.seed(15)
@@ -143,4 +144,7 @@ Type 'q()' to quit R.
  13  -2.127 1.754   -0.424 
   7  -1.082 1.015     -0.1 
  11  -0.773 2.253   -0.011 
+> 
+> cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
+Time elapsed:  0.92 0.05 0.96 0 0 
 > 

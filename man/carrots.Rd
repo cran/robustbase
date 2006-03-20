@@ -17,7 +17,7 @@
     \item{success}{ integer giving the number of carrots with insect damage.}
     \item{total}{ integer giving the total number of carrots per
       experimental unit.}
-    \item{logdose}{ numeric giving log(dose) values (eight
+    \item{logdose}{a numeric vector giving log(dose) values (eight
       different levels only).}
     \item{block}{factor with levels \code{B1} to \code{B3}}
   }
@@ -37,23 +37,20 @@
   London: Chapman and Hall.
 
   Eva Cantoni and Elvezio Ronchetti (2001); JASA,  and \cr
-  Eva Cantoni (2004); JSS %%FIXME, see \code{\link{robglm}}
+  Eva Cantoni (2004); JSS, see \code{\link{glmrob}}
 }
 
 \examples{
 data(carrots)
 str(carrots)
 plot(success/total ~ logdose, data = carrots, col = as.integer(block))
+coplot(success/total ~ logdose | block, data = carrots)
 
 ## Classical glm
 Cfit0 <- glm(cbind(success, total-success) ~ logdose + block,
              data=carrots, family=binomial)
 summary(Cfit0)
 
-## Robust Fit (see help(robglm)): %%>>>>> FIXME <<<<
-% Cfit1 <- robglm(cbind(success, total-success) ~ logdose + block,
-%              family=binomial, data=carrots, method="Mqle",
-%              control=robglmMqle.control(tcc=1.2, maxit=100))
-% summary(Cfit1)
+## Robust Fit (see help(glmrob)) ....
 }
 \keyword{datasets}

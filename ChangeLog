@@ -1,3 +1,81 @@
+2006-03-20  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.1-4
+
+	* data/vaso.rda:  one value, vaso[32,2],  had a typo; it was '0.3'
+	but should have been '0.03'
+
+2006-03-16  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/OGK.R (scaleTau2): add consistency correction (for OGK).
+	* man/scaleTau2.Rd: added
+
+	* R/glmrobMqle.R: ni=0 special casing (not finished yet).
+	* tests/binom-ni-small.R: more testing of ni=0
+
+2006-03-14  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* TODO, Done, DESCRIPTION: updated, ready for release
+
+2006-03-14  Andreas Ruckstuhl  <rks@zhwin.ch>
+
+	* R/anova-glmrob.R (anova.glmrob): new function
+	* man/anova.glmrob.Rd: and documentation, replacing previous modsel.*()
+
+2006-02-24  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/print.lts.R: moved to this file (and simplified slightly) to
+	* R/ltsReg.R (ltsReg): more cleanup; fix (y ~ 1) and (y ~ 0) properly
+
+2006-02-23  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* tests/LTS-specials.R: new file
+
+2006-02-22  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* tests/MCD-specials.R: new tests
+
+	* tests/huber-etc.R: tests for huberM() moved from pkg 'sfsmisc'
+
+2006-02-21  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/glmrob.R (summary.glmrob): "Std. Error" (with blank!)
+
+2006-02-18  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/glmrobMqle.R (glmrobMqle): make it work for ncoef == 0
+
+	* tests/glmrob-specials.R: new tests
+
+	* R/glmrob.R (print.summary.glmrob): the same as print.glmrob + more
+
+2006-02-17  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/glmrob.R (vcov.glmrob): added
+	(print.glmrob): fix typo
+
+	* tests/binom-ni-small.R: add from Martin's old "robGLM1" package
+
+	* R/glmrob.R (glmrob): '...' passed to glmrob<METH>.control(...)
+
+2006-02-17  Valentin Todorov  <valentin.todorov@chello.at>
+
+	* FIXED - .fastmcd and .fastlts no more return everything
+
+	* fixed problems in ltsReg in case of location model Y~1 (i.e. x
+	    is missing in ltsReg.default())
+	* ltsReg & covMcd - added options 'best' and 'exact' for nsamp
+
+	* ltsReg & covMcd - added parameter for controlling the small
+	    sample correction factors - use.correction
+
+	* rrcov.control - added parameter for controlling the small sample
+	    correction factors - use.correction
+
+	* ltsReg & covMcd - output of the consistency and the small sample
+	    correction factors
+
+
 2006-02-09  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* DESCRIPTION (Version): 0.1-2 ready for CRAN "baby release"
@@ -19,7 +97,7 @@
 
 2006-01-25  Martin Maechler  <maechler@stat.math.ethz.ch>
 
-	* DESCRIPTION (Version): 0.0-1  "prerelease" ready
+	* DESCRIPTION (Version): 0.0-1	"prerelease" ready
 
 	* man/psi_func-class.Rd: version "checked in" and ready for pre-release
 	* man/chgDefaults-methods.Rd: dito
@@ -43,7 +121,7 @@
 2005-12-28  Valentin Todorov  <valentin.todorov@chello.at>
     * 0.2-11
     * added more data sets from Rousseeuw & Leroy: telef, lactic,
-        pension, pilot, cloud, education, airmay
+	pension, pilot, cloud, education, airmay
     * fixed codoc discrepancies in the data sets stars and wood
     * ltsReg & covMcd - added control parameter for the small sample correction factors
     * ltsReg & covMcd - output of the consistency and the small sample correction factors
@@ -54,7 +132,7 @@
     * fixed bug in covPlot in case of class=TRUE
     * tolellipse - both robust and classical ellipse are superimposed
     * added directory inst/bm containing benchmarks comparing covMcd and ltsReg
-        to the corresponding functions in MASS, S-PLUS and Matlab
+	to the corresponding functions in MASS, S-PLUS and Matlab
 2005-10-17  Valentin Todorov  <valentin.todorov@chello.at>
     * 0.2-9
     * minor corrections in the help of covMcd
@@ -62,37 +140,37 @@
     * covMcd - fixed the limitation on the number of variables <= 50
     * ltsReg - fixed the limitation on the number of variables <= 50
     * added function summary.mcd which prints (additionally to the output
-        of print.mcd) the correlation matrix (if requested), the eigenvalues
-        of the covariance or correlation matrix and the robust distances.
+	of print.mcd) the correlation matrix (if requested), the eigenvalues
+	of the covariance or correlation matrix and the robust distances.
     * added control object for the estimation options rrcov.control and
-        used in covMcd and ltsReg
+	used in covMcd and ltsReg
 
 2005-09-20  Valentin Todorov  <valentin.todorov@chello.at>
     * 0.2-8
     * ltsReg: added formula interface
     * ltsReg: adde generic functions summary.lts and print.summary.lts
     * ltsReg: fixed a problem with reordering of the coeficients even in case
-        without intercept
+	without intercept
 
 2005-04-16  Valentin Todorov  <valentin.todorov@chello.at>
     * 0.2-7
     * ltsReg: fixed a bug related to nsamp -> it was hard-coded = 500
-        in Fortran
+	in Fortran
     * ltsPlot: default for id.n changed - instead of 3, now it is the
-        number of identified outliers
+	number of identified outliers
     * ltsPlot: help enhanced
     * covMcd, covPlot, tolellipse: tol.inv parameter changed to tol,
-        according the change in mahalanobis() in 2.1.0
+	according the change in mahalanobis() in 2.1.0
 
 2004-12-26  Valentin Todorov  <valentin.todorov@chello.at>
     * 0.2-6
     * a bug in ltsReg (rsquared) fixed
     * fixed CRLF line endings in FORTRAN sources
     * fixed a problem in covMcd: in case of p=1 and cov=[0], the cov matrix was
-        a double instead of a matrix, which resulted in errors in subsequent
-        calls (e.g. determinant(mcd$cov) expects a matrix)
+	a double instead of a matrix, which resulted in errors in subsequent
+	calls (e.g. determinant(mcd$cov) expects a matrix)
     * fixed a problem in ltsReg when p==1 and Intercept==FALSE - the vectors of
-        coefficients ans$coefficients and ans$raw.coefficients were of size 2
+	coefficients ans$coefficients and ans$raw.coefficients were of size 2
     * error handling added in ltsReg in case of scale=0
 
 2004-09-16  Valentin Todorov  <valentin.todorov@chello.at>

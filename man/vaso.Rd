@@ -11,7 +11,7 @@
   \describe{
     \item{\code{Volume}}{Inhaled volume of air}
     \item{\code{Rate}}{Rate of inhalation}
-    \item{\code{Y}}{a numeric vector}
+    \item{\code{Y}}{vector of 0 or 1 values.}
   }
 }
 \details{The data taken from Finney (1947) were obtained in a carefully

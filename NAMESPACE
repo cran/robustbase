@@ -2,6 +2,11 @@
 ##R 2.3.0 and later: useDynLib(robustbase, .registration=TRUE)
 useDynLib(robustbase)
 
+importFrom("graphics", plot)# < more ?
+importFrom("stats", anova, coef, family, fitted,
+	   logLik, model.frame, predict, residuals, terms, vcov)
+## ^^^^ MASS has a bit more; take it as example
+
 ##no longer: importFrom("MASS", psi.bisquare, psi.hampel, psi.huber)
 
 ## MASS has many rlm S3 methods; should we use some of them - for rnls() ?!
@@ -28,9 +33,7 @@ export(Sn, Qn,
 
        glmrob,
        nlrob,
-       glmrobMqle.control,
-       modsel.glmrob ## <- temporary?!(FIXME) not a method for a new generic
-
+       glmrobMqle.control
        )
 
 ## S3 methods for ``our own'' S3 generics:
@@ -38,8 +41,10 @@ S3method(ltsReg, default)
 S3method(ltsReg, formula)
 
 
-## register all the methods for generics elsewhere in case namespace is
-## loaded but not currently attached.
+## Register all the methods for S3 generics elsewhere
+## in case namespace is loaded but not currently attached.
+
+S3method(anova, glmrob)
 
 S3method(fitted, nlrob)
 S3method(plot, lts)
@@ -60,6 +65,7 @@ S3method(summary, lts)
 S3method(summary, mcd)
 S3method(summary, nlrob)
 
+S3method(vcov, glmrob)
 ##not there: S3method(print, summary.mcd)
 
 

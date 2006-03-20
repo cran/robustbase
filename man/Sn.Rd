@@ -30,7 +30,8 @@ Sn(x, constant = 1.1926, finite.corr = missing(constant))
   \emph{Journal of the American Statistical Association} \bold{88}, 1273--1283.
 }
 \seealso{\code{\link{mad}} for the \sQuote{most robust} but much less efficient
-  scale estimator; \code{\link{Qn}} for another even more efficient alternative.
+  scale estimator; \code{\link{Qn}} for a similar more efficient but
+  slower alternative; \code{\link{scaleTau2}}.
 }
 \author{Original Fortran code:
   Christophe Croux and Peter Rousseeuw \email{rousse@wins.uia.ac.be}.

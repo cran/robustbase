@@ -12,16 +12,13 @@
 ##
 ##  You should have received a copy of the GNU General Public License
 ##  along with this program; if not, write to the Free Software
-##  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+##  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 ##
 
-rrcov.control <- function (alpha=1/2, 
-                            nsamp=500, 
-                            seed=0, 
-                            print.it=FALSE,
-                            adjust=FALSE
-                           )
+rrcov.control <-
+    function(alpha = 1/2, nsamp = 500, seed = 0,
+	     print.it = FALSE, use.correction = TRUE, adjust = FALSE)
 {
-    list(alpha=alpha, nsamp=nsamp, seed=seed, print.it=print.it, adjust=adjust)        
-
+    list(alpha = alpha, nsamp = nsamp, seed = seed,
+	 print.it = print.it, use.correction = use.correction, adjust = adjust)
 }

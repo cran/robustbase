@@ -20,7 +20,8 @@ wgt.himedian(x, weights = rep(1, n))
   \code{\link{Qn}}.  We currently plan to replace it with more general
   weighted quantiles.
 }
-\seealso{\code{\link{median}}, ..... also wgt.* package Hmisc .....
+\seealso{\code{\link{median}}; %%.....
+  also \code{\link[Hmisc]{wtd.quantile}} from package \pkg{Hmisc}.
 }
 \examples{
 x <- c(1:6, 20)

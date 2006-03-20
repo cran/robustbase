@@ -1,15 +1,29 @@
 library(robustbase)
 library(MASS)
 
+y20 <- c(2:4, 8, 12, 22, 28, 29, 33, 34, 38, 40, 41, 47:48, 50:51, 54, 56, 59)
+
+test_location <- function() {
+    ## Improve: print less, and test equality explicitly
+    Y <- y20
+    print(ltsReg(y=Y))
+    print(ltsReg(y=Y, intercept=TRUE))
+    print(ltsReg(y=Y, intercept=FALSE))
+    print(ltsReg(y=Y, alpha=1))
+    print(ltsReg(Y ~ 1))
+    print(ltsReg(Y ~ 0))# = Y ~ 1 - 1 :  empty model (no coefficients)
+    print(ltsReg(Y ~ 1, alpha=1))
+}
+
 test_rsquared <- function() {
-    x1 <- c(2, 3, 4, 8, 12, 22, 28, 29, 33, 34, 38, 40, 41, 47, 48, 50, 51, 54, 56, 59)
+    x1 <- y20
     y1 <- c(1, 1, 1, 1, 1, 1, 1, 1, 1, 3.5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5)
     ll1 <- ltsReg(x1,y1, alpha = 0.8)
-    ## print() ing it is platform-dependent, since only ~= 0
+    ## print() ing is platform-dependent, since only ~= 0
     stopifnot(all.equal(unname(coef(ll1)), c(1,0), tol=1e-12),
               ll1$scale < 1e-14)
-    print(ltsReg(y1,x1,alpha = 0.8))
-    print(ltsReg(y1,x1,alpha = 0.8, intercept = FALSE))
+    print(ltsReg(y1,x1, alpha = 0.8))
+    print(ltsReg(y1,x1, alpha = 0.8, intercept = FALSE))
 }
 
 dodata <- function(nrep = 1, time = FALSE, short = FALSE, full = TRUE, method = c("FASTLTS","MASS"))
@@ -217,16 +231,9 @@ pad.right <- function(z, pads)
     paste(z, padding, sep = "")
 }
 
-whatis <- function(x) {
-    if(is.data.frame(x))
-        cat("Type: data.frame\n")
-    else if(is.matrix(x))
-        cat("Type: matrix\n")
-    else if(is.vector(x))
-        cat("Type: vector\n")
-    else
-        cat("Type: don't know\n")
-}
-
 dodata()
 test_rsquared()
+test_location()
+
+
+cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''

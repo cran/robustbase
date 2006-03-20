@@ -6,19 +6,22 @@ o  Generalizing  'wgt.himedian':  We'd want a C API on which R builds.
    There are pure R implementations:
     - 'weighted.median()' in limma
     	 and I have generalized it ---> inst/ex-funs.R
-
     - more general code (different 'tie' strategies; weighted *quantile*s)
       in /u/maechler/R/MM/STATISTICS/robust/weighted-median.R
+    - The 'Hmisc' package has wtd.quantile()
 
-o covOGK(): is *inconsistent* (by a constant factor, depending on n)
-  	    as long as it is used with the inconsistent scale.tau2()
-	    {the one that was proposed in the paper}.
+o covOGK():
   The argument name 'weight.fn' is pretty ugly and the default function
   name 'hard.rejection()' is just awful (we need a globally available
   function as 'role model'.
 
   - Consider making 'hard rejection'  the default though!
   -   "        "    n.iter = 1 or = 2 the default.
+
+  - Could allow 'n.iter = 0' to simply compute Cov()_{ij} = rcov(X_i, X_j)
+
+o scaleTau2():  Also do a cheap finite-sample correction [MM] !
+		[done partly; but undocumented, since bound to change]
 
 --- rrcov etc ---
 
@@ -33,10 +36,19 @@ o tolellipse() --> renamed to tolEllipsePlot()
      - allow other percentiles than just  97.5%
      - maybe *return* something
 
-o summary.mcd() should *return* and object of class "summary.mcd"
-  and then  print.summary.mcd() should print it !!!
+o covMcd() : 'print.it' should be called 'trace';
+	   but all the if(!print.it) cat(..) statements are *wrong* :
+	   computation should *Not* print anything for trace = FALSE
+	   {unless warnings and errors} !
 
-o plot(mcd. ) : should show the call !
+o summary.mcd() should *return* an object of class "summary.mcd"
+  and then  print.summary.mcd() should print it !
+
+o plot(mcd. ) : should show the call
+
+o ltsReg():  has  undocumented '$resid'
+	     in addition to '$residuals' and '$raw.residuals';
+	     drop it or document it !
 
 --- glmrob --
 
@@ -44,28 +56,47 @@ o glmrob(*, weights.on.x = "robCov")  currently uses  MASS::cov.rob(), i.e.
   "MVE" and Andreas had a comment that "mcd" is worse.
   But still, I (MM) strongly believe we should use  covMcd() instead.
 
-o MM wonders if 'family = binomial' is a good default, when OTOH,
-  glm() has  'family = gaussian' as a default.
-  MM's proposal: have *NO* default, so users need to set family explicitly.
-
 o Maybe  we should consider  'family = gaussian'  {analogy to glm()}
-  as a possible setting (*not* as default);
-  and just divert to  lmrob() in that case
+  as a possible setting, and just divert to  lmrob() in that case
 
 o psi.*(....,  rho = FALSE/TRUE)   functions from Andreas
   should be replaced by using the new  psi_func  objects
   --> ./R/psi-funs-AR.R  &  ./man/pkg-internal.Rd
 
-o glmrob() -> "glmrob" class needs
-  predict() and probably also residuals(..., type = "*")
+o predict.glmrob() and probably also residuals.glmrob()
+  should allow a 'type = *' specification like the *.glm() methods.
 
-o glmrob() needs tests in ./tests/ -- taking from man/glmrob.Rd
+o glmrob() needs tests in ./tests/   [maybe take from man/glmrob.Rd]
+	   take those from Martin's old 'robGLM1' package (need more!)
+o --> first test already shows that Martin's tests for "huberC == Inf"
+      were *not* yet moved from robGLM1 to glmrob()...
+
+o also, ni = 0 does not work quite as it should ( ./tests/binom-ni-small.R )
+
+o obj $ df ...  maybe should be defined -- for "glm" methods to be
+  applicable
 
 o summary.glmrob() should be better documented;
   we should decide if the current return value is fine.
+
+o Eva's code (and MM's) also computed & returned the "asymptotic efficiency"!
+
+o anova.glmrob(): More modularization, allowing to provide own 'test' function.
+  Test if Huber's C are different. Need theory to compare different C's and
+  same model (which includes classical vs robust).
+
+o drop1() would be nice
+
 
 --- nlrob ---
 
 o nlrob() needs tests in ./tests/ -- you can take some from man/nlrob.Rd
 
-o man/fitted.nlrob.Rd  seems completely superfluous to MM
+o summary.nlrob() is currently a "no-op" -- printing it should summarize
+		  robustness weights!
+
+------
+
+o Add data sets from the MMY-book  -- try to use the same variable names as
+  in the book [for that, need to wait for the book; to look at outputs or
+  S-plus scripts].

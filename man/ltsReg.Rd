@@ -16,7 +16,7 @@ ltsReg(x, \dots)
 
 \method{ltsReg}{default}(x, y, intercept = TRUE, alpha = NULL, nsamp = 500,
        adjust = FALSE, mcd = TRUE, qr.out = FALSE, yname = NULL,
-       seed = 0, control, \dots)
+       seed = 0, use.correction=TRUE, control, \dots)
 }
 \arguments{
   \item{formula}{a \code{\link{formula}} of the form \code{y ~ x1 + x2 + ...}.}
@@ -34,8 +34,13 @@ ltsReg(x, \dots)
   \item{alpha}{the percentage of squared residuals whose sum will be
     minimized.  Its default value is 0.5.  In general, \code{alpha} must
     be a value between 0.5 and 1.}
-  \item{nsamp}{number of subsets used for initial estimates; defaults to
-    \code{nsamp = 500}.}
+  \item{nsamp}{number of subsets used for initial estimates or
+    \code{"best"} or \code{"exact"}.  Default is \code{nsamp = 500}.  For
+    \code{nsamp="best"} exhaustive enumeration is done, as long as the
+    number of trials does not exceed 5000.  For \code{"exact"},
+    exhaustive enumeration will be attempted however many samples are needed.
+    In this case a warning message will be displayed saying that the
+    computation can take a very long time. }
   \item{adjust}{whether to perform intercept adjustment at each step.
     Since this can be time consuming, the default is \code{adjust = FALSE}.}
   \item{mcd}{whether to compute robust distances using Fast-MCD.}
@@ -43,7 +48,9 @@ ltsReg(x, \dots)
     \code{\link{qr}}); defaults to false.}
   \item{yname}{the name of the dependent variable.  Default is \code{yname = NULL}}
   \item{seed}{starting value for random generator.  Default is \code{seed = 0}}
-%% MM:  want control also for formula !?!?!?!?!!
+  \item{use.correction}{ whether to use finite sample correction factors.
+    Default is \code{use.correction=TRUE}}
+  %% MM:  want control also for formula !?!?!?!?!!
   \item{control}{a list with estimation options - same as these provided
   in the function specification.  If the control object is supplied, the
   parameters from it will be used.  If parameters are passed also in the
@@ -56,8 +63,14 @@ ltsReg(x, \dots)
   residuals, where h must be at least half the number of
   observations.  The default value of h is roughly 0.5n where n is the
   total number of observations, but the user may choose any value
-  between n/2 and n.  The computations are performed using the Fast LTS
-  algorithm proposed by Rousseeuw and Van Driessen (1999).
+  between n/2 and n.  The LTS estimate of the error scale is given
+  by the minimum of the objective function multiplied by a consistency
+  factor and a finite sample correction factor - see Pison et al. (2002)
+  for details.  The rescaling factors for the raw and final estimates are
+  returned also in the vectors \code{raw.cnp2} and \code{cnp2} of
+  length 2 respectively.  The finite sample corrections can be suppressed
+  by setting \code{use.correction=FALSE}.  The computations are performed
+  using the Fast LTS algorithm proposed by Rousseeuw and Van Driessen (1999).
 
   As always, the formula interface has an implied intercept term which can be
   removed either by \code{y ~ x - 1} or \code{y ~ 0 + x}.  See
@@ -97,11 +110,17 @@ ltsReg(x, \dots)
   \item{quan}{the number \eqn{h} of observations which have determined
     the least trimmed squares estimator.}
   \item{intercept}{same as the input parameter \code{intercept}.}
+  \item{cnp2}{a vector of length two containing the consistency
+    correction factor and the finite sample correction factor of
+    the final estimate of the error scale.}
   \item{raw.coefficients}{vector of raw coefficient estimates (including
   the intercept, when \code{intercept=TRUE}).}
   \item{raw.scale}{scale estimate of the raw residuals.}
   \item{raw.resid}{vector like \code{y} containing the raw residuals
     from the regression.}
+  \item{raw.cnp2}{a vector of length two containing the consistency
+    correction factor and the finite sample correction factor of the
+    raw estimate of the error scale.}
   \item{lts.wt}{
     vector like y containing weights that can be used in a weighted
     least squares.  These weights are 1 for points with reasonably
@@ -123,10 +142,6 @@ ltsReg(x, \dots)
 
   P. J. Rousseeuw and A. M. Leroy (1987)
   \emph{Robust Regression and Outlier Detection.} Wiley.
-
-  P. J. Rousseeuw and K. van Driessen (1999)
-  Computing LTS Regression for Large Data Sets;
-  Technical Report, University of Antwerp, submitted
 
   P. J. Rousseeuw and K. van Driessen (1999)
   A fast algorithm for the minimum covariance determinant estimator.

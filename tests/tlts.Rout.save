@@ -1,6 +1,6 @@
 
 R : Copyright 2006, The R Foundation for Statistical Computing
-Version 2.3.0 Under development (unstable) (2006-02-05 r37270)
+Version 2.2.1 Patched (2006-02-23 r37423)
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -16,17 +16,32 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > library(robustbase)
+Loading required package: MASS
 > library(MASS)
 > 
+> y20 <- c(2:4, 8, 12, 22, 28, 29, 33, 34, 38, 40, 41, 47:48, 50:51, 54, 56, 59)
+> 
+> test_location <- function() {
++     ## Improve: print less, and test equality explicitly
++     Y <- y20
++     print(ltsReg(y=Y))
++     print(ltsReg(y=Y, intercept=TRUE))
++     print(ltsReg(y=Y, intercept=FALSE))
++     print(ltsReg(y=Y, alpha=1))
++     print(ltsReg(Y ~ 1))
++     print(ltsReg(Y ~ 0))# = Y ~ 1 - 1 :  empty model (no coefficients)
++     print(ltsReg(Y ~ 1, alpha=1))
++ }
+> 
 > test_rsquared <- function() {
-+     x1 <- c(2, 3, 4, 8, 12, 22, 28, 29, 33, 34, 38, 40, 41, 47, 48, 50, 51, 54, 56, 59)
++     x1 <- y20
 +     y1 <- c(1, 1, 1, 1, 1, 1, 1, 1, 1, 3.5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5)
 +     ll1 <- ltsReg(x1,y1, alpha = 0.8)
-+     ## print() ing it is platform-dependent, since only ~= 0
++     ## print() ing is platform-dependent, since only ~= 0
 +     stopifnot(all.equal(unname(coef(ll1)), c(1,0), tol=1e-12),
 +               ll1$scale < 1e-14)
-+     print(ltsReg(y1,x1,alpha = 0.8))
-+     print(ltsReg(y1,x1,alpha = 0.8, intercept = FALSE))
++     print(ltsReg(y1,x1, alpha = 0.8))
++     print(ltsReg(y1,x1, alpha = 0.8, intercept = FALSE))
 + }
 > 
 > dodata <- function(nrep = 1, time = FALSE, short = FALSE, full = TRUE, method = c("FASTLTS","MASS"))
@@ -234,17 +249,6 @@ Type 'q()' to quit R.
 +     paste(z, padding, sep = "")
 + }
 > 
-> whatis <- function(x) {
-+     if(is.data.frame(x))
-+         cat("Type: data.frame\n")
-+     else if(is.matrix(x))
-+         cat("Type: matrix\n")
-+     else if(is.vector(x))
-+         cat("Type: vector\n")
-+     else
-+         cat("Type: don't know\n")
-+ }
-> 
 > dodata()
 
 Call:  dodata() 
@@ -257,6 +261,7 @@ Best subsample:
 Outliers:  4 
 [1]  3  8  9 10
 -------------
+
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
@@ -270,6 +275,7 @@ Scale estimate 1.525
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
+Residuals (from reweighted LS):
       1       2       3       4       5       6       7       8       9      10 
 -1.3927  0.1691  0.0000  0.4434 -0.3413  0.1655 -0.1148  0.0000  0.0000  0.0000 
      11      12 
@@ -292,6 +298,7 @@ Best subsample:
 Outliers:  6 
 [1]  7  9 11 20 30 34
 -------------
+
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
@@ -305,6 +312,7 @@ Scale estimate 0.4562
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
+Residuals (from reweighted LS):
     Min      1Q  Median      3Q     Max 
 -0.7840 -0.2137  0.0000  0.2267  0.5916 
 
@@ -324,6 +332,7 @@ Best subsample:
 Outliers:  1 
 [1] 17
 -------------
+
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
@@ -337,6 +346,7 @@ Scale estimate 13.54
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
+Residuals (from reweighted LS):
      Min       1Q   Median       3Q      Max 
 -30.2967  -3.5911  -0.6916   4.2514  17.1156 
 
@@ -357,6 +367,7 @@ Best subsample:
 Outliers:  4 
 [1]  1  3  4 21
 -------------
+
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
@@ -370,6 +381,7 @@ Scale estimate 1.922
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
+Residuals (from reweighted LS):
     Min      1Q  Median      3Q     Max 
 -2.5065 -0.4236  0.0000  0.5764  1.9342 
 
@@ -391,6 +403,7 @@ Best subsample:
 Outliers:  2 
 [1]  3 18
 -------------
+
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
@@ -404,6 +417,7 @@ Scale estimate 1.119
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
+Residuals (from reweighted LS):
     Min      1Q  Median      3Q     Max 
 -1.2155 -0.3887  0.0000  0.3056  0.9845 
 
@@ -427,6 +441,7 @@ Best subsample:
 Outliers:  4 
 [1]  5 16 23 24
 -------------
+
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
@@ -440,6 +455,7 @@ Scale estimate 1.233
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
+Residuals (from reweighted LS):
     Min      1Q  Median      3Q     Max 
 -2.4823 -0.3899  0.0000  0.3387  1.7013 
 
@@ -461,6 +477,7 @@ Best subsample:
 Outliers:  2 
 [1] 16 22
 -------------
+
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
@@ -474,6 +491,7 @@ Scale estimate 5.693
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
+Residuals (from reweighted LS):
    Min     1Q Median     3Q    Max 
 -6.669 -2.429  0.000  2.791  6.793 
 
@@ -496,6 +514,7 @@ Best subsample:
 Outliers:  3 
 [1]  1  9 24
 -------------
+
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
@@ -509,6 +528,7 @@ Scale estimate 2.383
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
+Residuals (from reweighted LS):
      Min       1Q   Median       3Q      Max 
 -5.03209 -1.03055 -0.01243  0.34737  4.23711 
 
@@ -529,6 +549,7 @@ Best subsample:
 Outliers:  4 
 [1]  4  6  8 19
 -------------
+
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
@@ -542,6 +563,7 @@ Scale estimate 0.01236
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
+Residuals (from reweighted LS):
       Min        1Q    Median        3Q       Max 
 -0.009281 -0.001771  0.000000  0.001146  0.013004 
 
@@ -566,6 +588,7 @@ Best subsample:
 Outliers:  10 
  [1]  1  2  3  4  5  6  7  8  9 10
 -------------
+
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
@@ -579,6 +602,7 @@ Scale estimate 0.744
 Call:
 ltsReg.formula(formula = form, data = dataset, mcd = FALSE)
 
+Residuals (from reweighted LS):
     Min      1Q  Median      3Q     Max 
 -0.9263 -0.3955  0.0000  0.3968  1.0106 
 
@@ -596,16 +620,94 @@ F-statistic: 0.9088 on 3 and 61 DF,  p-value: 0.4421
 --------------------------------------------------------
 ========================================================
 > test_rsquared()
+
+Call:
+ltsReg.default(x = y1, y = x1, alpha = 0.8)
+
 Coefficients:
-Intercept       data  
+Intercept         y1  
    25.921      5.305  
 
 Scale estimate 18.04 
 
+
+Call:
+ltsReg.default(x = y1, y = x1, intercept = FALSE, alpha = 0.8)
+
 Coefficients:
- data  
+   y1  
 31.44  
 
 Scale estimate 24.64 
 
+> test_location()
+
+Call:
+ltsReg.default(y = Y)
+
+Coefficients:
+    Y  
+44.62  
+
+Scale estimate 19.74 
+
+
+Call:
+ltsReg.default(y = Y, intercept = TRUE)
+
+Coefficients:
+    Y  
+44.62  
+
+Scale estimate 19.74 
+
+
+Call:
+ltsReg.default(y = Y, intercept = FALSE)
+
+Coefficients:
+    Y  
+44.62  
+
+Scale estimate 19.98 
+
+
+Call:
+ltsReg.default(y = Y, alpha = 1)
+
+Coefficients:
+    Y  
+32.95  
+
+Scale estimate 19.34 
+
+
+Call:
+ltsReg.formula(formula = Y ~ 1)
+
+Coefficients:
+    Y  
+44.62  
+
+Scale estimate 19.74 
+
+
+Call:
+ltsReg.formula(formula = Y ~ 0)
+
+No coefficients
+
+Call:
+ltsReg.formula(formula = Y ~ 1, alpha = 1)
+
+Coefficients:
+    Y  
+32.95  
+
+Scale estimate 19.34 
+
+> 
+> 
+> cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
+Time elapsed:  1.25 0.1 2.25 0 0 
 > 

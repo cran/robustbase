@@ -1,18 +1,23 @@
 \name{nlrob}
-\alias{nlrob}
 \title{Robust Fitting of Nonlinear Regression Models}
+\alias{nlrob}
+\alias{fitted.nlrob}
+\alias{residuals.nlrob}
+\alias{predict.nlrob}
 \description{
   \code{nlrob} fits a nonlinear regression model by robust
-  M-estimators. The fitting is done by iterated reweighted least squares
-  (IWLS).
+  M-estimators, using iterated reweighted least squares (IWLS).
 }
 \usage{
 nlrob(formula, data, start, weights = NULL, na.action = na.fail,
       psi = psi.huber, test.vec = c("resid", "coef", "w"), maxit = 20,
       acc = 1e-06, algorithm = "default", control = nls.control(),
       trace = FALSE, ...)
+
+\method{fitted}{nlrob}(object, ...)
+\method{residuals}{nlrob}(object, ...)
+\method{predict}{nlrob}(object, newdata, ...)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{formula}{a nonlinear \code{\link{formula}} including variables
     and parameters of the model, such as \code{y ~ f(x, alpha)} (cf. \code{\link{nls}}).
@@ -73,6 +78,11 @@ nlrob(formula, data, start, weights = NULL, na.action = na.fail,
     parameters.}
   \item{\dots}{potentially arguments to be passed to the psi function
     (see above).}
+
+  \item{object}{an \R object of class \code{"nlrob"}, typically
+    resulting from \code{nlrob(..)}.}
+  \item{newdata}{a data frame (or list) with the same names as the
+    original \code{data}, see e.g., \code{\link{predict.nls}}.}
 }
 % \details{
 

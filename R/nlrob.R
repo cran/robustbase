@@ -17,8 +17,8 @@ nlrob <-
     formula <- as.formula(formula)
     if (length(formula) != 3)
 	stop("'formula' should be a formula of the type 'y  ~ f(x, alpha)'")
-    varNames <- all.vars(formula)
     test.vec <- match.arg(test.vec)
+    varNames <- all.vars(formula)
     dataName <- substitute(data)
     data <- as.data.frame(data)
 
@@ -157,6 +157,7 @@ residuals.nlrob <- function (object, ...)
 }
 
 
+### FIXME !
 summary.nlrob <- function (object, ...)
 {
     cat("   summary.nlrob() -- not yet implemented.\n\n")

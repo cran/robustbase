@@ -52,6 +52,9 @@ licence it under the GNU Public Licence.
 
 See also ../inst/Copyrights
 */
+#include <sys/types.h>
+/* --> int64_t ; if people don't have the above, they can forget about it.. */
+/* #include "int64.h" */
 
 #include <Rmath.h> /* -> <math.h> and much more */
 #include <R_ext/Arith.h> /* R_Na..*/
@@ -184,11 +187,10 @@ double qn0(double *x, int n)
 
     int h, i, j,jj,jh;
     /* Following should be `long long int' : they can be of order n^2 */
-    long long k, knew, nl,nr, sump,sumq;
-    /* FIXME: need double when long long is not available ? */
+    int64_t k, knew, nl,nr, sump,sumq;
 
     h = n / 2 + 1;
-    k = (long long)h * (h - 1) / 2;
+    k = (int64_t)h * (h - 1) / 2;
     for (i = 0; i < n; ++i) {
 	y[i] = x[i];
 	left [i] = n - i + 1;
@@ -196,8 +198,8 @@ double qn0(double *x, int n)
 	/* the n - (i-h) is from the paper; original code had `n' */
     }
     R_qsort(y, 1, n); /* y := sort(x) */
-    nl = (long long)n * (n + 1) / 2;
-    nr = (long long)n * n;
+    nl = (int64_t)n * (n + 1) / 2;
+    nr = (int64_t)n * n;
     knew = k + nl;/* = k + (n+1 \over 2) */
     found = FALSE;
 #ifdef DEBUG_qn
@@ -418,7 +420,7 @@ Loop:									\
 									\
 } /* WGT_HIMED_PROC */
 
-WGT_HIMED_PROC(whimed_i, int, long long)
+WGT_HIMED_PROC(whimed_i, int, int64_t)
 
 WGT_HIMED_PROC(whimed,  double, double)
 
