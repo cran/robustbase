@@ -1,5 +1,5 @@
-#### Quasi-Deviance Differences	 --- used for Model Selection
-#### -------------------------------------------------------- ./modsel.glmrob.R
+#### Quasi-Deviance Differences	 --- for Model Selection
+#### --------------------------------------------------- -> ./anova-glmrob.R
 
 ## MM: These function names are really too long
 ##     but then, they are hidden in the name space ...

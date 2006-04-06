@@ -49,3 +49,11 @@ o) we have had some problems, but they are solved now
 13) covOGK() is now consistent per default
     because it is used with scaleTau2() which has now a constant
     consistency factor by default.
+
+14) lmrob():
+   - add "..." to argument list in order to allow ``control in there'' as well
+
+   - now use Calloc()/Free() instead of  malloc()/free()
+   - indentation etc more or less according to "R core coding standard"
+   - not using (many) 'register' -- since compiler optimization is often better
+

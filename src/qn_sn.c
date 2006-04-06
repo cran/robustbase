@@ -52,7 +52,8 @@ licence it under the GNU Public Licence.
 
 See also ../inst/Copyrights
 */
-#include <sys/types.h>
+#include <stdint.h>
+/* or #include <sys/types.h> */
 /* --> int64_t ; if people don't have the above, they can forget about it.. */
 /* #include "int64.h" */
 

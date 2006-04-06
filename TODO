@@ -100,3 +100,22 @@ o summary.nlrob() is currently a "no-op" -- printing it should summarize
 o Add data sets from the MMY-book  -- try to use the same variable names as
   in the book [for that, need to wait for the book; to look at outputs or
   S-plus scripts].
+
+--- lmrob --- --- --- --- ---
+
+o more tests in	tests/
+
+o R/lmrob*.R : seems like a simple ``dump''
+	   (maybe via package.skeleton() ?)
+	   ==> has almost NO comment in the R code
+
+  Possibly change default to  'compute.rd = FALSE' !?!
+
+o src/lmrob.c :
+
+   Things to fix:
+
+   - calls  C's  rand() instead of R builtin random number generators
+   - does many many vector and vector-matrix things itself
+     instead of using BLAS and LAPACK
+   - does median() , MAD() instead of using R's  sort() routines

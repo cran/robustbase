@@ -1,3 +1,10 @@
+2006-04-01  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/lmrob.c:   new lmrob() code from Matias' roblm package
+	* R/lmrob.*.R:   renamed s/roblm/lmrob/  but also refactored
+	* man/lmrob.*.Rd: and added a bit
+	* TODO:  section on lmrob()
+
 2006-03-20  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* DESCRIPTION (Version): 0.1-4
