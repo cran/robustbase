@@ -33,8 +33,8 @@ covMcd <- function(x,
 		   cor = FALSE,
 		   alpha = 1/2,
 		   nsamp = 500,
-		   seed = 0,
-		   print.it = FALSE,
+		   seed = NULL,
+		   trace = FALSE,
 		   use.correction = TRUE,
 		   control)
 {
@@ -47,16 +47,25 @@ covMcd <- function(x,
 	defCtrl <- rrcov.control()	# default control
 	if(alpha == defCtrl$alpha)	 alpha <- control$alpha
 	if(nsamp == defCtrl$nsamp)	 nsamp <- control$nsamp
-	if(seed == defCtrl$seed)	 seed <- control$seed
-	if(print.it == defCtrl$print.it) print.it <- control$print.it
+	if(identical(seed, defCtrl$seed)) seed <- control$seed
+	if(trace == defCtrl$trace) trace <- control$trace
 	if(use.correction == defCtrl$use.correction)
 	    use.correction <- control$use.correction
+    }
+
+    if(length(seed) > 0) {
+	if(exists(".Random.seed", envir=.GlobalEnv, inherits=FALSE))  {
+	    seed.keep <- get(".Random.seed", envir=.GlobalEnv, inherits=FALSE)
+	    on.exit(assign(".Random.seed", seed.keep, envir=.GlobalEnv))
+	}
+	assign(".Random.seed", seed, envir=.GlobalEnv)
     }
 
     ##	 vt::03.02.2006 - added options "best" and "exact" for nsamp
     ##	 nsamp will be further analized in the wrapper .fastmcd()
     if(!missing(nsamp) && is.numeric(nsamp) && nsamp <= 0)
 	stop("Invalid number of trials nsamp = ",nsamp, "!")
+
 
     ## vt:: tolerance to be used for computing the mahalanobis distances (default = 1e-7)
     tol <- 1e-10
@@ -114,7 +123,7 @@ covMcd <- function(x,
 	    ans$n.obs <- n
 	    msg <- "The classical covariance matrix is singular."
 	    ans$method <- paste(ans$method, msg, sep="\n")
-	    if(!print.it)
+	    if(trace)
 		cat(msg,"\n")
 
 	    weights <- 1
@@ -138,7 +147,7 @@ covMcd <- function(x,
 	    if( - (determinant(ans$cov, log = TRUE)$modulus[1] - 0)/p > 50) {
 		msg <- "The reweighted MCD scatter matrix is singular."
 		ans$method <- paste(ans$method, msg, sep="\n")
-		if(!print.it)
+		if(trace)
 		    cat(msg,"\n")
 	    }
 	    else {
@@ -168,7 +177,7 @@ covMcd <- function(x,
 	    dimnames(ans$X)[[1]] <- names(ans$mcd.wt)[ok]
 	else
 	    dimnames(ans$X) <- list(seq(along = ok)[ok], NULL)
-	if(print.it)
+	if(trace)
 	    cat(ans$method, "\n")
 	ans$raw.cnp2 <- raw.cnp2
 	ans$cnp2 <- cnp2
@@ -176,7 +185,7 @@ covMcd <- function(x,
 	return(ans)
     } ## end {alpha=1} --
 
-    mcd <- .fastmcd(x, quan, nsamp, seed)
+    mcd <- .fastmcd(x, quan, nsamp)
 
     ## Compute the consistency correction factor for the raw MCD
     ##	(see calfa in Croux and Haesbroeck)
@@ -263,72 +272,63 @@ covMcd <- function(x,
 	    if(length(dimn[[2]]))
 		names(ans$center) <- dimn[[2]]
 	    ans$n.obs <- n
-	    if(mcd$exactfit == -1) {
-		stop("The program allows for at most ", mcd$kount, " observations.")
-	    }
-	    if(mcd$exactfit == -2) {
-		stop("The program allows for at most ", mcd$kount, " variables.")
-	    }
+## no longer relevant:
+##	    if(mcd$exactfit == -1)
+##		stop("The program allows for at most ", mcd$kount, " observations.")
+##	    if(mcd$exactfit == -2)
+##		stop("The program allows for at most ", mcd$kount, " variables.")
 	    if(mcd$exactfit == 1) {
 		msg <- "The covariance matrix of the data is singular."
 		ans$method <- paste(ans$method, msg, sep = "\n")
-		if(!print.it)
+		if(trace)
 		    cat(msg, "\n")
 	    }
 	    if(mcd$exactfit == 2) {
 		msg <- paste("The covariance matrix has become singular during",
 			     "the iterations of the MCD algorithm.",
-                             collapse = "\n")
+			     collapse = "\n")
 		ans$method <- paste(ans$method, msg, sep = "\n")
-		if(!print.it)
+		if(trace)
 		    cat(msg, "\n")
 	    }
 	    if(p == 2) {
-                msg <- paste("There are", mcd$kount,
-                             "observations in the entire dataset of\n", n,
-                             "observations that lie on the line with equation\n",
-                             signif(mcd$coeff[1,1], digits= 5), "(x_i1-m_1) +",
-                             signif(mcd$coeff[1,2], digits= 5), "(x_i2-m_2)=0\n",
-                             "with (m_1,m_2) the mean of these observations.")
+		msg <- paste("There are", mcd$kount,
+			     "observations in the entire dataset of\n", n,
+			     "observations that lie on the line with equation\n",
+			     signif(mcd$coeff[1,1], digits= 5), "(x_i1-m_1) +",
+			     signif(mcd$coeff[1,2], digits= 5), "(x_i2-m_2)=0\n",
+			     "with (m_1,m_2) the mean of these observations.")
 		ans$method <- paste(ans$method, msg, sep = "\n")
-		if(!print.it)
+		if(trace)
 		    cat(msg, "\n")
 	    }
 	    else if(p == 3) {
 		msg <- paste("There are", mcd$kount,
-                             "observations in the entire dataset of\n", n,
-                             "observations that lie on the plane with equation\n",
-                             signif(mcd$coeff[1,1], digits= 5), "(x_i1-m_1) +",
-                             signif(mcd$coeff[1,2], digits= 5), "(x_i2-m_2) +",
-                             signif(mcd$coeff[1,3], digits= 5), "(x_i3-m_3)=0\n",
-                             "with (m_1,m_2) the mean of these observations."
-                             )
+			     "observations in the entire dataset of\n", n,
+			     "observations that lie on the plane with equation\n",
+			     signif(mcd$coeff[1,1], digits= 5), "(x_i1-m_1) +",
+			     signif(mcd$coeff[1,2], digits= 5), "(x_i2-m_2) +",
+			     signif(mcd$coeff[1,3], digits= 5), "(x_i3-m_3)=0\n",
+			     "with (m_1,m_2) the mean of these observations."
+			     )
 		ans$method <- paste(ans$method, msg, sep = "\n")
-		if(!print.it)
+		if(trace)
 		    cat(msg, "\n")
 	    }
 	    else { ##  p > 3 -----------
-                msg <- paste("There are", mcd$kount,
-                             "observations in the entire dataset of\n", n,
-                             "observations that lie on the hyperplane with equation\n",
-                             "a_1*(x_i1-m_1)+...+a_p*(x_ip-m_p)=0 \n",
-                             "with (m_1,...,m_p) the mean\n",
-                             "of these observations and coefficients a_i equal to: \n",
-
-                             paste(signif(mcd$coeff[1, ], digits= 5),
-                                   collapse=","))
-		if(!print.it) {
- 		    cat("There are", mcd$kount,
-			" observations in the entire dataset of\n", n,
-			"observations that lie on the hyperplane with equation \na_1*(x_i1-m_1)+...+a_p*(x_ip-m_p)=0 \nwith (m_1,...,m_p) the mean\nof these observations and coefficients a_i equal to: \n"
-			)
-		}
-		for(i in 1:p) {
-		    ans$method <-
-			paste(ans$method, signif(mcd$coeff[1, i], digits= 5))
-		}
-		if(!print.it)
+		msg1 <- paste("There are", mcd$kount,
+			     "observations in the entire dataset of\n", n,
+			     "observations that lie on the hyperplane with equation\n",
+			     "a_1*(x_i1-m_1)+...+a_p*(x_ip-m_p)=0 \n",
+			     "with (m_1,...,m_p) the mean\n",
+			     "of these observations and coefficients a_i equal to: \n")
+                msg <- paste(msg1,
+                             paste(formatC(mcd$coeff[1, ], digits= 5), collapse=","))
+		if(trace) {
+		    cat(msg1)
 		    print(signif(mcd$coeff[1, ], digits= 5))
+		}
+                ans$method <- paste(ans$method, msg, sep = "\n")
 	    } ## end {p > 3}
 
 	    ans$alpha <- alpha
@@ -386,7 +386,7 @@ covMcd <- function(x,
 
 		msg <- "The reweighted MCD scatter matrix is singular."
 		ans$method <- paste(ans$method, msg, sep="\n")
-		if(!print.it)
+		if(trace)
 		    cat(msg,"\n")
 		ans$mah <- ans$raw.mah
 	    }
@@ -409,13 +409,60 @@ covMcd <- function(x,
 	dimnames(ans$X)[[1]] <- names(ans$mcd.wt)[ok]
     else
 	dimnames(ans$X) <- list(seq(along = ok)[ok], NULL)
-    if(print.it)
+    if(trace)
 	cat(ans$method, "\n")
     ans$raw.cnp2 <- raw.cnp2
     ans$cnp2 <- cnp2
     class(ans) <- "mcd"
     return(ans)
 }
+
+print.mcd <- function(x, digits = max(3, getOption("digits") - 3), print.gap = 2, ...)
+{
+    cat("Minimum Covariance Determinant (MCD) estimator.\n")
+    if(!is.null(cl <- x$call)) {
+	cat("Call:\n")
+	dput(cl)
+    }
+    cat("-> Method: ", x$method, "\n")
+    cat("\nLog(Det.): ", format(log(x$crit), digits = digits) ,"\n")
+    cat("Robust Estimate of Location:\n")
+    print(x$center, digits = digits, print.gap = print.gap, ...)
+    cat("Robust Estimate of Covariance:\n")
+    print(x$cov, digits = digits, print.gap = print.gap, ...)
+    invisible(x)
+}
+
+summary.mcd <- function(object, ...)
+{
+    class(object) <- c("summary.mcd", class(object))
+    object
+}
+
+print.summary.mcd <-
+    function(x, digits = max(3, getOption("digits") - 3), print.gap = 2, ...)
+{
+    print.mcd(x, digits = digits, print.gap = print.gap, ...) # see above
+
+    ## hmm, maybe not *such* a good idea :
+    if(!is.null(x$cor)) {
+      cat("\nRobust Estimate of Correlation: \n")
+      dimnames(x$cor) <- dimnames(x$cov)
+      print(x$cor, digits = digits, print.gap = print.gap, ...)
+    }
+
+    cat("\nEigenvalues:\n")
+    print(eigen(x$cov, only.values = TRUE)$values, digits = digits, ...)
+
+    if(!is.null(x$mah)) {
+	cat("\nRobust Distances: \n")
+	print(as.vector(x$mah), digits = digits, ...)
+    }
+    invisible(x)
+}
+
+## NOTE:  plot.mcd() is in ./covPlot.R !
+## ----                    ~~~~~~~~~~~
 
 ### --- Namespace hidden (but parsed once and for all) : -------------
 
@@ -497,7 +544,7 @@ MCDcnp2.rew <- function(p, n, alpha)
 } ## end{ MCDcnp2.rew }
 
 
-.fastmcd <- function(x, quan, nsamp, seed)
+.fastmcd <- function(x, quan, nsamp)
 {
     dx <- dim(x)
     n <- dx[1]
@@ -552,7 +599,6 @@ MCDcnp2.rew <- function(p, n, alpha)
     storage.mode(p) <- "integer"
     storage.mode(quan) <- "integer"
     storage.mode(nsamp) <- "integer"
-    storage.mode(seed) <- "integer"
 
     ##	 Allocate temporary storage for the Fortran implementation,
     ##	 directly in the .Fortran() call.
@@ -562,18 +608,18 @@ MCDcnp2.rew <- function(p, n, alpha)
 	     x,
 	     n,
 	     p,
-	     quan,
+	     nhalff = quan,
 	     nsamp,
 	     initcovariance = double(p * p),
 	     initmean	    = double(p),
 	     best	    = rep.int(as.integer(10000), quan),
 	     mcdestimate = double(1),
 	     weights   = integer(n),
-	     exactfit  = integer(1),
+	     exactfit  = integer(1), # output indicator: 0: ok; 1: ..., 2: ..
 	     coeff     = matrix(double(5 * p), nrow = 5, ncol = p), ## plane
 	     kount     = integer(1),
 	     adjustcov = double(p * p),
-	     seed,
+	     integer(1),## << 'seed' no longer used -- FIXME
 	     temp   = integer(n),
 	     index1 = integer(n),
 	     index2 = integer(n),

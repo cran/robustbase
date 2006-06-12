@@ -56,7 +56,7 @@ glmrob(formula, family, data, weights, subset, na.action,
 
   \item{weights.on.x}{
     character string (can be abbreviated) specifying how points
-    (potential outliers) in x-space are downweighted. If \code{"hat"},
+    (potential outliers) in x-space are downweighted.  If \code{"hat"},
     weights on the design of the form \eqn{\sqrt{1-h_{ii}}} are used,
     where \eqn{h_{ii}} are the diagonal elements of the hat matrix.  If
     \code{"robCov"}, weights based on the robust Mahalanobis distance of the
@@ -97,8 +97,8 @@ glmrob(formula, family, data, weights, subset, na.action,
 }
 
 \value{
-  \code{glmrob} returns an object of class \code{"glmrob"} and is also inheriting from
-  \code{\link{glm}}.
+  \code{glmrob} returns an object of class \code{"glmrob"} and is also
+  inheriting from \code{\link{glm}}.
   \cr
   The function \code{\link{summary}} (i.e., \code{\link{summary.glmrob}}) can
   be used to obtain or print a summary of the results.
@@ -209,6 +209,21 @@ Efit2 <- glmrob(Ysum ~ Age10 + Base4*Trt, family = poisson,
                 data = epilepsy, method= "Mqle",
                 control = glmrobMqle.control(tcc=1.2, maxit=100))
 summary(Efit2)
+
+
+## 'x' weighting:
+
+try({
+  ## This fails on some platforms {singular ..},
+  ## but gives many warnings anyay
+ Efit3 <- glmrob(Ysum ~ Age10 + Base4*Trt, family = poisson,
+		 data = epilepsy, method= "Mqle", weights.on.x = "hat",
+		 control = glmrobMqle.control(tcc=1.2, maxit=100))
+})
+if(FALSE) # gives singular cov matrix!
+Efit4 <- glmrob(Ysum ~ Age10 + Base4*Trt, family = poisson,
+                data = epilepsy, method= "Mqle", weights.on.x = "covMcd",
+                control = glmrobMqle.control(tcc=1.2, maxit=100))
 }
 
 \keyword{robust}

@@ -1,5 +1,6 @@
 
 library(robustbase)
+set.seed(1) # since now .Random.seed is used by default!
 
 ## EX 1
 data(coleman)
@@ -11,13 +12,23 @@ summary(m0)
 summary(m1)
 
 
-(mC <- lmrob(Y ~ ., data = coleman))
+(mC <- lmrob(Y ~ ., data = coleman,
+	     control = lmrob.control(refine.tol = 1e-8)))
 summary(mC)
 ## Values will change once we use R's random number generator !
 stopifnot(
-all.equal(unname(coef(mC)), c(29.51, -1.66, 0.0834, 0.666, 1.18, -4.01),
-          tol = 1e-3) # tol =0.000146 for 64-bit, 0.000251 for 32-bit
+all.equal(unname(coef(mC)),
+	  c(30.50232, -1.666147, 0.08425381, 0.6677366, 1.167777, -4.136569),
+	  tol = 2e-7)# 6.112 e-8 (32-b)
 )
+dput(signif(unname(coef(mC)), 7))
+## 64b(0.2-0): c(30.50232, -1.666147, 0.08425381, 0.6677366, 1.167777, -4.136569)
+## 32b(0.2-0):	 "exactly" same !
+## Full precision:
+dput(unname(coef(mC)))
+## 32-bit:c(30.5023183940104, -1.66614687550933, 0.0842538074635567, 0.667736589938547, 1.16777744089398, -4.13656884777543)
+## 64-bit:c(30.5023184150851, -1.66614687537736, 0.0842538074722959, 0.667736589980183, 1.16777744061092, -4.1365688503035)
+
 str(mC)
 
 ## EX 2
@@ -34,41 +45,65 @@ gen <- function(n,p, n0, y0, x0, beta = rep(1, p))
     list(x=x, y=y)
 }
 
-## generate --a sample of  n  observations with  p  variables
+## generate --a sample of  n  observations with	 p  variables
 ## and 10% of outliers near (x1,y) = (10,10)
 n <- 500 ; n0 <- n %/% 10
 p <- 7 ## p = 20 is more impressive but too slow for "standard test"
 set.seed(17)
 a <- gen(n=n, p=p, n0= n0, y0=10, x0=10)
 plot(a$x[,1], a$y, col = c(rep(2, n0), rep(1, n-n0)))
-system.time( m1 <- lmrob(y~x, data = a) )
-plot(m1) #- currently 5 plots; MM:I  don't like #3 (Response vs fitted)
+system.time( m1 <- lmrob(y~x, data = a,
+                         control = lmrob.control(compute.rd = TRUE)))
+plot(m1, ask=FALSE)
+##-> currently 5 plots; MM:I  don't like #3 (Response vs fitted)
 
 ## don't compute robust distances --> faster by factor of two:
 system.time(m2 <- lmrob(y~x, data = a,
-                        control = lmrob.control(compute.rd = FALSE)))
+			control = lmrob.control(compute.rd = FALSE)))
 ## ==> half of the CPU time is spent in covMcd()!
 (sm2 <- summary(m2))
 l1 <- lm(y~x, data = a)
 cbind(robust = coef(sm2)[,1:2],
       lm = coef(summary(l1))[,1:2])
 
+m2.S1 <- with(a, lmrob.S(cbind(1,x), y, trace.lev = 2,
+			 ## trace.lev = 2 : quite a bit of output
+			 control= lmrob.control(seed = .Random.seed,
+			 nRes = 80, k.max = 20, refine.tol = 1e-4)))
+S.ctrl <- lmrob.control(seed = .Random.seed,## << keeps .Random.seed unchanged
+			nResample = 1000, best.r.s = 15, refine.tol = 1e-9)
+m2.S <- with(a, lmrob.S(cbind(1,x), y, control = S.ctrl, trace.lev = 1))
+str(m2.S)
+
 ##--- Now use n > 2000 --> so we use C internal fast_s_large_n(...)
 n <- 2500 ; n0 <- n %/% 10
 a2 <- gen(n=n, p = 3, n0= n0, y0=10, x0=10)
 plot(a2$x[,1], a2$y, col = c(rep(2, n0), rep(1, n-n0)))
+rs <- .Random.seed
 system.time( m3 <- lmrob(y~x, data = a2) )
 m3
-system.time( m4 <- lmrob(y~x, data = a2, compute.rd = FALSE))
+nrs <- .Random.seed # <-- to check that using 'seed' keeps .Random.seed
+system.time( m4 <- lmrob(y~x, data = a2, seed = rs, compute.rd = FALSE))
 (sm4 <- summary(m4))
 
-stopifnot(identical(coef(m3), coef(m4)),
-          all.equal(unname(coef(m3)),
-                    c(0.03802, 0.99653, 1.00555, 0.99981), tol= 4e-5),
-          all.equal(unname(coef(sm4)[,"Std. Error"]),
-                    c(0.0252, 0.00287, 0.0260, 0.0263), tol = 2e-3)
-          )
+## random seed must be the same because we used	 'seed = *' :
+stopifnot(nrs == .Random.seed, identical(coef(m3), coef(m4)))
 
+dput(signif(cf <- unname(coef(m3)), 7))
+## 0.2-0: c(0.007446546, 1.000712, 1.027921, 0.9896527)
+## 0.2-1: c(0.03148659, 0.9980933, 1.016364, 1.03243)
+## both for 32 and 64 bit
+
+dput(signif(100 * (sd <- unname(coef(sm4)[, "Std. Error"])), 7))
+## 0.2-0: c(2.219388, 0.274644,  2.196982, 2.26253)
+## 0.2-1: c(2.194914, 0.2737579, 2.371728, 2.206261)
+## both for 32 and 64 bit
+
+stopifnot(
+	  all.equal(cf, c(0.03148659, 0.9980933, 1.016364, 1.03243), tol= 7e-7)
+	  , # ... e-7	 needed on 64b
+	  all.equal(100*sd,c(2.194914,0.2737579, 2.371728, 2.206261),tol= 7e-7)
+	  ) # 1.334 e-7	 needed on 64b
 
 
 ## rm(a,m1, m2, m3, m4, sm2, l1)

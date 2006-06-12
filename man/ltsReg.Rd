@@ -14,9 +14,9 @@ ltsReg(x, \dots)
 \method{ltsReg}{formula}(formula, data, \dots,
        model = TRUE, x.ret = FALSE, y.ret = FALSE)
 
-\method{ltsReg}{default}(x, y, intercept = TRUE, alpha = NULL, nsamp = 500,
+\method{ltsReg}{default}(x, y, intercept = TRUE, alpha = 1/2, nsamp = 500,
        adjust = FALSE, mcd = TRUE, qr.out = FALSE, yname = NULL,
-       seed = 0, use.correction=TRUE, control, \dots)
+       seed = NULL, use.correction=TRUE, control, \dots)
 }
 \arguments{
   \item{formula}{a \code{\link{formula}} of the form \code{y ~ x1 + x2 + ...}.}
@@ -32,8 +32,7 @@ ltsReg(x, \dots)
   estimated; otherwise no constant term will be included.  Default is
   \code{intercept = TRUE}  }
   \item{alpha}{the percentage of squared residuals whose sum will be
-    minimized.  Its default value is 0.5.  In general, \code{alpha} must
-    be a value between 0.5 and 1.}
+    minimized, by default 0.5.  In general, \code{alpha} must between 0.5 and 1.}
   \item{nsamp}{number of subsets used for initial estimates or
     \code{"best"} or \code{"exact"}.  Default is \code{nsamp = 500}.  For
     \code{nsamp="best"} exhaustive enumeration is done, as long as the
@@ -47,7 +46,7 @@ ltsReg(x, \dots)
   \item{qr.out}{whether to return the QR decomposition (see
     \code{\link{qr}}); defaults to false.}
   \item{yname}{the name of the dependent variable.  Default is \code{yname = NULL}}
-  \item{seed}{starting value for random generator.  Default is \code{seed = 0}}
+  \item{seed}{initial seed for random generator, see \code{\link{rrcov.control}}.}
   \item{use.correction}{ whether to use finite sample correction factors.
     Default is \code{use.correction=TRUE}}
   %% MM:  want control also for formula !?!?!?!?!!

@@ -30,7 +30,8 @@ ltsReg.formula <- function(formula, data, ...,
     ##	  method <- match.arg(method)
 
     mf <- match.call(expand.dots = FALSE)
-    mf$method <- mf$contrasts <- mf$model <- mf$x.ret <- mf$y.ret <- mf$... <- NULL
+    mf$method <- mf$contrasts <- mf$model <- mf$x.ret <- mf$y.ret <- mf$... <-
+        NULL
     mf[[1]] <- as.name("model.frame")
     mf <- eval.parent(mf)
     ##	  if (method == "model.frame") return(mf)
@@ -76,13 +77,13 @@ ltsReg.formula <- function(formula, data, ...,
 ltsReg.default <-
     function (x, y,
 	      intercept = TRUE,
-	      alpha = NULL,
+	      alpha = 1/2,
 	      nsamp = 500,
 	      adjust = FALSE,
 	      mcd = TRUE,
 	      qr.out = FALSE,
 	      yname = NULL,
-	      seed = 0,
+	      seed = NULL,
 	      use.correction = TRUE,
 	      control,
 	      ...)
@@ -93,23 +94,28 @@ ltsReg.default <-
     ## but if single parameters were passed (not defaults) they will override the
     ## control object.
     if(!missing(control)) {
-	defcontrol <- rrcov.control()	# default control
-	if(is.null(alpha) && control$alpha != defcontrol$alpha)
+	defCtrl <- rrcov.control()	# default control
+	if(is.null(alpha) && control$alpha != defCtrl$alpha)
 	    alpha <- control$alpha
-	if(nsamp == defcontrol$nsamp)
-	    nsamp <- control$nsamp
-	if(seed == defcontrol$seed)
-	    seed <- control$seed
-	##	  if(print.it == defcontrol$print.it)
+	if(nsamp == defCtrl$nsamp)    nsamp <- control$nsamp
+	if(identical(seed, defCtrl$seed)) seed <- control$seed
+
+	##	  if(print.it == defCtrl$print.it)
 	##	      print.it <- control$print.it
-	if(use.correction == defcontrol$use.correction)
+	if(use.correction == defCtrl$use.correction)
 	    use.correction <- control$use.correction
-	if(adjust == defcontrol$adjust)
+	if(adjust == defCtrl$adjust)
 	    adjust <- control$adjust
     }
 
-    if(!length(alpha))
-	alpha <- 1/2
+    if(length(seed) > 0) {
+	if(exists(".Random.seed", envir=.GlobalEnv, inherits=FALSE))  {
+	    seed.keep <- get(".Random.seed", envir=.GlobalEnv, inherits=FALSE)
+	    on.exit(assign(".Random.seed", seed.keep, envir=.GlobalEnv))
+	}
+	assign(".Random.seed", seed, envir=.GlobalEnv)
+    }
+
     if(alpha < 1/2)
 	stop("alpha is out of range!")
     if(alpha > 1)
@@ -189,7 +195,7 @@ ltsReg.default <-
 	    center <- as.vector(mean(y))
 	    ## xbest <- NULL
 	} else {
-	    sh <- .fastmcd(as.matrix(y), as.integer(quan), nsamp = 0, seed)
+	    sh <- .fastmcd(as.matrix(y), as.integer(quan), nsamp = 0)
 
 	    center <- as.double(sh$initmean)
 	    qalpha <- qchisq(quan/n, 1)
@@ -341,7 +347,7 @@ ltsReg.default <-
 
 	    quan <- quan.f(alpha, n, rk)
 
-	    z <- .fastlts(x, y, quan, nsamp, intercept, adjust, seed)
+	    z <- .fastlts(x, y, quan, nsamp, intercept, adjust)
 
 	    ## vt:: lm.fit.qr == lm.fit(...,method=qr,...)
 	    ##	cf <- lm.fit.qr(x[z$inbest, , drop = FALSE], y[z$inbest])$coef
@@ -405,7 +411,7 @@ ltsReg.default <-
 	    ## unneeded: names(ans$coefficients) <- names(ans$raw.coefficients)
 	    ans$crit <- z$objfct
 	    if (intercept) {
-		sh <- .fastmcd(as.matrix(y), as.integer(quan), nsamp = 0, seed)
+		sh <- .fastmcd(as.matrix(y), as.integer(quan), nsamp = 0)
 		y <- as.vector(y) ## < ??
 		sh <- as.double(sh$adjustcov)
 		iR2 <- (sh0/sh)^2
@@ -757,7 +763,7 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
     return(1/fp.alpha.n)
 } ## LTScnp2.rew
 
-.fastlts <- function(x, y, quan, nsamp, intercept, adjust, seed) {
+.fastlts <- function(x, y, quan, nsamp, intercept, adjust) {
     dx <- dim(x)
     n <- dx[1]
     p <- dx[2]
@@ -771,31 +777,39 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
     ##	 vt::03.02.2006 - added options "best" and "exact" for nsamp
     if(!missing(nsamp)) {
 	if(is.numeric(nsamp) && nsamp <= 0) {
-	    warning(paste("Invalid number of trials nsamp=",nsamp,"!Using default.\n"))
+	    warning("Invalid number of trials nsamp=",nsamp,"! Using default.\n")
 	    nsamp <- -1
 	} else if(nsamp == "exact" || nsamp == "best") {
 	    myk <- p
 	    if(n > 2*nmini-1) {
-		warning(paste("Options 'best' and 'exact' not allowed for n greater then ",2*nmini-1," . \nUsing nsamp=",nsamp,"\n"))
+		warning("Options 'best' and 'exact' not allowed for n greater than ",
+                        2*nmini-1,". \nUsing nsamp=",nsamp,"\n")
 		nsamp <- -1
-	    } else {
-		nall <- .ncomb(myk, n)
+	    }
+            else { ## FIXME: Add a test case for this !
+		nall <- choose(n, myk)
 		if(nall > 5000 && nsamp == "best") {
 		    nsamp <- 5000
-		    warning(paste("Maximum 5000 subsets allowed for option 'best'. \nComputing 5000 subsets of size ",myk," out of ",n,"\n"))
+		    warning("Maximum 5000 subsets allowed for option 'best'.\n",
+                            "Computing 5000 subsets of size ",myk," out of ",n,
+                            "\n")
 		} else {
 		    nsamp <- 0		#all subsamples
 		    if(nall > 5000)
-			cat(paste("Computing all ",nall," subsets of size ",myk," out of ",n, "\n This may take a very long time!\n"))
+			cat("Computing all ",nall," subsets of size ", myk,
+                            " out of ",n,
+                            "\n This may take a very long time!\n")
 		}
 	    }
 	}
 
-	if(!is.numeric(nsamp) || nsamp == -1) { # still not defined - set it to the default
-	    defcontrol <- rrcov.control() # default control
+	if(!is.numeric(nsamp) || nsamp == -1) {
+            ## still not defined - set it to the default
+	    defCtrl <- rrcov.control() # default control
 	    if(!is.numeric(nsamp))
-		warning(paste("Invalid number of trials nsamp=",nsamp,"!Using default nsamp=",defcontrol$nsamp,"\n"))
-	    nsamp <- defcontrol$nsamp	# take the default nsamp
+		warning("Invalid number of trials nsamp=",nsamp,
+                        "! Using default nsamp=",defCtrl$nsamp,"\n")
+	    nsamp <- defCtrl$nsamp	# take the default nsamp
 	}
     }
 
@@ -812,7 +826,6 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
     storage.mode(p) <- "integer"
     storage.mode(quan) <- "integer"
     storage.mode(nsamp) <- "integer"
-    storage.mode(seed) <- "integer"
     storage.mode(objfct) <- "double"
 
     inbest <- matrix(10000, nrow = quan, ncol = 1)
@@ -916,7 +929,7 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
 	     intadjust = as.integer(adjust),
 	     nvad,
 	     datt,
-	     seed,
+	     integer(1),## << 'seed' no longer used -- FIXME
 	     weights,
 	     temp,
 	     index1,

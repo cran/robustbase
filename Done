@@ -23,6 +23,11 @@ o) we have had some problems, but they are solved now
 
 4) covMcd( * ):  replace 'print.it'  by  'trace'  which is more appropriate
    	         and common in S
+   note that the if(!print.it) cat(..) statements were *wrong*;
+   They now all are  if(trace) cat(..), since
+   computation should *Not* print anything for trace = FALSE
+   unless warnings and errors!
+
 
 5) renamed  tolellipse() to tolEllipsePlot()
    all these plotting functions may *NOT* set  par(mfrow = c(1,1)) !
@@ -50,10 +55,42 @@ o) we have had some problems, but they are solved now
     because it is used with scaleTau2() which has now a constant
     consistency factor by default.
 
+0.1-5:
+
 14) lmrob():
    - add "..." to argument list in order to allow ``control in there'' as well
 
    - now use Calloc()/Free() instead of  malloc()/free()
    - indentation etc more or less according to "R core coding standard"
    - not using (many) 'register' -- since compiler optimization is often better
+
+0.1-6:
+
+15) lmrob():
+   - use "good" lin.algebra functions in lmrob.S and lmrob.MM
+   - change default to compute.rd = FALSE  {no robust Mahalanobis distances;
+     are expensive, and only needed for some plotting
+     also MCD can "quickly" become singular.
+
+   - added 'trace.lev' argument to lmrob.S()
+      --> can have printing output during search
+
+0.2-0:
+
+16) lmrob) :
+    - 'seed': By default always same seed --> same result
+	       even though algorithm is random.
+      INSTEAD: we now use R's RNG and .Random.seed!
+    - print(summary(.)) now summarizes the robustness weights
+
+17) covMcd() and ltsReg():  now also use R's random number generator and
+    .Random.seed (unless the 'seed' argument is specified).
+
+18) summary.mcd() now  returns an object of class "summary.mcd"
+    and then  print.summary.mcd() prints it.
+
+0.2-1:
+
+19) lmrob.S() now *does* convergence monitoring
+
 

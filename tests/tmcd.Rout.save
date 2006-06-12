@@ -1,6 +1,6 @@
 
 R : Copyright 2006, The R Foundation for Statistical Computing
-Version 2.2.1 Patched (2006-02-18 r37405)
+Version 2.3.1 RC (2006-05-31 r38242)
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -29,7 +29,7 @@ Loading required package: MASS
 +     ##  - objective fucntion
 +     ##  - best subsample found (if short == false)
 +     ##  - outliers identified (with cutoff 0.975) (if short == false)
-+     ##  - estimated center and covarinance matrix if full == TRUE)
++     ##  - estimated center and covariance matrix if full == TRUE)
 +     ##
 +     ##@edescr
 +     ##
@@ -51,7 +51,7 @@ Loading required package: MASS
 +             quan <- as.integer(floor((n + p + 1)/2)) #default: floor((n+p+1)/2)
 +         }
 +         else {
-+             mcd <- covMcd(x, print.it = FALSE)
++             mcd <- covMcd(x) # trace = FALSE
 +             quan <- as.integer(mcd$quan)
 +         }
 + 
@@ -224,6 +224,7 @@ Loading required package: MASS
 > 
 > 
 > ## -- now do it:
+> set.seed(101) # <<-- sub-sampling algorithm now based on R's RNG and seed
 > dodata()
 
 Call:  dodata() 
@@ -234,21 +235,19 @@ Best subsample:
 [1]  1  3  4  5  7  9 11
 Outliers:  0 
 -------------
+Minimum Covariance Determinant (MCD) estimator.
 Call:
-covMcd(x = x, print.it = FALSE)
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
 
-
-Log(det):  5.679 
-
-
-Robust Estimate of Location: 
+Log(Det.):  5.679 
+Robust Estimate of Location:
 height  weight  
  38.25   33.09  
-
-Robust Estimate of Covariance: 
+Robust Estimate of Covariance:
         height  weight
-height  173.1   332.8 
-weight  332.8   726.1 
+height   173.1   332.8
+weight   332.8   726.1
 --------------------------------------------------------
 starsCYG              47   2  25    -8.031215
 Best subsample: 
@@ -256,21 +255,19 @@ Best subsample:
 Outliers:  6 
 [1]  7 11 14 20 30 34
 -------------
+Minimum Covariance Determinant (MCD) estimator.
 Call:
-covMcd(x = x, print.it = FALSE)
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
 
-
-Log(det):  -8.031 
-
-
-Robust Estimate of Location: 
+Log(Det.):  -8.031 
+Robust Estimate of Location:
    log.Te  log.light  
     4.409      4.949  
-
-Robust Estimate of Covariance: 
-           log.Te   log.light
-log.Te     0.01754  0.05234  
-log.light  0.05234  0.36434  
+Robust Estimate of Covariance:
+            log.Te  log.light
+log.Te     0.01754    0.05234
+log.light  0.05234    0.36434
 --------------------------------------------------------
 phosphor              18   2  10     6.878847
 Best subsample: 
@@ -278,21 +275,19 @@ Best subsample:
 Outliers:  2 
 [1] 1 6
 -------------
+Minimum Covariance Determinant (MCD) estimator.
 Call:
-covMcd(x = x, print.it = FALSE)
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
 
-
-Log(det):  6.879 
-
-
-Robust Estimate of Location: 
+Log(Det.):  6.879 
+Robust Estimate of Location:
   inorg  organic  
   13.35    38.80  
-
-Robust Estimate of Covariance: 
+Robust Estimate of Covariance:
          inorg  organic
-inorg    194.3  197.0  
-organic  197.0  274.4  
+inorg    194.3    197.0
+organic  197.0    274.4
 --------------------------------------------------------
 stackloss             21   3  12     5.472581
 Best subsample: 
@@ -300,22 +295,20 @@ Best subsample:
 Outliers:  9 
 [1]  1  2  3 15 16 17 18 19 21
 -------------
+Minimum Covariance Determinant (MCD) estimator.
 Call:
-covMcd(x = x, print.it = FALSE)
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
 
-
-Log(det):  5.473 
-
-
-Robust Estimate of Location: 
+Log(Det.):  5.473 
+Robust Estimate of Location:
   Air.Flow  Water.Temp  Acid.Conc.  
      59.50       20.83       87.33  
-
-Robust Estimate of Covariance: 
+Robust Estimate of Covariance:
             Air.Flow  Water.Temp  Acid.Conc.
-Air.Flow    13.75     12.78       12.54     
-Water.Temp  12.78     20.18       13.42     
-Acid.Conc.  12.54     13.42       50.81     
+Air.Flow       13.75       12.78       12.54
+Water.Temp     12.78       20.18       13.42
+Acid.Conc.     12.54       13.42       50.81
 --------------------------------------------------------
 coleman               20   5  13     1.286808
 Best subsample: 
@@ -323,24 +316,22 @@ Best subsample:
 Outliers:  7 
 [1]  1  6  9 10 11 15 18
 -------------
+Minimum Covariance Determinant (MCD) estimator.
 Call:
-covMcd(x = x, print.it = FALSE)
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
 
-
-Log(det):  1.287 
-
-
-Robust Estimate of Location: 
+Log(Det.):  1.287 
+Robust Estimate of Location:
   salaryP   fatherWc    sstatus  teacherSc  motherLev  
     2.757     48.379      6.118     25.005      6.398  
-
-Robust Estimate of Covariance: 
-           salaryP    fatherWc   sstatus    teacherSc  motherLev
-salaryP       0.4125     2.9089    -0.4338     0.2466     0.1222
-fatherWc      2.9089  2122.7550   538.2630    20.5270    56.1936
-sstatus      -0.4338   538.2630   195.2556     6.2423    16.4991
-teacherSc     0.2466    20.5270     6.2423     1.2787     0.9043
-motherLev     0.1222    56.1936    16.4991     0.9043     1.6980
+Robust Estimate of Covariance:
+           salaryP  fatherWc   sstatus  teacherSc  motherLev
+salaryP     0.4125     2.909   -0.4338     0.2466     0.1222
+fatherWc    2.9089  2122.755  538.2630    20.5270    56.1936
+sstatus    -0.4338   538.263  195.2556     6.2423    16.4991
+teacherSc   0.2466    20.527    6.2423     1.2787     0.9043
+motherLev   0.1222    56.194   16.4991     0.9043     1.6980
 --------------------------------------------------------
 salinity              28   3  16     1.326364
 Best subsample: 
@@ -348,19 +339,17 @@ Best subsample:
 Outliers:  4 
 [1]  5 16 23 24
 -------------
+Minimum Covariance Determinant (MCD) estimator.
 Call:
-covMcd(x = x, print.it = FALSE)
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
 
-
-Log(det):  1.326 
-
-
-Robust Estimate of Location: 
+Log(Det.):  1.326 
+Robust Estimate of Location:
     X1      X2      X3  
 10.083   2.783  22.778  
-
-Robust Estimate of Covariance: 
-    X1      X2      X3    
+Robust Estimate of Covariance:
+        X1      X2      X3
 X1  14.503   1.400  -4.428
 X2   1.400   5.329  -2.002
 X3  -4.428  -2.002   3.319
@@ -371,24 +360,22 @@ Best subsample:
 Outliers:  5 
 [1]  4  6  8 11 19
 -------------
+Minimum Covariance Determinant (MCD) estimator.
 Call:
-covMcd(x = x, print.it = FALSE)
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
 
-
-Log(det):  -36.27 
-
-
-Robust Estimate of Location: 
+Log(Det.):  -36.27 
+Robust Estimate of Location:
     x1      x2      x3      x4      x5  
 0.5869  0.1222  0.5309  0.5382  0.8918  
-
-Robust Estimate of Covariance: 
-    x1          x2          x3          x4          x5        
-x1   1.633e-02   3.063e-03   5.136e-03  -9.543e-04  -2.654e-03
-x2   3.063e-03   7.894e-04   2.067e-03  -8.467e-05   3.851e-05
-x3   5.136e-03   2.067e-03   1.080e-02  -1.419e-03   5.739e-04
-x4  -9.543e-04  -8.467e-05  -1.419e-03   4.635e-03   2.977e-03
-x5  -2.654e-03   3.851e-05   5.739e-04   2.977e-03   4.506e-03
+Robust Estimate of Covariance:
+            x1          x2          x3          x4          x5
+x1   0.0163266   3.063e-03   0.0051357  -9.543e-04  -2.654e-03
+x2   0.0030632   7.894e-04   0.0020670  -8.467e-05   3.851e-05
+x3   0.0051357   2.067e-03   0.0108015  -1.419e-03   5.739e-04
+x4  -0.0009543  -8.467e-05  -0.0014190   4.635e-03   2.977e-03
+x5  -0.0026545   3.851e-05   0.0005739   2.977e-03   4.506e-03
 --------------------------------------------------------
 hbk                   75   3  39    -1.047858
 Best subsample: 
@@ -397,22 +384,20 @@ Best subsample:
 Outliers:  14 
  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14
 -------------
+Minimum Covariance Determinant (MCD) estimator.
 Call:
-covMcd(x = x, print.it = FALSE)
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
 
-
-Log(det):  -1.048 
-
-
-Robust Estimate of Location: 
+Log(Det.):  -1.048 
+Robust Estimate of Location:
    X1     X2     X3  
 1.538  1.780  1.687  
-
-Robust Estimate of Covariance: 
-    X1       X2       X3     
-X1  1.68030  0.07533  0.17416
-X2  0.07533  1.71031  0.20890
-X3  0.17416  0.20890  1.58843
+Robust Estimate of Covariance:
+         X1       X2      X3
+X1  1.68030  0.07533  0.1742
+X2  0.07533  1.71031  0.2089
+X3  0.17416  0.20890  1.5884
 --------------------------------------------------------
 Animals               28   2  15    14.555543
 Best subsample: 
@@ -420,59 +405,55 @@ Best subsample:
 Outliers:  13 
  [1]  2  6  7  8  9 12 13 14 15 16 24 25 28
 -------------
+Minimum Covariance Determinant (MCD) estimator.
 Call:
-covMcd(x = x, print.it = FALSE)
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
 
-
-Log(det):  14.56 
-
-
-Robust Estimate of Location: 
+Log(Det.):  14.56 
+Robust Estimate of Location:
  body  brain  
 18.67  64.94  
-
-Robust Estimate of Covariance: 
-       body   brain
-body    2690   4562
-brain   4562  16346
+Robust Estimate of Covariance:
+       body  brain
+body   2690   4562
+brain  4562  16346
 --------------------------------------------------------
-milk                  86   8  47   -28.931843
+milk                  86   8  47   -28.848323
 Best subsample: 
- [1]  5  7  8  9 10 22 23 24 26 30 31 32 33 34 35 37 38 39 45 46 49 51 53 54 55
-[26] 56 57 58 59 60 61 63 64 65 66 67 68 69 71 72 76 78 79 81 83 84 86
+ [1]  5  7  8  9 10 21 22 24 26 30 31 32 33 34 35 36 39 45 46 51 53 54 55 56 57
+[26] 58 59 60 61 62 63 64 65 66 67 68 69 71 72 76 78 79 81 82 83 84 86
 Outliers:  20 
  [1]  1  2  3 11 12 13 14 15 16 17 18 20 27 41 44 47 70 74 75 77
 -------------
+Minimum Covariance Determinant (MCD) estimator.
 Call:
-covMcd(x = x, print.it = FALSE)
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
 
-
-Log(det):  -28.93 
-
-
-Robust Estimate of Location: 
+Log(Det.):  -28.85 
+Robust Estimate of Location:
      X1       X2       X3       X4       X5       X6       X7       X8  
-  1.030   35.757   33.054   26.121   25.100   25.037  122.940   14.356  
-
-Robust Estimate of Covariance: 
-    X1         X2         X3         X4         X5         X6         X7       
-X1  6.011e-07  1.147e-04  2.314e-04  2.214e-04  1.959e-04  1.839e-04  8.034e-04
-X2  1.147e-04  2.004e+00  2.813e-01  2.075e-01  1.299e-01  2.536e-01  1.643e+00
-X3  2.314e-04  2.813e-01  1.513e+00  1.116e+00  1.100e+00  1.111e+00  8.867e-01
-X4  2.214e-04  2.075e-01  1.116e+00  8.848e-01  8.471e-01  8.492e-01  7.261e-01
-X5  1.959e-04  1.299e-01  1.100e+00  8.471e-01  8.898e-01  8.583e-01  7.332e-01
-X6  1.839e-04  2.536e-01  1.111e+00  8.492e-01  8.583e-01  8.918e-01  7.355e-01
-X7  8.034e-04  1.643e+00  8.867e-01  7.261e-01  7.332e-01  7.355e-01  4.457e+00
-X8  4.527e-06  1.482e-01  2.215e-01  1.474e-01  1.252e-01  1.387e-01  2.724e-01
-    X8       
-X1  4.527e-06
-X2  1.482e-01
-X3  2.215e-01
-X4  1.474e-01
-X5  1.252e-01
-X6  1.387e-01
-X7  2.724e-01
-X8  1.485e-01
+  1.030   35.885   33.076   26.140   25.121   25.052  123.166   14.382  
+Robust Estimate of Covariance:
+           X1         X2         X3         X4         X5         X6         X7
+X1  5.244e-07  0.0001429  0.0001814  0.0001779  0.0001585  0.0001374  0.0007119
+X2  1.429e-04  2.3117741  0.2880534  0.2280272  0.1251295  0.2915536  2.0445205
+X3  1.814e-04  0.2880534  1.3600390  1.0078726  0.9937268  0.9841859  0.8510427
+X4  1.779e-04  0.2280272  1.0078726  0.8087730  0.7728411  0.7582802  0.7090137
+X5  1.585e-04  0.1251295  0.9937268  0.7728411  0.8194833  0.7743836  0.6901070
+X6  1.374e-04  0.2915536  0.9841859  0.7582802  0.7743836  0.7862365  0.7341326
+X7  7.119e-04  2.0445205  0.8510427  0.7090137  0.6901070  0.7341326  4.8640606
+X8  1.704e-05  0.2654868  0.2308933  0.1579462  0.1313123  0.1497227  0.4449118
+           X8
+X1  1.704e-05
+X2  2.655e-01
+X3  2.309e-01
+X4  1.579e-01
+X5  1.313e-01
+X6  1.497e-01
+X7  4.449e-01
+X8  1.891e-01
 --------------------------------------------------------
 bushfire              38   5  22    18.135810
 Best subsample: 
@@ -480,27 +461,25 @@ Best subsample:
 Outliers:  16 
  [1]  7  8  9 10 11 12 29 30 31 32 33 34 35 36 37 38
 -------------
+Minimum Covariance Determinant (MCD) estimator.
 Call:
-covMcd(x = x, print.it = FALSE)
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
 
-
-Log(det):  18.14 
-
-
-Robust Estimate of Location: 
+Log(Det.):  18.14 
+Robust Estimate of Location:
    V1     V2     V3     V4     V5  
 105.5  146.9  274.4  217.5  279.0  
-
-Robust Estimate of Covariance: 
-    V1       V2       V3       V4       V5     
-V1    593.7    459.4  -2903.2   -653.2   -532.8
-V2    459.4    405.4  -1930.2   -394.3   -333.3
-V3  -2903.2  -1930.2  17146.7   4212.9   3347.9
-V4   -653.2   -394.3   4212.9   1109.7    866.7
-V5   -532.8   -333.3   3347.9    866.7    682.6
+Robust Estimate of Covariance:
+         V1       V2     V3      V4      V5
+V1    593.7    459.4  -2903  -653.2  -532.8
+V2    459.4    405.4  -1930  -394.3  -333.3
+V3  -2903.2  -1930.2  17147  4212.9  3347.9
+V4   -653.2   -394.3   4213  1109.7   866.7
+V5   -532.8   -333.3   3348   866.7   682.6
 --------------------------------------------------------
 ========================================================
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  1.57 0.15 2.57 0 0 
+Time elapsed:  1.384 0.04 1.407 0 0 
 > 

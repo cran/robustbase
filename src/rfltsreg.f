@@ -13,20 +13,20 @@ cc  GNU General Public License for more details.
 cc
 cc  You should have received a copy of the GNU General Public License
 cc  along with this program; if not, write to the Free Software
-cc  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+cc  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 cc
-cc  I would like to thank Peter Rousseeuw and Katrien van Driessen for 
+cc  I would like to thank Peter Rousseeuw and Katrien van Driessen for
 cc  providing the initial code of this function.
 cc
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-	subroutine rfltsreg(dat,n,nvar,nhalff,krep,inbest,objfct,
+        subroutine rfltsreg(dat,n,nvar,nhalff,krep,inbest,objfct,
      *   intercept,intadjust,nvad,datt,iseed,
      *   weights,temp,index1,index2,aw2,aw,residu,y,nmahad,ndist,
      *   am,am2,slutn,
      *   jmiss,xmed,xmad,a,da,h,hvec,c,cstock,mstock,c1stock,
      *   m1stock,dath,sd,means,bmeans)
-     
+
 cc
 	implicit integer(i-n), double precision(a-h,o-z)
 cc
@@ -65,13 +65,13 @@ cc
 
 	integer matz,seed,tottimes,step
 	integer pnsel
-        integer xreplow
+        integer replow
 	integer krep,n,nvar,nhalff,nvad
 	double precision objfct
-	logical all,part,fine,final,xrfodd,more1,more2
+	logical all,part,fine,final,rfodd,more1,more2
 	integer intercept,intadjust
-	integer xrfnbreak,xrfncomb
-	
+	integer rfnbreak,rfncomb
+
         integer flag(km10)
 	integer mini(kmini)
 	integer subdat(2,nmaxi)
@@ -111,17 +111,20 @@ ccc	double precision bmeans(nvmax)
 	double precision bmeans(nvar)
 
         data faclts/2.6477,2.5092,2.3826,2.2662,2.1587,
-     *  2.0589,1.9660,1.879,1.7973,1.7203,1.6473/ 
+     *  2.0589,1.9660,1.879,1.7973,1.7203,1.6473/
 cc
 cc
 CDDD	CALL INTPR('>>> Enter RFLTSREG ... nvar=',-1,nvar,1)
 
+        call rndstart
+C            -------- == GetRNGstate() in C
+
 CCCC    10.10.2005 - substitute the parameters nmax and nvmax
         nmax = n
-        nvmax = nvar        
+        nvmax = nvar
         nvmax1 = nvmax+1
         nvm11 = nvmax*(nvmax+1)
-        
+
         nrep = krep
 
 	if(nvar.lt.5) then
@@ -141,7 +144,7 @@ cc	nhalff=int((n+nvar+1)/2)
 	jmax=max((3*n/4)+(nvar+1)/4,nhalff)
 	nquant=min(nint(real(((nhalff*1.0/n)-0.5)*40))+1,11)
 	factor=faclts(nquant)
-	jbreak=xrfnbreak(nhalff,n,nvar)
+	jbreak=rfnbreak(nhalff,n,nvar)
 	jdefaul=(n+nvar+1)/2
 	percen = (1.D0*nhalff)/(1.D0*n)
 	if(nvad.eq.1) goto 9000
@@ -171,7 +174,7 @@ cc
           part=.true.
           ngroup=int(n/(nmini*1.D0))
           if(n.ge.(2*nmini) .and. n.le.(3*nmini-1)) then
-            if(xrfodd(n)) then
+            if(rfodd(n)) then
               mini(1)=int(n/2)
               mini(2)=int(n/2)+1
             else
@@ -230,13 +233,13 @@ cc
           nrep=int((krep*1.D0)/ngroup)
           minigr=mini(1)+mini(2)+mini(3)+mini(4)+mini(5)
 cccc	CALL INTPR('>>> RFLTSREG ... minigr=',-1,iseed,1)
-          call xrfrdraw(subdat,n,seed,minigr,mini,ngroup,kmini)
+          call rfrdraw(subdat,n,seed,minigr,mini,ngroup,kmini)
         else
           minigr=n
           nhalf=nhalff
           kstep=k1
-          if(n.le.xreplow(nsel)) then
-            nrep=xrfncomb(nsel,n)
+          if(n.le.replow(nsel)) then
+            nrep=rfncomb(nsel,n)
           else
             nrep = krep
             all=.false.
@@ -310,8 +313,8 @@ CDDD	CALL INTPR('>>> Initialization ready',-1,0,0)
         if(nvad.eq.1) then
           do 23, jj=1,n
  23         ndist(jj)=dat(jj,1)
-          call xrfshsort(ndist,n)
-          call xrfmcduni(ndist,n,nhalff,slutn,bstd,am,am2,factor,
+          call rfshsort(ndist,n)
+          call rfmcduni(ndist,n,nhalff,slutn,bstd,am,am2,factor,
      *      n-nhalff+1)
           goto 9999
         endif
@@ -341,7 +344,7 @@ CC        nfac=nvad-1
           nn=n
         endif
         if(part .and. fine .and. .not. final) nn=minigr
- 
+
         if(fine.or.(.not.part.and.final)) then
           nrep=10
           nsel=nhalf
@@ -405,7 +408,7 @@ CC        nfac=nvad-1
             nhalf=int(minigr*percen)
           endif
         endif
- 
+
         do 81 i=1,nsel-1
           index1(i)=i
  81     continue
@@ -430,7 +433,7 @@ CDDD	CALL INTPR('>>> MAIN LOOP BY GROUPS: NGROUP= ',-1,ngroup,1)
 
         do 1111 ii=1,ngroup
 CDDD	     CALL INTPR('>>> LOOPING BY GROUPS...II: ',-1,ii,1)
-          
+
           if(.not.fine) kount=0
           if(part .and. .not. fine) nn=mini(ii)
           do 101 i=1,nn
@@ -461,12 +464,12 @@ CDDD               CALL INTPR('>>> LOOPING...I: ',-1,i,1)
           step=0
  132      if((part.and..not.fine).or.(.not.part.and..not.final)) then
               if(part) then
-                  call xrfrangen(mini(ii),nsel,index1,seed)
+                  call rfrangen(mini(ii),nsel,index1,seed)
               else
                   if(all) then
-                      call xrfgenpn(n,nsel,index1)
+                      call rfgenpn(n,nsel,index1)
                   else
-                      call xrfrangen(n,nsel,index1,seed)
+                      call rfrangen(n,nsel,index1,seed)
                   endif
               endif
           endif
@@ -496,7 +499,7 @@ CDDD               CALL INTPR('>>> LOOPING...I: ',-1,i,1)
               endif
 
  126          continue
- 
+
               do 136 jnc=1,nvar
  136              a(jnc)=c(jnc,1)
           endif
@@ -518,7 +521,7 @@ CDDD               CALL INTPR('>>> LOOPING...I: ',-1,i,1)
                   goto 1111
               endif
           endif
-            
+
  151      do 152 jnc=1,nn
               residu(jnc)=0.D0
               do 153 j=1,nvar
@@ -535,10 +538,10 @@ CDDD               CALL INTPR('>>> LOOPING...I: ',-1,i,1)
               endif
               aw(jnc)=residu(jnc)
  152      continue
-          
+
           more1=.false.
           more2=.false.
-          nmore=200 
+          nmore=200
           nmore2=nmore/2
 
           if(intadjust.eq.1) then
@@ -546,34 +549,34 @@ CDDD               CALL INTPR('>>> LOOPING...I: ',-1,i,1)
 CDDD		CALL INTPR('>>> INTERCEPT ADJUSTMENT 1',-1,i,1)
           if(intercept.eq.1.and.((.not.fine.and.part).or.
      *      .not.part.or.((nn-nhalf).le.nmore))) then
-              call xrfshsort(aw,nn)
-              call xrfmcduni(aw,nn,nhalf,slutn,bstd,am,am2,
+              call rfshsort(aw,nn)
+              call rfmcduni(aw,nn,nhalf,slutn,bstd,am,am2,
      *            factor,nn-nhalf+1)
               a(nvar)=a(nvar)+slutn(1)
               do 154 jnc=1,nn
  154              residu(jnc)=residu(jnc)-slutn(1)
           else
               if(intercept.eq.1) then
-                  call xrfshsort(aw,nn)
+                  call rfshsort(aw,nn)
                   do 184 jj=1,nn
  184                  am2(jj)=abs(aw(jj))
-                  dist2=xrffindq(am2,nn,nhalf,index1)
+                  dist2=rffindq(am2,nn,nhalf,index1)
                   do 174, jj=1,nhalf
  174                  aw2(jj)=aw(index1(jj))
-                  dist2=xrffindq(aw2,nhalf,1,index2) 
+                  dist2=rffindq(aw2,nhalf,1,index2)
                   jnc=index1(index2(1))
-                  if(jnc+nmore-nmore2+nhalf-1.gt.nn.or.jnc-nmore2.lt.1) 
+                  if(jnc+nmore-nmore2+nhalf-1.gt.nn.or.jnc-nmore2.lt.1)
      *                then
-                      call xrfmcduni(aw,nn,nhalf,slutn,bstd,am,am2,
+                      call rfmcduni(aw,nn,nhalf,slutn,bstd,am,am2,
      *                    factor,nn-nhalf+1)
                       a(nvar)=a(nvar)+slutn(1)
                       do 169 jnc=1,nn
  169                      residu(jnc)=residu(jnc)-slutn(1)
                   else
  555                  do 178 jj=0,nhalf-1+nmore
- 178                      aw2(jj+1)=aw(jnc-nmore2+jj) 
+ 178                      aw2(jj+1)=aw(jnc-nmore2+jj)
                       nlen=nmore+1
-                      call xrfmcduni(aw2,nhalf+nmore,nhalf,slutn,
+                      call rfmcduni(aw2,nhalf+nmore,nhalf,slutn,
      *          bstd,am,am2,factor,nlen)
                       if(nlen.eq.1.and..not.more1) then
                           if(.not.more2) then
@@ -588,7 +591,7 @@ CDDD		CALL INTPR('>>> INTERCEPT ADJUSTMENT 1',-1,i,1)
                                   nmore=nmore2
                                   nmore2=-nmore2
                                   more2=.true.
-                                  if(jnc+nmore-nmore2+nhalf-1.le.nn) 
+                                  if(jnc+nmore-nmore2+nhalf-1.le.nn)
      *                                goto 555
                               endif
                           else
@@ -614,15 +617,15 @@ CDDD		CALL INTPR('>>> INTERCEPT ADJUSTMENT 1',-1,i,1)
               endif
           endif
           endif
-          
+
           do 156 jnc=1,nn
  156        residu(jnc)=abs(residu(jnc))
-          dist2=xrffindq(residu,nn,nhalf,index2)
+          dist2=rffindq(residu,nn,nhalf,index2)
  9555     do 400 step=1,kstep
             tottimes=tottimes+1
             do 155, j=1,nhalf
  155          temp(j)=index2(j)
-            call xrfishsort(temp,nhalf)
+            call rfishsort(temp,nhalf)
             do 157 j=1,nhalf
               if(.not.part.or.final) then
                 do 158 mm=1,nvad
@@ -653,49 +656,49 @@ CDDD		CALL INTPR('>>> INTERCEPT ADJUSTMENT 1',-1,i,1)
 
           more1=.false.
           more2=.false.
-          nmore=200 
+          nmore=200
           nmore2=nmore/2
-          
+
           if(intadjust.eq.1) then
 
 CDDD		CALL INTPR('>>> INTERCEPT ADJUSTMENT 2',-1,step,1)
           if(intercept.eq.1.and.((.not.fine.and.part).or.
      *      .not.part.or.((nn-nhalf).le.nmore))) then
-              call xrfshsort(aw,nn)
-              call xrfmcduni(aw,nn,nhalf,slutn,bstd,am,am2,
+              call rfshsort(aw,nn)
+              call rfmcduni(aw,nn,nhalf,slutn,bstd,am,am2,
      *            factor,nn-nhalf+1)
               a(nvar)=a(nvar)+slutn(1)
               do 179 jnc=1,nn
  179              residu(jnc)=residu(jnc)-slutn(1)
           else
               if(intercept.eq.1) then
-                  call xrfshsort(aw,nn)
+                  call rfshsort(aw,nn)
                   do 185 jj=1,nn
  185                  am2(jj)=abs(aw(jj))
-                  dist2=xrffindq(am2,nn,nhalf,index1)
+                  dist2=rffindq(am2,nn,nhalf,index1)
                   do 180, jj=1,nhalf
  180                  aw2(jj)=aw(index1(jj))
-                  dist2=xrffindq(aw2,nhalf,1,index2) 
+                  dist2=rffindq(aw2,nhalf,1,index2)
                   jnc=index1(index2(1))
                   if(jnc+nmore-nmore2+nhalf-1.gt.nn.or.jnc-nmore2.lt.1)
      *                then
-                      call xrfmcduni(aw,nn,nhalf,slutn,bstd,am,am2,
+                      call rfmcduni(aw,nn,nhalf,slutn,bstd,am,am2,
      *                    factor,nn-nhalf+1)
                       a(nvar)=a(nvar)+slutn(1)
                       do 168 jnc=1,nn
  168                      residu(jnc)=residu(jnc)-slutn(1)
                   else
  666                  do 181 jj=0,nhalf-1+nmore
- 181                      aw2(jj+1)=aw(jnc-nmore2+jj) 
+ 181                      aw2(jj+1)=aw(jnc-nmore2+jj)
                       nlen=nmore+1
-                      call xrfmcduni(aw2,nhalf+nmore,nhalf,slutn,bstd,
+                      call rfmcduni(aw2,nhalf+nmore,nhalf,slutn,bstd,
      *                     am,am2,factor,nlen)
                       if(nlen.eq.1.and..not.more1) then
                           if(.not.more2) then
                               nmore=nmore2
                               nmore2=nmore2+nmore2
                               more1=.true.
-                              if(jnc-nmore2.ge.1) goto 666 
+                              if(jnc-nmore2.ge.1) goto 666
                           endif
                       else
                           if(nlen.eq.(nmore+1).and..not.more2) then
@@ -703,20 +706,20 @@ CDDD		CALL INTPR('>>> INTERCEPT ADJUSTMENT 2',-1,step,1)
                                   nmore=nmore2
                                   nmore2=-nmore2
                                   more2=.true.
-                                  if(jnc+nmore-nmore2+nhalf-1.le.nn) 
-     *                                goto 666 
+                                  if(jnc+nmore-nmore2+nhalf-1.le.nn)
+     *                                goto 666
                               endif
                           else
                               if(nlen.eq.1.and.more1) then
                                   if(.not.more2) then
                                       nmore2=nmore2+100
-                                      if(jnc-nmore2.ge.1) goto 666 
+                                      if(jnc-nmore2.ge.1) goto 666
                                   endif
                               else
                                   if(nlen.eq.(nmore+1).and.more2) then
                                       if(.not.more1) then
                                           nmore2=nmore2+100
-                            if(jnc+nmore-nmore2+nhalf-1.le.nn) goto 666 
+                            if(jnc+nmore-nmore2+nhalf-1.le.nn) goto 666
                                       endif
                                   endif
                               endif
@@ -729,10 +732,10 @@ CDDD		CALL INTPR('>>> INTERCEPT ADJUSTMENT 2',-1,step,1)
               endif
           endif
           endif
-          
+
           do 177 jnc=1,nn
  177        residu(jnc)=abs(residu(jnc))
-            dist2=xrffindq(residu,nn,nhalf,index2)
+            dist2=rffindq(residu,nn,nhalf,index2)
             fckw=0.D0
             do 176 jnc=1,nhalf
  176          fckw=fckw+residu(jnc)**2
@@ -749,7 +752,7 @@ CDDD		CALL INTPR('>>> INTERCEPT ADJUSTMENT 2',-1,step,1)
               do 175 jjj=1,nhalf
                 inbest(jjj)=index2(jjj)
  175          continue
-              call xrfcovcopy(a,bmeans,nvar,1)
+              call rfcovcopy(a,bmeans,nvar,1)
             endif
  400      continue
 cc
@@ -761,7 +764,7 @@ cc
 cc            At the end of the algorithm, only the ten
 cc            best solutions need to be stored.
             endif
- 
+
           if( flag((iii-1)*10+1).eq.1) then
             lll=1
           else
@@ -834,9 +837,13 @@ cc
       endif
 cc
       goto 9999
- 9999 return
+
+ 9999 continue
+      call rndend
+C          ------ == PutRNGstate() in C
+      return
       end
-ccccc
+ccccc end {rfltsreg}
 ccccc
 
       subroutine rfstatis(x,xmed,xmad,aw,aw2,intercept,nvad,nvmax1,
@@ -906,15 +913,15 @@ cc
 cc
       double precision aa(n),aw(nmax)
       integer index2(nmax)
-      double precision xrffindq
+      double precision rffindq
       double precision rfamdan
 cc
       jndl=int(n/2.0)
       if(mod(n,2).eq.0) then
-        rfamdan=(xrffindq(aa,n,jndl,index2)+
-     *    xrffindq(aa,n,jndl+1,index2))/2.0
+        rfamdan=(rffindq(aa,n,jndl,index2)+
+     *    rffindq(aa,n,jndl+1,index2))/2.0
       else
-        rfamdan=xrffindq(aa,n,jndl+1,index2)
+        rfamdan=rffindq(aa,n,jndl+1,index2)
       endif
       return
       end
@@ -1166,8 +1173,8 @@ cc
           h(nvar,nvar)=h(nvar,nvar)+
      *      (dble(xmed(k))*dble(xmed(k)))*xmp2/
      *      (dble(xmad(k))*dble(xmad(k)))*h(k,nvad)
- 70      continue
-         do 80 k=1,nvar
+ 70     continue
+        do 80 k=1,nvar
            if(k.ne.nvar) then
              h(nvar,nvar)=h(nvar,nvar)-2.0D0*xmp2*dble(xmed(k))/
      *         (dble(xmad(k)))*h(k,nvar)
@@ -1175,18 +1182,18 @@ cc
              h(nvar,nvar)=h(nvar,nvar)-2.0D0*xmp2*dble(xmed(k))/
      *         (dble(xmad(k)))*h(nvar,nvad)
            endif
- 80      continue
-         do 90 j=1,nfac
+ 80     continue
+        do 90 j=1,nfac
            ju=j+1
            do 90 k=ju,nvar
              hnn=2.0D0*dble(xmed(j))*dble(xmed(k))*xmp2
              h(nvar,nvar)=h(nvar,nvar)+hnn/
      *         (dble(xmad(j))*dble(xmad(k)))*h(j,k)
- 90      continue
-         da(nvar)=dsqrt(h(nvar,nvar))
-       endif
-       return
-       end
+ 90     continue
+        da(nvar)=dsqrt(h(nvar,nvar))
+      endif
+      return
+      end
 ccccc
 ccccc
       subroutine rfequat(am,nvmax,nvmax1,hvec,nvm11,na,nb,nerr)
@@ -1201,426 +1208,102 @@ ccccc
       jmat=n+nb
       jnk=0
       do 10 j=1,jmat
-         jnk=(j-1)*nvmax
-         do 10 nc=1,nvmax
-            jnk=jnk+1
-            hvec(jnk)=am(nc,j)
+	 jnk=(j-1)*nvmax
+	 do 10 nc=1,nvmax
+	    jnk=jnk+1
+	    hvec(jnk)=am(nc,j)
  10   continue
 
       nznde=n-1
       lclpl=-jdm
       do 120 jhfd=1,n
-         turn=0.D0
-         lclpl=lclpl+jdm+1
-         jdel=lclpl+n-jhfd
-         do 40 jncb=lclpl,jdel
-         if(dabs(hvec(jncb))-dabs(turn)) 40,40,30
- 30         turn=hvec(jncb)
-            ldel=jncb
- 40      continue
-         if(dabs(turn).le.1D-8) goto 170
-         if(ldel-lclpl) 60,80,60
- 60         deter=-deter
-            ldel=ldel-jdm
-            jncb=lclpl-jdm
-            do 70 jncc=jhfd,jmat
-               ldel=ldel+jdm
-               jncb=jncb+jdm
-               swap=hvec(jncb)
-               hvec(jncb)=hvec(ldel)
- 70         hvec(ldel)=swap
- 80         deter=deter*turn
-         if(jhfd.eq.n) goto 120
-         turn=1./turn
-         jncb=lclpl+1
-         do 90 jncc=jncb,jdel
- 90         hvec(jncc)=hvec(jncc)*turn
-         jncd=lclpl
-         jrow=jhfd+1
-         do 110 jncb=jrow,n
-            jncd=jncd+1
-            jnce=lclpl
-            jncf=jncd
-            do 100 jncc=jrow,jmat
-               jnce=jnce+jdm
-               jncf=jncf+jdm
- 100        hvec(jncf)=hvec(jncf)-hvec(jnce)*hvec(jncd)
- 110     continue
+	 turn=0.D0
+	 lclpl=lclpl+jdm+1
+	 jdel=lclpl+n-jhfd
+	 do 40 jncb=lclpl,jdel
+	 if(dabs(hvec(jncb))-dabs(turn)) 40,40,30
+ 30	    turn=hvec(jncb)
+	    ldel=jncb
+ 40	 continue
+	 if(dabs(turn).le.1D-8) then
+	    nerr=-1
+	    goto 180
+	 endif
+	 if(ldel-lclpl) 60,80,60
+ 60	    deter=-deter
+	    ldel=ldel-jdm
+	    jncb=lclpl-jdm
+	    do 70 jncc=jhfd,jmat
+	       ldel=ldel+jdm
+	       jncb=jncb+jdm
+	       swap=hvec(jncb)
+	       hvec(jncb)=hvec(ldel)
+ 70	    hvec(ldel)=swap
+ 80	    deter=deter*turn
+	 if(jhfd.eq.n) goto 120
+	 turn=1./turn
+	 jncb=lclpl+1
+	 do 90 jncc=jncb,jdel
+ 90	    hvec(jncc)=hvec(jncc)*turn
+	 jncd=lclpl
+	 jrow=jhfd+1
+	 do 110 jncb=jrow,n
+	    jncd=jncd+1
+	    jnce=lclpl
+	    jncf=jncd
+	    do 100 jncc=jrow,jmat
+	       jnce=jnce+jdm
+	       jncf=jncf+jdm
+ 100	    hvec(jncf)=hvec(jncf)-hvec(jnce)*hvec(jncd)
+ 110	 continue
  120  continue
-      
+
       nerr=0
       neqa=n+1
       jbegx=nznde*jdm+1
       do 150 jnc=neqa,jmat
-      jbegx=jbegx+jdm
-      jendx=jbegx+n
-      jbegc=n*jdm+1
-      jendc=jbegc+nznde
-      do 140 jncb=1,nznde
-      jendx=jendx-1
-      jbegc=jbegc-jdm
-      jendc=jendc-jdm-1
-      hvec(jendx)=hvec(jendx)/hvec(jendc+1)
-      swap=hvec(jendx)
-      jncd=jbegx-1
-      do 130 jncc=jbegc,jendc
-      jncd=jncd+1
- 130  hvec(jncd)=hvec(jncd)-hvec(jncc)*swap
- 140  continue
-      hvec(jbegx)=hvec(jbegx)/hvec(1)
+	 jbegx=jbegx+jdm
+	 jendx=jbegx+n
+	 jbegc=n*jdm+1
+	 jendc=jbegc+nznde
+	 do 140 jncb=1,nznde
+	    jendx=jendx-1
+	    jbegc=jbegc-jdm
+	    jendc=jendc-jdm-1
+	    hvec(jendx)=hvec(jendx)/hvec(jendc+1)
+	    swap=hvec(jendx)
+	    jncd=jbegx-1
+	    do 130 jncc=jbegc,jendc
+	       jncd=jncd+1
+	       hvec(jncd)=hvec(jncd)-hvec(jncc)*swap
+ 130	    continue
+ 140	 continue
+	 hvec(jbegx)=hvec(jbegx)/hvec(1)
  150  continue
       jnc=-jdm
       jbegx=nznde*jdm+1
       jendx=jbegx+nznde
       do 160 jncb=neqa,jmat
-      jbegx=jbegx+jdm
-      jendx=jendx+jdm
-      jnc=jnc+jdm
-      jncd=jnc
-      do 160 jncc=jbegx,jendx
-      jncd=jncd+1
- 160  hvec(jncd)=hvec(jncc)
-      goto 180
- 170  nerr=-1
+	 jbegx=jbegx+jdm
+	 jendx=jendx+jdm
+	 jnc=jnc+jdm
+	 jncd=jnc
+	 do 165 jncc=jbegx,jendx
+	    jncd=jncd+1
+	    hvec(jncd)=hvec(jncc)
+ 165	 continue
+ 160  continue
+
  180  jnk=0
       do 190 j=1,jmat
-      do 190 nc=1,nvmax
-      jnk=jnk+1
-      am(nc,j)=hvec(jnk)
+	 do 190 nc=1,nvmax
+	    jnk=jnk+1
+	    am(nc,j)=hvec(jnk)
  190  continue
       return
       end
 ccccc
-C--VT-- The following functions were added
-ccccc
-ccccc
-      function xreplow(k)
-cc
-cc    Find out which combinations of n and p are
-cc    small enough in order to perform exaustive search
-cc    Returns the maximal n for a given p, for which
-cc    exhaustive search is to be done
-cc    
-cc    k is the number of variables (p)
-cc
-      integer xreplow, k
-      integer irep(6)
-      data irep/500,50,22,17,15,14/
+C--     VT-- The following functions were added
+C--
+C--  MM: moved to ./rf-common.f - since they are used from ./rffastmcd.f too
 
-      iret=0
-      if(k.le.6) iret = irep(k)
-
-      xreplow = iret
-      return
-      end 
-ccccc
-ccccc
-      function xrfncomb(k,n)
-cc
-cc  Computes the number of combinations of k out of n.
-cc  (To avoid integer overflow during the computation,
-cc  ratios of reals are multiplied sequentially.)
-cc  For comb > 1E+009 the resulting 'comb' may be too large
-cc  to be put in the integer 'ncomb', but the main program
-cc  only calls this function for small enough n and k.
-cc
-      integer xrfncomb,k,n
-      double precision comb,fact
-cc
-      comb=dble(1.0)
-      do 10 j=1,k
-      fact=(dble(n-j+1.0))/(dble(k-j+1.0))
-      comb=comb*fact
- 10   continue
-      xrfncomb=int(comb+0.5D0)
-
-      return
-      end
-ccccc
-ccccc
-	subroutine xrfrangen(n,nsel,index,seed)
-cc
-cc    Randomly draws nsel cases out of n cases.
-cc    Here, index is the index set.
-cc
-	integer seed
-	integer index(nsel)
-	real uniran
-cc
-	do 100 i=1,nsel
- 10       num=int(uniran(seed)*n)+1
-	  if(i.gt.1) then
-	    do 50 j=1,i-1
-	      if(index(j).eq.num) goto 10
- 50         continue
-	  endif
-	  index(i)=num
- 100    continue
-	return
-	end
-ccccc
-ccccc
-	function uniran(seed)
-cc
-cc  Draws a random number from the uniform distribution on [0,1].
-cc
-	real uniran
-	integer seed
-	integer quot
-cc
-	seed=seed*5761+999
-	quot=seed/65536
-	seed=seed-quot*65536
-	uniran=float(seed)/65536.D0
-	return
-	end
-ccccc
-ccccc
-	subroutine xrfshsort(a,n)
-cc
-cc  Sorts the array a of length n.
-cc
-	double precision a(n)
-	double precision t
-	integer gap
-cc
-	gap=n
- 100    gap=gap/2
-	if(gap.eq.0) goto 200
-	do 180 i=1,n-gap
-	  j=i
- 120      if(j.lt.1) goto 180
-	  nextj=j+gap
-	  if(a(j).gt.a(nextj)) then
-	    t=a(j)
-	    a(j)=a(nextj)
-	    a(nextj)=t
-	  else
-	    j=0
-	  endif
-	  j=j-gap
-	  goto 120
- 180    continue
-	goto 100
- 200    return
-	end
-ccccc
-ccccc
-	subroutine xrfishsort(a,kk)
-cc
-cc  Sorts the integer array a of length kk.
-cc
-	integer a(kk)
-	integer t
-	integer gap
-cc
-	gap=kk
- 100    gap=gap/2
-	if(gap.eq.0) goto 200
-	do 180 i=1,kk-gap
-	  j=i
- 120      if(j.lt.1) goto 180
-	  nextj=j+gap
-	  if(a(j).gt.a(nextj)) then
-	    t=a(j)
-	    a(j)=a(nextj)
-	    a(nextj)=t
-	  else
-	    j=0
-	  endif
-	  j=j-gap
-	  goto 120
- 180    continue
-	goto 100
- 200    return
-	end
-ccccc
-ccccc
-	subroutine xrfcovcopy(a,b,n1,n2)
-cc
-cc  Copies matrix a to matrix b.
-cc
-	double precision a(n1,n2)
-	double precision b(n1,n2)
-cc
-	do 100 i=1,n1
-	  do 90 j=1,n2
-	    b(i,j)=a(i,j)
- 90       continue
- 100    continue
-	return
-	end
-ccccc
-ccccc
-	subroutine xrfgenpn(n,nsel,index)
-cc
-cc    Constructs all subsets of nsel cases out of n cases.
-cc
-	integer index(nsel)
-cc
-	k=nsel
-	index(k)=index(k)+1
- 10     if(k.eq.1.or.index(k).le.(n-(nsel-k))) goto 100
-	k=k-1
-	index(k)=index(k)+1
-	do 50 i=k+1,nsel
-	  index(i)=index(i-1)+1
- 50     continue
-	goto 10
- 100    return
-	end
-ccccc
-ccccc
-	function xrffindq(aw,ncas,k,index)
-cc
-cc  Finds the k-th order statistic of the array aw of length ncas.
-cc
-	double precision xrffindq
-	double precision aw(ncas)
-	double precision ax,wa
-	integer index(ncas)
-cc
-	do 10 j=1,ncas
-	  index(j)=j
- 10     continue
-	l=1
-	lr=ncas
- 20     if(l.ge.lr) goto 90
-	ax=aw(k)
-	jnc=l
-	j=lr
- 30     if(jnc.gt.j) goto 80
- 40     if(aw(jnc).ge.ax) goto 50
-	jnc=jnc+1
-	goto 40
- 50     if(aw(j).le.ax) goto 60
-	j=j-1
-	goto 50
- 60     if(jnc.gt.j) goto 70
-	i=index(jnc)
-	index(jnc)=index(j)
-	index(j)=i
-	wa=aw(jnc)
-	aw(jnc)=aw(j)
-	aw(j)=wa
-	jnc=jnc+1
-	j=j-1
- 70     goto 30
- 80     if(j.lt.k) l=jnc
-	if(k.lt.jnc) lr=j
-	goto 20
- 90     xrffindq=aw(k)
-	return
-	end
-ccccc
-ccccc
-	subroutine xrfrdraw(a,n,seed,ntot,mini,ngroup,kmini)
-cc
-cc  Draws ngroup nonoverlapping subdatasets out of a dataset of size n,
-cc  such that the selected case numbers are uniformly distributed from 1 to n.
-cc
-	integer a(2,ntot)
-	integer mini(kmini)
-	integer seed
-cc
-	jndex=0
-	do 10 k=1,ngroup
-	  do 20 m=1,mini(k)
-	    nrand=int(uniran(seed)*(n-jndex))+1 
-	    jndex=jndex+1
-	    if(jndex.eq.1) then
-	      a(1,jndex)=nrand
-	      a(2,jndex)=k
-	    else
-		a(1,jndex)=nrand+jndex-1
-		a(2,jndex)=k
-		do 5,i=1,jndex-1
-		  if(a(1,i).gt.nrand+i-1) then
-		    do 6, j=jndex,i+1,-1
-		      a(1,j)=a(1,j-1)
-		      a(2,j)=a(2,j-1)
- 6                  continue
-		    a(1,i)=nrand+i-1
-		    a(2,i)=k
-		    goto 20
-		  endif
- 5              continue
-	    endif
- 20       continue
- 10     continue
-	return
-	end
-ccccc
-ccccc
-	function xrfodd(n)
-cc
-	logical xrfodd
-cc
-	xrfodd=.true.
-	if(2*(n/2).eq.n) xrfodd=.false.
-	return
-	end
-ccccc
-ccccc
-	function xrfnbreak(nhalf,n,nvar)
-	integer xrfnbreak
-cc
-cc  Computes the breakdown value of the MCD estimator 
-cc
-	if (nhalf.lt.(n+nvar+1)/2) then
-	  xrfnbreak=(nhalf-nvar+1)*100/n
-	else
-	  xrfnbreak=(n-nhalf+1)*100/n
-	endif
-	return
-	end
-ccccc
-ccccc
-        subroutine xrfmcduni(w,ncas,jqu,slutn,bstd,aw,aw2,factor,len)
-cc
-cc  mcduni : calculates the MCD in the univariate case.
-cc           w contains the ordered observations 
-cc
-       implicit double precision (a-h,o-z), integer(i-n)
-       double precision w(ncas),aw(ncas),aw2(ncas)
-       double precision slutn(len)
-cc
-       sq=0.D0
-       sqmin=0.D0
-       ndup=1
-       do 5 j=1,ncas-jqu+1
- 5       slutn(j)=0.D0
-       do 20 jint=1,ncas-jqu+1
-       aw(jint)=0.D0
-       do 10 j=1,jqu
-       aw(jint)=aw(jint)+w(j+jint-1)
-       if (jint.eq.1) sq=sq+w(j)*w(j)
- 10    continue 
-       aw2(jint)=aw(jint)*aw(jint)/jqu
-       if (jint.eq.1) then 
-	 sq=sq-aw2(jint)
-         sqmin=sq
-	 slutn(ndup)=aw(jint)
-         len=jint
-		      else 
-         sq=sq-w(jint-1)*w(jint-1)+
-     *        w(jint+jqu-1)*w(jint+jqu-1)
-     *        -aw2(jint) + aw2(jint-1)
-         if(sq.lt.sqmin) then
-           ndup=1
-           sqmin=sq
-           slutn(ndup)=aw(jint)
-           len=jint
-         else
-           if(sq.eq.sqmin) then
-             ndup=ndup+1
-             slutn(ndup)=aw(jint) 
-           endif
-         endif
-       endif 
- 20    continue 
-       slutn(1)=slutn(int((ndup+1)/2))/jqu
-       bstd=factor*sqrt(sqmin/jqu)
-       return 
-       end 
-ccccc

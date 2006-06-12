@@ -36,15 +36,7 @@ o tolellipse() --> renamed to tolEllipsePlot()
      - allow other percentiles than just  97.5%
      - maybe *return* something
 
-o covMcd() : 'print.it' should be called 'trace';
-	   but all the if(!print.it) cat(..) statements are *wrong* :
-	   computation should *Not* print anything for trace = FALSE
-	   {unless warnings and errors} !
-
-o summary.mcd() should *return* an object of class "summary.mcd"
-  and then  print.summary.mcd() should print it !
-
-o plot(mcd. ) : should show the call
+o plot(mcd. ) [ R/covPlot.R ] : should show the call
 
 o ltsReg():  has  undocumented '$resid'
 	     in addition to '$residuals' and '$raw.residuals';
@@ -55,6 +47,8 @@ o ltsReg():  has  undocumented '$resid'
 o glmrob(*, weights.on.x = "robCov")  currently uses  MASS::cov.rob(), i.e.
   "MVE" and Andreas had a comment that "mcd" is worse.
   But still, I (MM) strongly believe we should use  covMcd() instead.
+  HOWEVER: Need something better when 'X' has (binary!) factors!
+  "hat" +- works, but needs more work
 
 o Maybe  we should consider  'family = gaussian'  {analogy to glm()}
   as a possible setting, and just divert to  lmrob() in that case
@@ -105,17 +99,12 @@ o Add data sets from the MMY-book  -- try to use the same variable names as
 
 o more tests in	tests/
 
-o R/lmrob*.R : seems like a simple ``dump''
-	   (maybe via package.skeleton() ?)
-	   ==> has almost NO comment in the R code
-
-  Possibly change default to  'compute.rd = FALSE' !?!
+o fully implement and test the multivariate case (y = matrix with > 1 col.)
 
 o src/lmrob.c :
 
    Things to fix:
 
-   - calls  C's  rand() instead of R builtin random number generators
    - does many many vector and vector-matrix things itself
      instead of using BLAS and LAPACK
    - does median() , MAD() instead of using R's  sort() routines

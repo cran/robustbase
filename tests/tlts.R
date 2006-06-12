@@ -231,6 +231,8 @@ pad.right <- function(z, pads)
     paste(z, padding, sep = "")
 }
 
+set.seed(101) # <<-- sub-sampling algorithm now based on R's RNG and seed
+
 dodata()
 test_rsquared()
 test_location()

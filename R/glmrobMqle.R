@@ -33,7 +33,7 @@ glmrobMqle <-
     w.x <- if(ncoef) {
 	switch(weights.on.x,
 	       "none" = rep.int(1, nobs),
-	       "Hii" = wts_HiiDist(X = X),
+	       "hat" = wts_HiiDist(X = X),
 	       "robCov" = wts_RobDist(X, intercept, covFun = MASS::cov.rob),
                                         # ARu said  'method="mcd" was worse'
 	       "covMcd" = wts_RobDist(X, intercept, covFun = covMcd),
@@ -198,9 +198,10 @@ glmrobMqle <-
 }
 
 
+## FIXME: test usage:
 wts_HiiDist <- function(X) {
     x <- qr(X)
-    Hii <- colSums(qr.qy(x, diag(1, nrow = NROW(y), ncol = x$rank))^2)
+    Hii <- colSums(qr.qy(x, diag(1, nrow = NROW(X), ncol = x$rank))^2)
     sqrt(1-Hii)
 }
 

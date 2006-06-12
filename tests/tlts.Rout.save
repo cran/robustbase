@@ -1,6 +1,6 @@
 
 R : Copyright 2006, The R Foundation for Statistical Computing
-Version 2.2.1 Patched (2006-02-23 r37423)
+Version 2.3.1 RC (2006-05-30 r38234)
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -249,6 +249,8 @@ Loading required package: MASS
 +     paste(z, padding, sep = "")
 + }
 > 
+> set.seed(101) # <<-- sub-sampling algorithm now based on R's RNG and seed
+> 
 > dodata()
 
 Call:  dodata() 
@@ -397,9 +399,9 @@ Multiple R-Squared: 0.975,	Adjusted R-squared: 0.9692
 F-statistic:   169 on 3 and 13 DF,  p-value: 1.159e-10 
 
 --------------------------------------------------------
-coleman               20   5  13     0.019426
+coleman               20   5  13     0.028344
 Best subsample: 
- [1]  2  5  6  7  8  9 11 13 14 15 16 19 20
+ [1]  1  2  6  7  8  9 11 13 14 15 16 19 20
 Outliers:  2 
 [1]  3 18
 -------------
@@ -709,5 +711,5 @@ Scale estimate 19.34
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  1.25 0.1 2.25 0 0 
+Time elapsed:  2.42 0.195 3.468 0 0 
 > 

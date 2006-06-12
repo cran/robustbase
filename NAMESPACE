@@ -49,6 +49,7 @@ S3method(ltsReg, formula)
 ## Register all the methods for S3 generics elsewhere
 ## in case namespace is loaded but not currently attached.
 
+S3method(anova, lmrob)
 S3method(anova, glmrob)
 
 S3method(fitted, nlrob)

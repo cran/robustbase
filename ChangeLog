@@ -1,9 +1,101 @@
+2006-06-08  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/lmrob.c (refine_fast_s): made sure 'conv *is* called as *Rboolean
+
+2006-06-07  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/lmrob.c (refine_fast_s): print warning in case of non-convergence
+
+	* DESCRIPTION (Version): 0.2-1 - pre-release
+
+	* R/lmrob.MM.R (lmrob.control): decrease refine.tol "back" to 1e-7
+	* man/lmrob.control.Rd:  dito
+	* src/lmrob.c (rho_biwgt): fix embarassing sign typo/thinko
+
+2006-06-06  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.2-0 "pre-released" to Andreas & Matias
+	* src/lmrob.c (rwls): return *max_it = #{iterations used}
+	* R/lmrob.MM.R (lmrob.MM): return #{iterations} back to R level
+	* R/lmrob.R (summary.lmrob): and make sure they are printed.
+
+2006-06-05  Andreas Ruckstuhl  <rks@zhwin.ch>
+
+	* R/anova.lmrob.R (anova.lmrob): new, for model comparison
+	  both "Wald" and "Deviance" tests.
+	* man/anova.lmrob.Rd: docu + example
+
+2006-05-31  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/covMcd.R (covMcd): use R' RNG
+	* R/covMcd.R (print.summary.mcd): is new; also print.mvd and
+		summary.* are now here, and improved.
+
+	* src/rfltsreg.f (rfltsreg): use R's RNG
+	* src/rffastmcd.f (rffastmcd): dito
+
+	* src/rf-common.f (rfrangen): use unifrnd(), and comment out
+		the previous uniran()
+
+	* src/R-rng4ftn.c: use R's RNGs also for Fortran, in
+
+2006-05-29  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/lmrob.c: use R's unif_rand() instead of C's rand()
+	* R/lmrob.MM.R: set/save R's .Random.seed, possible from 'seed'
+
+2006-05-29  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION: version 0.1-7; the last one with C's rand()
+	* R/lmrob.MM.R: it's "$seed" from init.S , not M(M)-estimate
+
+2006-04-25  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/biweight-funs.R (lmrob.Psi): unification, rescaling, such that Psi'(0) = 1
+
+2006-04-22  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/lmrob.MM.R (lmrob.S): new (control) option 'best.r.s = 2';
+		was hardcoded in C
+	* src/lmrob.c (R_lmrob_S): 'best_r' is now argument; further,
+		seed_rand is passed to the fast_s*() sub functions, so we
+		can call them from R {and decide ourselves "if fast".
+
+	* src/rf-common.f: new file for functions identical
+	in rffastcmd.f and rfltsreg.f.
+
+2006-04-21  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* data/NOxEmissions.Rd: add the large dataset from René Locher
+	* man/NOxEmissions.Rd:
+
+2006-04-21  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/lmrob.MM.R (lmrob.MM): return robustness weights as 'wt'
+
+2006-04-18  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/lmrob.MM.R (lmrob.control): change default for 'compute.rd'
+	to FALSE ==> robust (Mahalanobis) distances are *not* computed by
+	default.  This prevents singularity errors which happen frequently
+	as soon as X contains (large) factors (with few levels).
+
+2006-04-15  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* man/pension.Rd: add plots and simple 1st aid trafo (!)
+
+	* R/glmrobMqle.R (glmrobMqle): weights.on.x = "hat" couldn't have
+	worked(!) - still needs work __TODO__
+
+	* R/lmrob.MM.R (lmrob.S, lmrob.MM): simplified computations
+	achieving ~ 10% faster execution for a (n,p) = (500,20) example.
+
 2006-04-01  Martin Maechler  <maechler@stat.math.ethz.ch>
 
-	* src/lmrob.c:   new lmrob() code from Matias' roblm package
-	* R/lmrob.*.R:   renamed s/roblm/lmrob/  but also refactored
+	* src/lmrob.c:	 new lmrob() code from Matias' roblm package
+	* R/lmrob.*.R:	 renamed s/roblm/lmrob/	 but also refactored
 	* man/lmrob.*.Rd: and added a bit
-	* TODO:  section on lmrob()
+	* TODO:	 section on lmrob()
 
 2006-03-20  Martin Maechler  <maechler@stat.math.ethz.ch>
 

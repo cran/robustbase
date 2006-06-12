@@ -10,7 +10,8 @@
      Determinant) estimator.
 }
 \usage{
-covMcd(x, cor=FALSE, alpha=1/2, nsamp=500, seed=0, print.it=FALSE, use.correction=TRUE, control)
+covMcd(x, cor = FALSE, alpha = 1/2, nsamp = 500, seed = NULL,
+       trace = FALSE, use.correction = TRUE, control)
 }
 \arguments{
   \item{x}{a matrix or data frame. }
@@ -22,15 +23,16 @@ covMcd(x, cor=FALSE, alpha=1/2, nsamp=500, seed=0, print.it=FALSE, use.correctio
     are between 0.5 and 1 and the default is 0.5.}
   \item{nsamp}{ number of subsets used for initial estimates or \code{"best"}
     or \code{"exact"}.  Default is \code{nsamp = 500}.  For
-    \code{nsamp="best"} exhaustive enumeration is done, as long as the
+    \code{nsamp = "best"} exhaustive enumeration is done, as long as the
     number of trials does not exceed 5000. For \code{"exact"},
     exhaustive enumeration will be attempted however many samples are
     needed.  In this case a warning message will be displayed saying
     that the computation can take a very long time.}
-  \item{seed}{starting value for random generator. Default is \code{seed = 0}}
-  %% MM (FIXME): change this to 'trace'  (as in other S functions):
-  \item{print.it}{whether to print intermediate results. Default is \code{print.it = FALSE}}
-  \item{use.correction}{ whether to use finite sample correction factors. Default is \code{use.correction=TRUE}}
+  \item{seed}{initial seed for random generator, see \code{\link{rrcov.control}}.}
+  \item{trace}{logical indicating if intermediate results should be
+    printed; defaults to \code{FALSE}.}
+  \item{use.correction}{ whether to use finite sample correction
+    factors; defaults to \code{TRUE}.}
   \item{control}{ a list with estimation options - same as these provided in the
     fucntion specification. If the control object is supplied, the parameters from it
     will be used. If parameters are passed also in the invocation statement, they will
@@ -52,7 +54,7 @@ covMcd(x, cor=FALSE, alpha=1/2, nsamp=500, seed=0, print.it=FALSE, use.correctio
   The rescaling factors for the reweighted estimates are returned in the
   vector \code{cnp2} of length 2. Details for the computation of the finite
   sample correction factors can be found in Pison et al. (2002).
-  The finite sample corrections can be suppressed by setting \code{use.correction=FALSE}.
+  The finite sample corrections can be suppressed by setting \code{use.correction = FALSE}.
   The implementation in rrcov uses the Fast MCD algorithm of Rousseeuw and Van Driessen (1999)
   to approximate the minimum covariance determinant estimator.
 }

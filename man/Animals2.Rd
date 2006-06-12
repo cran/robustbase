@@ -55,7 +55,7 @@ plotbb <- function(bbdat) {
 }
 plotbb(bbdat = Animals2)
 
-## The `same' plot for Rouseeuw's subset:
+## The `same' plot for Rousseeuw's subset:
 data(Animals, package = "MASS")
 brain <- Animals[c(1:24, 26:25, 27:28),]
 plotbb(bbdat = brain)

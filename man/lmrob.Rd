@@ -55,18 +55,20 @@ lmrob(formula, data, subset, weights, na.action,
     instead of via \code{control}.}
 }
 \details{
-  This function computes and MM-regression estimator
+  This function computes an MM-regression estimator
   as described in Yohai (1987).  It uses a bi-square re-desceding
   score function, and by default it returns a highly
   robust and highly efficient estimator (with
   50\% breakdown point and 95\% asymptotic efficiency
-  for normal errors).
+  for normal errors).  The computation is carried out by a call to
+  \code{\link{lmrob.MM}()}.
 
   It uses an S-estimator (Rousseeuw
   and Yohai, 1984) for the errors which
   is also computed with a bi-square score function.
   The S-estimator is computed using the
-  Fast-S algorithm of Salibian-Barrera and Yohai (2006).
+  Fast-S algorithm of Salibian-Barrera and Yohai (2006), calling the
+  function \code{\link{lmrob.S}}.
 
   Standard errors are computed using the
   formulas of Croux, Dhaene and Hoorelbeke (2003).
@@ -74,12 +76,13 @@ lmrob(formula, data, subset, weights, na.action,
 \value{
   An object of class \code{lmrob}. A list that includes the
   following components:
-  \item{coef}{The MM-regression estimator}
-  \item{scale}{The S-scale estimator}
-  \item{s}{The auxiliary S-regression estimator}
+  \item{coefficients}{The MM-estimator of the coefficient vector}
+  \item{initial.coefficients}{the S-estimator}
+  \item{scale}{The scale as returned by S-estimator and used in the M one.}
   \item{cov}{The estimated covariance matrix of the regression coefficients}
   \item{residuals}{Residuals associated with the MM-estimator}
   \item{fitted.values}{Fitted values associated with the MM-estimator}
+  \item{weights}{the \dQuote{robustness weights} \eqn{\psi(r_i/S) / (r_i/S)}.}
   \item{converged}{\code{TRUE} if the IRWLS iterations have converged}
 }
 \references{
@@ -105,7 +108,9 @@ lmrob(formula, data, subset, weights, na.action,
 }
 \author{ Matias Salibian-Barrera }
 \seealso{
-  \code{\link{lmrob.control}}, and for methods,
+  \code{\link{lmrob.control}};
+  for the algorithms \code{\link{lmrob.S}} and \code{\link{lmrob.MM}};
+  and for methods,
   \code{\link{summary.lmrob}},
   \code{\link{print.lmrob}}, and \code{\link{plot.lmrob}}.
 }
@@ -124,4 +129,3 @@ abline(RlmST, col = "blue")
 }
 \keyword{robust}
 \keyword{regression}
-

@@ -11,7 +11,7 @@ dodata <- function(nrep = 1, time = FALSE, short = FALSE, full = TRUE,
     ##  - objective fucntion
     ##  - best subsample found (if short == false)
     ##  - outliers identified (with cutoff 0.975) (if short == false)
-    ##  - estimated center and covarinance matrix if full == TRUE)
+    ##  - estimated center and covariance matrix if full == TRUE)
     ##
     ##@edescr
     ##
@@ -33,7 +33,7 @@ dodata <- function(nrep = 1, time = FALSE, short = FALSE, full = TRUE,
             quan <- as.integer(floor((n + p + 1)/2)) #default: floor((n+p+1)/2)
         }
         else {
-            mcd <- covMcd(x, print.it = FALSE)
+            mcd <- covMcd(x) # trace = FALSE
             quan <- as.integer(mcd$quan)
         }
 
@@ -206,6 +206,7 @@ pad.right <- function(z, pads)
 
 
 ## -- now do it:
+set.seed(101) # <<-- sub-sampling algorithm now based on R's RNG and seed
 dodata()
 
 cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
