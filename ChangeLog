@@ -1,3 +1,9 @@
+2006-06-13  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.2-2
+
+	* src/Makevars (PKG_LIBS): need this (in particular for Windows)
+
 2006-06-08  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* src/lmrob.c (refine_fast_s): made sure 'conv *is* called as *Rboolean

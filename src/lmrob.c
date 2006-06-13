@@ -150,7 +150,7 @@ void sum_vec(double *a, double *b, double *c, int n);
 /* This assumes that 'p' is correctly defined, and 'j' can be used in caller: */
 #define COPY_beta(BETA_FROM, BETA_TO) \
   for(j=0; j < p; j++) BETA_TO[j] = BETA_FROM[j];
-/* In theory BLAS should be fast, but this is slightly slower,
+/* In theory BLAS should be fast, but this seems slightly slower,
  * particularly for non-optimized BLAS :*/
 /* static int one = 1; */
 /* #define COPY_beta(BETA_FROM, BETA_TO) \ */

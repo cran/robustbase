@@ -1,0 +1,65 @@
+
+> checkUsagePackage("robustbase", all=TRUE, suppressParamAssigns=TRUE)
+
+anovaGlmrobPair: local variable quasiDev used as function with no apparent local function definition
+chgDefaults: parameter object may not be used
+covOGK: local variable n assigned but may not be used
+covPlot : myddplot: local variable n assigned but may not be used
+.fastlts: no visible global function definition for .ncomb
+.fastlts: local variable c used as function with no apparent local function definition
+glmrob: no visible global function definition for glmrobCubif
+glmrob: parameter na.action may not be used
+glmrob: parameter subset may not be used
+glmrobMqle : valideta: parameter eta may not be used
+glmrobMqle : validmu: parameter mu may not be used
+glmrobMqle: no visible binding for global variable residP
+glmrobMqle: no visible binding for global variable sV
+glmrobMqle: no visible binding for global variable dmu.deta
+glmrobMqle: no visible binding for global variable sV
+glmrobMqle: no visible binding for global variable dmu.deta
+glmrobMqle: no visible binding for global variable sV
+glmrobMqle: no visible binding for global variable dmu.deta
+glmrobMqle: no visible binding for global variable Vmu
+glmrobMqle: no visible binding for global variable dmu.deta
+glmrobMqle: no visible binding for global variable sV
+glmrobMqle: no visible binding for global variable dmu.deta
+glmrobMqle: no visible binding for global variable residP
+glmrobMqle: no visible binding for global variable residP
+glmrobMqle: no visible binding for global variable residP
+glmrobMqle: local variable Epsi.init assigned but may not be used
+glmrobMqle: local variable linkinv used as function with no apparent local function definition
+glmrobMqle: local variable mu.eta assigned but may not be used
+glmrobMqle: local variable pbinom assigned but may not be used
+glmrobMqle: local variable xnames assigned but may not be used
+glmrobMqle: local variable ynames assigned but may not be used
+glmrobMqleDiffQuasiDevPois : f.cnui: parameter ni may not be used
+huberM: local variable wsum used as function with no apparent local function definition
+lmrob: parameter data may not be used
+lmrob: parameter formula may not be used
+lmrob: parameter na.action may not be used
+lmrob: parameter subset may not be used
+lmrob: parameter weights may not be used
+ltsPlot : rdiag: local variable xlim assigned but may not be used
+ltsReg: parameter x may not be used
+ltsReg.formula: parameter data may not be used
+ltsReg.formula: parameter formula may not be used
+.onLoad: parameter libname may not be used
+.onLoad: parameter pkgname may not be used
+plot.lmrob: local variable n assigned but may not be used
+plot.lmrob: parameter panel may not be used
+print.lmrob: local variable cf assigned but may not be used
+psiFunc: local variable ff assigned but may not be used
+summary.lmrob: local variable n assigned but may not be used
+summary.nlrob: local variable nlsSum assigned but may not be used
+tolEllipsePlot: local variable md assigned but may not be used
+wts_HiiDist: no visible binding for global variable y
+There were 50 or more warnings (use warnings() to see the first 50)
+
+> robustbase:::wts_HiiDist
+function (X)
+{
+    x <- qr(X)
+    Hii <- colSums(qr.qy(x, diag(1, nrow = NROW(y), ncol = x$rank))^2)
+    sqrt(1 - Hii)
+}
+<environment: namespace:robustbase>
