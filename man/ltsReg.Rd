@@ -6,13 +6,15 @@
 \title{Least Trimmed Squares Robust (High Breakdown) Regression}
 \concept{High breakdown point}
 \description{
-  Carries out least trimmed squares (LTS) regression.
+  Carries out least trimmed squares (LTS) robust (high breakdown point)
+  regression.
 }
 \usage{
 ltsReg(x, \dots)
 
-\method{ltsReg}{formula}(formula, data, \dots,
-       model = TRUE, x.ret = FALSE, y.ret = FALSE)
+\method{ltsReg}{formula}(formula, data, subset, weights, na.action,
+       model = TRUE, x.ret = FALSE, y.ret = FALSE,
+       contrasts = NULL, offset, \dots)
 
 \method{ltsReg}{default}(x, y, intercept = TRUE, alpha = 1/2, nsamp = 500,
        adjust = FALSE, mcd = TRUE, qr.out = FALSE, yname = NULL,
@@ -22,9 +24,31 @@ ltsReg(x, \dots)
   \item{formula}{a \code{\link{formula}} of the form \code{y ~ x1 + x2 + ...}.}
   \item{data}{data frame from which variables specified in
     \code{formula} are to be taken.}
+  \item{subset}{an optional vector specifying a subset of observations
+    to be used in the fitting process.}
+  \item{weights}{an optional vector of weights to be used
+    in the fitting process. \bold{NO USED YET}.
+    %%% If specified, weighted least squares is used
+    %%% with weights \code{weights} (that is, minimizing \code{sum(w*e^2)});
+    %%% otherwise ordinary least squares is used.
+    }
+  \item{na.action}{a function which indicates what should happen
+    when the data contain \code{NA}s.  The default is set by
+    the \code{na.action} setting of \code{\link{options}}, and is
+    \code{\link{na.fail}} if that is unset.  The \dQuote{factory-fresh}
+    default is \code{\link{na.omit}}.  Another possible value is
+    \code{NULL}, no action.  Value \code{\link{na.exclude}} can be useful.}
+
   \item{model, x.ret, y.ret}{\code{\link{logical}}s indicating if the
     model frame, the model matrix and the response are to be returned,
     respectively.}
+
+  \item{contrasts}{an optional list.  See the \code{contrasts.arg}
+    of \code{\link{model.matrix.default}}.}
+  \item{offset}{this can be used to specify an \emph{a priori}
+    known component to be included in the linear predictor
+    during fitting.  An \code{\link{offset}} term can be included in the
+    formula instead or as well, and if both are specified their sum is used.}
 
   \item{x}{a matrix or data frame containing the explanatory variables.}
   \item{y}{the response: a vector of length the number of rows of \code{x}.}.
@@ -152,6 +176,11 @@ ltsReg(x, \dots)
 }
 
 \seealso{
+  \code{\link{lmrob.S}()} provides a fast S estimator with similar
+  breakdown point as \code{ltsReg()} but better efficiency.\cr
+  For data analysis, rather use \code{\link{lmrob}} which is based on
+  \code{\link{lmrob.S}}.
+
   \code{\link{covMcd}};
   \code{\link{summary.lts}} for summaries.
 

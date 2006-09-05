@@ -41,7 +41,7 @@ lmrob(formula, data, subset, weights, na.action,
   \item{singular.ok}{logical. If \code{FALSE} (the default in S but
     not in \R) a singular fit is an error.}
 
-  \item{contrasts}{an optional list. See the \code{contrasts.arg}
+  \item{contrasts}{an optional list.  See the \code{contrasts.arg}
     of \code{\link{model.matrix.default}}.}
 
   \item{offset}{this can be used to specify an \emph{a priori}
@@ -122,10 +122,10 @@ data(starsCYG, package = "robustbase")
 ## Plot simple data and fitted lines
 plot(starsCYG)
  lmST <-    lm(log.light ~ log.Te, data = starsCYG)
-RlmST <- lmrob(log.light ~ log.Te, data = starsCYG)
-RlmST
+(RlmST <- lmrob(log.light ~ log.Te, data = starsCYG))
 abline(lmST, col = "red")
 abline(RlmST, col = "blue")
+summary(RlmST)
 }
 \keyword{robust}
 \keyword{regression}

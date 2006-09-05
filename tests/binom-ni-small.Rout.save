@@ -1,6 +1,6 @@
 
 R : Copyright 2006, The R Foundation for Statistical Computing
-Version 2.2.1 Patched (2006-03-16 r37549)
+Version 2.3.1 Patched (2006-06-26 r38426)
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -266,6 +266,10 @@ Coefficients:
 x             5.5039     0.6447   8.537   <2e-16 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Robustness weights w.r * w.x: 
+ 48 weights are ~= 1; the remaining 3 ones:
+    42     44     51 
+0.5127 0.7846 0.7388 
 
 Number of observations: 51 
 Fitted by method ‘Mqle’  (in 5 iterations)
@@ -273,6 +277,13 @@ Fitted by method ‘Mqle’  (in 5 iterations)
 (Dispersion parameter for binomial family taken to be 1)
 
 No deviance values available 
+Algorithmic parameters: 
+   acc    tcc 
+0.0001 1.3450 
+maxit 
+   50 
+test.acc 
+  "coef" 
 
 > summary(rg3$w.r)
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
@@ -289,13 +300,21 @@ Coefficients:
 x             5.5461     0.6259   8.861   <2e-16 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
-
+Robustness weights w.r * w.x: 
+ All 51 weights are ~= 1;
 Number of observations: 51 
 Fitted by method ‘Mqle’  (in 1 iterations)
 
 (Dispersion parameter for binomial family taken to be 1)
 
 No deviance values available 
+Algorithmic parameters: 
+  acc 
+1e-04 
+maxit   tcc 
+   50     5 
+test.acc 
+  "coef" 
 
 > summary(rg3.5$w.r)# all 1
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
@@ -314,13 +333,21 @@ Coefficients:
 x             5.5464     0.6259   8.861   <2e-16 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
-
+Robustness weights w.r * w.x: 
+ All 51 weights are ~= 1;
 Number of observations: 51 
 Fitted by method ‘Mqle’  (in 1 iterations)
 
 (Dispersion parameter for binomial family taken to be 1)
 
 No deviance values available 
+Algorithmic parameters: 
+  acc 
+1e-10 
+maxit   tcc 
+   50    15 
+test.acc 
+  "coef" 
 
 > 
 > stopifnot(all.equal(coef(s3.15)[,1:2], cfg, tol = 1e-5),# 2e-6
@@ -335,5 +362,5 @@ No deviance values available
 +                     rg3.15  [no.comp], tol = 1e-13))
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  1.09 0.1 1.58 0 0 
+Time elapsed:  1.788 0.119 2.335 0 0 
 > 

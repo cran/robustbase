@@ -1,6 +1,6 @@
 Package: robustbase
-Version: 0.2-2
-Date: 2006-06-13
+Version: 0.2-3
+Date: 2006-09-05
 Title: Basic Robust Statistics
 Author: Original code by many authors, notably
 	Peter Rousseeuw, Christophe Croux, see file 'Copyrights';
@@ -16,8 +16,8 @@ Description: "Essential" Robust Statistics.  The goal is to provide
  regression methodology including model selections and multivariate
  statistics where we strive to cover the upcoming book "Robust Statistics,
  Theory and Methods" by Maronna, Martin and Yohai; Wiley 2006.
-Depends: stats, graphics, methods, MASS
+Depends: stats, graphics, methods
 Suggests: MASS
 LazyLoad: yes
 License: GPL version 2 or later
-Packaged: Tue Jun 13 21:26:03 2006; maechler
+Packaged: Tue Sep  5 21:48:37 2006; maechler

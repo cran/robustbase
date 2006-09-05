@@ -57,8 +57,9 @@ o psi.*(....,  rho = FALSE/TRUE)   functions from Andreas
   should be replaced by using the new  psi_func  objects
   --> ./R/psi-funs-AR.R  &  ./man/pkg-internal.Rd
 
-o predict.glmrob() and probably also residuals.glmrob()
+o predict.glmrob() __NEEDED__ and probably also residuals.glmrob()
   should allow a 'type = *' specification like the *.glm() methods.
+
 
 o glmrob() needs tests in ./tests/   [maybe take from man/glmrob.Rd]
 	   take those from Martin's old 'robGLM1' package (need more!)
@@ -100,6 +101,8 @@ o Add data sets from the MMY-book  -- try to use the same variable names as
 o more tests in	tests/
 
 o fully implement and test the multivariate case (y = matrix with > 1 col.)
+
+o predict.lmrob() __NEEDED__
 
 o src/lmrob.c :
 

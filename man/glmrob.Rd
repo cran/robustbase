@@ -175,15 +175,15 @@ Cfit1 <- glm(cbind(success, total-success) ~ logdose + block,
              data = carrots, family = binomial)
 summary(Cfit1)
 
-Cfit2 <- glmrob(cbind(success, total-success) ~ logdose + block,
+Rfit1 <- glmrob(cbind(success, total-success) ~ logdose + block,
                 family = binomial, data = carrots, method= "Mqle",
-                control=glmrobMqle.control(tcc=1.2))
-summary(Cfit2)
+                control= glmrobMqle.control(tcc=1.2))
+summary(Rfit1)
 
-Cfit3 <- glmrob(success/total ~ logdose + block, family=binomial,
-                weights= total, data= carrots, method= "Mqle",
-                control=glmrobMqle.control(tcc=1.2))
-coef(Cfit3)  ## The same as Cfit2
+Rfit2 <- glmrob(success/total ~ logdose + block, weights = total,
+                family = binomial, data = carrots, method= "Mqle",
+                control= glmrobMqle.control(tcc=1.2))
+coef(Rfit2)  ## The same as Rfit1
 
 
 ## Binary response --------------
@@ -207,25 +207,22 @@ summary(Efit1)
 
 Efit2 <- glmrob(Ysum ~ Age10 + Base4*Trt, family = poisson,
                 data = epilepsy, method= "Mqle",
-                control = glmrobMqle.control(tcc=1.2, maxit=100))
+                control = glmrobMqle.control(tcc= 1.2))
 summary(Efit2)
 
-
 ## 'x' weighting:
+(Efit3 <- glmrob(Ysum ~ Age10 + Base4*Trt, family = poisson,
+ 	         data = epilepsy, method= "Mqle", weights.on.x = "hat",
+		 control = glmrobMqle.control(tcc= 1.2)))
 
-try({
-  ## This fails on some platforms {singular ..},
-  ## but gives many warnings anyay
- Efit3 <- glmrob(Ysum ~ Age10 + Base4*Trt, family = poisson,
-		 data = epilepsy, method= "Mqle", weights.on.x = "hat",
-		 control = glmrobMqle.control(tcc=1.2, maxit=100))
-})
-if(FALSE) # gives singular cov matrix!
+try( # gives singular cov matrix: 'Trt' is binary factor -->
+     # affine equivariance and subsampling are problematic
 Efit4 <- glmrob(Ysum ~ Age10 + Base4*Trt, family = poisson,
                 data = epilepsy, method= "Mqle", weights.on.x = "covMcd",
                 control = glmrobMqle.control(tcc=1.2, maxit=100))
-}
+)
 
+}
 \keyword{robust}
 \keyword{regression}
 \keyword{nonlinear}

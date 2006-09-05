@@ -14,6 +14,7 @@ importFrom("stats", anova, coef, family, fitted,
 
 ## Functions defined in this package
 export(Sn, Qn,
+       summarizeRobWeights,
        wgt.himedian,
 
        covMcd,

@@ -5,13 +5,16 @@
 \usage{
 \method{summary}{lts}(object, correlation = FALSE, \dots)
 
-\method{print}{summary.lts}(x, digits = max(3, getOption("digits") - 3), \dots)
+\method{print}{summary.lts}(x, digits = max(3, getOption("digits") - 3),
+     signif.stars = FALSE, \dots)
 }
 \arguments{
   \item{object}{an object of class \code{"lts"}, usually, a result of a call to \code{\link{ltsReg}}.}
   \item{correlation}{logical; if \code{TRUE}, the correlation matrix of the estimated parameters is returned and printed.}
   \item{x}{an object of class \code{"summary.lts"}, usually, a result of a call to \code{summary.lts}.}
   \item{digits}{the number of significant digits to use when printing.}
+  \item{signif.stars}{logical indicating if \dQuote{significance stars}
+    should be printer, see \code{\link{printCoefmat}}.}
   \item{\dots}{further arguments passed to or from other methods.}
 }
 \description{
@@ -63,7 +66,9 @@
 \examples{
 data(Animals2)
 ltsA <- ltsReg(log(brain) ~ log(body), data = Animals2)
-summary(ltsA)
+(slts <- summary(ltsA))
+## non-default options for printing the summary:
+print(slts, digits = 5, signif.stars = TRUE, signif.legend = FALSE)
 }
 \keyword{regression}
 \keyword{robust}

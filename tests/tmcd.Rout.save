@@ -1,6 +1,6 @@
 
 R : Copyright 2006, The R Foundation for Statistical Computing
-Version 2.3.1 RC (2006-05-31 r38242)
+Version 2.3.1 Patched (2006-09-02 r39110)
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -16,221 +16,19 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > library(robustbase)
-Loading required package: MASS
-> library(MASS)
 > 
-> dodata <- function(nrep = 1, time = FALSE, short = FALSE, full = TRUE,
-+                    method = c("FASTMCD","MASS")) {
-+     ##@bdescr
-+     ## Test the function covMcd() on the literature datasets:
-+     ##
-+     ## Call covMcd() for all regression datasets available in robustbase and print:
-+     ##  - execution time (if time == TRUE)
-+     ##  - objective fucntion
-+     ##  - best subsample found (if short == false)
-+     ##  - outliers identified (with cutoff 0.975) (if short == false)
-+     ##  - estimated center and covariance matrix if full == TRUE)
-+     ##
-+     ##@edescr
-+     ##
-+     ##@in  nrep              : [integer] number of repetitions to use for estimating the
-+     ##                                   (average) execution time
-+     ##@in  time              : [boolean] whether to evaluate the execution time
-+     ##@in  short             : [boolean] whether to do short output (i.e. only the
-+     ##                                   objective function value). If short == FALSE,
-+     ##                                   the best subsample and the identified outliers are
-+     ##                                   printed. See also the parameter full below
-+     ##@in  full              : [boolean] whether to print the estimated cente and covariance matrix
-+     ##@in  method            : [character] select a method: one of (FASTMCD, MASS)
-+ 
-+     domcd <- function(x, xname, nrep = 1) {
-+         n <- dim(x)[1]
-+         p <- dim(x)[2]
-+         if(method == "MASS") {
-+             mcd <- cov.mcd(x)
-+             quan <- as.integer(floor((n + p + 1)/2)) #default: floor((n+p+1)/2)
-+         }
-+         else {
-+             mcd <- covMcd(x) # trace = FALSE
-+             quan <- as.integer(mcd$quan)
-+         }
-+ 
-+         if(method == "MASS")
-+             crit <- mcd$crit
-+         else
-+             crit <- log(mcd$crit)
-+ 
-+         if(time) {
-+             xtime <- system.time(dorep(x, nrep, method))[1]/nrep
-+             xres <- sprintf("%3d %3d %3d %12.6f %10.3f\n",
-+                             dim(x)[1], dim(x)[2], quan, crit, xtime)
-+         }
-+         else {
-+             xres <- sprintf("%3d %3d %3d %12.6f\n", dim(x)[1], dim(x)[2], quan, crit)
-+         }
-+         lpad <- lname-nchar(xname)
-+         cat(pad.right(xname,lpad), xres)
-+ 
-+         if(!short) {
-+             cat("Best subsample: \n")
-+             print(mcd$best)
-+ 
-+             ibad <- which(mcd$mcd.wt == 0)
-+             names(ibad) <- NULL
-+             nbad <- length(ibad)
-+             cat("Outliers: ",nbad,"\n")
-+             if(nbad > 0)
-+                 print(ibad)
-+             if(full) {
-+                 cat("-------------\n")
-+                 print(mcd)
-+             }
-+             cat("--------------------------------------------------------\n")
-+         }
-+     }
-+ 
-+     lname <- 20
-+     method <- match.arg(method)
-+ 
-+     data(heart)
-+     data(starsCYG)
-+     data(phosphor)
-+     data(stackloss)
-+     data(coleman)
-+     data(salinity)
-+     data(wood)
-+     data(hbk)
-+ 
-+     data(Animals, package = "MASS")
-+     brain <- Animals[c(1:24, 26:25, 27:28),]
-+     data(milk)
-+     data(bushfire)
-+ 
-+     ##    data(x1000)
-+     ##    data(x5000)
-+ 
-+     tmp <- sys.call()
-+     cat("\nCall: ", deparse(substitute(tmp)),"\n")
-+ 
-+     cat("Data Set               n   p  Half LOG(obj)        Time\n")
-+     cat("========================================================\n")
-+     domcd(heart[, 1:2], data(heart), nrep)
-+     domcd(starsCYG, data(starsCYG), nrep)
-+     domcd(data.matrix(subset(phosphor, select = -plant)),
-+           data(phosphor), nrep)
-+     domcd(stack.x, data(stackloss), nrep)
-+     domcd(data.matrix(subset(coleman, select = -Y)), data(coleman), nrep)
-+     domcd(data.matrix(subset(salinity, select = -Y)), data(salinity), nrep)
-+     domcd(data.matrix(subset(wood, select = -y)), data(wood), nrep)
-+     domcd(data.matrix(subset(hbk,  select = -Y)), data(hbk), nrep)
-+ 
-+ 
-+     domcd(brain, "Animals", nrep)
-+     domcd(milk, data(milk), nrep)
-+     domcd(bushfire, data(bushfire), nrep)
-+     cat("========================================================\n")
-+     ##    domcd(x1000$X,data(x1000), nrep)
-+     ##    domcd(x5000$X,data(x5000), nrep)
-+ }
-> 
-> dogen <- function(nrep = 1, eps = 0.49, method = c("FASTMCD", "MASS")) {
-+ 
-+     domcd <- function(x, nrep = 1) {
-+         gc()
-+         xtime <- system.time(dorep(x, nrep, method))[1]/nrep
-+         cat(sprintf("%6d %3d %10.2f\n", dim(x)[1], dim(x)[2], xtime))
-+         xtime
-+     }
-+ 
-+     set.seed(1234)
-+ 
-+     method <- match.arg(method)
-+ 
-+     ap <- c(2, 5, 10, 20, 30)
-+     an <- c(100, 500, 1000, 10000, 50000)
-+ 
-+     tottime <- 0
-+     cat("     n   p       Time\n")
-+     cat("=====================\n")
-+     for(i in 1:length(an)) {
-+         for(j in 1:length(ap)) {
-+             n <- an[i]
-+             p <- ap[j]
-+             if(5*p <= n) {
-+                 xx <- gendata(n, p, eps)
-+                 X <- xx$X
-+                 tottime <- tottime + domcd(X, nrep)
-+             }
-+         }
-+     }
-+ 
-+     cat("=====================\n")
-+     cat("Total time: ", tottime*nrep, "\n")
-+ }
-> 
-> docheck <- function(n, p, eps) {
-+     xx <- gendata(n,p,eps)
-+     mcd <- covMcd(xx$X)
-+     check(mcd, xx$xind)
-+ }
-> 
-> check <- function(mcd, xind) {
-+ ##  check if mcd is robust w.r.t xind, i.e. check how many of xind
-+ ##  did not get zero weight
-+     mymatch <- xind %in% which(mcd$mcd.wt == 0)
-+     length(xind) - length(which(mymatch))
-+ }
-> 
-> dorep <- function(x, nrep = 1, method = c("FASTMCD","MASS")) {
-+ 
-+     method <- match.arg(method)
-+     for(i in 1:nrep)
-+     if(method == "MASS")
-+         cov.mcd(x)
-+     else
-+         covMcd(x)
-+ }
-> 
-> #### gendata() ####
-> ## Generates a location contaminated multivariate
-> ## normal sample of n observations in p dimensions
-> ##    (1-eps)*Np(0,Ip) + eps*Np(m,Ip)
-> ## where
-> ##    m = (b,b,...,b)
-> ## Defaults: eps=0 and b=10
-> ##
-> gendata <- function(n,p,eps = 0,b = 10) {
-+ 
-+     if(missing(n) || missing(p))
-+         stop("Please specify (n,p)")
-+     if(eps < 0 || eps >= 0.5)
-+         stop(message = "eps must be in [0,0.5)")
-+     X <- mvrnorm(n,rep(0,p),diag(1,nrow = p,ncol = p))
-+     nbad <- as.integer(eps * n)
-+     if(nbad > 0) {
-+         Xbad <- mvrnorm(nbad,rep(b,p),diag(1,nrow = p,ncol = p))
-+         xind <- sample(n,nbad)
-+         X[xind,] <- Xbad
-+     }
-+     list(X = X, xind = xind)
-+ }
-> 
-> pad.right <- function(z, pads)
-+ {
-+     ## Pads spaces to right of text
-+     padding <- paste(rep(" ", pads), collapse = "")
-+     paste(z, padding, sep = "")
-+ }
-> 
+> source(system.file("test_MCD.R", package = "robustbase"))
+> ##          ../inst/test_MCD.R
 > 
 > ## -- now do it:
+> options(digits = 5)
 > set.seed(101) # <<-- sub-sampling algorithm now based on R's RNG and seed
-> dodata()
+> doMCDdata()
 
-Call:  dodata() 
-Data Set               n   p  Half LOG(obj)        Time
+Call:  doMCDdata() 
+Data Set               n   p  Half   LOG(obj)  Time [ms]
 ========================================================
-heart                 12   2   7     5.678742
+               heart  12   2   7     5.678742 
 Best subsample: 
 [1]  1  3  4  5  7  9 11
 Outliers:  0 
@@ -240,36 +38,16 @@ Call:
 covMcd(x = x)
 -> Method:  Minimum Covariance Determinant Estimator. 
 
-Log(Det.):  5.679 
+Log(Det.):  5.68 
 Robust Estimate of Location:
 height  weight  
- 38.25   33.09  
+  38.3    33.1  
 Robust Estimate of Covariance:
         height  weight
-height   173.1   332.8
-weight   332.8   726.1
+height     173     333
+weight     333     726
 --------------------------------------------------------
-starsCYG              47   2  25    -8.031215
-Best subsample: 
- [1]  1  2  4  6  8 10 12 13 16 24 25 26 28 32 33 37 38 39 40 41 42 43 44 45 46
-Outliers:  6 
-[1]  7 11 14 20 30 34
--------------
-Minimum Covariance Determinant (MCD) estimator.
-Call:
-covMcd(x = x)
--> Method:  Minimum Covariance Determinant Estimator. 
-
-Log(Det.):  -8.031 
-Robust Estimate of Location:
-   log.Te  log.light  
-    4.409      4.949  
-Robust Estimate of Covariance:
-            log.Te  log.light
-log.Te     0.01754    0.05234
-log.light  0.05234    0.36434
---------------------------------------------------------
-phosphor              18   2  10     6.878847
+            phosphor  18   2  10     6.878847 
 Best subsample: 
  [1]  3  5  8  9 11 12 13 14 15 17
 Outliers:  2 
@@ -280,16 +58,36 @@ Call:
 covMcd(x = x)
 -> Method:  Minimum Covariance Determinant Estimator. 
 
-Log(Det.):  6.879 
+Log(Det.):  6.88 
 Robust Estimate of Location:
   inorg  organic  
-  13.35    38.80  
+   13.4     38.8  
 Robust Estimate of Covariance:
          inorg  organic
-inorg    194.3    197.0
-organic  197.0    274.4
+inorg      194      197
+organic    197      274
 --------------------------------------------------------
-stackloss             21   3  12     5.472581
+            starsCYG  47   2  25    -8.031215 
+Best subsample: 
+ [1]  1  2  4  6  8 10 12 13 16 24 25 26 28 32 33 37 38 39 40 41 42 43 44 45 46
+Outliers:  6 
+[1]  7 11 14 20 30 34
+-------------
+Minimum Covariance Determinant (MCD) estimator.
+Call:
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
+
+Log(Det.):  -8.03 
+Robust Estimate of Location:
+   log.Te  log.light  
+     4.41       4.95  
+Robust Estimate of Covariance:
+           log.Te  log.light
+log.Te     0.0175     0.0523
+log.light  0.0523     0.3643
+--------------------------------------------------------
+           stackloss  21   3  12     5.472581 
 Best subsample: 
  [1]  4  5  6  7  8  9 10 11 12 13 14 20
 Outliers:  9 
@@ -300,17 +98,17 @@ Call:
 covMcd(x = x)
 -> Method:  Minimum Covariance Determinant Estimator. 
 
-Log(Det.):  5.473 
+Log(Det.):  5.47 
 Robust Estimate of Location:
   Air.Flow  Water.Temp  Acid.Conc.  
-     59.50       20.83       87.33  
+      59.5        20.8        87.3  
 Robust Estimate of Covariance:
             Air.Flow  Water.Temp  Acid.Conc.
-Air.Flow       13.75       12.78       12.54
-Water.Temp     12.78       20.18       13.42
-Acid.Conc.     12.54       13.42       50.81
+Air.Flow        13.7        12.8        12.5
+Water.Temp      12.8        20.2        13.4
+Acid.Conc.      12.5        13.4        50.8
 --------------------------------------------------------
-coleman               20   5  13     1.286808
+             coleman  20   5  13     1.286808 
 Best subsample: 
  [1]  2  3  4  5  7  8 12 13 14 16 17 19 20
 Outliers:  7 
@@ -321,19 +119,19 @@ Call:
 covMcd(x = x)
 -> Method:  Minimum Covariance Determinant Estimator. 
 
-Log(Det.):  1.287 
+Log(Det.):  1.29 
 Robust Estimate of Location:
   salaryP   fatherWc    sstatus  teacherSc  motherLev  
-    2.757     48.379      6.118     25.005      6.398  
+     2.76      48.38       6.12      25.00       6.40  
 Robust Estimate of Covariance:
-           salaryP  fatherWc   sstatus  teacherSc  motherLev
-salaryP     0.4125     2.909   -0.4338     0.2466     0.1222
-fatherWc    2.9089  2122.755  538.2630    20.5270    56.1936
-sstatus    -0.4338   538.263  195.2556     6.2423    16.4991
-teacherSc   0.2466    20.527    6.2423     1.2787     0.9043
-motherLev   0.1222    56.194   16.4991     0.9043     1.6980
+           salaryP  fatherWc  sstatus  teacherSc  motherLev
+salaryP      0.412      2.91   -0.434      0.247      0.122
+fatherWc     2.909   2122.76  538.263     20.527     56.194
+sstatus     -0.434    538.26  195.256      6.242     16.499
+teacherSc    0.247     20.53    6.242      1.279      0.904
+motherLev    0.122     56.19   16.499      0.904      1.698
 --------------------------------------------------------
-salinity              28   3  16     1.326364
+            salinity  28   3  16     1.326364 
 Best subsample: 
  [1]  1  2  6  7  8 12 13 14 18 20 21 22 25 26 27 28
 Outliers:  4 
@@ -344,17 +142,17 @@ Call:
 covMcd(x = x)
 -> Method:  Minimum Covariance Determinant Estimator. 
 
-Log(Det.):  1.326 
+Log(Det.):  1.33 
 Robust Estimate of Location:
-    X1      X2      X3  
-10.083   2.783  22.778  
+   X1     X2     X3  
+10.08   2.78  22.78  
 Robust Estimate of Covariance:
-        X1      X2      X3
-X1  14.503   1.400  -4.428
-X2   1.400   5.329  -2.002
-X3  -4.428  -2.002   3.319
+       X1     X2     X3
+X1  14.50   1.40  -4.43
+X2   1.40   5.33  -2.00
+X3  -4.43  -2.00   3.32
 --------------------------------------------------------
-wood                  20   5  13   -36.270094
+                wood  20   5  13   -36.270094 
 Best subsample: 
  [1]  1  2  3  5  9 10 12 13 14 15 17 18 20
 Outliers:  5 
@@ -365,19 +163,19 @@ Call:
 covMcd(x = x)
 -> Method:  Minimum Covariance Determinant Estimator. 
 
-Log(Det.):  -36.27 
+Log(Det.):  -36.3 
 Robust Estimate of Location:
-    x1      x2      x3      x4      x5  
-0.5869  0.1222  0.5309  0.5382  0.8918  
+   x1     x2     x3     x4     x5  
+0.587  0.122  0.531  0.538  0.892  
 Robust Estimate of Covariance:
-            x1          x2          x3          x4          x5
-x1   0.0163266   3.063e-03   0.0051357  -9.543e-04  -2.654e-03
-x2   0.0030632   7.894e-04   0.0020670  -8.467e-05   3.851e-05
-x3   0.0051357   2.067e-03   0.0108015  -1.419e-03   5.739e-04
-x4  -0.0009543  -8.467e-05  -0.0014190   4.635e-03   2.977e-03
-x5  -0.0026545   3.851e-05   0.0005739   2.977e-03   4.506e-03
+           x1         x2         x3         x4         x5
+x1   0.016327   3.06e-03   0.005136  -9.54e-04  -2.65e-03
+x2   0.003063   7.89e-04   0.002067  -8.47e-05   3.85e-05
+x3   0.005136   2.07e-03   0.010802  -1.42e-03   5.74e-04
+x4  -0.000954  -8.47e-05  -0.001419   4.63e-03   2.98e-03
+x5  -0.002654   3.85e-05   0.000574   2.98e-03   4.51e-03
 --------------------------------------------------------
-hbk                   75   3  39    -1.047858
+                 hbk  75   3  39    -1.047858 
 Best subsample: 
  [1] 15 16 17 18 19 20 21 22 23 24 26 27 31 32 33 35 36 37 38 40 43 49 50 51 54
 [26] 55 56 58 59 61 63 64 66 67 70 71 72 73 74
@@ -389,17 +187,17 @@ Call:
 covMcd(x = x)
 -> Method:  Minimum Covariance Determinant Estimator. 
 
-Log(Det.):  -1.048 
+Log(Det.):  -1.05 
 Robust Estimate of Location:
-   X1     X2     X3  
-1.538  1.780  1.687  
+  X1    X2    X3  
+1.54  1.78  1.69  
 Robust Estimate of Covariance:
-         X1       X2      X3
-X1  1.68030  0.07533  0.1742
-X2  0.07533  1.71031  0.2089
-X3  0.17416  0.20890  1.5884
+        X1      X2     X3
+X1  1.6803  0.0753  0.174
+X2  0.0753  1.7103  0.209
+X3  0.1742  0.2089  1.588
 --------------------------------------------------------
-Animals               28   2  15    14.555543
+             Animals  28   2  15    14.555543 
 Best subsample: 
  [1]  1  3  4  5 10 11 17 18 19 20 21 22 23 26 27
 Outliers:  13 
@@ -410,16 +208,16 @@ Call:
 covMcd(x = x)
 -> Method:  Minimum Covariance Determinant Estimator. 
 
-Log(Det.):  14.56 
+Log(Det.):  14.6 
 Robust Estimate of Location:
  body  brain  
-18.67  64.94  
+ 18.7   64.9  
 Robust Estimate of Covariance:
        body  brain
 body   2690   4562
 brain  4562  16346
 --------------------------------------------------------
-milk                  86   8  47   -28.848323
+                milk  86   8  47   -28.848323 
 Best subsample: 
  [1]  5  7  8  9 10 21 22 24 26 30 31 32 33 34 35 36 39 45 46 51 53 54 55 56 57
 [26] 58 59 60 61 62 63 64 65 66 67 68 69 71 72 76 78 79 81 82 83 84 86
@@ -431,31 +229,31 @@ Call:
 covMcd(x = x)
 -> Method:  Minimum Covariance Determinant Estimator. 
 
-Log(Det.):  -28.85 
+Log(Det.):  -28.8 
 Robust Estimate of Location:
-     X1       X2       X3       X4       X5       X6       X7       X8  
-  1.030   35.885   33.076   26.140   25.121   25.052  123.166   14.382  
+    X1      X2      X3      X4      X5      X6      X7      X8  
+  1.03   35.89   33.08   26.14   25.12   25.05  123.17   14.38  
 Robust Estimate of Covariance:
-           X1         X2         X3         X4         X5         X6         X7
-X1  5.244e-07  0.0001429  0.0001814  0.0001779  0.0001585  0.0001374  0.0007119
-X2  1.429e-04  2.3117741  0.2880534  0.2280272  0.1251295  0.2915536  2.0445205
-X3  1.814e-04  0.2880534  1.3600390  1.0078726  0.9937268  0.9841859  0.8510427
-X4  1.779e-04  0.2280272  1.0078726  0.8087730  0.7728411  0.7582802  0.7090137
-X5  1.585e-04  0.1251295  0.9937268  0.7728411  0.8194833  0.7743836  0.6901070
-X6  1.374e-04  0.2915536  0.9841859  0.7582802  0.7743836  0.7862365  0.7341326
-X7  7.119e-04  2.0445205  0.8510427  0.7090137  0.6901070  0.7341326  4.8640606
-X8  1.704e-05  0.2654868  0.2308933  0.1579462  0.1313123  0.1497227  0.4449118
-           X8
-X1  1.704e-05
-X2  2.655e-01
-X3  2.309e-01
-X4  1.579e-01
-X5  1.313e-01
-X6  1.497e-01
-X7  4.449e-01
-X8  1.891e-01
+          X1        X2        X3        X4        X5        X6        X7
+X1  5.24e-07  0.000143  0.000181  0.000178  0.000158  0.000137  0.000712
+X2  1.43e-04  2.311774  0.288053  0.228027  0.125129  0.291554  2.044520
+X3  1.81e-04  0.288053  1.360039  1.007873  0.993727  0.984186  0.851043
+X4  1.78e-04  0.228027  1.007873  0.808773  0.772841  0.758280  0.709014
+X5  1.58e-04  0.125129  0.993727  0.772841  0.819483  0.774384  0.690107
+X6  1.37e-04  0.291554  0.984186  0.758280  0.774384  0.786237  0.734133
+X7  7.12e-04  2.044520  0.851043  0.709014  0.690107  0.734133  4.864061
+X8  1.70e-05  0.265487  0.230893  0.157946  0.131312  0.149723  0.444912
+          X8
+X1  1.70e-05
+X2  2.65e-01
+X3  2.31e-01
+X4  1.58e-01
+X5  1.31e-01
+X6  1.50e-01
+X7  4.45e-01
+X8  1.89e-01
 --------------------------------------------------------
-bushfire              38   5  22    18.135810
+            bushfire  38   5  22    18.135810 
 Best subsample: 
  [1]  1  2  3  4  5  6 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28
 Outliers:  16 
@@ -466,20 +264,611 @@ Call:
 covMcd(x = x)
 -> Method:  Minimum Covariance Determinant Estimator. 
 
-Log(Det.):  18.14 
+Log(Det.):  18.1 
 Robust Estimate of Location:
-   V1     V2     V3     V4     V5  
-105.5  146.9  274.4  217.5  279.0  
+ V1   V2   V3   V4   V5  
+105  147  274  218  279  
 Robust Estimate of Covariance:
-         V1       V2     V3      V4      V5
-V1    593.7    459.4  -2903  -653.2  -532.8
-V2    459.4    405.4  -1930  -394.3  -333.3
-V3  -2903.2  -1930.2  17147  4212.9  3347.9
-V4   -653.2   -394.3   4213  1109.7   866.7
-V5   -532.8   -333.3   3348   866.7   682.6
+       V1     V2     V3    V4    V5
+V1    594    459  -2903  -653  -533
+V2    459    405  -1930  -394  -333
+V3  -2903  -1930  17147  4213  3348
+V4   -653   -394   4213  1110   867
+V5   -533   -333   3348   867   683
+--------------------------------------------------------
+========================================================
+> ##                vvvv no timing for 'R CMD Rdiff' outputs
+> doMCDdata(nrep = 12, time=FALSE)
+
+Call:  doMCDdata(nrep = 12, time = FALSE) 
+Data Set               n   p  Half   LOG(obj)  Time [ms]
+========================================================
+               heart  12   2   7     5.678742 
+Best subsample: 
+[1]  1  3  4  5  7  9 11
+Outliers:  0 
+-------------
+Minimum Covariance Determinant (MCD) estimator.
+Call:
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
+
+Log(Det.):  5.68 
+Robust Estimate of Location:
+height  weight  
+  38.3    33.1  
+Robust Estimate of Covariance:
+        height  weight
+height     173     333
+weight     333     726
+--------------------------------------------------------
+            phosphor  18   2  10     6.878847 
+Best subsample: 
+ [1]  3  5  8  9 11 12 13 14 15 17
+Outliers:  2 
+[1] 1 6
+-------------
+Minimum Covariance Determinant (MCD) estimator.
+Call:
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
+
+Log(Det.):  6.88 
+Robust Estimate of Location:
+  inorg  organic  
+   13.4     38.8  
+Robust Estimate of Covariance:
+         inorg  organic
+inorg      194      197
+organic    197      274
+--------------------------------------------------------
+            starsCYG  47   2  25    -8.031215 
+Best subsample: 
+ [1]  1  2  4  6  8 10 12 13 16 24 25 26 28 32 33 37 38 39 40 41 42 43 44 45 46
+Outliers:  6 
+[1]  7 11 14 20 30 34
+-------------
+Minimum Covariance Determinant (MCD) estimator.
+Call:
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
+
+Log(Det.):  -8.03 
+Robust Estimate of Location:
+   log.Te  log.light  
+     4.41       4.95  
+Robust Estimate of Covariance:
+           log.Te  log.light
+log.Te     0.0175     0.0523
+log.light  0.0523     0.3643
+--------------------------------------------------------
+           stackloss  21   3  12     5.472581 
+Best subsample: 
+ [1]  4  5  6  7  8  9 10 11 12 13 14 20
+Outliers:  9 
+[1]  1  2  3 15 16 17 18 19 21
+-------------
+Minimum Covariance Determinant (MCD) estimator.
+Call:
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
+
+Log(Det.):  5.47 
+Robust Estimate of Location:
+  Air.Flow  Water.Temp  Acid.Conc.  
+      59.5        20.8        87.3  
+Robust Estimate of Covariance:
+            Air.Flow  Water.Temp  Acid.Conc.
+Air.Flow        13.7        12.8        12.5
+Water.Temp      12.8        20.2        13.4
+Acid.Conc.      12.5        13.4        50.8
+--------------------------------------------------------
+             coleman  20   5  13     1.286808 
+Best subsample: 
+ [1]  2  3  4  5  7  8 12 13 14 16 17 19 20
+Outliers:  7 
+[1]  1  6  9 10 11 15 18
+-------------
+Minimum Covariance Determinant (MCD) estimator.
+Call:
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
+
+Log(Det.):  1.29 
+Robust Estimate of Location:
+  salaryP   fatherWc    sstatus  teacherSc  motherLev  
+     2.76      48.38       6.12      25.00       6.40  
+Robust Estimate of Covariance:
+           salaryP  fatherWc  sstatus  teacherSc  motherLev
+salaryP      0.412      2.91   -0.434      0.247      0.122
+fatherWc     2.909   2122.76  538.263     20.527     56.194
+sstatus     -0.434    538.26  195.256      6.242     16.499
+teacherSc    0.247     20.53    6.242      1.279      0.904
+motherLev    0.122     56.19   16.499      0.904      1.698
+--------------------------------------------------------
+            salinity  28   3  16     1.326364 
+Best subsample: 
+ [1]  1  2  6  7  8 12 13 14 18 20 21 22 25 26 27 28
+Outliers:  4 
+[1]  5 16 23 24
+-------------
+Minimum Covariance Determinant (MCD) estimator.
+Call:
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
+
+Log(Det.):  1.33 
+Robust Estimate of Location:
+   X1     X2     X3  
+10.08   2.78  22.78  
+Robust Estimate of Covariance:
+       X1     X2     X3
+X1  14.50   1.40  -4.43
+X2   1.40   5.33  -2.00
+X3  -4.43  -2.00   3.32
+--------------------------------------------------------
+                wood  20   5  13   -36.270094 
+Best subsample: 
+ [1]  1  2  3  5  9 10 12 13 14 15 17 18 20
+Outliers:  5 
+[1]  4  6  8 11 19
+-------------
+Minimum Covariance Determinant (MCD) estimator.
+Call:
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
+
+Log(Det.):  -36.3 
+Robust Estimate of Location:
+   x1     x2     x3     x4     x5  
+0.587  0.122  0.531  0.538  0.892  
+Robust Estimate of Covariance:
+           x1         x2         x3         x4         x5
+x1   0.016327   3.06e-03   0.005136  -9.54e-04  -2.65e-03
+x2   0.003063   7.89e-04   0.002067  -8.47e-05   3.85e-05
+x3   0.005136   2.07e-03   0.010802  -1.42e-03   5.74e-04
+x4  -0.000954  -8.47e-05  -0.001419   4.63e-03   2.98e-03
+x5  -0.002654   3.85e-05   0.000574   2.98e-03   4.51e-03
+--------------------------------------------------------
+                 hbk  75   3  39    -1.047858 
+Best subsample: 
+ [1] 15 16 17 18 19 20 21 22 23 24 26 27 31 32 33 35 36 37 38 40 43 49 50 51 54
+[26] 55 56 58 59 61 63 64 66 67 70 71 72 73 74
+Outliers:  14 
+ [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14
+-------------
+Minimum Covariance Determinant (MCD) estimator.
+Call:
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
+
+Log(Det.):  -1.05 
+Robust Estimate of Location:
+  X1    X2    X3  
+1.54  1.78  1.69  
+Robust Estimate of Covariance:
+        X1      X2     X3
+X1  1.6803  0.0753  0.174
+X2  0.0753  1.7103  0.209
+X3  0.1742  0.2089  1.588
+--------------------------------------------------------
+             Animals  28   2  15    14.555543 
+Best subsample: 
+ [1]  1  3  4  5 10 11 17 18 19 20 21 22 23 26 27
+Outliers:  13 
+ [1]  2  6  7  8  9 12 13 14 15 16 24 25 28
+-------------
+Minimum Covariance Determinant (MCD) estimator.
+Call:
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
+
+Log(Det.):  14.6 
+Robust Estimate of Location:
+ body  brain  
+ 18.7   64.9  
+Robust Estimate of Covariance:
+       body  brain
+body   2690   4562
+brain  4562  16346
+--------------------------------------------------------
+                milk  86   8  47   -28.902301 
+Best subsample: 
+ [1]  6  7  8  9 10 19 21 22 23 24 25 26 30 33 34 35 36 37 38 39 45 46 53 54 55
+[26] 56 57 58 59 60 61 62 63 64 65 66 67 69 71 72 76 78 79 80 81 82 83
+Outliers:  19 
+ [1]  1  2  3 11 12 13 14 15 16 17 18 27 41 44 47 70 74 75 77
+-------------
+Minimum Covariance Determinant (MCD) estimator.
+Call:
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
+
+Log(Det.):  -28.9 
+Robust Estimate of Location:
+    X1      X2      X3      X4      X5      X6      X7      X8  
+  1.03   35.97   33.13   26.17   25.15   25.08  123.18   14.39  
+Robust Estimate of Covariance:
+          X1        X2        X3        X4        X5        X6        X7
+X1  6.32e-07  6.21e-05  0.000226  0.000223  0.000199  0.000184  0.000826
+X2  6.21e-05  1.95e+00  0.310403  0.238424  0.154144  0.266028  2.115707
+X3  2.26e-04  3.10e-01  1.549647  1.141295  1.110358  1.138861  0.899494
+X4  2.23e-04  2.38e-01  1.141295  0.906291  0.858642  0.875429  0.739460
+X5  1.99e-04  1.54e-01  1.110358  0.858642  0.893047  0.875242  0.721182
+X6  1.84e-04  2.66e-01  1.138861  0.875429  0.875242  0.920950  0.741532
+X7  8.26e-04  2.12e+00  0.899494  0.739460  0.721182  0.741532  5.215574
+X8  8.15e-06  3.48e-01  0.265962  0.170683  0.149067  0.163267  0.514534
+          X8
+X1  8.15e-06
+X2  3.48e-01
+X3  2.66e-01
+X4  1.71e-01
+X5  1.49e-01
+X6  1.63e-01
+X7  5.15e-01
+X8  2.08e-01
+--------------------------------------------------------
+            bushfire  38   5  22    18.135810 
+Best subsample: 
+ [1]  1  2  3  4  5  6 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28
+Outliers:  16 
+ [1]  7  8  9 10 11 12 29 30 31 32 33 34 35 36 37 38
+-------------
+Minimum Covariance Determinant (MCD) estimator.
+Call:
+covMcd(x = x)
+-> Method:  Minimum Covariance Determinant Estimator. 
+
+Log(Det.):  18.1 
+Robust Estimate of Location:
+ V1   V2   V3   V4   V5  
+105  147  274  218  279  
+Robust Estimate of Covariance:
+       V1     V2     V3    V4    V5
+V1    594    459  -2903  -653  -533
+V2    459    405  -1930  -394  -333
+V3  -2903  -1930  17147  4213  3348
+V4   -653   -394   4213  1110   867
+V5   -533   -333   3348   867   683
+--------------------------------------------------------
+========================================================
+> doMCDdata(nrep = 12, time=FALSE, method = "MASS")
+
+Call:  doMCDdata(nrep = 12, time = FALSE, method = "MASS") 
+Data Set               n   p  Half   LOG(obj)  Time [ms]
+========================================================
+               heart  12   2   7     5.678742 
+Best subsample: 
+[1]  1  3  4  5  7  9 11
+Outliers:  0 
+-------------
+$center
+height weight 
+40.358 38.125 
+
+$cov
+       height weight
+height 142.46 298.91
+weight 298.91 679.01
+
+$msg
+[1] "0 singular samples of size 3 out of 220"
+
+$crit
+[1] 5.6787
+
+$best
+[1]  1  3  4  5  7  9 11
+
+$n.obs
+[1] 12
+
+--------------------------------------------------------
+            phosphor  18   2  10     6.878847 
+Best subsample: 
+ [1]  3  5  8  9 11 12 13 14 15 17
+Outliers:  0 
+-------------
+$center
+  inorg organic 
+ 15.215  39.385 
+
+$cov
+         inorg organic
+inorg    95.47  116.49
+organic 116.49  171.76
+
+$msg
+[1] "1 singular samples of size 3 out of 816"
+
+$crit
+[1] 6.8788
+
+$best
+ [1]  3  5  8  9 11 12 13 14 15 17
+
+$n.obs
+[1] 18
+
+--------------------------------------------------------
+            starsCYG  47   2  25    -8.031215 
+Best subsample: 
+ [1]  1  2  4  6  8 10 12 13 16 24 25 26 28 32 33 37 38 39 40 41 42 43 44 45 46
+[26] 47
+Outliers:  0 
+-------------
+$center
+   log.Te log.light 
+   4.4127    4.9335 
+
+$cov
+            log.Te log.light
+log.Te    0.011508  0.038513
+log.light 0.038513  0.241013
+
+$msg
+[1] "9 singular samples of size 3 out of 1500"
+
+$crit
+[1] -8.0312
+
+$best
+ [1]  1  2  4  6  8 10 12 13 16 24 25 26 28 32 33 37 38 39 40 41 42 43 44 45 46
+[26] 47
+
+$n.obs
+[1] 47
+
+--------------------------------------------------------
+           stackloss  21   3  12     5.472581 
+Best subsample: 
+ [1]  4  5  6  7  8  9 10 11 12 13 14 20
+Outliers:  0 
+-------------
+$center
+  Air.Flow Water.Temp Acid.Conc. 
+    56.706     20.235     85.529 
+
+$cov
+           Air.Flow Water.Temp Acid.Conc.
+Air.Flow    23.4706     7.5735    16.1029
+Water.Temp   7.5735     6.3162     5.3676
+Acid.Conc.  16.1029     5.3676    32.3897
+
+$msg
+[1] "97 singular samples of size 4 out of 2000"
+
+$crit
+[1] 5.4726
+
+$best
+ [1]  4  5  6  7  8  9 10 11 12 13 14 20
+
+$n.obs
+[1] 21
+
+--------------------------------------------------------
+             coleman  20   5  13     1.286808 
+Best subsample: 
+ [1]  2  3  4  5  7  8 12 13 14 16 17 19 20
+Outliers:  0 
+-------------
+$center
+  salaryP  fatherWc   sstatus teacherSc motherLev 
+   2.8253   44.6267    4.7133   25.1240    6.3320 
+
+$cov
+           salaryP  fatherWc   sstatus teacherSc motherLev
+salaryP    0.18916  -0.30888   0.14262   0.17971   0.02461
+fatherWc  -0.30888 683.87325 196.89588   3.30523  17.29381
+sstatus    0.14262 196.89588  85.94311   1.68507   5.58631
+teacherSc  0.17971   3.30523   1.68507   0.51571   0.21891
+motherLev  0.02461  17.29381   5.58631   0.21891   0.50172
+
+$msg
+[1] "0 singular samples of size 6 out of 3000"
+
+$crit
+[1] 1.2868
+
+$best
+ [1]  2  3  4  5  7  8 12 13 14 16 17 19 20
+
+$n.obs
+[1] 20
+
+--------------------------------------------------------
+            salinity  28   3  16     1.326364 
+Best subsample: 
+ [1]  1  2  6  7  8 12 13 14 18 20 21 22 25 26 27 28
+Outliers:  0 
+-------------
+$center
+     X1      X2      X3 
+10.0826  2.7826 22.7777 
+
+$cov
+         X1       X2      X3
+X1  9.14332  0.88241 -2.7916
+X2  0.88241  3.35968 -1.2622
+X3 -2.79160 -1.26222  2.0924
+
+$msg
+[1] "3 singular samples of size 4 out of 2000"
+
+$crit
+[1] 1.3264
+
+$best
+ [1]  1  2  6  7  8 12 13 14 18 20 21 22 25 26 27 28
+
+$n.obs
+[1] 28
+
+--------------------------------------------------------
+                wood  20   5  13   -36.270094 
+Best subsample: 
+ [1]  1  2  3  5  9 10 12 13 14 15 17 18 20
+Outliers:  0 
+-------------
+$center
+     x1      x2      x3      x4      x5 
+0.57613 0.12294 0.53127 0.53760 0.88913 
+
+$cov
+            x1         x2          x3          x4          x5
+x1  5.2757e-03 7.8749e-04  1.2965e-03 -2.0514e-05 -4.0002e-04
+x2  7.8749e-04 2.2023e-04  5.4362e-04  2.3846e-05  2.7230e-05
+x3  1.2965e-03 5.4362e-04  3.0435e-03 -7.0560e-04 -4.4395e-05
+x4 -2.0514e-05 2.3846e-05 -7.0560e-04  2.1388e-03  1.3511e-03
+x5 -4.0002e-04 2.7230e-05 -4.4395e-05  1.3511e-03  1.5946e-03
+
+$msg
+[1] "0 singular samples of size 6 out of 3000"
+
+$crit
+[1] -36.27
+
+$best
+ [1]  1  2  3  5  9 10 12 13 14 15 17 18 20
+
+$n.obs
+[1] 20
+
+--------------------------------------------------------
+                 hbk  75   3  39    -1.047858 
+Best subsample: 
+ [1] 15 16 17 18 19 20 21 22 23 24 26 27 31 32 33 35 36 37 38 40 43 49 50 51 54
+[26] 55 56 58 59 61 63 64 66 67 70 71 72 73 74
+Outliers:  0 
+-------------
+$center
+    X1     X2     X3 
+1.5583 1.8033 1.6600 
+
+$cov
+         X1       X2      X3
+X1 1.124845 0.022175 0.15373
+X2 0.022175 1.138972 0.18149
+X3 0.153729 0.181492 1.04346
+
+$msg
+[1] "0 singular samples of size 4 out of 2000"
+
+$crit
+[1] -1.0479
+
+$best
+ [1] 15 16 17 18 19 20 21 22 23 24 26 27 31 32 33 35 36 37 38 40 43 49 50 51 54
+[26] 55 56 58 59 61 63 64 66 67 70 71 72 73 74
+
+$n.obs
+[1] 75
+
+--------------------------------------------------------
+             Animals  28   2  15    14.555543 
+Best subsample: 
+ [1]  1  3  4  5 10 11 17 18 19 20 21 22 23 26 27
+Outliers:  0 
+-------------
+$center
+   body   brain 
+ 48.331 127.321 
+
+$cov
+        body   brain
+body  4978.6  7801.4
+brain 7801.4 21693.7
+
+$msg
+[1] "0 singular samples of size 3 out of 3276"
+
+$crit
+[1] 14.556
+
+$best
+ [1]  1  3  4  5 10 11 17 18 19 20 21 22 23 26 27
+
+$n.obs
+[1] 28
+
+--------------------------------------------------------
+                milk  86   8  47   -28.931843 
+Best subsample: 
+ [1]  5  7  8  9 10 22 23 24 26 30 31 32 33 34 35 37 38 39 45 46 49 51 53 54 55
+[26] 56 57 58 59 60 61 63 64 65 66 67 68 69 71 72 76 78 79 81 83 84 86
+Outliers:  0 
+-------------
+$center
+      X1       X2       X3       X4       X5       X6       X7       X8 
+  1.0302  35.7571  33.0540  26.1206  25.1000  25.0365 122.9397  14.3559 
+
+$cov
+           X1         X2         X3         X4         X5         X6         X7
+X1 4.2168e-07 8.0438e-05 0.00016232 0.00015533 0.00013742 0.00012898 0.00056354
+X2 8.0438e-05 1.4057e+00 0.19735023 0.14557604 0.09112903 0.17788018 1.15253456
+X3 1.6232e-04 1.9735e-01 1.06155658 0.78306196 0.77129032 0.77961086 0.62201741
+X4 1.5533e-04 1.4558e-01 0.78306196 0.62069636 0.59419355 0.59568612 0.50932924
+X5 1.3742e-04 9.1129e-02 0.77129032 0.59419355 0.62419355 0.60209677 0.51435484
+X6 1.2898e-04 1.7788e-01 0.77961086 0.59568612 0.60209677 0.62558116 0.51594726
+X7 5.6354e-04 1.1525e+00 0.62201741 0.50932924 0.51435484 0.51594726 3.12630312
+X8 3.1754e-06 1.0393e-01 0.15537148 0.10339299 0.08783871 0.09729826 0.19106964
+           X8
+X1 3.1754e-06
+X2 1.0393e-01
+X3 1.5537e-01
+X4 1.0339e-01
+X5 8.7839e-02
+X6 9.7298e-02
+X7 1.9107e-01
+X8 1.0417e-01
+
+$msg
+[1] "25 singular samples of size 9 out of 3000"
+
+$crit
+[1] -28.932
+
+$best
+ [1]  5  7  8  9 10 22 23 24 26 30 31 32 33 34 35 37 38 39 45 46 49 51 53 54 55
+[26] 56 57 58 59 60 61 63 64 65 66 67 68 69 71 72 76 78 79 81 83 84 86
+
+$n.obs
+[1] 86
+
+--------------------------------------------------------
+            bushfire  38   5  22    18.135810 
+Best subsample: 
+ [1]  1  2  3  4  5  6 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28
+Outliers:  0 
+-------------
+$center
+    V1     V2     V3     V4     V5 
+109.44 149.56 260.32 215.12 276.88 
+
+$cov
+         V1      V2       V3      V4      V5
+V1   376.67  280.03 -1628.02 -342.01 -285.07
+V2   280.03  236.42  -987.14 -188.82 -162.89
+V3 -1628.02 -987.14 10203.64 2369.63 1917.58
+V4  -342.01 -188.82  2369.63  589.94  468.56
+V5  -285.07 -162.89  1917.58  468.56  375.19
+
+$msg
+[1] "0 singular samples of size 6 out of 3000"
+
+$crit
+[1] 18.136
+
+$best
+ [1]  1  2  3  4  5  6 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28
+
+$n.obs
+[1] 38
+
 --------------------------------------------------------
 ========================================================
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  1.384 0.04 1.407 0 0 
+Time elapsed:  2.77 0.12 4.218 0 0 
 > 

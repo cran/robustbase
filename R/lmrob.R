@@ -98,6 +98,8 @@ print.lmrob <- function(x, digits = max(3, getOption("digits") - 3), ...)
 }
 
 
+vcov.lmrob <- function (object, ...) { object$cov }
+
 summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...)
 {
     z <- object
@@ -190,7 +192,7 @@ print.summary.lmrob <-
 	}
 	cat("\n")
 
-        summarizeRobWeights(x$weights, digits = digits, ...)
+	summarizeRobWeights(x$weights, digits = digits, ...)
 
     } else cat("\nNo Coefficients\n")
 
@@ -199,7 +201,7 @@ print.summary.lmrob <-
     invisible(x)
 }
 
-## hidden in namespace:
+## hidden in namespace
 printControl <-
     function(ctrl, digits = getOption("digits"),
 	     str.names = "seed",
@@ -207,13 +209,20 @@ printControl <-
 	     ...)
 {
     ## Purpose: nicely and sensibly print a 'control' structure
+    ##		currently  for lmrob(), glmrob()
     ## Author: Martin Maechler, Date: 31 May 2006
+    PR <- function(LST, ...) if(length(LST)) print(unlist(LST), ...)
+
     cat(header,"\n")
     is.str <- (nc <- names(ctrl)) %in% str.names
-    real.ctrl <- sapply(ctrl, function(x) length(x) > 0 && x != round(x))
-    print(unlist(ctrl[!is.str & real.ctrl]), digits = digits, ...)
-    ## non-real ones, but dropping 0-length ones
-    print(unlist(ctrl[!is.str & !real.ctrl]), ...)
+    is.ch <- sapply(ctrl, is.character)
+    real.ctrl <- sapply(ctrl, function(x)
+			length(x) > 0 && is.numeric(x) && x != round(x))
+    PR(ctrl[!is.str & real.ctrl], digits = digits, ...)
+    ## non-real, non-char ones (typically integers), but dropping 0-length ones
+    PR(ctrl[!is.str & !is.ch & !real.ctrl], ...)
+    ## char ones
+    PR(ctrl[!is.str & is.ch], ...)
     if(any(is.str))
 	for(n in nc[is.str]) {
 	    cat(n,":")
@@ -223,28 +232,52 @@ printControl <-
 }
 
 summarizeRobWeights <-
-    function(w, digits = getOption("digits"),
-             header = "Robustness weights:", ...)
+    function(w, digits = getOption("digits"), header = "Robustness weights:",
+	     eps = 1e-4, eps1 = eps, ...)
 {
     ## Purpose: nicely print a "summary" of robustness weights
     stopifnot(is.numeric(w))
     cat(header,"\n")
+    cat0 <- function(...) cat('', ...)
     n <- length(w)
     if(n <= 10) print(w, digits = digits, ...)
     else {
-	n1 <- sum(w1 <- abs(w - 1) < 1e-4)
-	n0 <- sum(w0 <- abs(w) < 1e-4 / n)
+	n1 <- sum(w1 <- abs(w - 1) < eps1)
+	n0 <- sum(w0 <- abs(w) < eps / n)
 	if(n0 > 0 || n1 > 0) {
-	    if(n0 > 0)
-		cat(n0, " observations c(",
-		    strwrap(paste(which(w0),collapse=",")),
-		    ")\n  are outliers with |weights| < ", formatC(1e-4 / n),".\n",
-		    sep='')
+	    if(n0 > 0) {
+		i0 <- which(w0)
+		c3 <- paste("with |weight| < ", formatC(eps / n, digits = digits),
+			    ";", sep='')
+		cat0(if(n0 > 1) {
+		       cc <- sprintf("%d observations c(%s)",
+				     n0, strwrap(paste(i0, collapse=",")))
+		       c2 <- " are outliers"
+		       paste(cc,
+			     if(nchar(cc)+ nchar(c2)+ nchar(c3) > getOption("width"))
+			     "\n	", c2, sep='')
+		     } else
+		       sprintf("observation %d is an outlier", i0),
+		     c3, "\n")
+	    }
 	    if(n1 > 0)
-		cat(n1, "weights are ~= 1.\n")
-	    cat("The remaining", n - n0 - n1,
-		" ones are summarized as\n")
+		cat0(ngettext(n1, "one weight is",
+			     sprintf("%s%d weights are",
+				     if(n1 == n)"All " else '', n1)), "~= 1;")
+	    n.rem <- n - n0 - n1
+	    if(n.rem == 0)
+		return(invisible())
+	    cat0("the remaining",
+		 ngettext(n.rem, "one", sprintf("%d ones", n.rem)))
+	    if(is.null(names(w)))
+		names(w) <- as.character(seq(along = w))
 	    w <- w[!w1 & !w0]
+	    if(n.rem <= 10) {
+		cat(":\n")
+		print(w, digits = digits, ...)
+		return(invisible())
+	    }
+	    else cat(" are summarized as\n")
 	}
 	print(summary(w, digits = digits), digits = digits, ...)
     }

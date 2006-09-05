@@ -1,3 +1,47 @@
+2006-09-05  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* tests/tlts.R: rename test functions and move to new file
+	* inst/test_LTS.R:
+	* tests/tmcd.R: rename test functions and move to new file;
+	   do not 'time' them, since we want to use *.Rout.save files.
+	* inst/test_MCD.R:
+
+	* src/Makevars: add long overdue $(FLIBS)
+
+2006-09-04  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/ltsReg.R (ltsReg.default): add argument name: sort(*, partial = )
+	* R/covMcd.R (covMcd): dito
+
+2006-06-27  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Depends): no longer depend on "MASS" which is suggested.
+
+	* NAMESPACE, man/summarizeRobWeights.Rd: export and document
+		summarizeRobWeights().
+
+	* R/lmrob.R (summarizeRobWeights): improvement (singular/plural etc)
+
+	* R/ltsReg.R (ltsReg.formula): add 'subset' etc; and follow
+		guidelines in developer.r-project.org/model-fitting-functions.txt.
+
+	* tests/tmcd.R: typo; add timing comparison
+
+	* R/glmrob.R (glmrob): family = "gaussian" now dispatches to lmrob()
+
+2006-06-24  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/glmrob.R (print.summary.glmrob): as for lmrob(), now use
+		summarizeRobWeights() and printControl().
+
+	* R/lmrob.R (printControl): more flexible
+
+	* man/glmrob.Rd: update examples with 'weights.on.x'
+
+2006-06-23  Andreas Ruckstuhl  <rks@zhwin.ch>
+
+	* R/glmrobMqle.R (wts_HiiDist): *row*Sums()!
+
 2006-06-13  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* DESCRIPTION (Version): 0.2-2

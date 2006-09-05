@@ -198,10 +198,9 @@ glmrobMqle <-
 }
 
 
-## FIXME: test usage:
 wts_HiiDist <- function(X) {
     x <- qr(X)
-    Hii <- colSums(qr.qy(x, diag(1, nrow = NROW(X), ncol = x$rank))^2)
+    Hii <- rowSums(qr.qy(x, diag(1, nrow = NROW(X), ncol = x$rank))^2)
     sqrt(1-Hii)
 }
 

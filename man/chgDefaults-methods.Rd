@@ -1,5 +1,6 @@
 \name{chgDefaults-methods}
 \docType{methods}
+\alias{chgDefaults}% the generic
 \alias{chgDefaults-methods}
 \alias{chgDefaults,ANY-method}
 \alias{chgDefaults,psi_func-method}

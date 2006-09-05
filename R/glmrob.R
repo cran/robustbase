@@ -14,9 +14,15 @@ function (formula, family, data, weights, subset,
 	stop("'family' not recognized")
     }
     if (!(family$family %in% c("binomial", "poisson"))) {
-	if(family$family == "gaussian")
-	    ## FIXME: use  our	lmrob() as soon as its available
-	    stop("Use MASS::rlm(formula, ...) for the Gaussian case")
+	if(family$family == "gaussian") {
+	    if(weights.on.x != "none")
+		stop("Use lmrob(formula, ...) for the Gaussian case;\n",
+		     " 'weights.on.x' needs to be changed")
+	    return(lmrob(formula, data= data, weights= weights, subset= subset,
+			 na.action= na.action, offset = offset,
+			 control = control, model = model, x = x, y = y,
+			 contrasts = contrasts, ...) )
+	}
 	else
 	    stop("Robust fitting method not yet implemented for this family")
     }
@@ -97,7 +103,7 @@ summary.glmrob <- function(object, correlation=FALSE, symbolic.cor=FALSE, ...)
 			"z-value" = zvalue, "Pr(>|z|)" = pvalue)
 
     ans <- c(object[c("call", "terms", "family", "iter", "control", "method",
-                      "residuals", "fitted.values")],
+		      "residuals", "fitted.values", "w.r", "w.x")],
 	     ## MM: should rather keep more from 'object' ?
 	     ##	    currently, cannot even print the asympt.efficiency!
 	     list(deviance=NULL, df.residual=NULL, null.deviance=NULL,
@@ -152,6 +158,9 @@ print.summary.glmrob <-
 	else cat("\nCoefficients:\n")
 	printCoefmat(cf, digits = digits, signif.stars = signif.stars,
 		     na.print = "NA", ...)
+
+	summarizeRobWeights(x$w.r * x$w.x, digits = digits,
+			    header = "Robustness weights w.r * w.x:", ...)
     }
     else cat("No coefficients\n\n")
 
@@ -186,6 +195,9 @@ print.summary.glmrob <-
 	    }
 	}
     }
+
+    printControl(x$control, digits = digits)
+
     cat("\n")
     invisible(x)
 }
