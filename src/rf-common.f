@@ -1,30 +1,36 @@
-c-- Routines common to
-c-- fastLTS ( ./rfltsreg.f )  and
-c-- fastMCD ( ./rffastmcd.f )
-
-ccccc
-ccccc
-	subroutine rfrangen(n,nsel,index,seed)
-cc
-cc    Randomly draws nsel cases out of n cases.
-cc    Here, index is the index set.
-cc
-	integer seed
-	integer index(nsel)
-	real uniran
-cc
-	do 100 i=1,nsel
-cOLD 10	  num=int(uniran(seed)*n)+1
- 10	  num=int(unifrnd()*n)+1
-	  if(i.gt.1) then
+c
+c--   Routines common to
+c--   fastLTS ( ./rfltsreg.f )  and
+c--   fastMCD ( ./rffastmcd.f )
+c
+c
+      subroutine rfrangen(n, nsel, index, seed)
+c
+c     Randomly draws nsel cases out of n cases.
+c     Here, index is the index set.
+c
+      implicit none
+      integer n, nsel, index(nsel), seed
+c     real uniran
+      double precision unifrnd
+      integer i,j, num
+c
+      do 100 i=1,nsel
+c     OLD 10	  num=int(uniran(seed)*n)+1
+ 10	 num=int(unifrnd()*n)+1
+C 	 if(num .gt. n) then
+C 	    call intpr('** rfrangen(): num > n; num=', -1, num, 1)
+C 	    num=n
+C 	 endif
+	 if(i.gt.1) then
 	    do 50 j=1,i-1
-	      if(index(j).eq.num) goto 10
+	       if(index(j).eq.num) goto 10
  50	    continue
-	  endif
-	  index(i)=num
- 100	continue
-	return
-	end
+	 endif
+	 index(i)=num
+ 100  continue
+      return
+      end
 ccccc
 ccccc
 cOLD 	function uniran(seed)
@@ -47,17 +53,22 @@ ccccc
 cc
 cc    Constructs all subsets of nsel cases out of n cases.
 cc
-	integer index(nsel)
+        implicit none
+	integer n,nsel,index(nsel)
 cc
+        integer k,i
+
 	k=nsel
 	index(k)=index(k)+1
- 10	if(k.eq.1.or.index(k).le.(n-(nsel-k))) goto 100
+c while
+ 10	if(k.eq.1 .or. index(k).le.(n-(nsel-k))) goto 100
 	k=k-1
 	index(k)=index(k)+1
 	do 50 i=k+1,nsel
 	  index(i)=index(i-1)+1
  50	continue
 	goto 10
+c end{while}
  100	return
 	end
 ccccc
@@ -66,10 +77,13 @@ ccccc
 cc
 cc  Sorts the array a of length n.
 cc
+        implicit none
+        integer n
 	double precision a(n)
+c
 	double precision t
-	integer gap
-cc
+	integer gap, i,j, nextj
+
 	gap=n
  100	gap=gap/2
 	if(gap.eq.0) goto 200
@@ -96,10 +110,11 @@ ccccc
 cc
 cc  Sorts the integer array a of length kk.
 cc
-	integer a(kk)
-	integer t
-	integer gap
-cc
+        implicit none
+	integer a(kk), kk
+c
+	integer t, gap, i,j, nextj
+
 	gap=kk
  100	gap=gap/2
 	if(gap.eq.0) goto 200
@@ -131,14 +146,17 @@ cc    exhaustive search is to be done
 cc
 cc    k is the number of variables (p)
 cc
+      implicit none
       integer replow, k
+c
       integer irep(6)
       data irep/500,50,22,17,15,14/
-
-      iret=0
-      if(k.le.6) iret = irep(k)
-
-      replow = iret
+c
+      if(k.le.6) then
+	 replow = irep(k)
+      else
+	 replow = 0
+      endif
       return
       end
 ccccc
@@ -152,13 +170,16 @@ cc  For comb > 1E+009 the resulting 'comb' may be too large
 cc  to be put in the integer 'rfncomb', but the main program
 cc  only calls this function for small enough n and k.
 cc
+      implicit none
       integer rfncomb,k,n
+c
       double precision comb,fact
-cc
+      integer j
+c
       comb=dble(1.0)
       do 10 j=1,k
-      fact=(dble(n-j+1.0))/(dble(k-j+1.0))
-      comb=comb*fact
+         fact=(dble(n-j+1.0))/(dble(k-j+1.0))
+         comb=comb*fact
  10   continue
       rfncomb=int(comb+0.5D0)
       return
@@ -171,7 +192,7 @@ cc  Copies matrix a to matrix b.
 cc
 	double precision a(n1,n2)
 	double precision b(n1,n2)
-cc
+c
 	do 100 i=1,n1
 	  do 90 j=1,n2
 	    b(i,j)=a(i,j)
@@ -185,10 +206,12 @@ ccccc
 cc
 cc  Finds the k-th order statistic of the array aw of length ncas.
 cc
-	double precision rffindq
-	double precision aw(ncas)
+        implicit none
+        integer ncas,k,index(ncas)
+	double precision rffindq, aw(ncas)
+c
 	double precision ax,wa
-	integer index(ncas)
+        integer i,j,l,lr,jnc
 cc
 	do 10 j=1,ncas
 	  index(j)=j
@@ -229,15 +252,25 @@ cc
 cc  Draws ngroup nonoverlapping subdatasets out of a dataset of size n,
 cc  such that the selected case numbers are uniformly distributed from 1 to n.
 cc
-	integer a(2,ntot)
-	integer mini(kmini)
-	integer seed
+        implicit none
+	integer ntot, kmini, a(2,ntot), n, seed, mini(kmini), ngroup
+c
+        double precision unifrnd
+c
+        integer jndex, nrand, k,m,i,j
 cc
 	jndex=0
 	do 10 k=1,ngroup
 	  do 20 m=1,mini(k)
 cOLD 	    nrand=int(uniran(seed)*(n-jndex))+1
 	    nrand=int(unifrnd()*(n-jndex))+1
+C 	    if(nrand .gt. n-jndex) then
+C 	       call intpr(
+C      1         '** rfrdraw(): need to correct nrand > n-jndex; nrand=',
+C      2	                  -1, nrand, 1)
+C 	       nrand=n-jndex
+C 	    endif
+
 	    jndex=jndex+1
 	    if(jndex.eq.1) then
 	      a(1,jndex)=nrand
@@ -254,6 +287,7 @@ cOLD 	    nrand=int(uniran(seed)*(n-jndex))+1
 		    a(1,i)=nrand+i-1
 		    a(2,i)=k
 		    goto 20
+c                   ------- break
 		  endif
  5		continue
 	    endif

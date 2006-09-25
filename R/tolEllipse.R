@@ -22,9 +22,8 @@
 ##   this function.
 
 tolEllipsePlot <-
-    function(x, mcd = NULL, cutoff = NULL, id.n = NULL,
-	     classic = FALSE,
-	     tol = 1e-07, # VT:: 16.04.2005 - change for 2.1.0 - use tol instead of tol.inv
+    function(x, m.cov = covMcd(x), cutoff = NULL, id.n = NULL,
+	     classic = FALSE, tol = 1e-07,
 	     xlab = "", ylab = "", main = "Tolerance ellipse (97.5%)",
 	     txt.leg = c("robust", "classical"),
 	     col.leg = c("red", "blue"),
@@ -40,14 +39,13 @@ tolEllipsePlot <-
 
 ##@edescr
 ##
-##@in  x		 : [matrix] A data.frame or matrix, n > 2*p
-##@in  mcd		 : [mcd object] An object of type mcd - its attributes
-##					center and cov will be used
-##@in  cutoff		 : [number] Distance needed to flag data points outside the ellipse
-##@in  outflag		 : [logical] Whether to print the labels of the outliers
-##@in  tol		 : [number] tolerance to be used for computing the inverse see 'solve'.
-##				    defaults to 1e-7
-
+##@in  x	: [matrix] A data.frame or matrix, n > 2*p
+##@in  m.cov	: [mcd object] An object of type mcd - its attributes
+##				center and cov will be used
+##@in  cutoff	: [number] Distance needed to flag data points outside the ellipse
+##@in  outflag	: [logical] Whether to print the labels of the outliers
+##@in  tol	: [number] tolerance to be used for computing the inverse see 'solve'.
+##		    defaults to 1e-7
 
 ## MM: This is nothing else but a version  cluster::ellipsoidPoints() !! -- FIXME
     ellips <- function(loc, cov) {
@@ -66,34 +64,27 @@ tolEllipsePlot <-
 	z2 <- dist/sqrt(lambda2) * sin(z)
 	alfa <- atan(eigvect[2]/eigvect[1])
 	r <- matrix(c(cos(alfa),  - sin(alfa), sin(alfa), cos(alfa)), ncol = 2)
-	z <- t(t(cbind(z1, z2) %*% r) + loc)	#   xmin <- min(x, z[, 1])
-
-	z
+	t(loc + t(cbind(z1, z2) %*% r))	#   xmin <- min(x, z[, 1])
     }
 
     ##	parameters and preconditions
 
-    if(is.vector(x) || is.matrix(x)) {
-	if(!is.numeric(x))
-	    stop("x is not a numeric dataframe or matrix.")
-    } else if(is.data.frame(x)) {
-	if(!all(sapply(x,data.class) == "numeric"))
-	    stop("x is not a numeric dataframe or matrix.")
-    }
+    if(is.data.frame(x))
+        x <- data.matrix(x)
+    if(!is.matrix(x) || !is.numeric(x))
+        stop("x is not a numeric dataframe or matrix.")
 
     n <- dim(x)[1]
     p <- dim(x)[2]
 
     if(p != 2)
-	stop("Dimension must be 2!")
+	stop("Dimension {= ncol(x)} must be 2!")
 
-    if(missing(mcd))
-	mcd <- covMcd(x)
-    if(length(mcd$center) == 0 ||  length(mcd$cov) == 0)
-	stop("Invalid mcd object: attributes center and cov missing!")
+    if(!is.numeric(m.cov$center) ||  !is.numeric(m.cov$cov))
+	stop("argument 'm.cov' must have numeric components 'center' and 'cov'")
 
-    x.loc <- mcd$center
-    x.cov <- n/(n - 1) * mcd$cov
+    x.loc <- m.cov$center
+    x.cov <- n/(n - 1) * m.cov$cov
     xM <- colMeans(x)
     z1 <- ellips(loc = xM, cov = n/(n - 1) * cov.wt(x)$cov)
     z2 <- ellips(loc = x.loc, cov = x.cov)
@@ -101,7 +92,7 @@ tolEllipsePlot <-
     y1 <- c(min(x[, 2], z1[, 2], z2[, 2]), max(x[,2],z1[,2], z2[,2]))
 
     md <- sqrt(mahalanobis(x, xM, cov(x), tol=tol))
-    rd <- sqrt(mahalanobis(x,mcd$center, mcd$cov, tol=tol))
+    rd <- sqrt(mahalanobis(x,m.cov$center, m.cov$cov, tol=tol))
 
     ## Note: the *calling* function may pass a 'missing' value
     if(missing(cutoff) || is.null(cutoff))
@@ -109,9 +100,9 @@ tolEllipsePlot <-
     if(missing(id.n) || is.null(id.n))
 	id.n <- sum(rd > cutoff)
 
-    if(classic) {
-        opr <- if(prod(par("mfrow")) == 1) par(mfrow=c(1,2), pty="m") else list()
-    }
+    ### (2,1) is wrong for 'classic' -- we *overplot*:
+    ## if(classic)
+    ##  opr <- if(prod(par("mfrow"))== 1) par(mfrow=c(1,2), pty="m") else list()
     ## MM: this is *NOT* good :
     ## else par(mfrow = c(1, 1))
 
@@ -122,34 +113,21 @@ tolEllipsePlot <-
 ##  define the plot, plot a box, plot the "good" points,
 ##  plot the outliers either as points or as numbers depending on outflag,
 ##  plot the ellipse, write a title of the plot
-    plot(x, xlim = x1, ylim = y1, xlab = xlab, ylab = ylab)
+    plot(x, xlim = x1, ylim = y1, xlab = xlab, ylab = ylab, main = main)
     box()
     xrange <- par("usr")
     xrange <- xrange[2] - xrange[1]
     text(x[ind, 1] + xrange/50, x[ind, 2], ind)
 
     points(z2, type = "l", lty=lty.leg[1], col=col.leg[1])
-    title(main)
 
 ##  2. Classical tolerance
     if(classic){
 	points(z1, type = "l", lty=lty.leg[2], col=col.leg[2])
 	legend("bottomright", txt.leg, lty = lty.leg, col = col.leg)
 
-        par(opr)
+        ## par(opr)
     }
 
-##  2. Classical tolerance
-##    if(classic){
-##	 plot(x[, 1], x[, 2], xlim = x1, ylim = y1, xlab = "", ylab = "", type = "p")
-##	 box()
-##
-##	 xrange <- par("usr")
-##	 xrange <- xrange[2] - xrange[1]
-##	 text(x[ind, 1] + xrange/50, x[ind, 2], ind)
-##
-##	 points(z1[, 1], z1[, 2], type = "l")
-##	 title(main = "CLASSICAL TOLERANCE \n	 ELLIPSE (97.5%)")
-##    }
     invisible()
 }

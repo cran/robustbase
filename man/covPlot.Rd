@@ -20,12 +20,17 @@
 }
 \usage{
 \method{plot}{mcd}(x,
-     which = c("all", "dd", "distance", "qqchi2", "tolEllipsePlot", "screeplot"),
+     which = c("all", "dd", "distance", "qqchi2",
+               "tolEllipsePlot", "screeplot"),
      classic = FALSE, ask = (which=="all" && dev.interactive()),
      cutoff, id.n, tol = 1e-7, \dots)
 
-%    covPlot(x, which = c("all","dd","distance","qqchi2","tolEllipsePlot","screeplot"), classic=FALSE, ask=(which=="all" && dev.interactive()), mcd, cutoff, id.n, tol = 1e-7)
-
+covPlot(x,
+     which = c("all", "dd", "distance", "qqchi2",
+               "tolEllipsePlot", "screeplot"),
+     classic = FALSE, ask = (which == "all" && dev.interactive()),
+     m.cov = covMcd(x),
+     cutoff = NULL, id.n, tol = 1e-07, \dots)
 %% ddplot(x, \dots)
 %% distplot(x, \dots)
 %% chi2qqplot(x, \dots)
@@ -33,10 +38,14 @@
 }
 
 \arguments{
-  \item{x}{a \code{mcd} object, typically result of \code{covMcd}.}
+  \item{x}{For the \code{plot()} method, a \code{mcd} object, typically
+    result of \code{\link{covMcd}}.\cr
+    For \code{covPlot()}, the numeric data matrix such as the \code{X}
+    component as returned from \code{\link{covMcd}}.}
   \item{which}{string indicating which plot to show.  See the
     \emph{Details} section for a description of the options.  Defaults to \code{"all"}.}.
-  \item{classic}{whether to plot the classical distances too. Default is \code{FALSE}.}.
+  \item{classic}{whether to plot the classical distances too.
+    Defaults to \code{FALSE}.}.
   \item{ask}{logical indicating if the user should be \emph{ask}ed
     before each plot, see \code{\link{par}(ask=.)}.  Defaults to
     \code{which == "all" && \link{dev.interactive}()}.
@@ -47,32 +56,40 @@
     \code{cutoff} is used.}
   \item{tol}{tolerance to be used for computing the inverse, see
     \code{\link{solve}}.  Defaults to \code{tol = 1e-7}.}
+  \item{m.cov}{an object similar to those of class \code{"mcd"}; however
+    only its components \code{center} and \code{cov} will be used.  If
+    missing, the MCD will be computed (via \code{\link{covMcd}()}).}
   \item{\dots}{other parameters to be passed through to plotting functions.}
 }
 \details{
-  This function produces several plots based on the robust and classical
-  location and covariance matrix. Which of them to select is specified
-  by the attribute  \code{which}.
-  The possible options are:
+  These functions produce several plots based on the robust and classical
+  location and covariance matrix.  Which of them to select is specified
+  by the attribute  \code{which}.  The \code{plot} method for
+  \code{"mcd"} objects is calling \code{covPlot()} directly, whereas
+  \code{covPlot()} should also be useful for plotting other (robust)
+  covariance estimates.  The possible options are:
+  \describe{
+    \item{\code{distance}}{index plot of the robust distances}
 
- \code{distance} - index plot of the robust distances;
+    \item{\code{dd}}{distance-distance plot}
 
- \code{dd} - distance-distance plot;
+    \item{\code{qqchi2}}{a qq-plot of the robust distances versus the
+      quantiles of the chi-squared distribution}
 
- \code{qqchi2} - a qq-plot of the robust distances versus the quantiles of the chi-squared distribution
+    \item{\code{tolEllipsePlot}}{a tolerance ellipse plot, via
+      \code{\link{tolEllipsePlot}()}}
 
- \code{tolEllipsePlot} - a tolerance ellipse
+    \item{\code{screeplot}}{an eigenvalues comparison plot - screeplot}
+  }
 
- \code{screeplot} - an eigenvalues comparison plot - screeplot
-
- The Distance-Distance Plot, introduced by
- Rousseeuw and van Zomeren (1990), displays the robust distances
- versus the classical Mahalanobis distances. The dashed line is the set of
- points where the robust distance is equal to the classical distance.
- The horizontal and vertical lines are drawn at values equal to the cutoff
- which defaults to square root of the 97.5\% quantile of a chi-squared
- distribution with p degrees of freedom. Points beyond these lines can
- be considered outliers.
+  The Distance-Distance Plot, introduced by
+  Rousseeuw and van Zomeren (1990), displays the robust distances
+  versus the classical Mahalanobis distances.  The dashed line is the set of
+  points where the robust distance is equal to the classical distance.
+  The horizontal and vertical lines are drawn at values equal to the cutoff
+  which defaults to square root of the 97.5\% quantile of a chi-squared
+  distribution with p degrees of freedom.  Points beyond these lines can
+  be considered outliers.
 }
 %\value{}
 \references{
@@ -98,6 +115,14 @@ plot(mcd, which = "tolEllipsePlot", classic = TRUE)
 op <- par(mfrow = c(2,3))
 plot(mcd) ## -> which = "all" (5 plots)
 par(op)
+
+## same plots for another robust Cov estimate:
+data(hbk)
+hbk.x <- data.matrix(hbk[, 1:3])
+cOGK <- covOGK(hbk.x, n.iter = 2, sigmamu = scaleTau2,
+               weight.fn = hard.rejection)
+covPlot(hbk.x, m.cov = cOGK, classic = TRUE, ask= TRUE)
+
 \dontshow{
 op <- par(mfrow = c(3,3))
 plot(mcd, classic = TRUE) ## -> which = "all" (7 plots)

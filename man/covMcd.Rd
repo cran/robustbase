@@ -88,7 +88,7 @@ covMcd(x, cor = FALSE, alpha = 1/2, nsamp = 500, seed = NULL,
   \item{raw.cnp2}{a vector of length two containing the consistency
     correction factor and the finite sample correction factor of
     the raw estimate of the covariance matrix.}
-  \item{X}{the input data as a matrix.}
+  \item{X}{the input data as numeric matrix, without \code{\link{NA}}s.}
   \item{n.obs}{total number of observations.}
   \item{alpha}{the size of the subsets over which the determinant is
     minimized (the default is \eqn{(n+p+1)/2}).}

@@ -1,3 +1,4 @@
+cc -*- mode: fortran; kept-new-versions: 25; kept-old-versions: 20 -*-
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 cc  rrcov : Scalable Robust Estimators with High Breakdown Point
 cc
@@ -1561,23 +1562,33 @@ cc
 cc FIXME: 'seed' now unused
 	subroutine prdraw(a,pnsel,seed,nn)
 cc
-	integer a(nn)
-	integer pnsel
-	integer seed
+        implicit none
+	integer nn, a(nn), pnsel, seed
+c
+        double precision unifrnd
+	integer jndex, nrand, i,j
 cc
 	jndex=pnsel
 cOLD 	nrand=int(uniran(seed)*(nn-jndex))+1
 	nrand=int(unifrnd() * (nn-jndex))+1
+C         if(nrand .gt. nn-jndex) then
+C            call intpr(
+C      1          '** prdraw(): correcting nrand > nn-jndex; nrand=',
+C      2          -1, nrand, 1)
+C            nrand=nn-jndex
+C         endif
+
 	jndex=jndex+1
 	a(jndex)=nrand+jndex-1
 	do 5, i=1,jndex-1
-	  if(a(i).gt.nrand+i-1) then
-	    do 6,j=jndex,i+1,-1
-	      a(j)=a(j-1)
- 6	    continue
-	    a(i)=nrand+i-1
-	    goto 10
-	  endif
+           if(a(i).gt.nrand+i-1) then
+              do 6,j=jndex,i+1,-1
+                 a(j)=a(j-1)
+ 6            continue
+              a(i)=nrand+i-1
+              goto 10
+c             ------- break
+           endif
  5	continue
  10	continue
 	return

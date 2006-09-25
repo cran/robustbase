@@ -111,3 +111,5 @@ o src/lmrob.c :
    - does many many vector and vector-matrix things itself
      instead of using BLAS and LAPACK
    - does median() , MAD() instead of using R's  sort() routines
+
+----

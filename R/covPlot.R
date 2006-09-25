@@ -26,25 +26,20 @@ plot.mcd <-
              which=c("all", "dd","distance","qqchi2","tolEllipsePlot","screeplot"),
              classic= FALSE,
              ask = (which=="all" && dev.interactive()),
-             cutoff,
-             id.n,
+             cutoff = NULL, id.n,
              tol = 1e-7, ...)
-{  ## VT:: 16.04.2005 - change for 2.1.0 - use 'tol' instead of 'tol.inv'
+{
     if (!inherits(x, "mcd"))
         stop("Use only with 'mcd' objects")
-
-    covPlot(x$X, which=which, classic=classic, ask=ask,
-            cutoff=cutoff, mcd=x, id.n=id.n, tol=tol, ...)
+    covPlot(x$X, which=which, classic=classic, ask=ask, cutoff=cutoff,
+            mcd = x, id.n=id.n, tol=tol, ...)
 }
 
-covPlot <- function(x,
-                   which=c("all", "dd","distance","qqchi2","tolEllipsePlot","screeplot"),
-                   classic=FALSE,
-                   ask=FALSE,
-                   mcd,
-                   cutoff,
-                   id.n,
-                   tol = 1e-7, ...)
+covPlot <-
+    function(x, which = c("all", "dd", "distance", "qqchi2",
+			  "tolEllipsePlot", "screeplot"),
+	     classic = FALSE, ask = (which == "all" && dev.interactive()),
+	     m.cov = covMcd(x), cutoff = NULL, id.n, tol = 1e-7, ...)
 {
 
     ##@bdescr
@@ -73,39 +68,37 @@ covPlot <- function(x,
     ##
     ##@edescr
     ##
-    ##@in  x                 : [matrix] A data.frame or matrix, n > 2*p
-    ##@in  which          : [character] A plot option, one of:
-    ##                            classic: index plot of the classical mahalanobis distances
-    ##                            robust:  index plot of the robust mahalanobis distances
-    ##                            dd:      distance-distance plot
-    ##                            index:   parallel index plot of classical and robust distances
-    ##                            all:     all three plots
-    ##                          default is "all"
-    ##@in  classic           : [logical] If true the classical plot will be displayed too
-    ##                                   default is classic=FALSE
-    ##@in  mcd               : [mcd object] An object of type mcd - its attributes
+    ##@in  x       : [matrix] A data.frame or matrix, n > 2*p
+    ##@in  which   : [character] A plot option, one of:
+    ##                classic: index plot of the classical mahalanobis distances
+    ##                robust : index plot of the robust mahalanobis distances
+    ##                dd :     distance-distance plot
+    ##                index :  parallel index plot of classical and robust distances
+    ##                all :    all three plots --- this is the default
+    ##
+    ##@in  classic : [logical] If true the classical plot will be displayed too
+    ##                                   default is classic = FALSE
+    ##@in  m.cov    : [list] An object like class "mcd" - only its attributes
     ##                                      center and cov will be used
-    ##@in  cutoff            : [number] The cutoff value for the distances
-    ##@in  id.n              : [number] number of observations to be identified with a label.
-    ##                                  Defaults to the number of observations with distance
-    ##                                  larger than cutoff
-    ##@in  tol               : [number] tolerance to be used for computing the inverse - see 'solve'.
-    ##                                  defaults to 1e-7
+    ##@in  cutoff  : [number] The cutoff value for the distances
+    ##@in  id.n    : [number] number of observations to be identified with a label.
+    ## 			Defaults to the number of observations with
+    ##                  distance larger than cutoff -- missing is propagated
+    ##@in  tol     : [number] tolerance to be used for computing the inverse
+    ##                         - see 'solve'. defaults to 1e-7
 
     ## NOTE: The default tolerance 1e-7, will not work for some example
     ##       data sets, like milk or aircraft
 
-    myscreeplot <- function(x, mcd) {
-
-        if(missing(mcd))
-            mcd <- covMcd(x)
-        erob <- eigen(mcd$cov,symmetric=TRUE,only.values=TRUE)$values
-        eclass <- eigen(var(x),symmetric=TRUE,only.values=TRUE)$values
+    myscreeplot <- function(x, m.cov = covMcd(x))
+    {
+        erob   <- eigen(m.cov$cov,symmetric = TRUE, only.values = TRUE)$values
+        eclass <- eigen(var(x), symmetric = TRUE, only.values = TRUE)$values
 
         leg.txt <- c("Robust", "Classical")
         leg.col <- c("green", "red")
-        leg.pch = c(1,24)
-        leg.lty = c("solid", "dotted")
+        leg.pch  <- c(1,24)
+        leg.lty  <- c("solid", "dotted")
 
         eall <- c(erob,eclass)
         ylim <- c( min(eall), max(eall))
@@ -113,10 +106,10 @@ covPlot <- function(x,
         plot(erob, ylim=ylim, ylab="Eigenvalues", xlab="Index", type="n")
         legend("topright", leg.txt, pch = leg.pch, lty = leg.lty, col = leg.col)
 
-        lines(erob, type="o", pch = leg.pch[1], lty = leg.lty[1], col=leg.col[1])
-        lines(eclass, type="o", pch = leg.pch[2], lty = leg.lty[2], col=leg.col[2])
+        lines(erob,   type="o", pch= leg.pch[1], lty= leg.lty[1], col=leg.col[1])
+        lines(eclass, type="o", pch= leg.pch[2], lty= leg.lty[2], col=leg.col[2])
 
-        title(main="Scree plot")
+        title(main = "Scree plot")
     }
 
     mydistplot <- function(x, cutoff, classic = FALSE, id.n) {
@@ -126,45 +119,43 @@ covPlot <- function(x,
         ##  observations with largest value of x. If id.n is not supplied,
         ##  calculate it as the number of observations larger than cutoff.
         ##  Use cutoff to draw a horisontal line.
-        ##  Use classic=FALSE/TRUE to choose the label of the vertical axes
+        ##  Use classic = FALSE/TRUE to choose the label of the vertical axes
 
         n <- length(x)
-        if(missing(id.n))
-            id.n <- length(which(x>cutoff))
-        if(classic)
-            ylab="Square Root of Mahalanobis distance"
-        else
-            ylab="Square Root of Robust distance"
-        plot(x, ylab=ylab, xlab="Index", type="p")
+	if(missing(id.n)) # maybe propagated
+	    id.n <- length(which(x > cutoff))
+        ylab <- paste("Square Root of",
+                      if(classic) "Mahalanobis" else "Robust",
+                      "distance")
+	plot(x, type = "p", ylab = ylab, xlab = "Index",
+	     main = "Distance Plot")
         label(1:n, x, id.n)
-        abline(h=cutoff)
-
-        title(main="Distance Plot")
+        abline(h = cutoff)
     }
 
     myddplot <- function(md, rd, cutoff, id.n) {
         ##  Distance-Distance Plot:
-        ##  Plot the vector y=rd (robust distances) against
-        ##  x=md (mahalanobis distances). Identify by a label the id.n
+        ##  Plot the vector y = rd (robust distances) against
+        ##  x = md (mahalanobis distances). Identify by a label the id.n
         ##  observations with largest rd. If id.n is not supplied, calculate
         ##  it as the number of observations larger than cutoff. Use cutoff
         ##  to draw a horisontal and a vertical line. Draw also a dotted line
         ##  with a slope 1.
         n <- length(md)
-        if(missing(id.n))
-            id.n <- length(which(rd>cutoff))
+	if(missing(id.n)) # maybe propagated
+	    id.n <- length(which(rd > cutoff))
         xlab <- "Mahalanobis distance"
         ylab <- "Robust distance"
-        plot(md, rd, xlab=xlab, ylab=ylab, type="p")
-        label(md,rd,id.n)
-        abline(0, 1, lty=2)
-        abline(v=cutoff)
-        abline(h=cutoff)
-
-        title(main="Distance-Distance Plot")
+        plot(md, rd, type = "p", xlab = xlab, ylab = ylab,
+	     main = "Distance-Distance Plot")
+        label(md, rd, id.n)
+        abline(0, 1, lty = 2)
+        abline(v = cutoff, h = cutoff)
     }
 
-    qqplot <- function(x, p, cutoff, classic=FALSE, id.n) {
+    qqplot <- function(x, p, cutoff = sqrt(qchisq(0.975, p)),
+                       classic = FALSE, id.n)
+    {
         ##  Chisquare QQ-Plot:
         ##  Plot the vector x (robust or mahalanobis distances) against
         ##  the square root of the quantiles of the chi-squared distribution
@@ -172,66 +163,62 @@ covPlot <- function(x,
         ##  Identify by a label the id.n observations with largest value of x.
         ##  If id.n is not supplied, calculate it as the number of observations
         ##  larger than cutoff.
-        ##  Use classic=FALSE/TRUE to choose the label of the vertical axes
-
+        ##  Use classic = FALSE/TRUE to choose the label of the vertical axes
 
         ##  parameters and preconditions
 
         n <- length(x)
-
-        if(missing(cutoff))
-            cutoff <- sqrt(qchisq(0.975, p))
-
-        if(missing(id.n))
-            id.n <- length(which(x>cutoff))
-
+	if(missing(id.n)) # maybe propagated
+	    id.n <- length(which(x > cutoff))
         qq <- sqrt(qchisq(((1:n)-1/3)/(n+1/3), p))
 
-        x <- sort(x, index.return=TRUE)
+        x <- sort(x, index.return = TRUE)
         ix <- x$ix
         x <- x$x
 
-        if(classic)
-            ylab="Mahalanobis distance"
-        else
-            ylab="Robust distance"
-
-        plot(qq, x, xlab="Square root of the quantiles of the chi-squared distribution", ylab=ylab, type="p")
+        ylab <- paste(if(classic) "Mahalanobis" else "Robust", "distance")
+        xlab <- "Square root of the quantiles of the chi-squared distribution"
+	plot(qq, x, xlab = xlab, ylab = ylab,
+	     main = "Chisquare QQ-Plot")
         if(id.n > 0) {
             ind <- (n-id.n+1):n
-            xrange <- par("usr")
-            xrange <- xrange[2] - xrange[1]
+            xrange <- diff(par("usr")[1:2])
             text(qq[ind] + xrange/50, x[ind], ix[ind])
         }
-        abline(0, 1, lty=2)
-        title(main="Chisquare QQ-Plot")
+        abline(0, 1, lty = 2)
     }
 
-    label <- function(x, y, id.n=3) {
-        if(id.n > 0) {
-            xrange <- par("usr")
-            xrange <- xrange[2] - xrange[1]
+    label <- function(x, y, id.n = 3) {
+        if(id.n > 0) { ## label the largest 'id.n' y-values
+            xrange <- diff(par("usr")[1:2])
             n <- length(y)
-            ind <- sort(y, index.return=TRUE)$ix
+            ind <- sort(y, index.return = TRUE)$ix
             ind <- ind[(n-id.n+1):n]
             text(x[ind] + xrange/50, y[ind], ind)
         }
     }
 
-    ##  parameters and preconditions
+    ##  arguments checking of preconditions
 
-    if(is.vector(x) || is.matrix(x)) {
-        if(!is.numeric(x))
-            stop( "x is not a numeric dataframe or matrix.")
-    } else if(is.data.frame(x)) {
-        if(!all(sapply(x,data.class) == "numeric"))
-            stop( "x is not a numeric dataframe or matrix.")
-    }
+    if(is.data.frame(x))
+        x <- data.matrix(x)
+    if(!is.matrix(x) || !is.numeric(x))
+        stop("x is not a numeric dataframe or matrix.")
 
     n <- dim(x)[1]
     p <- dim(x)[2]
 
-    if(missing(cutoff))
+    if(!is.numeric(m.cov$center) ||  !is.numeric(m.cov$cov))
+	stop("argument 'm.cov' must have numeric components 'center' and 'cov'")
+    if(length(m.cov$center) != p)
+        stop("Data set and provided center have different dimensions!")
+
+    ## ?covPlot says it only needs 'cov' and 'center'
+    ## Maybe should be smarter and *test* for non-singularity
+    if(is.numeric(m.cov$crit) && m.cov$crit == 0)
+	stop( "The covariance matrix is singular!")
+
+    if(is.null(cutoff))
         cutoff <- sqrt(qchisq(0.975, p))
 
     if(!missing(id.n) && !is.null(id.n)) {
@@ -239,69 +226,58 @@ covPlot <- function(x,
         if(id.n < 0 || id.n > n)
             stop(sQuote("id.n")," must be in {1,..,",n,"}")
     }
-
-    if(missing(mcd))
-        mcd <- covMcd(x)
-
-    if(length(mcd$center)  == 0 ||  length(mcd$cov) == 0)
-        stop( "Invalid mcd object: attributes center and cov missing!")
-
-    if(length(mcd$center)  != p)
-        stop( "Data set and provided center have different dimensions!")
-
-    if(mcd$crit == 0)
-        stop( "The covariance matrix is singular!")
-
-    md <- mahalanobis(x, colMeans(x), var(x), tol=tol)
-    md <- sqrt(md)
-
-    rd <- mahalanobis(x, mcd$center, mcd$cov, tol=tol)
-    rd <- sqrt(rd)
-
     which <- match.arg(which)
 
-    ## *Never* here : par(mfrow=c(1,1), pty="m")
+    md <- sqrt(mahalanobis(x, colMeans(x), var(x), tol = tol))
+    rd <- sqrt(mahalanobis(x, m.cov$center, m.cov$cov, tol = tol))
+
+    ## *Never* here : par(mfrow = c(1,1), pty = "m")
     op <- if (ask) par(ask = TRUE) else list()
     on.exit(par(op))
 
     if(which == "all" || which == "distance") {
+	if(classic) {
+	    opr <- if(prod(par("mfrow")) == 1)
+		par(mfrow = c(1,2), pty = "m") else list()
+	}
+        ## index plot of mahalanobis distances:
+        mydistplot(rd, cutoff, id.n = id.n)
         if(classic) {
-            opr <- if(prod(par("mfrow")) == 1) par(mfrow=c(1,2), pty="m") else list()
-        }
-        mydistplot(rd, cutoff, id.n=id.n) # index plot of mahalanobis distances
-        if(classic) {
-            mydistplot(md, cutoff, classic=TRUE, id.n=id.n) # index plot of robust distances
+            ## index plot of robust distances:
+            mydistplot(md, cutoff, classic = TRUE, id.n = id.n)
             par(opr)
         }
     }
 
     if(which == "all" || which == "dd") {
-        myddplot(md, rd, cutoff=cutoff, id.n=id.n) # distance-distance plot
+        myddplot(md, rd, cutoff = cutoff, id.n = id.n) # distance-distance plot
     }
 
     if(which == "all" || which == "qqchi2") {
         if(classic) {
-            opr <- if(prod(par("mfrow")) == 1) par(mfrow=c(1,2), pty="m") else list()
+            opr <- if(prod(par("mfrow")) == 1)
+                par(mfrow = c(1,2), pty = "m") else list()
         }
-        qqplot(rd, p, cutoff=cutoff, id.n=id.n) # qq-plot of the robust distances versus the
-                                        # quantiles of the chi-squared distribution
-        if(classic) {
-            qqplot(md, p, cutoff=cutoff, classic=TRUE, id.n=id.n)
-                                        # qq-plot of the mahalanobis distances
+        ## qq-plot of the robust distances versus the
+        ## quantiles of the chi-squared distribution
+        qqplot(rd, p, cutoff = cutoff, id.n = id.n)
+        if(classic) { ## qq-plot of the mahalanobis distances
+
+            qqplot(md, p, cutoff = cutoff, classic = TRUE, id.n = id.n)
             par(opr)
         }
     }
 
     if(which == "all" || which == "tolEllipsePlot") {
-        if(length(dim(x)) >= 2 && dim(x)[2] == 2)
-            tolEllipsePlot(x, mcd=mcd, cutoff=cutoff,
-                           id.n=id.n, classic=classic, tol=tol)
+        if(p == 2)
+            tolEllipsePlot(x, m.cov = m.cov, cutoff = cutoff,
+                           id.n = id.n, classic = classic, tol = tol)
         else
-            warning("Warning: For tolerance ellipses the dimension must be 2!")
+            warning("For tolerance ellipses the dimension 'p' must be 2!")
     }
 
     if(which == "all" || which == "screeplot") {
-        myscreeplot(x, mcd=mcd)
+        myscreeplot(x, m.cov = m.cov)
     }
 
 } ## end { covPlot }
