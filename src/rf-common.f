@@ -111,7 +111,7 @@ cc
 cc  Sorts the integer array a of length kk.
 cc
         implicit none
-	integer a(kk), kk
+	integer kk, a(kk)
 c
 	integer t, gap, i,j, nextj
 
@@ -152,7 +152,7 @@ c
       integer irep(6)
       data irep/500,50,22,17,15,14/
 c
-      if(k.le.6) then
+      if(k .le. 6) then
 	 replow = irep(k)
       else
 	 replow = 0
@@ -311,7 +311,8 @@ ccccc
 cc
 cc  Computes the breakdown value of the MCD estimator
 cc
-	integer rfnbreak
+        implicit none
+	integer rfnbreak, nhalf, n, nvar
 
 	if (nhalf.le.(n+nvar+1)/2) then
 	  rfnbreak=(nhalf-nvar)*100/n
@@ -332,7 +333,8 @@ c This version returns the index (jint) in 'len'
 c which is used in rfltreg.f
 
 	implicit double precision (a-h,o-z), integer(i-n)
-	double precision w(ncas),aw(ncas),aw2(ncas)
+        integer ncas, jqu, len
+	double precision w(ncas), aw(ncas), aw2(ncas)
 	double precision slutn(len)
 cc
 	sq=0.D0
