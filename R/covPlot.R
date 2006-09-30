@@ -26,20 +26,23 @@ plot.mcd <-
              which=c("all", "dd","distance","qqchi2","tolEllipsePlot","screeplot"),
              classic= FALSE,
              ask = (which=="all" && dev.interactive()),
-             cutoff = NULL, id.n,
-             tol = 1e-7, ...)
+             cutoff = NULL, id.n, labels.id = rownames(x$X), cex.id = 0.75,
+             label.pos = c(4,2), tol = 1e-7, ...)
 {
     if (!inherits(x, "mcd"))
         stop("Use only with 'mcd' objects")
-    covPlot(x$X, which=which, classic=classic, ask=ask, cutoff=cutoff,
-            mcd = x, id.n=id.n, tol=tol, ...)
+    covPlot(x$X, which= which, classic= classic, ask= ask, m.cov = x,
+	    cutoff= cutoff, id.n = id.n, labels.id, cex.id = cex.id,
+	    label.pos = label.pos, tol = tol, ...)
 }
 
 covPlot <-
     function(x, which = c("all", "dd", "distance", "qqchi2",
 			  "tolEllipsePlot", "screeplot"),
 	     classic = FALSE, ask = (which == "all" && dev.interactive()),
-	     m.cov = covMcd(x), cutoff = NULL, id.n, tol = 1e-7, ...)
+	     m.cov = covMcd(x), cutoff = NULL,
+             id.n, labels.id = rownames(x), cex.id = 0.75,
+             label.pos = c(4,2), tol = 1e-7, ...)
 {
 
     ##@bdescr
@@ -176,29 +179,27 @@ covPlot <-
         ix <- x$ix
         x <- x$x
 
-        ylab <- paste(if(classic) "Mahalanobis" else "Robust", "distance")
-        xlab <- "Square root of the quantiles of the chi-squared distribution"
-	plot(qq, x, xlab = xlab, ylab = ylab,
-	     main = "Chisquare QQ-Plot")
-        if(id.n > 0) {
-            ind <- (n-id.n+1):n
-            xrange <- diff(par("usr")[1:2])
-            text(qq[ind] + xrange/50, x[ind], ix[ind])
-        }
-        abline(0, 1, lty = 2)
+	ylab <- paste(if(classic) "Mahalanobis" else "Robust", "distance")
+	xlab <- "Square root of the quantiles of the chi-squared distribution"
+	plot(qq, x, xlab = xlab, ylab = ylab, main = "Chisquare QQ-Plot")
+	label(qq, x, id.n, ind = (n-id.n+1):n, labs = ix)
+	abline(0, 1, lty = 2)
+    } ## end{qqplot}
+
+    label <- function(x, y, id.n,
+		      ind = sort.list(y, decreasing = TRUE)[1:id.n],
+		      labs = labels.id, adj.x = TRUE)
+    {
+	if(id.n > 0) { ## label the largest 'id.n' y-values
+	    labpos <-
+		if(adj.x) label.pos[1+ as.numeric(x > mean(range(x)))] else 3
+	    text(x[ind], y[ind], labs[ind],
+		 cex = cex.id, xpd = TRUE, pos = labpos, offset = 0.25)
+	}
     }
 
-    label <- function(x, y, id.n = 3) {
-        if(id.n > 0) { ## label the largest 'id.n' y-values
-            xrange <- diff(par("usr")[1:2])
-            n <- length(y)
-            ind <- sort(y, index.return = TRUE)$ix
-            ind <- ind[(n-id.n+1):n]
-            text(x[ind] + xrange/50, y[ind], ind)
-        }
-    }
 
-    ##  arguments checking of preconditions
+    ## Begin{covPlot} -- arguments checking of preconditions
 
     if(is.data.frame(x))
         x <- data.matrix(x)
@@ -221,6 +222,9 @@ covPlot <-
     if(is.null(cutoff))
         cutoff <- sqrt(qchisq(0.975, p))
 
+    ## now "more in line" with plot.lm()'s labeling:
+    if(is.null(labels.id))
+        labels.id <- as.character(1:n)
     if(!missing(id.n) && !is.null(id.n)) {
         id.n <- as.integer(id.n)
         if(id.n < 0 || id.n > n)

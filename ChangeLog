@@ -1,3 +1,11 @@
+2006-09-30  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/covPlot.R (covPlot): added 'labels.id', 'cex.id' and
+	'label.pos' arguments, "parallel" to plot.lm() and improved the
+	labeling accordingly.
+
+	* man/covPlot.Rd: 'ask=TRUE' gives problems in R <= 2.3.1
+
 2006-09-29  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* DESCRIPTION (Version): 0.2-5

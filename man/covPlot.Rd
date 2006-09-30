@@ -23,14 +23,16 @@
      which = c("all", "dd", "distance", "qqchi2",
                "tolEllipsePlot", "screeplot"),
      classic = FALSE, ask = (which=="all" && dev.interactive()),
-     cutoff, id.n, tol = 1e-7, \dots)
+     cutoff, id.n, labels.id = rownames(x$X), cex.id = 0.75,
+     label.pos = c(4,2), tol = 1e-7, \dots)
 
 covPlot(x,
      which = c("all", "dd", "distance", "qqchi2",
                "tolEllipsePlot", "screeplot"),
      classic = FALSE, ask = (which == "all" && dev.interactive()),
      m.cov = covMcd(x),
-     cutoff = NULL, id.n, tol = 1e-07, \dots)
+     cutoff = NULL, id.n, labels.id = rownames(x), cex.id = 0.75,
+     label.pos = c(4,2), tol = 1e-07, \dots)
 %% ddplot(x, \dots)
 %% distplot(x, \dots)
 %% chi2qqplot(x, \dots)
@@ -54,6 +56,11 @@ covPlot(x,
   \item{id.n}{number of observations to be identified by a label.  If
     not supplied, the number of observations with distance larger than
     \code{cutoff} is used.}
+  \item{labels.id}{vector of labels, from which the labels for extreme
+    points will be chosen.  \code{NULL} uses observation numbers.}
+  \item{cex.id}{magnification of point labels.}
+  \item{label.pos}{positioning of labels, for the left half and right
+    half of the graph respectively (used as \code{\link{text}(.., pos=*)}).}
   \item{tol}{tolerance to be used for computing the inverse, see
     \code{\link{solve}}.  Defaults to \code{tol = 1e-7}.}
   \item{m.cov}{an object similar to those of class \code{"mcd"}; however
@@ -121,7 +128,9 @@ data(hbk)
 hbk.x <- data.matrix(hbk[, 1:3])
 cOGK <- covOGK(hbk.x, n.iter = 2, sigmamu = scaleTau2,
                weight.fn = hard.rejection)
-covPlot(hbk.x, m.cov = cOGK, classic = TRUE, ask= TRUE)
+%% this "\dont*{} case is needed for R <= 2.3.1 :
+\dontrun{ covPlot(hbk.x, m.cov = cOGK, classic = TRUE, ask= TRUE)}
+\dontshow{covPlot(hbk.x, m.cov = cOGK, classic = TRUE, ask= FALSE)}
 
 \dontshow{
 op <- par(mfrow = c(3,3))

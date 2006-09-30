@@ -1,6 +1,6 @@
 
-R : Copyright 2006, The R Foundation for Statistical Computing
-Version 2.3.1 Patched (2006-06-26 r38426)
+R version 2.4.0 RC (2006-09-29 r39553)
+Copyright (C) 2006 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -16,7 +16,6 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > library(robustbase)
-Loading required package: MASS
 > #library(robustbase, lib="/u/maechler/R/Pkgs/robustbase.Rcheck")
 > 
 > ### Binomial example with  *small*  ni
@@ -155,7 +154,7 @@ List of 26
  $ y                : Named num [1:51] 0.000 0.167 0.000 0.167 0.000 ...
   ..- attr(*, "names")= chr [1:51] "1" "2" "3" "4" ...
  $ converged        : logi TRUE
- $ model            :`data.frame':	51 obs. of  2 variables:
+ $ model            :'data.frame':	51 obs. of  2 variables:
   ..$ cbind(k, ni - k): num [1:51, 1:2] 0 1 0 1 0 0 1 2 0 1 ...
   .. ..- attr(*, "dimnames")=List of 2
   .. .. ..$ : NULL
@@ -362,5 +361,5 @@ test.acc
 +                     rg3.15  [no.comp], tol = 1e-13))
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  1.788 0.119 2.335 0 0 
+Time elapsed:  1.48 0.06 1.767 0 0 
 > 
