@@ -543,8 +543,8 @@ c  singularity '1' (exact fit := 1) :
  5001	continue
 	call rs(nvar,nvar,cova1,w,matz,z,fv1,fv2,ierr)
 	call rfdis(dat,z,ndist,n,nvar,n,nvar,means)
-	call rfexact(kount,n,ndist,z,nvmax,nvmax1,nvar,
-     *	     sscp1,rec,dat,nmax,cova1,means,sd,nvar+1,weight)
+	call rfexact(kount,n,ndist, nvmax1,nvar,
+     *	     sscp1,rec,dat, cova1,means,sd,nvar+1,weight)
 	call rfcovcopy(cova1,initcov,nvar,nvar)
 	call rfcovcopy(means,initmean,nvar,1)
 	do 56 j=1,nvar
@@ -724,8 +724,8 @@ cc
 	      endif
  76	      continue
 	      call rfdis(dat,z,ndist,n,nvar,n,nvar,means)
-	      call rfexact(kount,n,ndist,z,nvmax,nvmax1,nvar,
-     *		   sscp1,rec,dat,nmax,cova1,means,sd,nvar+1,weight)
+	      call rfexact(kount,n,ndist, nvmax1,nvar,
+     *		   sscp1,rec,dat, cova1,means,sd,nvar+1,weight)
 	      call rfcovcopy(cova1,initcov,nvar,nvar)
 	      call rfcovcopy(means,initmean,nvar,1)
 	      do 78 jjj=1,nvar
@@ -961,8 +961,8 @@ cc
 		call transfo(cova1,means,dat,med,mad,nvar,n)
 		call rs(nvar,nvar,cova1,w,matz,z,fv1,fv2,ierr)
 		call rfdis(dat,z,ndist,n,nvar,nn,nvar,means)
-		call rfexact(kount,n,ndist,z,nvmax,nvmax1,nvar,
-     *		     sscp1,rec,dat,nmax,cova1,means,sd,nvar+1,weight)
+		call rfexact(kount,n,ndist, nvmax1,nvar,
+     *		     sscp1,rec,dat, cova1,means,sd,nvar+1,weight)
 		call rfcovcopy(cova1,initcov,nvar,nvar)
 		call rfcovcopy(means,initmean,nvar,1)
 		do 140,jjj=1,nvar
@@ -978,8 +978,8 @@ cc
 		    call transfo(cova1,means,dat,med,mad,nvar,n)
 		    call rs(nvar,nvar,cova1,w,matz,z,fv1,fv2,ierr)
 		    call rfdis(dat,z,ndist,n,nvar,nn,nvar,means)
-		    call rfexact(kount,n,ndist,z,nvmax,nvmax1,nvar,
-     *			sscp1,rec,dat,nmax,cova1,means,sd,nvar+1,weight)
+		    call rfexact(kount,n,ndist, nvmax1,nvar,
+     *			sscp1,rec,dat, cova1,means,sd,nvar+1,weight)
 		    call rfcovcopy(cova1,initcov,nvar,nvar)
 		    call rfcovcopy(means,initmean,nvar,1)
 		    do 142,jjj=1,nvar
@@ -1008,7 +1008,7 @@ cc
 		    goto 1000
 		  else
 		    call rfishsort(index1,pnsel)
-		    call prdraw(index1,pnsel,seed,nn)
+		    call prdraw(index1,pnsel, nn)
 		    pnsel=pnsel+1
 		    goto 9550
 		  endif
@@ -1077,8 +1077,8 @@ cc
 		  else
 		    call rfdis(dath,z,ndist,nmaxi,nvmax,nn,nvar, means)
 		  endif
-		  call rfexact(kount,n,ndist,z,nvmax,nvmax1,nvar,
-     *		       sscp1,rec,dat,nmax,cova1,means,sd,nvar+1,weight)
+		  call rfexact(kount,n,ndist, nvmax1,nvar,
+     *		       sscp1,rec,dat, cova1,means,sd,nvar+1,weight)
 		  call rfcovcopy(cova1,initcov,nvar,nvar)
 		  call rfcovcopy(means,initmean,nvar,1)
 		  do 160 jjj=1,nvar
@@ -1094,8 +1094,8 @@ cc
 		    call transfo(cova1,means,dat,med,mad,nvar,n)
 		    call rs(nvar,nvar,cova1,w,matz,z,fv1,fv2,ierr)
 		    call rfdis(dat,z,ndist,n,nvar,n,nvar,means)
-		    call rfexact(kount,n,ndist,z,nvmax,nvmax1,nvar,
-     *			sscp1,rec,dat,nmax,cova1,means,sd,nvar+1,weight)
+		    call rfexact(kount,n,ndist, nvmax1,nvar,
+     *			sscp1,rec,dat, cova1,means,sd,nvar+1,weight)
 		    call rfcovcopy(cova1,initcov,nvar,nvar)
 		    call rfcovcopy(means,initmean,nvar,1)
 		    do 161 jjj=1,nvar
@@ -1131,8 +1131,8 @@ cc
 		    call transfo(cova1,means,dat,med,mad,nvar,n)
 		    call rs(nvar,nvar,cova1,w,matz,z,fv1,fv2,ierr)
 		    call rfdis(dat,z,ndist,n,nvar,n,nvar,means)
-		    call rfexact(kount,n,ndist,z,nvmax,nvmax1,nvar,
-     *			sscp1,rec,dat,nmax,cova1,means,sd,nvar+1,weight)
+		    call rfexact(kount,n,ndist, nvmax1,nvar,
+     *			sscp1,rec,dat, cova1,means,sd,nvar+1,weight)
 		    call rfcovcopy(cova1,initcov,nvar,nvar)
 		    call rfcovcopy(means,initmean,nvar,1)
 		    do 165 jjj=1,nvar
@@ -1411,15 +1411,14 @@ ccccc
 ccccc
 ccccc
 ccccc
-      subroutine rfexact(kount,nn,ndist,z,nvmax,nvmax1,nvar,sscp1,
-     *	rec,dat,nmax,cova1,means,sd,nvar1,weight)
+      subroutine rfexact(kount,nn,ndist, nvmax1,nvar,sscp1,
+     *	rec,dat, cova1,means,sd,nvar1,weight)
 cc
 cc Determines how many objects lie on the hyperplane with equation
 cc z(1,1)*(x_i1 - means_1)+ ... + z(p,1)* (x_ip - means_p) = 0
 cc and computes their mean and their covariance matrix.
 cc
       double precision ndist(nn)
-      double precision z(nvar,nvar)
       double precision sscp1(nvar1,nvar1)
       double precision rec(nvmax1)
       double precision dat(nn,nvar)
@@ -1559,11 +1558,10 @@ cc
 	return
 	end
 
-cc FIXME: 'seed' now unused
-	subroutine prdraw(a,pnsel,seed,nn)
+	subroutine prdraw(a,pnsel, nn)
 cc
         implicit none
-	integer nn, a(nn), pnsel, seed
+	integer nn, a(nn), pnsel
 c
         double precision unifrnd
 	integer jndex, nrand, i,j

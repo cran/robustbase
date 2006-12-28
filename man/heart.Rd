@@ -16,6 +16,9 @@
 }
 \usage{
 data(heart)
+%> QA bug: would want:
+%> data(heart, package="robustbase")
+%> but that gives two warnings
 }
 \format{
   A data frame with 12 observations on the following 3 variables.
@@ -24,6 +27,10 @@ data(heart)
     \item{\code{weight}}{Patient's weights in pounds}
     \item{\code{clength}}{Y: Catheter Length (in centimeters)}
   }
+}
+\note{There are other \code{heart} datasets in other \R packages,
+  notably \pkg{survival}, hence considering using
+  \code{package = "robustbase"}, see examples.
 }
 \source{
   Weisberg (1980)
@@ -35,7 +42,7 @@ data(heart)
   Wiley, p.103, table 13.
 }
 \examples{
-data(heart)
+data(heart, package="robustbase")
 heart.x <- data.matrix(heart[, 1:2]) # the X-variables
 plot(heart.x)
 covMcd(heart.x)

@@ -94,3 +94,9 @@ o) we have had some problems, but they are solved now
 19) lmrob.S() now *does* convergence monitoring
 
 
+0.2-7:
+
+20) covOGK():
+  - made 'weight.fn = hard rejection'  the default
+  - made 'n.iter = 2'                  the default.
+

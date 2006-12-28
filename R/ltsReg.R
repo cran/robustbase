@@ -365,7 +365,7 @@ ltsReg.default <-
 	    ## vt:: lm.fit.qr == lm.fit(...,method=qr,...)
 	    ##	cf <- lm.fit.qr(x[z$inbest, , drop = FALSE], y[z$inbest])$coef
 	    cf <- lm.fit(x[z$inbest, , drop = FALSE], y[z$inbest])$coef
-	    ans$best <- sort(as.vector(z$inbest))
+	    ans$best <- sort(z$inbest)
 	    fitted <- x %*% cf
 	    resid <- y - fitted
 	    coefs[piv] <- cf ## FIXME? why construct 'coefs' so complicatedly?	use 'cf' !
@@ -780,12 +780,13 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
     return(1/fp.alpha.n)
 } ## LTScnp2.rew
 
-.fastlts <- function(x, y, quan, nsamp, intercept, adjust) {
+.fastlts <- function(x, y, quan, nsamp, intercept, adjust)
+{
     dx <- dim(x)
     n <- dx[1]
     p <- dx[2]
 
-    ##	 parameters for partitioning
+    ## Parameters for partitioning --- *IDENTICAL* to those in ../src/rfltsreg.[fc]
     kmini <- 5
     nmini <- 300
     km10 <- 10*kmini
@@ -793,14 +794,14 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
 
     ##	 vt::03.02.2006 - added options "best" and "exact" for nsamp
     if(!missing(nsamp)) {
-	if(is.numeric(nsamp) && nsamp <= 0) {
+	if(!is.numeric(nsamp) || nsamp <= 0) {
 	    warning("Invalid number of trials nsamp=",nsamp,"! Using default.\n")
 	    nsamp <- -1
 	} else if(nsamp == "exact" || nsamp == "best") {
 	    myk <- p
 	    if(n > 2*nmini-1) {
-		warning("Options 'best' and 'exact' not allowed for n greater than ",
-                        2*nmini-1,". \nUsing nsamp=",nsamp,"\n")
+		warning("'nsamp' options 'best' and 'exact' not allowed for n greater than ",
+                        2*nmini-1,". Will use default.\n")
 		nsamp <- -1
 	    }
             else { ## FIXME: Add a test case for this !
@@ -808,8 +809,7 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
 		if(nall > 5000 && nsamp == "best") {
 		    nsamp <- 5000
 		    warning("Maximum 5000 subsets allowed for option 'best'.\n",
-                            "Computing 5000 subsets of size ",myk," out of ",n,
-                            "\n")
+                            "Computing 5000 subsets of size ",myk," out of ",n,"\n")
 		} else {
 		    nsamp <- 0		#all subsamples
 		    if(nall > 5000)
@@ -818,41 +818,28 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
                             "\n This may take a very long time!\n")
 		}
 	    }
-	}
-
-	if(!is.numeric(nsamp) || nsamp == -1) {
-            ## still not defined - set it to the default
-	    defCtrl <- rrcov.control() # default control
-	    if(!is.numeric(nsamp))
-		warning("Invalid number of trials nsamp=",nsamp,
-                        "! Using default nsamp=",defCtrl$nsamp,"\n")
-	    nsamp <- defCtrl$nsamp	# take the default nsamp
+        }
+	if(nsamp == -1) { ## still not defined - set it to the default
+	    nsamp <- rrcov.control()$nsamp
 	}
     }
 
 
-    y <- as.matrix(y)
-    x1 <- matrix(0, ncol = p + 1, nrow = n)
-    x1 <- cbind(x, y)
-    x1 <- as.matrix(x1)
+    ## y <- as.matrix(y)
+    ## xy <- matrix(0, ncol = p + 1, nrow = n)
+    xy <- cbind(x, y)
+    ## xy <- as.matrix(xy)
+    storage.mode(xy) <- "double"
 
-    objfct <- 0
-
-    storage.mode(x1) <- "double"
     storage.mode(n) <- "integer"
     storage.mode(p) <- "integer"
     storage.mode(quan) <- "integer"
     storage.mode(nsamp) <- "integer"
-    storage.mode(objfct) <- "double"
 
-    inbest <- matrix(10000, nrow = quan, ncol = 1)
+    objfct <- as.double(0)
+    inbest <- rep.int(as.integer(10000), quan)
 
-    storage.mode(inbest) <- "integer"
-
-    datt <- matrix(0, ncol = p + 1, nrow = n)
-    storage.mode(datt) <- "double"
-    nvad <- p + 1
-    storage.mode(nvad) <- "integer"
+    datt <- matrix(as.double(0), ncol = p + 1, nrow = n)
 
     ##	 Allocate temporary storage for the fortran implementation
 
@@ -935,16 +922,16 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
     storage.mode(bmeans) <- "double"
 
     .Fortran("rfltsreg",
-	     x1 = x1,
+	     xy = xy,
 	     n,
 	     p,
 	     quan,
 	     nsamp,
 	     inbest = inbest,
 	     objfct = objfct,
-	     interc = as.integer(intercept),
+	     intercept = as.integer(intercept),
 	     intadjust = as.integer(adjust),
-	     nvad,
+	     nvad = as.integer(p + 1),
 	     datt,
 	     integer(1),## << 'seed' no longer used -- FIXME
 	     weights,
@@ -957,11 +944,11 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
 	     yy,
 	     nmahad,
 	     ndist,
-	     am,
-	     am2,
-	     slutn,
-	     jmiss, xmed, xmad, a, da, h, hvec, c, cstock, mstock, c1stock,
-	     m1stock, dath, sd,
+	     am, am2,
+	     slutn, jmiss,
+             xmed, xmad, a, da, h, hvec, c,
+             cstock, mstock, c1stock, m1stock,
+             dath, sd,
 	     means, bmeans,
 	     PACKAGE = "robustbase")[ c("inbest", "objfct") ]
 }

@@ -15,9 +15,6 @@ o covOGK():
   name 'hard.rejection()' is just awful (we need a globally available
   function as 'role model'.
 
-  - Consider making 'hard rejection'  the default though!
-  -   "        "    n.iter = 1 or = 2 the default.
-
   - Could allow 'n.iter = 0' to simply compute Cov()_{ij} = rcov(X_i, X_j)
 
 o scaleTau2():  Also do a cheap finite-sample correction [MM] !

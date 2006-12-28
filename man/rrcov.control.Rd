@@ -10,7 +10,8 @@
      \bold{NOTE: The name  WILL change !!!!}
 }
 \usage{
-rrcov.control(alpha = 1/2, nsamp = 500, seed = NULL, trace = FALSE,
+rrcov.control(alpha = 1/2, nsamp = 500, seed = NULL, tolSolve = 1e-14,
+              trace = FALSE,
               use.correction = TRUE, adjust = FALSE)
 }
 \arguments{
@@ -28,11 +29,16 @@ rrcov.control(alpha = 1/2, nsamp = 500, seed = NULL, trace = FALSE,
   \item{seed}{initial seed for R's random number generator; see
     \code{\link{.Random.seed}} and the description of the \code{seed}
     argument in \code{\link{lmrob.control}}.}
-%% FIXME: This  REALLY should be renamed to  'trace' !!
-  \item{trace}{whether to print intermediate results. Default is \code{trace = FALSE}}
-  \item{use.correction}{ whether to use finite sample correction factors. Default is \code{use.correction=TRUE}}
-  \item{adjust}{whether to perform intercept adjustment at each step. This could be quite
-time consuming, therefore the default is \code{adjust = FALSE} }
+  \item{tolSolve}{numeric tolerance to be used for inversion
+    (\code{\link{solve}}) of the covariance matrix in
+    \code{\link{mahalanobis}}.}
+  \item{trace}{whether to print intermediate results.  Default is
+    \code{trace = FALSE}}
+  \item{use.correction}{whether to use finite sample correction factors.
+    Defaults to \code{TRUE}.}
+  \item{adjust}{whether to perform intercept adjustment at each
+    step.  Because this can be quite time consuming, the default is
+    \code{adjust = FALSE}.}
 }
 \details{
 For details about the estimation options see the corresponding estimation functions.

@@ -1,5 +1,7 @@
 \name{Qn}
 \alias{Qn}
+\alias{s_Qn}
+%
 \title{Robust Location-Free Scale Estimate More Efficient than MAD}
 \description{
   Compute the robust scale estimator \eqn{Q_n}{Qn}, an efficient
@@ -7,6 +9,8 @@
 }
 \usage{
 Qn(x, constant = 2.2219, finite.corr = missing(constant))
+
+s_Qn(x, mu.too = FALSE, \dots)
 }
 \arguments{
   \item{x}{numeric vector of observations.}
@@ -15,11 +19,20 @@ Qn(x, constant = 2.2219, finite.corr = missing(constant))
   \item{finite.corr}{logical indicating if the finite sample bias
     correction factor should be applied.  Default to \code{TRUE} unless
     \code{constant} is specified.}
+  \item{mu.too}{logical indicating if the \code{\link[stats]{median(x)}} should
+    also be returned for \code{s_Qn()}.}
+  \item{\dots}{potentially further arguments for \code{s_Qn()} passed to
+    \code{Qn()}.}
 }
 \value{
-  a number, the \eqn{Q_n}{Qn} robust scale estimator, scaled to be
-  consistent for \eqn{\sigma^2} and i.i.d. Gaussian observatsions,
-  optionally bias corrected for finite samples.
+  \code{Qn()} returns a number, the \eqn{Q_n}{Qn} robust scale
+  estimator, scaled to be consistent for \eqn{\sigma^2} and
+  i.i.d. Gaussian observatsions, optionally bias corrected for finite
+  samples.
+
+  \code{s_Qn(x, mu.too=TRUE)} returns a length-2 vector with location
+  (\eqn{\mu}) and scale; this is typically only useful for
+  \code{\link{covOGK}(*, sigmamu = s_Qn)}.
 }
 \details{
   ............  FIXME ........
@@ -36,7 +49,7 @@ Qn(x, constant = 2.2219, finite.corr = missing(constant))
   also available from
   \url{http://win-www.uia.ac.be/u/statis/abstract/Timeff92.htm}.
 }
-\seealso{\code{\link{mad}} for the \sQuote{most robust} but much less efficient
+\seealso{\code{\link[stats]{mad}} for the \sQuote{most robust} but much less efficient
   scale estimator; \code{\link{Sn}} for a similar faster but less
   efficient alternative; \code{\link{scaleTau2}}.
 }
@@ -48,7 +61,7 @@ Qn(x, constant = 2.2219, finite.corr = missing(constant))
 \examples{
 set.seed(153)
 x <- sort(c(rnorm(80), rt(20, df = 1)))
-Qn(x)
+s_Qn(x, mu.too = TRUE)
 Qn(x, finite.corr = FALSE)
 }
 \keyword{robust}

@@ -24,9 +24,19 @@ cM1 <- covOGK(milk, 1, sigmamu = scaleTau2, weight.fn = hard.rejection)
 cM2 <- covOGK(milk, 2, sigmamu = scaleTau2, weight.fn = hard.rejection)
 
 symnum(cov2cor(cM1 $cov))
-symnum(cov2cor(cM1 $wcov))
 symnum(cov2cor(cM2 $cov))
+symnum(cov2cor(cM1 $wcov))
 symnum(cov2cor(cM2 $wcov))
+
+cMQn  <- covOGK(milk, sigmamu = s_Qn, weight.fn = hard.rejection)
+cMSn  <- covOGK(milk, sigmamu = s_Sn, weight.fn = hard.rejection)
+cMiqr <- covOGK(milk, sigmamu = s_IQR, weight.fn = hard.rejection)
+cMmad <- covOGK(milk, sigmamu = s_mad, weight.fn = hard.rejection)
+
+as.dist(round(cov2cor(cMQn$wcov), 3))
+as.dist(round(cov2cor(cMSn$wcov), 3))
+as.dist(round(cov2cor(cMiqr$wcov), 3))
+as.dist(round(cov2cor(cMmad$wcov), 3))
 
 
 cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''

@@ -31,14 +31,15 @@
 ## -- also in the line of the many other cov*() functions I've renamed
 ##                      s/pairwise/covOGK/
 
-## NOTA BENE: This is *not* consistent (by a constant factor)
-## ---------  since  scaleTau2() is not
+## NOTA BENE: Is *now* consistent, since MM made  scaleTau2()  consistent
 
 ### Documentation -----> ../man/covOGK.Rd
 ##  =============        ================
 
-covOGK <- function(X, n.iter, sigmamu, rcov = covGK, weight.fn,
-                   keep.data = FALSE, ...)
+covOGK <- function(X, n.iter = 2,
+		   sigmamu,
+		   rcov = covGK, weight.fn = hard.rejection,
+		   keep.data = FALSE, ...)
 {
     stopifnot(n.iter >= 1)
     call <- match.call()
@@ -175,6 +176,18 @@ scaleTau2 <- function(x, c1 = 4.5, c2 = 3.0, consistency = TRUE,
     c(if(mu.too) mu,
       ## sqrt(sigma2) == sqrt( sigma0^2 / n * sum(rho) ) :
       sigma0 * sqrt(sum(rho)/nEs2))
+}
+
+## Two other simple 'scalefun' to be used for covOGK;
+## s_Qn(), s_Sn() are in ./qnsn.R
+s_mad <- function(x, mu.too= FALSE, na.rm = FALSE) {
+    if (na.rm) x <- x[!is.na(x)]
+    mx <- median(x)
+    c(if(mu.too) mx, mad(x, center = mx))
+}
+s_IQR <- function(x, mu.too= FALSE, na.rm = FALSE) {
+    Qx <- quantile(x, (1:3)/4, na.rm = na.rm, names = FALSE)
+    c(if(mu.too) Qx[2], (Qx[3] - Qx[1]) * 0.5 * formals(mad)$constant)
 }
 
 covGK <- function(x, y, scalefn = scaleTau2, ...)

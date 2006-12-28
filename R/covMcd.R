@@ -36,22 +36,22 @@ covMcd <- function(x,
 		   seed = NULL,
 		   trace = FALSE,
 		   use.correction = TRUE,
-		   control)
+		   control = rrcov.control())
 {
     ##	 Analyze and validate the input parameters ...
 
     ## if a control object was supplied, take the option parameters
     ## from it, but if single parameters were passed (not defaults)
     ## they will override the control object.
-    if(!missing(control)) {
-	defCtrl <- rrcov.control()	# default control
-	if(alpha == defCtrl$alpha)	 alpha <- control$alpha
-	if(nsamp == defCtrl$nsamp)	 nsamp <- control$nsamp
-	if(identical(seed, defCtrl$seed)) seed <- control$seed
-	if(trace == defCtrl$trace) trace <- control$trace
-	if(use.correction == defCtrl$use.correction)
-	    use.correction <- control$use.correction
-    }
+    ## defCtrl <- rrcov.control()# default control
+    # 'control' specified
+    if(missing(alpha))	alpha <- control$alpha
+    if(missing(nsamp))	nsamp <- control$nsamp
+    if(missing(seed))	 seed <- control$seed
+    if(missing(trace))	trace <- control$trace
+    if(missing(use.correction)) use.correction <- control$use.correction
+
+    tolSolve <- control$tolSolve # had 1e-10 hardwired {now defaults to 1e-14}
 
     if(length(seed) > 0) {
 	if(exists(".Random.seed", envir=.GlobalEnv, inherits=FALSE))  {
@@ -67,8 +67,6 @@ covMcd <- function(x,
 	stop("Invalid number of trials nsamp = ",nsamp, "!")
 
 
-    ## vt:: tolerance to be used for computing the mahalanobis distances (default = 1e-7)
-    tol <- 1e-10
 
     if(is.data.frame(x))
 	x <- data.matrix(x)
@@ -129,9 +127,8 @@ covMcd <- function(x,
 	    weights <- 1
 	}
 	else {
-	    mah <- mahalanobis(x, loc, mcd, tol = tol)
+	    mah <- mahalanobis(x, loc, mcd, tol = tolSolve)
 	    ## VT:: 01.09.2004 - bug in alpha=1
-	    ##	    (tol instead of tol.inv as parameter name)
 	    weights <- as.numeric(mah < quantiel) # 0/1
 	    sum.w <- sum(weights)
 	    ans <- c(ans, cov.wt(x, wt = weights, cor = cor))
@@ -151,7 +148,7 @@ covMcd <- function(x,
 		    cat(msg,"\n")
 	    }
 	    else {
-		mah <- mahalanobis(x, ans$center, ans$cov, tol = tol)
+		mah <- mahalanobis(x, ans$center, ans$cov, tol = tolSolve)
 		weights <- as.numeric(mah < quantiel) # 0/1
 	    }
 	}
@@ -345,7 +342,9 @@ covMcd <- function(x,
 
 	else { ## exactfit == 0 : have general position ------------------------
 
-	    mah <- mahalanobis(x, mcd$initmean, mcd$initcovariance, tol = tol)
+            ## FIXME: here we assume that mcd$initcovariance is not singular
+            ## ----- but it is for data(mortality, package = "riv") !
+	    mah <- mahalanobis(x, mcd$initmean, mcd$initcovariance, tol = tolSolve)
 	    mcd$weights <- weights <- as.numeric(mah < quantiel)
 	    sum.w <- sum(weights)
 
@@ -380,7 +379,7 @@ covMcd <- function(x,
 		names(ans$raw.center) <- dimn[[2]]
 	    ans$raw.weights <- weights
 	    ans$crit <- mcd$mcdestimate
-	    ans$raw.mah <- mahalanobis(x, ans$raw.center, ans$raw.cov, tol = tol)
+	    ans$raw.mah <- mahalanobis(x, ans$raw.center, ans$raw.cov, tol = tolSolve)
 
 	    ## Check if the reweighted scatter matrix is singular.
 	    if( - (determinant(ans$cov, log = TRUE)$modulus[1] - 0)/p > 50) {
@@ -392,7 +391,7 @@ covMcd <- function(x,
 		ans$mah <- ans$raw.mah
 	    }
 	    else {
-		mah <- mahalanobis(x, ans$center, ans$cov, tol = tol)
+		mah <- mahalanobis(x, ans$center, ans$cov, tol = tolSolve)
 		ans$mah <- mah
 		weights <- as.numeric(mah < quantiel)
 	    }
@@ -619,7 +618,7 @@ MCDcnp2.rew <- function(p, n, alpha)
 	     exactfit  = integer(1), # output indicator: 0: ok; 1: ..., 2: ..
 	     coeff     = matrix(double(5 * p), nrow = 5, ncol = p), ## plane
 	     kount     = integer(1),
-	     adjustcov = double(p * p),
+	     adjustcov = double(p * p), ## << never used -- FIXME
 	     integer(1),## << 'seed' no longer used -- FIXME
 	     temp   = integer(n),
 	     index1 = integer(n),

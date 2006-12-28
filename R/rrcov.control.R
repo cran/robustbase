@@ -16,9 +16,10 @@
 ##
 
 rrcov.control <-
-    function(alpha = 1/2, nsamp = 500, seed = NULL,
+    function(alpha = 1/2, nsamp = 500, seed = NULL, tolSolve = 1e-14,
 	     trace = FALSE, use.correction = TRUE, adjust = FALSE)
 {
     list(alpha = alpha, nsamp = nsamp, seed = as.integer(seed),
+	 tolSolve = tolSolve,
 	 trace = trace, use.correction = use.correction, adjust = adjust)
 }

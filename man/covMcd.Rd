@@ -33,10 +33,11 @@ covMcd(x, cor = FALSE, alpha = 1/2, nsamp = 500, seed = NULL,
     printed; defaults to \code{FALSE}.}
   \item{use.correction}{ whether to use finite sample correction
     factors; defaults to \code{TRUE}.}
-  \item{control}{ a list with estimation options - same as these provided in the
-    fucntion specification. If the control object is supplied, the parameters from it
-    will be used. If parameters are passed also in the invocation statement, they will
-    override the corresponding elements of the control object.}
+  \item{control}{a list with estimation options - this includes those
+    above provided in the function specification.  If \code{control} is
+    supplied, the parameters from it will be used.  If parameters are
+    passed also in the invocation statement, they will override the
+    corresponding elements of the control object.}
 }
 \details{
   The minimum covariance determinant estimator of location and scatter

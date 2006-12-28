@@ -68,3 +68,9 @@ wgt.himedian <- function(x, weights = rep(1,n))
     .C("wgt_himed", x, n, weights, res = double(1), PACKAGE = "robustbase")$res
 }
 
+## To be used directly as  'scaleFun'  in  'covOGK()' :
+s_Qn <- function(x, mu.too = FALSE, ...)
+    c(if(mu.too) median(x), Qn(x, ...))
+
+s_Sn <- function(x, mu.too = FALSE, ...)
+    c(if(mu.too) median(x), Sn(x, ...))
