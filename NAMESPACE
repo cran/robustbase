@@ -19,6 +19,7 @@ export(Sn, Qn,
        summarizeRobWeights,
        wgt.himedian,
 
+       h.alpha.n,
        covMcd,
        ltsReg,
        tolEllipsePlot,
@@ -33,15 +34,17 @@ export(Sn, Qn,
 ## Not yet:
 ##     hampelPsi,
 ##     tukeyPsi, # = biweight / bisquare
+       tukeyChi, tukeyPsi1, # <- used by lmrob.*()
 
        lmrob,
+       lmrob.fit.MM, lmrob.MM,
+       lmrob.S,
+       lmrob.control,
 
        glmrob,
        nlrob,
        glmrobMqle.control
        )
-## FIXME: for *Chi, *S,....  -- will be renamed / organized
-exportPattern("^lmrob.*")
 
 
 ## S3 methods for ``our own'' S3 generics:

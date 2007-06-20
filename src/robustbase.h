@@ -1,4 +1,6 @@
-#include <R.h>
+/* External and interal  API  of  C and Fortran routines in robustbase */
+
+/* C code which includes this, typically includes <R.h> */
 
 /* ./qn_sn.c : */
 #define Sint int
@@ -18,15 +20,15 @@ void R_lmrob_S(double *X, double *y, int *n, int *P,
 	       int *nRes, double *scale, double *beta_s,
 	       double *C, double *bb,
 	       int *best_r, int *Groups, int *N_group,
-	       int *K_s, int *max_k, double *rel_tol, int* converged,
-	       int *trace_lev);
+	       int *K_s, int *max_k, double *rel_tol,
+	       int* converged, int *trace_lev);
 
 void R_lmrob_MM(double *X, double *y, int *n, int *P,
 		double *beta_initial, double *scale,
-		double *beta_m,
+		double *beta_m, double *resid,
 		int *max_it,
-		double *rho_c,
-		int *converged);
+		double *rho_c, double *loss, double *rel_tol,
+		int *converged, int *trace_lev);
 
 int F77_NAME(rffastmcd)(
     double *dat, int *n, int *nvar, int *nhalff, int *krep,

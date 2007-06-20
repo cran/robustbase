@@ -17,13 +17,26 @@ lmrob.fit.MM(x, y, control,
   \item{init.S}{a \code{\link{list}} with components \code{coef},
     \code{scale}, and \code{cov} specifying an initial S-estimate, such
     as resulting from \code{\link{lmrob.S}(..)}.}
+  %% FIXME: used in practice, should also contain convergence info
+  %% ---- *AND* that should be propagated lmrob.S() --> lmrob.fit.MM() --> lmrob()
 }
-\details{This function is used by \code{\link{lmrob}} and not
-  intended to be used on its own.
+\details{This function is used by \code{\link{lmrob}} and typically not
+  to be used on its own.
 }
 \value{
-  A list that contains regression coefficient estimators
-  and the robustly estimated error standard deviation
+  A list with components
+  \item{fitted.values}{}
+  \item{residuals}{}
+  \item{weights}{}
+  \item{rank}{}
+  \item{degree.freedom}{\code{n - rank}}% more!
+  \item{coefficients}{regression coefficient estimators}
+  \item{initial.coefficients}{}% = iCoef,
+  \item{scale}{the robustly estimated error standard deviation}% = final.MM$scale,
+  \item{cov}{}% = cov.matrix,
+  \item{control}{}% = control,
+  \item{iter}{}% = final.MM$iter, <<<<<< also 'init.S' !
+  \item{converged}{}% = final.MM$converged) <<<< also 'init.S'
 }
 \seealso{
   \code{\link{lmrob}},

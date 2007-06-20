@@ -206,6 +206,8 @@ ccccc
 cc
 cc  Finds the k-th order statistic of the array aw of length ncas.
 cc
+cc MM{FIXME}: "rather" use R's C API   rPsort (double* X, int N, int K)
+
         implicit none
         integer ncas,k,index(ncas)
 	double precision rffindq, aw(ncas)
@@ -218,10 +220,12 @@ cc
  10	continue
 	l=1
 	lr=ncas
+c    while(l < lr)
  20	if(l.ge.lr) goto 90
 	ax=aw(k)
 	jnc=l
 	j=lr
+
  30	if(jnc.gt.j) goto 80
  40	if(aw(jnc).ge.ax) goto 50
 	jnc=jnc+1
@@ -229,16 +233,17 @@ cc
  50	if(aw(j).le.ax) goto 60
 	j=j-1
 	goto 50
- 60	if(jnc.gt.j) goto 70
-	i=index(jnc)
-	index(jnc)=index(j)
-	index(j)=i
-	wa=aw(jnc)
-	aw(jnc)=aw(j)
-	aw(j)=wa
-	jnc=jnc+1
-	j=j-1
- 70	goto 30
+ 60	if(jnc .le. j) then
+           i=index(jnc)
+           index(jnc)=index(j)
+           index(j)=i
+           wa=aw(jnc)
+           aw(jnc)=aw(j)
+           aw(j)=wa
+           jnc=jnc+1
+           j=j-1
+        endif
+	goto 30
  80	if(j.lt.k) l=jnc
 	if(k.lt.jnc) lr=j
 	goto 20
@@ -305,23 +310,22 @@ cc
 	if(2*(n/2).eq.n) rfodd=.false.
 	return
 	end
-ccccc
-ccccc
-	function rfnbreak(nhalf,n,nvar)
-cc
-cc  Computes the breakdown value of the MCD estimator
-cc
-        implicit none
-	integer rfnbreak, nhalf, n, nvar
 
-	if (nhalf.le.(n+nvar+1)/2) then
-	  rfnbreak=(nhalf-nvar)*100/n
-	else
-	  rfnbreak=(n-nhalf+1)*100/n
-	endif
-	return
-	end
 ccccc
+c unused 	function rfnbreak(nhalf,n,nvar)
+c unused cc
+c unused cc  Computes the breakdown value - in percent! - of the MCD estimator
+c unused cc
+c unused         implicit none
+c unused 	integer rfnbreak, nhalf, n, nvar
+c unused
+c unused 	if (nhalf.le.(n+nvar+1)/2) then
+c unused 	  rfnbreak=(nhalf-nvar)*100/n
+c unused 	else
+c unused 	  rfnbreak=(n-nhalf+1)*100/n
+c unused 	endif
+c unused 	return
+c unused 	end
 ccccc
 
 	subroutine rfmcduni(w,ncas,jqu,slutn,bstd,aw,aw2,factor,len)

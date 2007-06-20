@@ -41,38 +41,47 @@ covMcd(x, cor = FALSE, alpha = 1/2, nsamp = 500, seed = NULL,
 }
 \details{
   The minimum covariance determinant estimator of location and scatter
-  implemented in \code{covMcd()} is similar to the existing \R function
+  implemented in \code{covMcd()} is similar to \R function
   \code{\link[MASS]{cov.mcd}()} in \pkg{MASS}.  The MCD method looks for
-  the \eqn{h (> n/2)} observations (out of \eqn{n}) whose classical
-  covariance matrix has the lowest possible determinant.  The raw MCD
-  estimate of location is then the average of these \eqn{h} points,
+  the \eqn{h (> n/2)} (\eqn{h = h(\alpha,n,p) =}
+  \code{\link{h.alpha.n}(alpha,n,p)}) observations (out of \eqn{n})
+  whose classical covariance matrix has the lowest possible determinant.
+
+  The raw MCD estimate of location is then the average of these \eqn{h} points,
   whereas the raw MCD estimate of scatter is their covariance matrix,
   multiplied by a consistency factor and a finite sample correction factor
   (to make it consistent at the normal model and unbiased at small samples).
-  Both rescaling factors are returned also in the vector \code{raw.cnp2}
-  of length 2. Based on these raw MCD estimates, a reweighting step is performed
-  which increases the finite-sample eficiency considerably - see Pison et al. (2002).
-  The rescaling factors for the reweighted estimates are returned in the
-  vector \code{cnp2} of length 2. Details for the computation of the finite
-  sample correction factors can be found in Pison et al. (2002).
-  The finite sample corrections can be suppressed by setting \code{use.correction = FALSE}.
-  The implementation in rrcov uses the Fast MCD algorithm of Rousseeuw and Van Driessen (1999)
-  to approximate the minimum covariance determinant estimator.
+
+  The implementation of \code{covMcd} uses the Fast MCD algorithm of
+  Rousseeuw and Van Driessen (1999) to approximate the minimum
+  covariance determinant estimator.
+
+  Both rescaling factors (consistency and finite sample) are returned
+  also in the vector \code{raw.cnp2} of length 2.  Based on these raw
+  MCD estimates, a reweighting step is performed which increases the
+  finite-sample eficiency considerably - see Pison et al.~(2002).  The
+  rescaling factors for the reweighted estimates are returned in the
+  vector \code{cnp2} of length 2.  Details for the computation of the
+  finite sample correction factors can be found in Pison et al. (2002).
+
+  The finite sample corrections can be suppressed by setting
+  \code{use.correction = FALSE}.
 }
 \author{Valentin Todorov \email{valentin.todorov@chello.at}, based on
   work written for S-plus by Peter Rousseeuw and Katrien van Driessen
   from University of Antwerp.% no E-mails for spam-protection
 }
 \value{
-  An object of class \code{"mcd"} which is basically a \code{\link{list}} with
-  components
+  An object of class \code{"mcd"} which is basically a
+  \code{\link{list}} with components
   \item{center}{the final estimate of location.}
   \item{cov}{the final estimate of scatter.}
   \item{cor}{the (final) estimate of the correlation matrix (only if
     \code{cor = TRUE}).}
   \item{crit}{the value of the criterion, i.e. the determinant.}
   \item{best}{the best subset found and used for computing the raw
-    estimates.  The size of \code{best} is equal to \code{quan}.}
+    estimates, with \code{\link{length}(best) == quan =
+      \link{h.alpha.n}(alpha,n,p)}.}
   \item{mah}{mahalanobis distances of the observations using the final
     estimate of the location and scatter.}
   \item{mcd.wt}{weights of the observations using the final estimate of
@@ -93,9 +102,9 @@ covMcd(x, cor = FALSE, alpha = 1/2, nsamp = 500, seed = NULL,
   \item{n.obs}{total number of observations.}
   \item{alpha}{the size of the subsets over which the determinant is
     minimized (the default is \eqn{(n+p+1)/2}).}
-  \item{quan}{the number of observations on which the MCD is based.  If
-    \code{quan} equals \code{n.obs}, the MCD is the classical covariance
-    matrix.}
+  \item{quan}{the number of observations, \eqn{h}, on which the MCD is
+    based.  If \code{quan} equals \code{n.obs}, the MCD is the classical
+    covariance matrix.}
   \item{method}{character string naming the method (Minimum Covariance
     Determinant).}
   \item{call}{the call used (see \code{\link{match.call}}).}

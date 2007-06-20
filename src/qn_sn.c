@@ -59,11 +59,8 @@ See also ../inst/Copyrights
 /* --> int64_t ; if people don't have the above, they can forget about it.. */
 /* #include "int64.h" */
 
+#include <R.h>
 #include <Rmath.h> /* -> <math.h> and much more */
-#include <R_ext/Arith.h> /* R_Na..*/
-#include <R_ext/Utils.h> /* sorting */
-#include <R_ext/Boolean.h>
-#include <R_ext/Memory.h>
 
 /* Interface routines to be called via .C() : */
 #include "robustbase.h"

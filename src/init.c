@@ -35,8 +35,10 @@ static R_NativePrimitiveArgType R_lmrob_S_t[] = {
 
 static R_NativePrimitiveArgType R_lmrob_MM_t[] = {
     REALSXP, REALSXP, INTSXP, INTSXP,
-    /* beta_initial */ REALSXP, REALSXP, REALSXP,
-    /* max_it */ INTSXP, REALSXP, LGLSXP
+    /* beta_initial */ REALSXP, REALSXP,
+    /* beta_m */ REALSXP, REALSXP,
+    /* max_it */ INTSXP, REALSXP,
+    /* loss */ REALSXP, REALSXP, LGLSXP, INTSXP
 };
 
 static const R_CMethodDef CEntries[]  = {

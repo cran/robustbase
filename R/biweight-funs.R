@@ -8,7 +8,7 @@
 ## and       Chi (x, c) == (6/c^2) Rho(x,c), where Psi(.) = Rho'(.)
 
 
-lmrob.Chi <- function(x, cc, deriv = 0)
+tukeyChi <- function(x, cc, deriv = 0)
 {
     x <- x / cc
     x2 <- x*x
@@ -30,7 +30,9 @@ lmrob.Chi <- function(x, cc, deriv = 0)
     r
 }
 
-lmrob.Psi <- function(x, cc, deriv = 0)
+## we call this  '*Psi1'  such as to not be confounded with
+## the (future!) S4 object tukeyPsi1() !
+tukeyPsi1 <- function(x, cc, deriv = 0)
 {
     ## This version of psi() is scaled such that psi'(0) = 1
     x2 <- (x / cc)^2
@@ -54,8 +56,8 @@ lmrob.Psi <- function(x, cc, deriv = 0)
 }
 
 if(FALSE)
-lmrob.PsiEx <- function (x, cc, deriv = 0)
-## lmrob.PsiEx <- function (x, cc = 4.685, deriv = 0)
+tukeyPsi1Ex <- function (x, cc, deriv = 0)
+## tukeyPsi1Ex <- function (x, cc = 4.685, deriv = 0)
 ##                               ^^^^^^^^^
 {
   ## This version of psi() is scaled such that psi'(0) = 1

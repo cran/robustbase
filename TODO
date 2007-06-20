@@ -101,6 +101,8 @@ o fully implement and test the multivariate case (y = matrix with > 1 col.)
 
 o predict.lmrob() __NEEDED__
 
+o anova.lmrob() __NEEDED__ {tau-test; deviance as in glm; ?? }
+			    S+ : "RWald" & "RF" (= rob. F)
 o src/lmrob.c :
 
    Things to fix:
@@ -110,3 +112,8 @@ o src/lmrob.c :
    - does median() , MAD() instead of using R's  sort() routines
 
 ----
+
+o Alternative version of covOGK() for correlation-only
+  using's Huber's correlation formula which ensures [-1,1] range
+  --> ~/R/MM/Pkg-ex/robustbase/robcorgroesser1.R
+  and ~/R/MM/STATISTICS/robust/pairwise-new.R

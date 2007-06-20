@@ -1,3 +1,6 @@
+####========== Pairwise methods for covariance / correlation =================
+
+
 ### From: Kjell Konis <konis@stats.ox.ac.uk>
 ### To: R-SIG-Robust@stat.math.ethz.ch, Ricardo Maronna ...
 ### Cc: Rand Wilcox ...
@@ -68,6 +71,7 @@ covOGK <- function(X, n.iter = 2,
         }
 
         ## Compute the eigenvectors of U and store them as columns of E:
+        ## eigen(U, symmetric) only needs left/lower triangle
         E <- eigen(U, symmetric = TRUE)$vectors
 
         ## Compute A and store it for each iteration
@@ -203,3 +207,6 @@ hard.rejection <- function(distances, p, beta = 0.9, ...)
     wts[distances <= d0] <- 1.0
     wts
 }
+
+##-- TODO "pairwise QC" ... etc
+##--> ~maechler/R/MM/STATISTICS/robust/pairwise-new.R

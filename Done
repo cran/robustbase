@@ -100,3 +100,10 @@ o) we have had some problems, but they are solved now
   - made 'weight.fn = hard rejection'  the default
   - made 'n.iter = 2'                  the default.
 
+0.2-8:
+
+21) covMcd(): Finite sample correction is *WRONG* for quite small n !
+
+22) lmrob(): use *relative* error for convergence check in RWLS
+	     (MM-)iterations; allow to set the tolerance for these
+	     allow some trace output

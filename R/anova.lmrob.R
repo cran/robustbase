@@ -105,7 +105,7 @@ anovaLmrobPair <- function(FMfit, reduced.model, initCoef, test)
 	y <- FMfit$residuals + FMfit$fitted.values
 	s0 <- FMfit$scale
 	psi <- function(u, deriv = 0)
-	    lmrob.Psi(u, deriv, cc = FMfit$control$tuning.psi)
+	    tukeyPsi1(u, deriv, cc = FMfit$control$tuning.psi)
 	iC <-
 	    if(is.null(initCoef)) {
 		res <- as.vector(y - X[,RMod] %*% FMfit$coef[RMod])

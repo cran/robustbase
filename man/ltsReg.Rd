@@ -27,7 +27,7 @@ ltsReg(x, \dots)
   \item{subset}{an optional vector specifying a subset of observations
     to be used in the fitting process.}
   \item{weights}{an optional vector of weights to be used
-    in the fitting process. \bold{NO USED YET}.
+    in the fitting process. \bold{NOT USED YET}.
     %%% If specified, weighted least squares is used
     %%% with weights \code{weights} (that is, minimizing \code{sum(w*e^2)});
     %%% otherwise ordinary least squares is used.
@@ -55,8 +55,9 @@ ltsReg(x, \dots)
   \item{intercept}{if true, a model with constant term will be
   estimated; otherwise no constant term will be included.  Default is
   \code{intercept = TRUE}  }
-  \item{alpha}{the percentage of squared residuals whose sum will be
-    minimized, by default 0.5.  In general, \code{alpha} must between 0.5 and 1.}
+  \item{alpha}{the percentage (roughly) of squared residuals whose sum will be
+    minimized, by default 0.5.  In general, \code{alpha} must between
+    0.5 and 1.}
   \item{nsamp}{number of subsets used for initial estimates or
     \code{"best"} or \code{"exact"}.  Default is \code{nsamp = 500}.  For
     \code{nsamp="best"} exhaustive enumeration is done, as long as the
@@ -82,13 +83,17 @@ ltsReg(x, \dots)
   \item{\dots}{arguments passed to or from other methods.}
 }
 \details{
-  The LTS regression method minimizes the sum of the h smallest squared
-  residuals, where h must be at least half the number of
-  observations.  The default value of h is roughly 0.5n where n is the
-  total number of observations, but the user may choose any value
-  between n/2 and n.  The LTS estimate of the error scale is given
-  by the minimum of the objective function multiplied by a consistency
-  factor and a finite sample correction factor - see Pison et al. (2002)
+  The LTS regression method minimizes the sum of the \eqn{h} smallest
+  squared residuals, where \eqn{h > n/2}, i.e. at least half the number of
+  observations must be used.  The default value of \eqn{h} (when
+  \code{alpha=1/2}) is roughly \eqn{n / 2}, more precisely,
+  \code{(n+p+1) \%/\% 2} where \eqn{n} is the
+  total number of observations, but by setting \code{alpha}, the user
+  may choose higher values up to n, where
+  \eqn{h = h(\alpha,n,p) =} \code{\link{h.alpha.n}(alpha,n,p)}.  The LTS
+  estimate of the error scale is given by the minimum of the objective
+  function multiplied by a consistency factor
+  and a finite sample correction factor -- see Pison et al. (2002)
   for details.  The rescaling factors for the raw and final estimates are
   returned also in the vectors \code{raw.cnp2} and \code{cnp2} of
   length 2 respectively.  The finite sample corrections can be suppressed
@@ -99,11 +104,14 @@ ltsReg(x, \dots)
   removed either by \code{y ~ x - 1} or \code{y ~ 0 + x}.  See
   \code{\link{formula}} for more details.
 }
+\note{We strongly recommend using \code{\link{lmrob}()} instead of
+  \code{ltsReg} (\emph{See also} below)!
+}
 \value{
   The function \code{ltsReg} returns an object of class \code{"lts"}.
-  \cr
-  The function \code{\link{summary}} is used to obtain and print
-  a summary table of the results.
+  The \code{\link{summary}} method function is used to obtain (and
+  print) a summary table of the results, and \code{\link[ltsPlot]{plot}()}
+  can be used to plot them, see the the specific help pages.
 
   The generic accessor functions \code{\link{coefficients}},
   \code{\link{fitted.values}} and \code{\link{residuals}}
@@ -121,8 +129,8 @@ ltsReg(x, \dots)
     \code{intercept=TRUE}), obtained after reweighting.
   }
   \item{best}{
-    the best subset found and used for computing the raw estimates.  The
-    size of \code{best} is equal to \code{quan}.
+    the best subset found and used for computing the raw estimates, with
+    \code{\link{length}(best) == quan = \link{h.alpha.n}(alpha,n,p)}.
   }
   \item{fitted.values}{vector like \code{y} containing the fitted values
     of the response after reweighting.}
@@ -150,7 +158,8 @@ ltsReg(x, \dots)
     small raw residuals, and 0 for points with large raw residuals.
   }
   \item{method}{character string naming the method (Least Trimmed Squares).}
-  \item{X}{the input data as a matrix.}
+  \item{X}{the input data as a matrix (including intercept column if
+    applicable).}
   \item{Y}{the response variable as a vector.}
 
 }

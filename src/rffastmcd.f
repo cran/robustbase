@@ -78,8 +78,9 @@ cc
 cc   The algorithm works as follows:
 cc
 cc	 The dataset contains n cases, and nvar variables are used.
-cc	 When n < 2*nmini, the algorithm will analyze the dataset as a whole.
-cc	 When n >= 2*nmini, the algorithm will use several subdatasets.
+cc  Let n_0 := 2 * nmini (== 600).
+cc	 When n <  n_0, the algorithm will analyze the dataset as a whole.
+cc	 When n >= n_0, the algorithm will use several subdatasets.
 cc
 cc	 When the dataset is analyzed as a whole, a trial
 cc	 subsample of nvar+1 cases is taken, of which the mean and
@@ -125,6 +126,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 	subroutine rffastmcd(dat,n,nvar,nhalff,krep,initcov,initmean,
+c                                       ------ nhalff = quan = h(alpha)
      *	  inbest,det,weight,fit,coeff,kount,adcov,
      *	  iseed,
      *	  temp, index1, index2, nmahad, ndist, am, am2, slutn,
@@ -159,14 +161,15 @@ cc
 	parameter (k2=2)
 	parameter (k3=100)
 
-c MM: below, there is also hardcoded "10" in places related to "stock" !
+c MM: below, '10' ("the ten best solutions") is also hardcoded in many places,
+c	 related to "stock" !
 
 cc
-cc  The parameter krep represents the total number of trial subsamples
-cc  to be drawn when n exceeds 2*nmini.
+cc  krep := the total number of trial subsamples
+cc          to be drawn when n exceeds 2*nmini;
+cc  	was hardcoded krep := 500; now an *argument*
 cc
-c	parameter (krep=500)
-cc
+
 cc  The following lines need not be modified.
 cc
 C	parameter (nvmax1=nvmax+1)
@@ -175,7 +178,8 @@ C	parameter (nvm12=nvmax1*nvmax1)
 	parameter (km10=10*kmini)
 	parameter (nmaxi=nmini*kmini)
 cc
-	integer rfncomb,rfnbreak
+	integer rfncomb
+c unused   integer rfnbreak
 	integer ierr,matz,seed,tottimes,step
 	integer pnsel
 	integer flag(km10)
@@ -183,6 +187,7 @@ cc
 	integer subdat(2,nmaxi)
 	double precision mcdndex(10,2,kmini)
 	integer subndex(450)
+c FIXME                 ^^^ how does this depend on (kmini,nmini,...) ???
 	integer replow
 	integer fit
 cc	double precision chi2(50)
@@ -299,10 +304,10 @@ cc  observations on which the MCD is based) is given by the integer variable
 cc  nhalff.
 cc  If nhalff equals n, the MCD is the classical covariance matrix.
 cc  The logical value class indicates this situation.
-cc  The variable nbreak is the breakdown point of the MCD estimator
-cc  based on nhalff observations, whereas jdefaul is the optimal value of
-cc  nhalff, with maximal breakdown point. The variable percen is the
-cc  corresponding percentage.
+cc  The variable jbreak is the breakdown point of the MCD estimator
+cc  based on nhalff observations, whereas jdefaul = (n+nvar+1)/2
+cc  would be the optimal value of nhalff, with maximal breakdown point.
+cc  The variable percen is the corresponding percentage (MM: rather "fraction").
 cc
 	percen = (1.D0*nhalff)/(1.D0*n)
 
@@ -316,7 +321,7 @@ cc
 	  endif
 	endif
 
-	jbreak=rfnbreak(nhalff,n,nvar)
+c unused	jbreak=rfnbreak(nhalff,n,nvar)
 	class= .false.
 	if(nhalff.ge.n) then
 c	 compute *only* the classical estimate
@@ -339,7 +344,9 @@ cc.	  call rfmcduni(ndist,n,nhalff,slutn,bstd,am,am2, factor,
 	  initcov(1)=bstd
 	  goto 9999
 	endif
-cc
+
+cc  p >= 2   in the following
+cc  ------
 cc  Some initializations:
 cc    seed = starting value for random generator
 cc    matz = auxiliary variable for the subroutine rs, indicating whether
@@ -445,6 +452,7 @@ c MM(FIXME):  The following code depends crucially on  kmini == 5
 	  nhalf=nhalff
 	  kstep=k1
 	  if(n.le.replow(nsel)) then
+c     		use all combinations; happens iff  nsel = nvar+1 = p+1 <= 6
 	     nrep=rfncomb(nsel,n)
 	  else
 C VT::02.09.2004 - remove the hardcoded 500 for nrep
@@ -1538,7 +1546,7 @@ ccccc
 ccccc
 	subroutine rfcorrel(nvar,a,b,sd)
 cc
-cc  Transforms the scatter matrix a to the correlation matrix b.
+cc  Transforms the scatter matrix a to the correlation matrix b: <==> R's  cov2cor(.)
 cc
 	double precision a(nvar,nvar)
 	double precision b(nvar,nvar)

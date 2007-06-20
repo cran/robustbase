@@ -1,6 +1,6 @@
 
-R : Copyright 2006, The R Foundation for Statistical Computing
-Version 2.3.1 RC (2006-05-31 r38242)
+R version 2.4.1 Patched (2007-03-25 r40887)
+Copyright (C) 2007 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -16,10 +16,9 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > #### Test special cases  for  covMcd()
-> 
+>
 > library(robustbase)
-Loading required package: MASS
-> 
+>
 > ### 1) p = 1 ----------------------------------------------------
 > set.seed(1)
 > x <- c(rnorm(50),100, 1e10)
@@ -27,12 +26,12 @@ Loading required package: MASS
 Minimum Covariance Determinant (MCD) estimator.
 Call:
 covMcd(x = x)
--> Method:  Univariate location and scale estimation. 
+-> Method:  Univariate location and scale estimation.
 
-Log(Det.):  -2.130 
+Log(Det.):  -2.130
 Robust Estimate of Location:
-     x  
-0.1922  
+     x
+0.1922
 Robust Estimate of Covariance:
         x
 x  0.7642
@@ -49,8 +48,10 @@ List of 14
  $ n.obs     : int 52
  $ alpha     : num 0.5
  $ quan      : num 27
- $ raw.cov   : Named num 0.839
-  ..- attr(*, "names")= chr "x"
+ $ raw.cov   : num [1, 1] 0.839
+  ..- attr(*, "dimnames")=List of 2
+  .. ..$ : chr "x"
+  .. ..$ : chr "x"
  $ raw.center: Named num 0.325
   ..- attr(*, "names")= chr "x"
  $ crit      : num 0.119
@@ -66,12 +67,12 @@ List of 14
 Minimum Covariance Determinant (MCD) estimator.
 Call:
 covMcd(x = x)
--> Method:  Univariate location and scale estimation. 
+-> Method:  Univariate location and scale estimation.
 
-Log(Det.):  -2.130 
+Log(Det.):  -2.130
 Robust Estimate of Location:
-     x  
-0.1922  
+     x
+0.1922
 Robust Estimate of Covariance:
         x
 x  0.7642
@@ -80,14 +81,14 @@ x  0.7642
 Minimum Covariance Determinant (MCD) estimator.
 Call:
 covMcd(x = x, alpha = 1)
--> Method:  Minimum Covariance Determinant Estimator. 
-The minimum covariance determinant estimates based on 52 observations 
-are equal to the classical estimates. 
+-> Method:  Minimum Covariance Determinant Estimator.
+The minimum covariance determinant estimates based on 52 observations
+are equal to the classical estimates.
 
-Log(Det.):  42.1 
+Log(Det.):  42.1
 Robust Estimate of Location:
-    x  
-2.059  
+    x
+2.059
 Robust Estimate of Covariance:
        x
 x  228.4
@@ -123,137 +124,142 @@ List of 14
 Minimum Covariance Determinant (MCD) estimator.
 Call:
 covMcd(x = x, alpha = 1)
--> Method:  Minimum Covariance Determinant Estimator. 
-The minimum covariance determinant estimates based on 52 observations 
-are equal to the classical estimates. 
+-> Method:  Minimum Covariance Determinant Estimator.
+The minimum covariance determinant estimates based on 52 observations
+are equal to the classical estimates.
 
-Log(Det.):  42.1 
+Log(Det.):  42.1
 Robust Estimate of Location:
-    x  
-2.059  
+    x
+2.059
 Robust Estimate of Covariance:
        x
 x  228.4
-> 
+>
 > ### 1b) p = 1, constant scale
 > (rc <- covMcd(rep(1,12)))
 Minimum Covariance Determinant (MCD) estimator.
 Call:
 covMcd(x = rep(1, 12))
--> Method:  Univariate location and scale estimation. 
-More than 7 of the observations are identical. 
+-> Method:  Univariate location and scale estimation.
+Initial scale 0 because more than 'h' (=7) observations are identical.
 
-Log(Det.):  -Inf 
+Log(Det.):  -Inf
 Robust Estimate of Location:
-rep(1, 12)  
-         1  
+rep(1, 12)
+         1
 Robust Estimate of Covariance:
-      [,1]
-[1,]     0
-attr(,"names")
-[1]  "rep(1, 12)"
+            rep(1, 12)
+rep(1, 12)           0
 > str(rc)
-List of 14
- $ method    : chr "Univariate location and scale estimation. \nMore than 7 of the observations are identical."
- $ call      : language covMcd(x = rep(1, 12))
- $ cov       : num [1, 1] 0
+List of 15
+ $ method     : chr "Univariate location and scale estimation."
+ $ call       : language covMcd(x = rep(1, 12))
+ $ singularity:List of 2
+  ..$ kind: chr "identicalObs"
+  ..$ q   : num 7
+ $ cov        : num [1, 1] 0
+  ..- attr(*, "dimnames")=List of 2
+  .. ..$ : chr "rep(1, 12)"
+  .. ..$ : chr "rep(1, 12)"
+ $ raw.cov    : num [1, 1] 0
+  ..- attr(*, "dimnames")=List of 2
+  .. ..$ : chr "rep(1, 12)"
+  .. ..$ : chr "rep(1, 12)"
+ $ center     : Named num 1
   ..- attr(*, "names")= chr "rep(1, 12)"
- $ center    : Named num 1
+ $ raw.center : Named num 1
   ..- attr(*, "names")= chr "rep(1, 12)"
- $ n.obs     : int 12
- $ alpha     : num 0.5
- $ quan      : num 7
- $ raw.cov   : num [1, 1] 0
-  ..- attr(*, "names")= chr "rep(1, 12)"
- $ raw.center: Named num 1
-  ..- attr(*, "names")= chr "rep(1, 12)"
- $ crit      : num 0
- $ mcd.wt    : num [1:12] 1 1 1 1 1 1 1 1 1 1 ...
- $ X         : num [1:12, 1] 1 1 1 1 1 1 1 1 1 1 ...
+ $ n.obs      : int 12
+ $ alpha      : num 0.5
+ $ quan       : num 7
+ $ crit       : num 0
+ $ mcd.wt     : num [1:12] 1 1 1 1 1 1 1 1 1 1 ...
+ $ X          : num [1:12, 1] 1 1 1 1 1 1 1 1 1 1 ...
   ..- attr(*, "dimnames")=List of 2
   .. ..$ : chr [1:12] "1" "2" "3" "4" ...
   .. ..$ : NULL
- $ raw.cnp2  : num [1:2] 4.97 1.41
- $ cnp2      : num [1:2] 1 1
+ $ raw.cnp2   : num [1:2] 4.97 1.41
+ $ cnp2       : num [1:2] 1 1
  - attr(*, "class")= chr "mcd"
 > summary(rc)
 Minimum Covariance Determinant (MCD) estimator.
 Call:
 covMcd(x = rep(1, 12))
--> Method:  Univariate location and scale estimation. 
-More than 7 of the observations are identical. 
+-> Method:  Univariate location and scale estimation.
+Initial scale 0 because more than 'h' (=7) observations are identical.
 
-Log(Det.):  -Inf 
+Log(Det.):  -Inf
 Robust Estimate of Location:
-rep(1, 12)  
-         1  
+rep(1, 12)
+         1
 Robust Estimate of Covariance:
-      [,1]
-[1,]     0
-attr(,"names")
-[1]  "rep(1, 12)"
+            rep(1, 12)
+rep(1, 12)           0
 > ## with alpha = 1
 > (rc1 <- covMcd(rep(1,12), alpha = 1))
 Minimum Covariance Determinant (MCD) estimator.
 Call:
 covMcd(x = rep(1, 12), alpha = 1)
 -> Method:  Minimum Covariance Determinant Estimator.
-The classical covariance matrix is singular. 
-The minimum covariance determinant estimates based on 12 observations 
-are equal to the classical estimates. 
+The minimum covariance determinant estimates based on 12 observations
+are equal to the classical estimates.
+The classical covariance matrix is singular.
 
-Log(Det.):  -Inf 
+Log(Det.):  -Inf
 Robust Estimate of Location:
-rep(1, 12)  
-         1  
+rep(1, 12)
+         1
 Robust Estimate of Covariance:
             rep(1, 12)
 rep(1, 12)           0
 > str(rc1)
-List of 14
- $ method    : chr "Minimum Covariance Determinant Estimator.\nThe classical covariance matrix is singular. \nThe minimum covariance determinant es"| __truncated__
- $ call      : language covMcd(x = rep(1, 12), alpha = 1)
- $ cov       : num [1, 1] 0
+List of 15
+ $ method     : chr "Minimum Covariance Determinant Estimator. \nThe minimum covariance determinant estimates based on 12 observations \nare equal t"| __truncated__
+ $ call       : language covMcd(x = rep(1, 12), alpha = 1)
+ $ cov        : num [1, 1] 0
   ..- attr(*, "dimnames")=List of 2
   .. ..$ : chr "rep(1, 12)"
   .. ..$ : chr "rep(1, 12)"
- $ center    : Named num 1
+ $ center     : Named num 1
   ..- attr(*, "names")= chr "rep(1, 12)"
- $ n.obs     : int 12
- $ alpha     : num 1
- $ quan      : num 12
- $ raw.cov   : num [1, 1] 0
+ $ n.obs      : int 12
+ $ singularity:List of 1
+  ..$ kind: chr "classical"
+ $ alpha      : num 1
+ $ quan       : num 12
+ $ raw.cov    : num [1, 1] 0
   ..- attr(*, "dimnames")=List of 2
   .. ..$ : chr "rep(1, 12)"
   .. ..$ : chr "rep(1, 12)"
- $ raw.center: Named num 1
+ $ raw.center : Named num 1
   ..- attr(*, "names")= chr "rep(1, 12)"
- $ crit      : num 0
- $ mcd.wt    : num [1:12] 1 1 1 1 1 1 1 1 1 1 ...
- $ X         : num [1:12, 1] 1 1 1 1 1 1 1 1 1 1 ...
+ $ crit       : num 0
+ $ mcd.wt     : num [1:12] 1 1 1 1 1 1 1 1 1 1 ...
+ $ X          : num [1:12, 1] 1 1 1 1 1 1 1 1 1 1 ...
   ..- attr(*, "dimnames")=List of 2
   .. ..$ : chr [1:12] "1" "2" "3" "4" ...
   .. ..$ : NULL
- $ raw.cnp2  : num [1:2] 1 1
- $ cnp2      : num [1:2] 1 1
+ $ raw.cnp2   : num [1:2] 1 1
+ $ cnp2       : num [1:2] 1 1
  - attr(*, "class")= chr "mcd"
 > summary(rc1)
 Minimum Covariance Determinant (MCD) estimator.
 Call:
 covMcd(x = rep(1, 12), alpha = 1)
 -> Method:  Minimum Covariance Determinant Estimator.
-The classical covariance matrix is singular. 
-The minimum covariance determinant estimates based on 12 observations 
-are equal to the classical estimates. 
+The minimum covariance determinant estimates based on 12 observations
+are equal to the classical estimates.
+The classical covariance matrix is singular.
 
-Log(Det.):  -Inf 
+Log(Det.):  -Inf
 Robust Estimate of Location:
-rep(1, 12)  
-         1  
+rep(1, 12)
+         1
 Robust Estimate of Covariance:
             rep(1, 12)
 rep(1, 12)           0
-> 
+>
 > ### 2)  constant observations  { multivariate scale == 0 } -----------
 > (X <- matrix(rep(2*(1:4), 12), nrow = 12, byrow = TRUE))
       [,1] [,2] [,3] [,4]
@@ -275,14 +281,12 @@ Call:
 covMcd(x = X)
 -> Method:  Minimum Covariance Determinant Estimator.
 The covariance matrix of the data is singular.
-There are 12 observations in the entire dataset of
- 12 observations that lie on the hyperplane with equation
- a_1*(x_i1-m_1)+...+a_p*(x_ip-m_p)=0 
- with (m_1,...,m_p) the mean
- of these observations and coefficients a_i equal to: 
-      1,     0,     0,     0 
+There are 12 observations (in the entire dataset of 12 obs.) lying on
+the hyperplane with equation a_1*(x_i1 - m_1) + ... + a_p*(x_ip - m_p)
+= 0 with (m_1,...,m_p) the mean of these observations and coefficients
+a_i from the vector a <- c(1, 0, 0, 0)
 
-Log(Det.):  -Inf 
+Log(Det.):  -Inf
 Robust Estimate of Location:
 [1]  2  4  6  8
 Robust Estimate of Covariance:
@@ -297,14 +301,12 @@ Call:
 covMcd(x = X)
 -> Method:  Minimum Covariance Determinant Estimator.
 The covariance matrix of the data is singular.
-There are 12 observations in the entire dataset of
- 12 observations that lie on the hyperplane with equation
- a_1*(x_i1-m_1)+...+a_p*(x_ip-m_p)=0 
- with (m_1,...,m_p) the mean
- of these observations and coefficients a_i equal to: 
-      1,     0,     0,     0 
+There are 12 observations (in the entire dataset of 12 obs.) lying on
+the hyperplane with equation a_1*(x_i1 - m_1) + ... + a_p*(x_ip - m_p)
+= 0 with (m_1,...,m_p) the mean of these observations and coefficients
+a_i from the vector a <- c(1, 0, 0, 0)
 
-Log(Det.):  -Inf 
+Log(Det.):  -Inf
 Robust Estimate of Location:
 [1]  2  4  6  8
 Robust Estimate of Covariance:
@@ -318,11 +320,11 @@ Minimum Covariance Determinant (MCD) estimator.
 Call:
 covMcd(x = X, alpha = 1)
 -> Method:  Minimum Covariance Determinant Estimator.
-The classical covariance matrix is singular. 
-The minimum covariance determinant estimates based on 12 observations 
-are equal to the classical estimates. 
+The minimum covariance determinant estimates based on 12 observations
+are equal to the classical estimates.
+The classical covariance matrix is singular.
 
-Log(Det.):  -Inf 
+Log(Det.):  -Inf
 Robust Estimate of Location:
 [1]  2  4  6  8
 Robust Estimate of Covariance:
@@ -336,11 +338,11 @@ Minimum Covariance Determinant (MCD) estimator.
 Call:
 covMcd(x = X, alpha = 1)
 -> Method:  Minimum Covariance Determinant Estimator.
-The classical covariance matrix is singular. 
-The minimum covariance determinant estimates based on 12 observations 
-are equal to the classical estimates. 
+The minimum covariance determinant estimates based on 12 observations
+are equal to the classical estimates.
+The classical covariance matrix is singular.
 
-Log(Det.):  -Inf 
+Log(Det.):  -Inf
 Robust Estimate of Location:
 [1]  2  4  6  8
 Robust Estimate of Covariance:
@@ -349,10 +351,10 @@ Robust Estimate of Covariance:
 [2,]     0     0     0     0
 [3,]     0     0     0     0
 [4,]     0     0     0     0
-> 
+>
 > ### 3)  alpha = 1 : classical estimates --- for general cases --------
-> 
-> 
+>
+>
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  0.933 0.041 0.975 0 0 
-> 
+Time elapsed:  0.64 0.08 1.162 0 0
+>

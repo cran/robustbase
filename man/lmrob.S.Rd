@@ -22,10 +22,11 @@ lmrob.S(x, y, control, trace.lev = 0)
   efficiency \sQuote{on its own}).
 }
 \value{
-  A list containing the following elements:
-  \item{coef   }{Vector of S-regression coefficient estimates }
-  \item{scale  }{The S-scale residual estimate }
-  \item{cov    }{covariance matrix of the coefficient estimators }
+  A list with components
+  \item{coef}{numeric vector (length \eqn{p}) of S-regression coefficient estimates.}
+  \item{scale}{the S-scale residual estimate}% 'residual estimate' ?? % resid. VAR !?
+  \item{cov}{covariance matrix (\eqn{p \times p}{p x p}) of the
+    coefficient estimates.}
   \item{k.iter}{(maximal) number of refinement iterations used.}
   \item{converged}{logical indicating if \bold{all} refinement
     iterations had converged.}

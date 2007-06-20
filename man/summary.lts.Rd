@@ -6,7 +6,7 @@
 \method{summary}{lts}(object, correlation = FALSE, \dots)
 
 \method{print}{summary.lts}(x, digits = max(3, getOption("digits") - 3),
-     signif.stars = FALSE, \dots)
+     signif.stars = getOption("show.signif.stars"), \dots)
 }
 \arguments{
   \item{object}{an object of class \code{"lts"}, usually, a result of a call to \code{\link{ltsReg}}.}
@@ -68,7 +68,7 @@ data(Animals2)
 ltsA <- ltsReg(log(brain) ~ log(body), data = Animals2)
 (slts <- summary(ltsA))
 ## non-default options for printing the summary:
-print(slts, digits = 5, signif.stars = TRUE, signif.legend = FALSE)
+print(slts, digits = 5, signif.stars = FALSE)
 }
 \keyword{regression}
 \keyword{robust}

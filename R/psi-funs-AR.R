@@ -6,6 +6,7 @@
 ### by Andreas Ruckstuhl
 
 ### FIXME: replace by using the objects in  ./psi-rho-funs.R
+###        and                              ./biweight-funs.R
 
 psi.bisquare <- function (u, c=4.685, deriv=0, rho=FALSE)
 {

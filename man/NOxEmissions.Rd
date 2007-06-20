@@ -1,6 +1,7 @@
 \name{NOxEmissions}
 \alias{NOxEmissions}
 \docType{data}
+\encoding{latin1}
 \title{NOx Air Pollution Data}
 \description{
   A typical medium sized environmental data set with hourly measurements

@@ -8,14 +8,16 @@ lmrob.control <-
 	     best.r.s = 2,	# had '2'    hardwired in C
 	     k.max = 200,	# had '50'   hardwired in C
 	     refine.tol = 1e-7, # had '1e-7' hardwired in C {often not converged ?!}
+             rel.tol = 1e-7,    # had '1e-7' hardwired in C for ABSOLUTE tol
+             trace.lev = 0,
 	     compute.rd = FALSE)
 {
     list(seed = as.integer(seed), nResample = nResample, tuning.chi = tuning.chi,
 	 bb = bb, tuning.psi = tuning.psi,
 	 max.it = max.it, groups = groups, n.group = n.group,
 	 best.r.s = best.r.s, k.fast.s = k.fast.s,
-	 k.max = k.max, refine.tol = refine.tol,
-	 compute.rd = compute.rd)
+	 k.max = k.max, refine.tol = refine.tol, rel.tol = rel.tol,
+         trace.lev = trace.lev, compute.rd = compute.rd)
 }
 
 
@@ -42,7 +44,8 @@ lmrob.fit.MM <-
 	cov.matrix <- matrix(final.MM$cov, p, p)
     }
     else { ## If IRWLS did not converge, use the initial (S) estimator:
-	warning("IRWLS iterations did NOT converge in ", control$max.it," steps")
+	warning("IRWLS iterations (for MM) did NOT converge in ",
+                control$max.it," steps; using initial estimate instead.")
 	coef <- iCoef
 	cov.matrix <- matrix(init.S$cov, p, p)
     }
@@ -59,13 +62,14 @@ lmrob.fit.MM <-
 	names(coef) <- dn
     }
     f <- drop(x %*% coef)
-    r <- y - f
-    list(fitted.values = f, residuals = r, weights = final.MM$wt,
-	 rank = rank, degree.freedom = n - rank,
+    list(fitted.values = f, residuals = y - f,
+         weights = final.MM$wt, rank = rank, degree.freedom = n - rank,
 	 coefficients = coef, initial.coefficients = iCoef,
 	 scale = final.MM$scale, cov = cov.matrix, control = control,
-	 iter = final.MM$iter, converged = final.MM$converged)
-}
+	 iter = final.MM$iter, converged = final.MM$converged,
+         ## return initial estimate; notably its own 'converged'
+         init.S = init.S)
+}## lmrob.MM.fit()
 
 
 lmrob.MM <- function(x, y, beta.initial, scale, control)
@@ -88,21 +92,29 @@ lmrob.MM <- function(x, y, beta.initial, scale, control)
 	    beta.initial = as.double(beta.initial),
 	    scale = as.double(scale),
 	    coef = double(p),
+            resid = double(n),
 	    iter = as.integer(control$ max.it),
 	    c.psi = c.psi,
+            loss = double(1),
+	    rel.tol= as.double(control$rel.tol),
 	    converged = logical(1),
-	    PACKAGE = "robustbase")[c("coef", "scale", "converged", "iter")]
+	    trace.lev = as.integer(control$trace.lev),
+	    PACKAGE = "robustbase")[
+            c("coef", "scale", "resid", "loss", "converged", "iter")]
     ## FIXME?: Should rather warn *here* in case of non-convergence
-    ## FIXME: shouldn't C-code above return residuals ?!
-    r.s	 <- drop(y - x %*% b$coef)	 / sigma
+    ## now does return  residuals :
+    stopifnot(all.equal(b$resid, drop(y - x %*% b$coef),
+			check.attributes = FALSE, tol = 1e-12))
+    ## scaled residuals:
+    r.s	 <- b$resid / sigma
     r2.s <- drop(y - x %*% beta.initial) / sigma
-    w	<- lmrob.Psi( r.s, cc = c.psi, deriv = 1)
-    ch1 <- lmrob.Chi(r2.s, cc = c.chi, deriv = 1)
+    w	<- tukeyPsi1( r.s, cc = c.psi, deriv = 1)
+    ch1 <- tukeyChi(r2.s, cc = c.chi, deriv = 1)
     ## FIXME for multivariate y :
     A <- solve(	crossprod(x, x * w) ) * (n * sigma)
     a <- A %*% (crossprod(x, w * r.s) / (n * mean(ch1 * r2.s)))
-    w  <- lmrob.Psi( r.s, cc = c.psi)
-    w2 <- lmrob.Chi(r2.s, cc = c.chi)
+    w  <- tukeyPsi1( r.s, cc = c.psi)
+    w2 <- tukeyChi(r2.s, cc = c.chi)
     Xww <- crossprod(x, w*w2)
     u1 <- crossprod(x, x * w^2) / n
     u1 <- A %*% u1 %*% A
@@ -141,7 +153,7 @@ lmrob.S <- function(x, y, control, trace.lev = 0)
     c.chi <- as.double(control$tuning.chi)
     best.r <- as.integer(control$best.r.s)
     stopifnot(length(c.chi) > 0, c.chi >= 0, length(bb) > 0,
-	      length(best.r)> 0, best.r >= 1)
+	      length(best.r) > 0, best.r >= 1)
 
     b <- .C("R_lmrob_S",
 	    x = as.double(x),
@@ -168,11 +180,11 @@ lmrob.S <- function(x, y, control, trace.lev = 0)
     names(b)[names(b) == "k.max"] <- "k.iter" # maximal #{refinement iter.}
     ## FIXME: get 'res'iduals from C
     r2.s <- drop(y - x %*% b$coef) / sigma
-    w <- lmrob.Chi(r2.s, cc = c.chi, deriv = 2)
+    w <- tukeyChi(r2.s, cc = c.chi, deriv = 2)
     A <- solve(	crossprod(x, x * w) ) * (n * sigma)
     a <- crossprod(x, w * r2.s) / n
-    w  <- lmrob.Chi(r2.s, cc = c.chi, deriv = 1)
-    w2 <- lmrob.Chi(r2.s, cc = c.chi)
+    w  <- tukeyChi(r2.s, cc = c.chi, deriv = 1)
+    w2 <- tukeyChi(r2.s, cc = c.chi)
     a <- A %*% (a/ mean(w * r2.s))
     Xww <- crossprod(x, w*w2)
     u1 <- crossprod(x, x * w^2) / n

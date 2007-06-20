@@ -1,0 +1,330 @@
+
+R version 2.5.1 beta (2007-06-19 r41995)
+Copyright (C) 2007 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ### lmrob()  with "real data"
+> 
+> library(robustbase)
+> 
+> set.seed(0)
+> data(salinity)
+> summary(m0.sali  <- lmrob(Y ~ . , data = salinity))
+
+Call:
+lmrob(formula = Y ~ ., data = salinity)
+
+Weighted Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.4326 -0.4018  0.1741  0.5272  5.8751 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 18.39327    4.01996   4.575 0.000122 ***
+X1           0.71048    0.04938  14.388 2.68e-13 ***
+X2          -0.17770    0.14762  -1.204 0.240397    
+X3          -0.62733    0.15845  -3.959 0.000584 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+
+Robust residual standard error: 1 
+Convergence in 11 IRWLS iterations
+
+Robustness weights: 
+ observation 16 is an outlier with |weight| < 3.571e-06; 
+ one weight is ~= 1; the remaining 26 ones are summarized as
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.5335  0.8480  0.9779  0.9146  0.9952  0.9998 
+Algorithmic parameters: 
+tuning.chi         bb tuning.psi refine.tol    rel.tol 
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
+ nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
+       500         50          5        400          2          1        200 
+ trace.lev compute.rd 
+         0          0 
+seed : int(0) 
+> (A1 <- anova(m0.sali, Y ~ X1 + X3))
+Robust Wald Test Table
+
+Model 1: Y ~ X1 + X2 + X3
+Model 2: Y ~ X1 + X3
+Largest model fitted by lmrob(), i.e. MM
+
+  pseudoDf Test.Stat Df Pr(>chisq)
+1       24                        
+2       25    1.4492  1     0.2287
+> ## -> X2 is not needed
+> (m1.sali  <- lmrob(Y ~ X1 + X3, data = salinity))
+
+Call:
+lmrob(formula = Y ~ X1 + X3, data = salinity)
+
+Coefficients:
+(Intercept)           X1           X3  
+    15.8169       0.7210      -0.5415  
+
+> (A2 <- anova(m0.sali, m1.sali)) # the same as before
+Robust Wald Test Table
+
+Model 1: Y ~ X1 + X2 + X3
+Model 2: Y ~ X1 + X3
+Largest model fitted by lmrob(), i.e. MM
+
+  pseudoDf Test.Stat Df Pr(>chisq)
+1       24                        
+2       25    1.4492  1     0.2287
+> stopifnot(all.equal(A1$Pr[2], A2$Pr[2], tol=1e-14))
+> 
+> anova(m0.sali, m1.sali, test = "Deviance")
+Robust Deviance Table
+
+Model 1: Y ~ X1 + X2 + X3
+Model 2: Y ~ X1 + X3
+Largest model fitted by lmrob(), i.e. MM
+
+  pseudoDf Test.Stat Df Pr(>chisq)
+1       24                        
+2       25    1.9567  1     0.1619
+> ## whereas 'X3' is highly significant:
+> m2 <- update(m0.sali, ~ . -X3)
+> (A3 <- anova(m0.sali, m2))
+Robust Wald Test Table
+
+Model 1: Y ~ X1 + X2 + X3
+Model 2: Y ~ X1 + X2
+Largest model fitted by lmrob(), i.e. MM
+
+  pseudoDf Test.Stat Df Pr(>chisq)    
+1       24                            
+2       25    15.675  1  7.521e-05 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+> (A4 <- anova(m0.sali, m2, test = "Deviance"))
+Robust Deviance Table
+
+Model 1: Y ~ X1 + X2 + X3
+Model 2: Y ~ X1 + X2
+Largest model fitted by lmrob(), i.e. MM
+
+  pseudoDf Test.Stat Df Pr(>chisq)    
+1       24                            
+2       25    19.650  1  9.302e-06 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+> cX3 <- c(Estimate = -0.627327396, `Std. Error` = 0.15844971,
++          `t value` = -3.9591577, `Pr(>|t|)` = 0.000584156)
+> stopifnot(all.equal(cX3, coef(summary(m0.sali))["X3",], tol = 1e-6))
+> 
+> 
+> ##  example(lmrob)
+> set.seed(7)
+> data(coleman)
+> summary( m1 <- lmrob(Y ~ ., data=coleman) )
+
+Call:
+lmrob(formula = Y ~ ., data = coleman)
+
+Weighted Residuals:
+     Min       1Q   Median       3Q      Max 
+-4.16181 -0.39226  0.01611  0.55619  7.22766 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 30.50232    6.71260   4.544 0.000459 ***
+salaryP     -1.66615    0.43129  -3.863 0.001722 ** 
+fatherWc     0.08425    0.01467   5.741 5.10e-05 ***
+sstatus      0.66774    0.03385  19.726 1.30e-11 ***
+teacherSc    1.16778    0.10983  10.632 4.35e-08 ***
+motherLev   -4.13657    0.92084  -4.492 0.000507 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+
+Robust residual standard error: 1.134 
+Convergence in 11 IRWLS iterations
+
+Robustness weights: 
+ observation 18 is an outlier with |weight| < 5e-06; 
+ the remaining 19 ones are summarized as
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.1491  0.9412  0.9847  0.9279  0.9947  0.9982 
+Algorithmic parameters: 
+tuning.chi         bb tuning.psi refine.tol    rel.tol 
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
+ nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
+       500         50          5        400          2          1        200 
+ trace.lev compute.rd 
+         0          0 
+seed : int(0) 
+> stopifnot(c(3,18) == which(m1$w < 0.2))
+> 
+> data(starsCYG)
+> (RlmST <- lmrob(log.light ~ log.Te, data = starsCYG))
+
+Call:
+lmrob(formula = log.light ~ log.Te, data = starsCYG)
+
+Coefficients:
+(Intercept)       log.Te  
+     -4.969        2.253  
+
+> summary(RlmST)
+
+Call:
+lmrob(formula = log.light ~ log.Te, data = starsCYG)
+
+Weighted Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.80959 -0.28838  0.00282  0.36668  3.39585 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)   
+(Intercept)  -4.9694     3.4100  -1.457  0.15198   
+log.Te        2.2532     0.7691   2.930  0.00531 **
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+
+Robust residual standard error: 0.4715 
+Convergence in 15 IRWLS iterations
+
+Robustness weights: 
+ 4 observations c(11,20,30,34) are outliers with |weight| < 2.128e-06; 
+ 2 weights are ~= 1; the remaining 41 ones are summarized as
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.6533  0.9229  0.9632  0.9351  0.9882  0.9999 
+Algorithmic parameters: 
+tuning.chi         bb tuning.psi refine.tol    rel.tol 
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
+ nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
+       500         50          5        400          2          1        200 
+ trace.lev compute.rd 
+         0          0 
+seed : int(0) 
+> stopifnot(c(11,20,30,34) == which(RlmST$w < 0.01))
+> 
+> set.seed(47)
+> data(hbk)
+> m.hbk <- lmrob(Y ~ ., data = hbk)
+> summary(m.hbk)
+
+Call:
+lmrob(formula = Y ~ ., data = hbk)
+
+Weighted Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.92731 -0.38663  0.05321  0.71800 10.80005 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)  
+(Intercept) -0.18943    0.11665  -1.624   0.1088  
+X1           0.08520    0.07316   1.165   0.2481  
+X2           0.04099    0.02963   1.383   0.1709  
+X3          -0.05367    0.03199  -1.678   0.0978 .
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+
+Robust residual standard error: 0.7964 
+Convergence in 9 IRWLS iterations
+
+Robustness weights: 
+ 10 observations c(1,2,3,4,5,6,7,8,9,10) are outliers with |weight| < 1.333e-06; 
+ the remaining 65 ones are summarized as
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.8549  0.9320  0.9710  0.9589  0.9936  0.9998 
+Algorithmic parameters: 
+tuning.chi         bb tuning.psi refine.tol    rel.tol 
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
+ nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
+       500         50          5        400          2          1        200 
+ trace.lev compute.rd 
+         0          0 
+seed : int(0) 
+> stopifnot(1:10 == which(m.hbk$w < 0.01))
+> 
+> data(heart)
+> summary(mhrt <- lmrob(clength ~ ., data = heart))
+
+Call:
+lmrob(formula = clength ~ ., data = heart)
+
+Weighted Residuals:
+     Min       1Q   Median       3Q      Max 
+-9.87865 -1.75398 -0.08874  0.81797  5.63933 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept)  30.2921    62.7390   0.483    0.641
+height       -0.1368     2.1287  -0.064    0.950
+weight        0.3135     0.7360   0.426    0.680
+
+Robust residual standard error: 2.591 
+Convergence in 36 IRWLS iterations
+
+Robustness weights: 
+ 2 weights are ~= 1; the remaining 10 ones:
+     2      3      4      5      6      7      8      9     11     12 
+0.9887 0.9301 0.9608 0.9082 0.9262 0.9963 0.1140 0.9666 0.6149 0.9998 
+Algorithmic parameters: 
+tuning.chi         bb tuning.psi refine.tol    rel.tol 
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
+ nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
+       500         50          5        400          2          1        200 
+ trace.lev compute.rd 
+         0          0 
+seed : int(0) 
+> stopifnot(8  == which(mhrt$w < 0.15),
++           11 == which(0.61 < mhrt$w & mhrt$w < 0.62),
++           c(1:7,9:10,12) == which(mhrt$w > 0.90))
+> 
+> data(stackloss)
+> mSL <- lmrob(stack.loss ~ ., data = stackloss)
+> summary(mSL)
+
+Call:
+lmrob(formula = stack.loss ~ ., data = stackloss)
+
+Weighted Residuals:
+      Min        1Q    Median        3Q       Max 
+-10.50974  -1.43819  -0.09134   1.02503   7.23113 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -41.52462    5.29780  -7.838 4.82e-07 ***
+Air.Flow      0.93885    0.11743   7.995 3.68e-07 ***
+Water.Temp    0.57955    0.26296   2.204   0.0416 *  
+Acid.Conc.   -0.11292    0.06989  -1.616   0.1246    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+
+Robust residual standard error: 1.912 
+Convergence in 17 IRWLS iterations
+
+Robustness weights: 
+ observation 21 is an outlier with |weight| < 4.762e-06; 
+ the remaining 20 ones are summarized as
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.1215  0.8806  0.9493  0.8848  0.9896  0.9998 
+Algorithmic parameters: 
+tuning.chi         bb tuning.psi refine.tol    rel.tol 
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
+ nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
+       500         50          5        400          2          1        200 
+ trace.lev compute.rd 
+         0          0 
+seed : int(0) 
+> 
+> 
+> cat('Time elapsed: ', proc.time(),'\n') # "stats"
+Time elapsed:  0.822 0.077 1.448 0 0 
+> 

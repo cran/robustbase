@@ -1,6 +1,6 @@
 
-R version 2.4.0 RC (2006-09-29 r39553)
-Copyright (C) 2006 The R Foundation for Statistical Computing
+R version 2.5.0 alpha (2007-04-05 r41063)
+Copyright (C) 2007 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -170,13 +170,13 @@ List of 26
   .. .. ..- attr(*, "order")= int 1
   .. .. ..- attr(*, "intercept")= int 1
   .. .. ..- attr(*, "response")= int 1
-  .. .. ..- attr(*, ".Environment")=length 13 <environment> 
+  .. .. ..- attr(*, ".Environment")=<R_GlobalEnv> 
   .. .. ..- attr(*, "predvars")= language list(cbind(k, ni - k), x)
   .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "nmatrix.2" "numeric"
   .. .. .. ..- attr(*, "names")= chr [1:2] "cbind(k, ni - k)" "x"
  $ call             : language glmrob(formula = cbind(k, ni - k) ~ x, family = binomial, acc = 1e-10)
  $ formula          :Class 'formula' length 3 cbind(k, ni - k) ~ x
-  .. ..- attr(*, ".Environment")=length 13 <environment> 
+  .. ..- attr(*, ".Environment")=<R_GlobalEnv> 
  $ terms            :Classes 'terms', 'formula' length 3 cbind(k, ni - k) ~ x
   .. ..- attr(*, "variables")= language list(cbind(k, ni - k), x)
   .. ..- attr(*, "factors")= int [1:2, 1] 0 1
@@ -187,11 +187,11 @@ List of 26
   .. ..- attr(*, "order")= int 1
   .. ..- attr(*, "intercept")= int 1
   .. ..- attr(*, "response")= int 1
-  .. ..- attr(*, ".Environment")=length 13 <environment> 
+  .. ..- attr(*, ".Environment")=<R_GlobalEnv> 
   .. ..- attr(*, "predvars")= language list(cbind(k, ni - k), x)
   .. ..- attr(*, "dataClasses")= Named chr [1:2] "nmatrix.2" "numeric"
   .. .. ..- attr(*, "names")= chr [1:2] "cbind(k, ni - k)" "x"
- $ data             :length 13 <environment> 
+ $ data             :<R_GlobalEnv> 
  $ offset           : NULL
  $ control          :List of 4
   ..$ acc     : num 1e-10
@@ -361,5 +361,5 @@ test.acc
 +                     rg3.15  [no.comp], tol = 1e-13))
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  1.48 0.06 1.767 0 0 
+Time elapsed:  0.885 0.047 1.326 0 0 
 > 

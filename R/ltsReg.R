@@ -66,7 +66,7 @@ ltsReg.formula <- function(formula, data, subset, weights, na.action,
 	xint <- match("(Intercept)", colnames(x), nomatch = 0)
 	if(xint)
 	    x <- x[, -xint, drop = FALSE]
-	fit <- ltsReg(x, y, intercept = (xint > 0), ...)
+	fit <- ltsReg.default(x, y, intercept = (xint > 0), ...)
     }
 
     ## 3) return the na.action info
@@ -81,7 +81,7 @@ ltsReg.formula <- function(formula, data, subset, weights, na.action,
     fit$terms <- mt
 
     if(model) fit$model <- mf
-    if(x.ret) fit$x <- x
+    if(x.ret) fit$x <- x # or? if(xint == 0) x else  x[, c(2:p,1), drop=FALSE]
     if(y.ret) fit$y <- y
 
     fit
@@ -201,18 +201,18 @@ ltsReg.default <-
 	    warning("'qr.out = TRUE' for univariate location is disregarded")
 	    qr.out <- FALSE
 	}
-	quan <- quan.f(alpha, n, dx[2])
+	h <- h.alpha.n(alpha, n, dx[2])
 	p <- 1
 	if (alpha == 1) {
 	    scale <- sqrt(cov.wt(as.matrix(y))$cov)
 	    center <- as.vector(mean(y))
 	    ## xbest <- NULL
 	} else {
-	    sh <- .fastmcd(as.matrix(y), as.integer(quan), nsamp = 0)
+	    sh <- .fastmcd(as.matrix(y), as.integer(h), nsamp = 0)
 
 	    center <- as.double(sh$initmean)
-	    qalpha <- qchisq(quan/n, 1)
-	    calphainvers <- pgamma(qalpha/2, 1/2 + 1)/(quan/n)
+	    qalpha <- qchisq(h/n, 1)
+	    calphainvers <- pgamma(qalpha/2, 1/2 + 1)/(h/n)
 	    raw.cnp2[1] <- calpha <- 1/calphainvers
 	    raw.cnp2[2] <- correct <- LTScnp2(1, intercept = intercept, n, alpha)
 	    if(!use.correction) # do not use finite sample correction factor
@@ -227,7 +227,7 @@ ltsReg.default <-
 		    coefficients = center,
 		    raw.coefficients = center,
 		    alpha = alpha,
-		    quan  = quan,
+		    quan  = h,
 		    raw.resid = resid/scale)
 
 	if (abs(scale) < 1e-07) {
@@ -242,7 +242,7 @@ ltsReg.default <-
 	    ans$coefficients <- reweighting$center
 	    ans$scale <- sqrt(sum(weights)/(sum(weights) - 1) * reweighting$cov)
 	    resid <- y - ans$coefficients
-	    ans$crit <- sum(sort((y - center)^2, partial = quan)[1:quan])
+	    ans$crit <- sum(sort((y - center)^2, partial = h)[1:h])
 	    if (sum(weights) == n) {
 		cdelta.rew <- 1
 		correct.rew <- 1
@@ -272,7 +272,7 @@ ltsReg.default <-
     else { ## ------------------ usual non-trivial case ---------------------
 	if(mcd) ## need 'old x' later
 	    X <- x
-	if (intercept) {
+	if (intercept) { ## intercept must be *last* (<- fortran code) {"uahh!"}
 	    x <- cbind(x, "Intercept" = 1)
 	    dx <- dim(x)
 	    xn <- colnames(x)
@@ -281,23 +281,26 @@ ltsReg.default <-
 	if (n <= 2 * p)
 	    stop("Need more than twice as many observations as variables.")
 
+	## VT:: 26.12.2004
+	## Reorder the coefficients so that the intercept is at the beginning ..
+	## Skip this if p == 1 (i.e. p=1 and intercept=FALSE).
+	getCoef <- ## simple wrapper (because of above "intercept last")
+	    if(p > 1 && intercept)
+		 function(cf) cf[c(p, 1:(p - 1))]
+	    else function(cf) cf
+
 	ans <- list(alpha = alpha)
 
 	if(alpha == 1) { ## alpha == 1 -----------------------
 	    ## old, suboptimal: z <- lsfit(x, y, intercept = FALSE)
 	    z <- lm.fit(x, y)
 	    qrx <- z$qr
-	    ## VT:: 26.12.2004
-	    ## Reorder the coeficients, so that the intercept is at the beginning of the matrix
-	    ## Skip this if p == 1 (i.e. p=1 and intercept=FALSE).
-	    ## Do the same for the names and for ans$coef - see below
 	    cf <- z$coef
 	    names(cf) <- xn
-	    ans$raw.coefficients <-
-		if(p > 1 && intercept) cf[c(p, 1:(p - 1))] else cf
+	    ans$raw.coefficients <- getCoef(cf)
 
 	    resid <- z$residuals
-	    ans$quan <- quan <- n
+	    ans$quan <- h <- n
 
 	    s0 <- sqrt((1/(n - p)) * sum(resid^2))
 
@@ -316,9 +319,7 @@ ltsReg.default <-
 		## old, suboptimal: z <- lsfit(x, y, wt = weights, intercept = FALSE)
 		z <- lm.wfit(x, y, w = weights)
 
-		## VT:: 26.12.2004
-		ans$coefficients <-
-		    if(p > 1 && intercept) z$coef[c(p, 1:(p - 1))] else z$coef
+		ans$coefficients <- getCoef(z$coef)
 
 		fitted <- x %*% z$coef
 		ans$scale <- sqrt(sum(weights * resid^2)/(sum.w - 1))
@@ -334,9 +335,7 @@ ltsReg.default <-
 		weights <- as.numeric(abs(ans$resid) <= quantiel)
 	    }
 
-	    ## VT:: 26.12.2004
-	    names(ans$coefficients) <-
-		if(p > 1 && intercept) xn[c(p, 1:(p - 1))] else xn
+	    names(ans$coefficients) <- getCoef(xn)
 
 	    s1 <- sum(resid^2)
 	    ans$crit <- s1
@@ -358,9 +357,9 @@ ltsReg.default <-
 	    ## else :
 	    piv <- 1:p
 
-	    quan <- quan.f(alpha, n, rk)
+	    h <- h.alpha.n(alpha, n, rk)
 
-	    z <- .fastlts(x, y, quan, nsamp, intercept, adjust)
+	    z <- .fastlts(x, y, h, nsamp, intercept, adjust)
 
 	    ## vt:: lm.fit.qr == lm.fit(...,method=qr,...)
 	    ##	cf <- lm.fit.qr(x[z$inbest, , drop = FALSE], y[z$inbest])$coef
@@ -370,18 +369,16 @@ ltsReg.default <-
 	    resid <- y - fitted
 	    coefs[piv] <- cf ## FIXME? why construct 'coefs' so complicatedly?	use 'cf' !
 
-	    ## VT:: 26.12.2004
-	    ans$raw.coefficients <-
-		if(p > 1 && intercept) coefs[c(p, 1:(p - 1))] else coefs
+	    ans$raw.coefficients <- getCoef(coefs)
 
-	    ans$quan <- quan
+	    ans$quan <- h
 	    correct <- if(use.correction)
 		LTScnp2(p, intercept = intercept, n, alpha) else 1
 	    raw.cnp2[2] <- correct
-	    s0 <- sqrt((1/quan) * sum(sort(resid^2, partial = quan)[1:quan]))
+	    s0 <- sqrt((1/h) * sum(sort(resid^2, partial = h)[1:h]))
 	    sh0 <- s0
-	    qn.q <- qnorm((quan + n)/ (2 * n))
-	    s0 <- s0 / sqrt(1 - (2 * n)/(quan / qn.q) * dnorm(qn.q)) * correct
+	    qn.q <- qnorm((h + n)/ (2 * n))
+	    s0 <- s0 / sqrt(1 - (2 * n)/(h / qn.q) * dnorm(qn.q)) * correct
 
 	    if (abs(s0) < 1e-07) {
 		weights <- as.numeric(abs(resid) <= 1e-07)
@@ -397,9 +394,7 @@ ltsReg.default <-
 		## old, suboptimal: z1 <- lsfit(x, y, wt = weights, intercept = FALSE)
 		z1 <- lm.wfit(x, y, w = weights)
 
-		## VT:: 26.12.2004
-		ans$coefficients <-
-		    if(p > 1) z1$coef[c(p, 1:(p - 1))] else z1$coef
+		ans$coefficients <- getCoef(z1$coef)
 
 		fitted <- x %*% z1$coef
 		resid <- z1$residuals
@@ -424,14 +419,14 @@ ltsReg.default <-
 	    ## unneeded: names(ans$coefficients) <- names(ans$raw.coefficients)
 	    ans$crit <- z$objfct
 	    if (intercept) {
-		sh <- .fastmcd(as.matrix(y), as.integer(quan), nsamp = 0)
+		sh <- .fastmcd(as.matrix(y), as.integer(h), nsamp = 0)
 		y <- as.vector(y) ## < ??
 		sh <- as.double(sh$adjustcov)
 		iR2 <- (sh0/sh)^2
 	    }
 	    else {
-		s1 <- sum(sort(resid^2, partial = quan)[1:quan])
-		sh <- sum(sort(y^2,     partial = quan)[1:quan])
+		s1 <- sum(sort(resid^2, partial = h)[1:h])
+		sh <- sum(sort(y^2,     partial = h)[1:h])
 		iR2 <- s1/sh
 	    }
 
@@ -470,10 +465,9 @@ ltsReg.default <-
 	rownames
     names(ans$scale) <- names(ans$raw.scale) <- yn
     names(ans$rsquared) <- names(ans$crit) <- yn
-    ans$Y <- y		# VT:: 01.09.2004 - add y to the result object
-    ans$X <- x
-    dimnames(ans$X) <-
-	list((if(length(rownames)) rownames else seq(along = na.x))[ok], xn)
+    ans$Y <- y
+    ans$X <- if(p > 1 && intercept) x[, c(p, 1:(p - 1))] else x
+    dimnames(ans$X) <- list(rownames[ok], names(ans$coefficients))
     if (qr.out)
 	ans$qr <- qrx
     ans$raw.cnp2 <- raw.cnp2
@@ -519,19 +513,7 @@ summary.lts <- function (object, correlation = FALSE, ...)
     resvar <- rss/rdf
 
     R <- if (p > 0) chol2inv(Qr$qr[p1, p1, drop = FALSE]) else matrix(,p,p)
-
-    ## Reorder R, so that the intercept (if any) moves
-    ## to the beginning. Skip this if p == 1 or intercept=FALSE :
-    if(p > 1 && int) {
-	RR <- R
-	RR[2:p, 2:p] <- R[1:(p - 1), 1:(p-1)]
-	rr <- R[p,]
-	rr[2:p] <- R[p, 1:(p - 1)]
-	rr[1] <- R[p,p]
-	RR[1,] <- rr
-	RR[,1] <- rr
-	R <- RR
-    }
+    ## no need to reorder R anymore, since 'X' already has "intercept first"
     se <- sqrt(diag(R) * resvar)
 
     est <- z$coefficients
@@ -584,8 +566,9 @@ print.lts <- function (x, digits = max(3, getOption("digits") - 3), ...)
 
 print.summary.lts <-
     function(x, digits = max(3, getOption("digits") - 3),
-	     signif.stars = FALSE, ...)
-    ##			    ^^^^^ (since they are not quite correct ?)
+	     signif.stars = getOption("show.signif.stars"), ...)
+##	     signif.stars = FALSE, ...)
+##			    ^^^^^ (since they are not quite correct ?)
 {
     cat("\nCall:\n",
 	paste(deparse(x$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
@@ -780,7 +763,7 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
     return(1/fp.alpha.n)
 } ## LTScnp2.rew
 
-.fastlts <- function(x, y, quan, nsamp, intercept, adjust)
+.fastlts <- function(x, y, h.alph, nsamp, intercept, adjust)
 {
     dx <- dim(x)
     n <- dx[1]
@@ -823,7 +806,7 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
 	    nsamp <- rrcov.control()$nsamp
 	}
     }
-
+    nsamp <- as.integer(nsamp)
 
     ## y <- as.matrix(y)
     ## xy <- matrix(0, ncol = p + 1, nrow = n)
@@ -833,102 +816,50 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
 
     storage.mode(n) <- "integer"
     storage.mode(p) <- "integer"
-    storage.mode(quan) <- "integer"
-    storage.mode(nsamp) <- "integer"
-
-    objfct <- as.double(0)
-    inbest <- rep.int(as.integer(10000), quan)
-
-    datt <- matrix(as.double(0), ncol = p + 1, nrow = n)
+    storage.mode(h.alph) <- "integer"
 
     ##	 Allocate temporary storage for the fortran implementation
 
-    weights <- matrix(0, nrow = n, ncol = 1)
-    temp <- matrix(0, nrow = n, ncol = 1)
-    index1 <- matrix(0, nrow = n, ncol = 1)
-    index2 <- matrix(0, nrow = n, ncol = 1)
-    aw2 <- matrix(0, nrow = n, ncol = 1)
-    aw <- matrix(0, nrow = n, ncol = 1)
-    residu <- matrix(0, nrow = n, ncol = 1)
-    yy <- matrix(0, nrow = n, ncol = 1)
-    nmahad <- matrix(0, nrow = n, ncol = 1)
-    ndist <- matrix(0, nrow = n, ncol = 1)
-    am <- matrix(0, nrow = n, ncol = 1)
-    am2 <- matrix(0, nrow = n, ncol = 1)
-    slutn <- matrix(0, nrow = n, ncol = 1)
+    datt <- matrix(0., ncol = p + 1, nrow = n)
 
-    storage.mode(weights) <- "double"
-    storage.mode(temp) <- "integer"
-    storage.mode(index1) <- "integer"
-    storage.mode(index2) <- "integer"
-    storage.mode(aw2) <- "double"
-    storage.mode(aw) <- "double"
-    storage.mode(residu) <- "double"
-    storage.mode(yy) <- "double"
-    storage.mode(nmahad) <- "double"
-    storage.mode(ndist) <- "double"
-    storage.mode(am) <- "double"
-    storage.mode(am2) <- "double"
-    storage.mode(slutn) <- "double"
+    temp <- index1 <- index2 <- integer(n)
 
-    ##	 integer jmiss(nvad)		     --> p+1
-    jmiss <- matrix(0, nrow = p+1, ncol = 1)
-    storage.mode(jmiss) <- "integer"
-    ##	 double precision xmed(nvad)	 --> p+1
-    xmed <- matrix(0, nrow = p+1, ncol = 1)
-    storage.mode(xmed) <- "double"
-    ##	 double precision xmad(nvad)	 p+1
-    xmad <- matrix(0, nrow = p+1, ncol = 1)
-    storage.mode(xmad) <- "double"
-    ##	 double precision a(nvad)		 p+1
-    a <- matrix(0, nrow = p+1, ncol = 1)
-    storage.mode(a) <- "double"
+    weights <- aw2 <- aw <- residu <- yy <-
+	nmahad <- ndist <- am <- am2 <- slutn <-
+	    double(n)
 
-    ##	 double precision da(nvad)		 p+1
-    da <- matrix(0, nrow = p+1, ncol = 1)
-    storage.mode(da) <- "double"
-    ##	 double precision h(nvar,nvad)	     p*(p+1)
-    h <- matrix(0, nrow = p*(p+1), ncol = 1)
-    storage.mode(h) <- "double"
-    ##	 double precision hvec(nvar*nvad)	     p*(p+1)
-    hvec <- matrix(0, nrow = p*(p+1), ncol = 1)
-    storage.mode(hvec) <- "double"
-    ##	 double precision c(nvar,nvad)	     p*(p+1)
-    c <- matrix(0, nrow = p*(p+1), ncol = 1)
-    storage.mode(c) <- "double"
-    ##	 double precision cstock(10,nvar*nvar)	 10*p*p
-    cstock <- matrix(0, nrow = 10*p*p, ncol = 1)
-    storage.mode(cstock) <- "double"
-    ##	 double precision mstock(10,nvar)	     10*p
-    mstock <- matrix(0, nrow = 10*p, ncol = 1)
-    storage.mode(mstock) <- "double"
-    ##	 double precision c1stock(km10,nvar*nvar)	 km10*p*p
-    c1stock <- matrix(0, nrow = km10*p*p, ncol = 1)
-    storage.mode(c1stock) <- "double"
-    ##	  double precision m1stock(km10,nvar)	  km10*p
-    m1stock <- matrix(0, nrow = km10*p, ncol = 1)
-    storage.mode(m1stock) <- "double"
-    ##	  double precision dath(nmaxi,nvad)		  nmaxi*(p+1)
-    dath <- matrix(0, nrow = nmaxi*(p+1), ncol = 1)
-    storage.mode(dath) <- "double"
-    ##	 double precision sd(nvar)		     p
-    sd <- matrix(0, nrow = p, ncol = 1)
-    storage.mode(sd) <- "double"
-    ##	 double precision means(nvar)	     p
-    means <- matrix(0, nrow = p, ncol = 1)
-    storage.mode(means) <- "double"
-    ##	 double precision bmeans(nvar)	     p
-    bmeans <- matrix(0, nrow = p, ncol = 1)
-    storage.mode(bmeans) <- "double"
+    jmiss <- integer(p+1)	##	 integer jmiss(nvad)	  --> p+1
+
+    xmed <- double(p+1)		##	 double	 xmed(nvad)	  --> p+1
+    xmad <- double(p+1)		##	 double	 xmad(nvad)
+    a	 <- double(p+1)		##	 double	    a(nvad)
+    da	 <- double(p+1)		##	 double	   da(nvad)
+
+    h <- matrix(0., p, p+1)	##	 double	 h(nvar,nvad)		p*(p+1)
+    hvec <- double(p*(p+1))	##	 double	 hvec(nvar*nvad)	p*(p+1)
+    c <- matrix(0., p, p+1)	##	 double	 c(nvar,nvad)		p*(p+1)
+
+    cstock <- matrix(0., 10, p*p)##	 double	 cstock(10,nvar*nvar)	10*p*p
+    mstock <- matrix(0., 10, p) ##	 double	 mstock(10,nvar)	10*p
+    c1stock <- matrix(0., km10, p*p)##	 double	 c1stock(km10,nvar*nvar)  km10*p*p
+    m1stock <- matrix(0., km10, p)##	 double	 m1stock(km10,nvar)	km10*p
+
+    dath <- matrix(0., nmaxi, p+1)##	 double	 dath(nmaxi,nvad)	nmaxi*(p+1)
+
+    sd <- double(p)		##	 double	 sd(nvar)		p
+    means <- double(p)		##	 double	 means(nvar)		p
+    bmeans <- double(p)		##	 double	 means(nvar)		p
 
     .Fortran("rfltsreg",
 	     xy = xy,
 	     n,
 	     p,
-	     quan,
+	     h.alph,
 	     nsamp,
-	     inbest = inbest,
-	     objfct = objfct,
+
+	     inbest = rep.int(as.integer(10000), h.alph),
+	     objfct = as.double(0),
+
 	     intercept = as.integer(intercept),
 	     intadjust = as.integer(adjust),
 	     nvad = as.integer(p + 1),

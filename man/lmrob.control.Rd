@@ -10,7 +10,8 @@ lmrob.control(seed = NULL, nResample = 500,
               tuning.chi = 1.54764, bb = 0.5, tuning.psi = 4.685061,
               max.it = 50, groups = 5, n.group = 400,
               k.fast.s = 1, best.r.s = 2, k.max = 200,
-              refine.tol = 1e-7, compute.rd = FALSE)
+              refine.tol = 1e-7, rel.tol = 1e-7,
+              trace.lev = 0, compute.rd = FALSE)
 }
 \arguments{
   \item{seed}{an integer vector, the seed to be used for random
@@ -48,6 +49,12 @@ lmrob.control(seed = NULL, nResample = 500,
     refinement steps for the \dQuote{fully} iterated best candidates.}
   \item{refine.tol}{(for the fast-S algorithm): relative convergence
     tolerance for the fully iterated best candidates.}
+  \item{rel.tol}{(for the RWLS iterations of the MM algorithm): relative
+    convergence tolerance for the parameter vector.}
+  \item{trace.lev}{integer indicating if the progress of the MM-algorithm
+    should be traced (increasingly); default \code{trace.lev = 0} does
+    no tracing.}
+  %% NOTE that lmrob.S() has its "own"  'trace.lev' !
   \item{compute.rd}{logical indicating if robust distances (based on
     the MCD robust covariance estimator \code{\link{covMcd}}) are to be
     computed for the robust diagnostic plots.  This may take some

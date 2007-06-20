@@ -196,6 +196,9 @@ hampelPsi <-
             k = c(2,4,8) / 1.345)
 
 ## TODO:  Biweight :
+## ----   --------  but note that we have
+##  (non-S4) ./biweight-funs.R  already {used by lmrob.*()}
+##             ~~~~~~~~~~~~~~~
 if(FALSE)
 tukeyPsi <- c() ##########
 

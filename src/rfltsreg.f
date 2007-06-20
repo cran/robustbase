@@ -30,7 +30,7 @@ c
 c    dat   = cbind(x,y)   hence  n x (p+1)
 c    nvar  = p
 c    nvad  = p+1
-c    nhalff: 'quan' = quan.f(alpha, n, rk)  which is
+c    nhalff: 'quan' = quan.f = h.alpha.n(alpha, n, rk)  which is
 c                   = (n + p + 1) %/% 2  when alpha= 1/2
 c    krep  = nsamp  (e.g. = 5000 for "best")
 c
@@ -76,7 +76,8 @@ cc
       integer intercept,intadjust
       integer pnsel, replow
       integer i,ii,iii, j,jj,jjj, jndex, k,kk,kkk, lll, m,mm, nn
-      integer jmin,jmax, jerd,jnc,jdefaul,jbreak,jreg, kstep,kount
+      integer jmin,jmax, jerd,jnc, jreg, kstep,kount
+c unused      integer jdefaul, jbreak
       integer minigr
       integer nfac,nerr, ngroup, nhalf,nlen,nmax,nmore, nmore2, nquant
       integer nvmax1, nvm11, nvmax, nsel, nstop, nrep
@@ -86,7 +87,8 @@ cc
       double precision MADeps
 
       logical all,part,fine,final,rfodd,more1,more2
-      integer rfnbreak,rfncomb
+c unused      integer rfnbreak
+      integer rfncomb
 
       integer flag(km10)
       integer mini(kmini)
@@ -163,8 +165,8 @@ cc	nhalff=int((n+nvar+1)/2)
       jmax=max((3*n/4)+(nvar+1)/4,nhalff)
       nquant=min(nint(real(((nhalff*1.0/n)-0.5)*40))+1,11)
       factor=faclts(nquant)
-      jbreak=rfnbreak(nhalff,n,nvar)
-      jdefaul=(n+nvar+1)/2
+c unused      jbreak=rfnbreak(nhalff,n,nvar)
+c unused      jdefaul=(n+nvar+1)/2
       percen = (1.D0*nhalff)/(1.D0*n)
       if(nvad.eq.1) goto 9000
 cc
@@ -254,6 +256,7 @@ cccc  CALL INTPR('>>> RFLTSREG ... minigr=',-1,iseed,1)
 	nhalf=nhalff
 	kstep=k1
 	if(n.le.replow(nsel)) then
+c     		use all combinations; happens iff  nsel = nvar = p <= 6
 	  nrep=rfncomb(nsel,n)
 	else
 	  nrep = krep

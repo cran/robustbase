@@ -13,7 +13,7 @@ summary(m1)
 
 
 (mC <- lmrob(Y ~ ., data = coleman,
-	     control = lmrob.control(refine.tol = 1e-8)))
+	     control = lmrob.control(refine.tol = 1e-8, rel.tol = 1e-9)))
 summary(mC)
 ## Values will change once we use R's random number generator !
 stopifnot(
@@ -105,9 +105,39 @@ stopifnot(
 	  all.equal(100*sd,c(2.194914,0.2737579, 2.371728, 2.206261),tol= 7e-7)
 	  ) # 1.334 e-7	 needed on 64b
 
+cat('Time elapsed: ', proc.time(),'\n') # "stats"
 
 ## rm(a,m1, m2, m3, m4, sm2, l1)
 
+## Small examples from R-SIG-robust
 
+## First example from René Locher :
+dat1 <- data.frame(lconc= log(c(21.8, 23.7, 12.2, 38.5, 21, 38.9)),
+                   dist =     c( 100, 180,  280,  30,  220,  6))
+m5 <- lmrob(lconc ~ dist, data = dat1)
+## Warning messages:
+## ... S refinements did not converge (to tol=1e-07) in 200 iterations
+##  "  "     "
+m5$init.S$converged # FALSE
+m5. <- lmrob(lconc ~ dist, data = dat1,
+             control = lmrob.control(refine.tol = 1e-5))
+m5.$init.S$converged # TRUE
+## gives TRUE as the IRWLS iterations after the lmrob.S() have converged.
+
+## 2nd example from René Locher , 6 Jun 2007
+
+dat2 <- data.frame(lconc=log(c(29.5,40.1,21.1,25.3,27.3,25.2,26.9,19.1,16.4)),
+                     dist =    c(520, 1480,1780, 740, 540,1050,1100,1640,1860))
+
+res2 <- lmrob(lconc~dist, data = dat2)
+
+## Used to give Warning messages:
+## 1: rwls(): not converged in 1000 lambda iterations
+## ...
+## 4: rwls(): ............
+
+res2 <- lmrob(lconc~dist, data = dat2, trace.lev = 3)
+##                                     -------------
+summary(res2)
 
 cat('Time elapsed: ', proc.time(),'\n') # "stats"
