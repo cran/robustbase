@@ -7,8 +7,9 @@ x  <- c(0.26, 0.161, 1.33, -0.925, 0.199, -1.476, 0.489)
 iw <- c(5, 4, 4, 1, 5, 1, 5)
 
 
-stopifnot(0.26 == (himR <-  weighted.median(rep(x,iw))))
-stopifnot(himR == wgt.himedian(x, iw)) ## (once gave infinite loop)
+stopifnot(0.26 == (himR <-  weighted.median(rep(x,iw))),
+          himR == wgt.himedian(x, iw), ## (once gave infinite loop)
+          himR == wgt.himedian(x, as.integer(iw)))
 
 
 ## same result, but *different  wweigted.median() debug output!
@@ -96,4 +97,29 @@ if(dev.interactive()) {
     boxplot(Tx, main = sprintf("n=%d  x N(0,1) + %d (1%%) outliers to the right",
                 N,n.o))
     abline(h = 1, lty = 3, lwd = 2, col = "gray")
+}
+
+if(interactive()) { ## i.e. not when package testing ..
+
+N <- 500
+set.seed(101)
+str(iw <- 1L+ as.integer(rpois(N, 1))); str(w <- as.double(iw))
+
+cr <- ci <- numeric(50)
+for(nn in seq_along(ci)) {
+    x <- round(rnorm(N),1)
+    cat(".")
+    cr[nn] <- system.time(for(i in 1:1000) rr <- wgt.himedian(x,  w))[1]
+    ci[nn] <- system.time(for(i in 1:1000) ri <- wgt.himedian(x, iw))[1]
+    stopifnot(rr == ri)
+};cat("\n")
+
+
+## Or rather (as correctly) a "paired" comparsion:
+boxplot(cr - ci, notch=TRUE)
+## rather
+t.test(     cr,      ci, paired = TRUE) ##-> P-value of 0.0219
+t.test(log(cr), log(ci), paired = TRUE) ##-> P-value of 0.0088
+wilcox.test(cr, ci, paired = TRUE)      ##-> P-value of 2.23e-5 (!!)
+
 }

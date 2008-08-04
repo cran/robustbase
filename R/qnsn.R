@@ -5,9 +5,8 @@ Qn <- function(x, constant = 2.2219, finite.corr = missing(constant))
     n <- length(x)
     if(n == 0) return(NA) else if(n == 1) return(0.)
 
-    r <- constant * .C("Qn0", as.double(x), n,
-                       res = double(1),
-                       PACKAGE = "robustbase")$res
+    r <- constant *
+        .C(Qn0, as.double(x), n, res = double(1))$res
 
     if (finite.corr)
 	(if (n <= 9) {
@@ -37,11 +36,10 @@ Sn <- function(x, constant = 1.1926, finite.corr = missing(constant))
     n <- length(x)
     if(n == 0) return(NA) else if(n == 1) return(0.)
 
-    r <- constant * .C("Sn0",
+    r <- constant * .C(Sn0,
                        as.double(x), n,
                        as.integer(!is.unsorted(x)),# is.sorted
-                       res = double(1), a2 = double(n),
-                       PACKAGE = "robustbase")$res
+                       res = double(1), a2 = double(n))$res
     ## NB: a2[] could be used for confidence intervals and other estimates!
     if (finite.corr) (
 	if (n <= 9) {
@@ -60,12 +58,16 @@ Sn <- function(x, constant = 1.1926, finite.corr = missing(constant))
 
 wgt.himedian <- function(x, weights = rep(1,n))
 {
-    ## Purpose: integer-weighted hiMedian of x
+    ## Purpose: weighted hiMedian of x
     ## Author: Martin Maechler, Date: 14 Mar 2002
     n <- length(x <- as.double(x))
-    if(n != length(weights <- as.double(weights)))
-        stop("`weights' must have same length as `x'")
-    .C("wgt_himed", x, n, weights, res = double(1), PACKAGE = "robustbase")$res
+    stopifnot(storage.mode(weights) %in% c("integer", "double"))
+    if(n != length(weights))
+	stop("`weights' must have same length as `x'")
+    ## if(is.integer(weights)) message("using integer weights")
+    .C(if(is.integer(weights)) wgt_himed_i else wgt_himed,
+       x, n, weights,
+       res = double(1))$res
 }
 
 ## To be used directly as  'scaleFun'  in  'covOGK()' :

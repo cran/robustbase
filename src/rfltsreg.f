@@ -21,11 +21,11 @@ cc
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       subroutine rfltsreg(dat,n,nvar,nhalff,krep,inbest,objfct,
-     *	   intercept,intadjust,nvad,datt,iseed,
-     *	   weights,temp,index1,index2,aw2,aw,residu,y,nmahad,ndist,
-     *	   am,am2,slutn,
-     *	   jmiss,xmed,xmad,a,da,h,hvec,c,cstock,mstock,c1stock,
-     *	   m1stock,dath,sd,means,bmeans)
+     *     intercept,intadjust,nvad,datt,iseed,
+     *     weights,temp,index1,index2,aw2,aw,residu,y,nmahad,ndist,
+     *     am,am2,slutn,
+     *     jmiss,xmed,xmad,a,da,h,hvec,c,cstock,mstock,c1stock,
+     *     m1stock,dath,sd,means,bmeans)
 c
 c    dat   = cbind(x,y)   hence  n x (p+1)
 c    nvar  = p
@@ -131,7 +131,7 @@ ccc   double precision bmeans(nvmax)
       double precision bmeans(nvar)
 
       data faclts/2.6477,2.5092,2.3826,2.2662,2.1587,
-     *	   2.0589,1.9660,1.879,1.7973,1.7203,1.6473/
+     *     2.0589,1.9660,1.879,1.7973,1.7203,1.6473/
 cc
 cc
 CDDD  CALL INTPR('>>> Enter RFLTSREG ... nvar=',-1,nvar,1)
@@ -148,13 +148,13 @@ CCCC  10.10.2005 - substitute the parameters nmax and nvmax
       nrep = krep
 
       if(nvar .lt.5 ) then
-	 eps=1.0D-12
+         eps=1.0D-12
       else
-	 if(nvar .ge. 5 .and. nvar .le. 8) then
-	    eps=1.0D-14
-	 else
-	    eps=1.0D-16
-	 endif
+         if(nvar .ge. 5 .and. nvar .le. 8) then
+            eps=1.0D-14
+         else
+            eps=1.0D-16
+         endif
       endif
 c     Tolerance for rfstatis():  |MAD| < MADeps  : <==> "problem"
       MADeps=1.0D-6
@@ -180,8 +180,8 @@ CDDD  CALL INTPR('>>> Enter RFLTSREG ... iseed=',-1,iseed,1)
       final=.false.
       all=.true.
       do 21,i=1,nmaxi
-	subdat(1,i)=1000000
-	subdat(2,i)=1000000
+        subdat(1,i)=1000000
+        subdat(2,i)=1000000
  21   continue
 cc
       mini(1)=0
@@ -190,78 +190,78 @@ cc
       mini(4)=0
       mini(5)=0
       if(n.gt.(2*nmini-1)) then
-	kstep=k1
-	part=.true.
-	ngroup=int(n/(nmini*1.D0))
-	if(n.ge.(2*nmini) .and. n.le.(3*nmini-1)) then
-	  if(rfodd(n)) then
-	    mini(1)=int(n/2)
-	    mini(2)=int(n/2)+1
-	  else
-	    mini(1)=n/2
-	    mini(2)=n/2
-	  endif
-	else if(n.ge.(3*nmini) .and. n.le.(4*nmini-1)) then
-	  if(3*(n/3) .eq. n) then
-	    mini(1)=n/3
-	    mini(2)=n/3
-	    mini(3)=n/3
-	  else
-	    mini(1)=int(n/3)
-	    mini(2)=int(n/3)+1
-	    if(3*(n/3) .eq. n-1) then
-	      mini(3)=int(n/3)
-	    else
-	      mini(3)=int(n/3)+1
-	    endif
-	  endif
-	else if(n.ge.(4*nmini) .and. n.le.(5*nmini-1)) then
-	  if(4*(n/4) .eq. n) then
-	    mini(1)=n/4
-	    mini(2)=n/4
-	    mini(3)=n/4
-	    mini(4)=n/4
-	  else
-	    mini(1)=int(n/4)
-	    mini(2)=int(n/4)+1
-	    if(4*(n/4) .eq. n-1) then
-	      mini(3)=int(n/4)
-	      mini(4)=int(n/4)
-	    else
-	      if(4*(n/4) .eq. n-2) then
-		mini(3)=int(n/4)+1
-		mini(4)=int(n/4)
-	      else
-		mini(3)=int(n/4)+1
-		mini(4)=int(n/4)+1
-	      endif
-	    endif
-	  endif
-	else
-	  mini(1)=nmini
-	  mini(2)=nmini
-	  mini(3)=nmini
-	  mini(4)=nmini
-	  mini(5)=nmini
-	endif
+        kstep=k1
+        part=.true.
+        ngroup=int(n/(nmini*1.D0))
+        if(n.ge.(2*nmini) .and. n.le.(3*nmini-1)) then
+          if(rfodd(n)) then
+            mini(1)=int(n/2)
+            mini(2)=int(n/2)+1
+          else
+            mini(1)=n/2
+            mini(2)=n/2
+          endif
+        else if(n.ge.(3*nmini) .and. n.le.(4*nmini-1)) then
+          if(3*(n/3) .eq. n) then
+            mini(1)=n/3
+            mini(2)=n/3
+            mini(3)=n/3
+          else
+            mini(1)=int(n/3)
+            mini(2)=int(n/3)+1
+            if(3*(n/3) .eq. n-1) then
+              mini(3)=int(n/3)
+            else
+              mini(3)=int(n/3)+1
+            endif
+          endif
+        else if(n.ge.(4*nmini) .and. n.le.(5*nmini-1)) then
+          if(4*(n/4) .eq. n) then
+            mini(1)=n/4
+            mini(2)=n/4
+            mini(3)=n/4
+            mini(4)=n/4
+          else
+            mini(1)=int(n/4)
+            mini(2)=int(n/4)+1
+            if(4*(n/4) .eq. n-1) then
+              mini(3)=int(n/4)
+              mini(4)=int(n/4)
+            else
+              if(4*(n/4) .eq. n-2) then
+                mini(3)=int(n/4)+1
+                mini(4)=int(n/4)
+              else
+                mini(3)=int(n/4)+1
+                mini(4)=int(n/4)+1
+              endif
+            endif
+          endif
+        else
+          mini(1)=nmini
+          mini(2)=nmini
+          mini(3)=nmini
+          mini(4)=nmini
+          mini(5)=nmini
+        endif
 
-	nhalf=int(mini(1)*percen)
-	if(ngroup.gt.kmini) ngroup=kmini
-	nrep=int((krep*1.D0)/ngroup)
-	minigr=mini(1)+mini(2)+mini(3)+mini(4)+mini(5)
+        nhalf=int(mini(1)*percen)
+        if(ngroup.gt.kmini) ngroup=kmini
+        nrep=int((krep*1.D0)/ngroup)
+        minigr=mini(1)+mini(2)+mini(3)+mini(4)+mini(5)
 cccc  CALL INTPR('>>> RFLTSREG ... minigr=',-1,iseed,1)
-	call rfrdraw(subdat,n,seed,minigr,mini,ngroup,kmini)
+        call rfrdraw(subdat,n,seed,minigr,mini,ngroup,kmini)
       else
-	minigr=n
-	nhalf=nhalff
-	kstep=k1
-	if(n.le.replow(nsel)) then
-c     		use all combinations; happens iff  nsel = nvar = p <= 6
-	  nrep=rfncomb(nsel,n)
-	else
-	  nrep = krep
-	  all=.false.
-	endif
+        minigr=n
+        nhalf=nhalff
+        kstep=k1
+        if(n.le.replow(nsel)) then
+c		use all combinations; happens iff  nsel = nvar = p <= 6
+          nrep=rfncomb(nsel,n)
+        else
+          nrep = krep
+          all=.false.
+        endif
       endif
 
       seed=iseed
@@ -270,91 +270,91 @@ cc
 CDDD  CALL INTPR('>>> Start initialization ... nrep=',-1,nrep,1)
 
       do 31, j=1,nvmax
-	do 33, k=1,10
-	  mstock(k,j)=1000000.D0
-	  do 35, kk=1,kmini
- 35	    m1stock((kk-1)*10+k,j)=1000000.D0
-	  do 37 i=1,nvmax
-	    do 39,kk=1,kmini
- 39	      c1stock((kk-1)*10+k,(j-1)*nvmax+i)=1000000.D0
-	    cstock(k,(j-1)*nvmax+i)=1000000.D0
- 37	  continue
- 33	continue
-	means(j)=0.D0
-	bmeans(j)=0.D0
-	sd(j)=0.D0
-	do 46, k=1,nvmax1
-	  c(j,k)=0.D0
-	  h(j,k)=0.D0
- 46	continue
+        do 33, k=1,10
+          mstock(k,j)=1000000.D0
+          do 35, kk=1,kmini
+ 35         m1stock((kk-1)*10+k,j)=1000000.D0
+          do 37 i=1,nvmax
+            do 39,kk=1,kmini
+ 39           c1stock((kk-1)*10+k,(j-1)*nvmax+i)=1000000.D0
+            cstock(k,(j-1)*nvmax+i)=1000000.D0
+ 37       continue
+ 33     continue
+        means(j)=0.D0
+        bmeans(j)=0.D0
+        sd(j)=0.D0
+        do 46, k=1,nvmax1
+          c(j,k)=0.D0
+          h(j,k)=0.D0
+ 46     continue
  31   continue
 
       do 41, j=1,nmax
-	nmahad(j)=0.D0
-	ndist(j)=0.D0
-	index1(j)=1000000
-	index2(j)=1000000
-	temp(j)=1000000
-	weights(j)=0.D0
-	aw(j)=0.D0
-	aw2(j)=0.D0
-	residu(j)=0.D0
-	y(j)=0.D0
-	am(j)=0.D0
-	am2(j)=0.D0
-	slutn(j)=0.D0
+        nmahad(j)=0.D0
+        ndist(j)=0.D0
+        index1(j)=1000000
+        index2(j)=1000000
+        temp(j)=1000000
+        weights(j)=0.D0
+        aw(j)=0.D0
+        aw2(j)=0.D0
+        residu(j)=0.D0
+        y(j)=0.D0
+        am(j)=0.D0
+        am2(j)=0.D0
+        slutn(j)=0.D0
  41   continue
 
       do 43,j=1,km10
- 43	flag(j)=1
+ 43     flag(j)=1
       do 45, j=1,nvmax1
-	jmiss(j)=0
-	xmed(j)=0.D0
-	xmad(j)=0.D0
-	a(j)=0.D0
-	da(j)=0.D0
-	do 48,k=1,nmaxi
- 48	  dath(k,j)=0.D0
+        jmiss(j)=0
+        xmed(j)=0.D0
+        xmad(j)=0.D0
+        a(j)=0.D0
+        da(j)=0.D0
+        do 48,k=1,nmaxi
+ 48       dath(k,j)=0.D0
  45   continue
 
       do 44, j=1,maxmini
-	subndex(j)=0.D0
+        subndex(j)=0.D0
  44   continue
       do 42,j=1,nhalff
-	inbest(j)=0
+        inbest(j)=0
  42   continue
 
       do 47,j=1,nvm11
- 47	hvec(j)=0.D0
+ 47     hvec(j)=0.D0
 
 CDDD  CALL INTPR('>>> Initialization ready',-1,0,0)
  9000 continue
 
       if(nvad.eq.1) then
-	do 23, jj=1,n
- 23	  ndist(jj)=dat(jj,1)
-	call rfshsort(ndist,n)
-	call rfmcduni(ndist,n,nhalff,slutn,bstd,am,am2,factor,
-     *	     n-nhalff+1)
-	goto 9999
+        do 23, jj=1,n
+ 23       ndist(jj)=dat(jj,1)
+        call rfshsort(ndist,n)
+        call rfmcduni(ndist,n,nhalff,slutn,bstd,am,am2,factor,
+     *       n-nhalff+1)
+        goto 9999
       endif
 cc
       if(.not.fine .and. .not.final) then
-	call rfstatis(dat,xmed,xmad,aw2,intercept,nvad, nvmax1,nmax,n,
-     *	     nstop,MADeps,weights,y,nvar,index2)
-	if(nstop.eq.1) goto 9999
+        call rfstatis(dat,xmed,xmad,aw2,intercept,nvad, nvmax1,nmax,n,
+     *       nstop,MADeps,weights,y,nvar,index2)
+        if(nstop.eq.1) goto 9999
       endif
 
 cc
       jreg=1
       call rflsreg(nvmax1, nvmax,nvar,n,a,dat, weights, da, h,
-     *	   fckw,hvec,nvm11,jmiss,nvad,n)
-cc	       nfac=nvad-1
+     *     fckw,hvec,nvm11,jmiss,nvad,n)
+cc             nfac=nvad-1
       nfac=nvar-1
       call rfrtran(nvar,intercept,nfac,nvad,nvmax1,xmed,
-     *	   xmad,a,nvad,fckw)
+     *     xmad,a,nvad,fckw)
       call rftrc(h,da,nvmax,nvmax1,nvar,intercept,nfac,nvad,
-     *	   xmed,xmad)
+     *     xmed,xmad)
       jerd=0
 
       tottimes=0
@@ -362,66 +362,66 @@ c---- - - - - - - - - Outermost loop - - - - - - - - - - - - - - - - - - -
 c----
  5555 object=10.D25
       if(.not. part .or. final) then
-	 nn=n
+         nn=n
       endif
       if(part .and. fine .and. .not. final) nn=minigr
 
       if(fine.or.(.not.part.and.final)) then
-	nrep=10
-	nsel=nhalf
-	kstep=k2
-	if (final) then
-	  nhalf=nhalff
-	  ngroup=1
-	  if (n*nvar .le.100000) then
-	    kstep=k3
-	  else if (n*nvar .gt.100000 .and. n*nvar .le.200000) then
-	    kstep=10
-	  else if (n*nvar .gt.200000 .and. n*nvar .le.300000) then
-	    kstep=9
-	  else if (n*nvar .gt.300000 .and. n*nvar .le.400000) then
-	    kstep=8
-	  else if (n*nvar .gt.400000 .and. n*nvar .le.500000) then
-	    kstep=7
-	  else if (n*nvar .gt.500000 .and. n*nvar .le.600000) then
-	    kstep=6
-	  else if (n*nvar .gt.600000 .and. n*nvar .le.700000) then
-	    kstep=5
-	  else if (n*nvar .gt.700000 .and. n*nvar .le.800000) then
-	    kstep=4
-	  else if (n*nvar .gt.800000 .and. n*nvar .le.900000) then
-	    kstep=3
-	  else if (n*nvar .gt.900000 .and. n*nvar .le.1000000) then
-	    kstep=2
-	  else
-	    kstep=1
-	  endif
+        nrep=10
+        nsel=nhalf
+        kstep=k2
+        if (final) then
+          nhalf=nhalff
+          ngroup=1
+          if (n*nvar .le.100000) then
+            kstep=k3
+          else if (n*nvar .gt.100000 .and. n*nvar .le.200000) then
+            kstep=10
+          else if (n*nvar .gt.200000 .and. n*nvar .le.300000) then
+            kstep=9
+          else if (n*nvar .gt.300000 .and. n*nvar .le.400000) then
+            kstep=8
+          else if (n*nvar .gt.400000 .and. n*nvar .le.500000) then
+            kstep=7
+          else if (n*nvar .gt.500000 .and. n*nvar .le.600000) then
+            kstep=6
+          else if (n*nvar .gt.600000 .and. n*nvar .le.700000) then
+            kstep=5
+          else if (n*nvar .gt.700000 .and. n*nvar .le.800000) then
+            kstep=4
+          else if (n*nvar .gt.800000 .and. n*nvar .le.900000) then
+            kstep=3
+          else if (n*nvar .gt.900000 .and. n*nvar .le.1000000) then
+            kstep=2
+          else
+            kstep=1
+          endif
 
-	  if (n.gt.5000) then
-	    nrep=1
-	  endif
-	else
-	  nhalf=int(minigr*percen)
-	endif
+          if (n.gt.5000) then
+            nrep=1
+          endif
+        else
+          nhalf=int(minigr*percen)
+        endif
       endif
 
       do 81 i=1,nsel-1
-	 index1(i)=i
+         index1(i)=i
  81   continue
       index1(nsel)=nsel-1
 cc
       if(.not. final) then
-	do 83 i=1,10
-	  do 85 j=1,ngroup
-	    mcdndex(i,1,j)=10.D25
- 85	  mcdndex(i,2,j)=10.D25
- 83	continue
+        do 83 i=1,10
+          do 85 j=1,ngroup
+            mcdndex(i,1,j)=10.D25
+ 85       mcdndex(i,2,j)=10.D25
+ 83     continue
       endif
       if (fine .and. .not. final) then
-	do 91, j=1,minigr
-	  do 93, k=1,nvad
- 93	    dath(j,k)=dat(subdat(1,j),k)
- 91	continue
+        do 91, j=1,minigr
+          do 93, k=1,nvad
+ 93         dath(j,k)=dat(subdat(1,j),k)
+ 91     continue
       endif
       kount=0
 
@@ -430,417 +430,417 @@ CDDD  CALL INTPR('>>> MAIN LOOP BY GROUPS: NGROUP= ',-1,ngroup,1)
       do 1111 ii=1,ngroup
 CDDD  CALL INTPR('>>> LOOPING BY GROUPS...II: ',-1,ii,1)
 
-	if(.not.fine) kount=0
-	if(part .and. .not. fine) nn=mini(ii)
-	do 101 i=1,nn
-	  index2(i)=i
- 101	continue
+        if(.not.fine) kount=0
+        if(part .and. .not. fine) nn=mini(ii)
+        do 101 i=1,nn
+          index2(i)=i
+ 101    continue
 
-	if(part .and. .not. fine) then
-	  jndex=0
-	  do 103 j=1,minigr
-	    if(subdat(2,j).eq.ii) then
-	      jndex=jndex+1
-	      subndex(jndex)=subdat(1,j)
-	    endif
- 103	  continue
-	  do 105 j=1,mini(ii)
-	    do 107 k=1,nvad
-	      dath(j,k)=dat(subndex(j),k)
- 107	    continue
- 105	  continue
-	endif
+        if(part .and. .not. fine) then
+          jndex=0
+          do 103 j=1,minigr
+            if(subdat(2,j).eq.ii) then
+              jndex=jndex+1
+              subndex(jndex)=subdat(1,j)
+            endif
+ 103      continue
+          do 105 j=1,mini(ii)
+            do 107 k=1,nvad
+              dath(j,k)=dat(subndex(j),k)
+ 107        continue
+ 105      continue
+        endif
 cc
 CDDD  CALL INTPR('>>> MAIN LOOP: NREP=',-1,nrep,1)
-	do 1000 i=1,nrep
+        do 1000 i=1,nrep
 CDDD  CALL INTPR('>>> LOOPING...I: ',-1,i,1)
 
-	  pnsel=nsel
-	  tottimes=tottimes+1
-	  fckwi=0.D0
-	  fckw1=0.D0
-	  step=0
- 132	  if((part.and..not.fine).or.(.not.part.and..not.final)) then
-	    if(part) then
-	      call rfrangen(mini(ii),nsel,index1,seed)
-	    else
-	      if(all) then
-		call rfgenpn(n,nsel,index1)
-	      else
-		call rfrangen(n,nsel,index1,seed)
-	      endif
-	    endif
-	  endif
+          pnsel=nsel
+          tottimes=tottimes+1
+          fckwi=0.D0
+          fckw1=0.D0
+          step=0
+ 132      if((part.and..not.fine).or.(.not.part.and..not.final)) then
+            if(part) then
+              call rfrangen(mini(ii),nsel,index1,seed)
+            else
+              if(all) then
+                call rfgenpn(n,nsel,index1)
+              else
+                call rfrangen(n,nsel,index1,seed)
+              endif
+            endif
+          endif
 
-c     9550     continue
-	  if(.not.fine.and.part) then
-	    do 121 j=1,pnsel
-	      do 123 m=1,nvad
- 123		c(j,m)=dath(index1(j),m)
- 121	    continue
-	  endif
-	  if(.not.part.and..not.final) then
-	    do 122 j=1,pnsel
-	      do 124 m=1,nvad
- 124		c(j,m)=dat(index1(j),m)
- 122	    continue
-	  endif
+c 9550     continue
+          if(.not.fine.and.part) then
+            do 121 j=1,pnsel
+              do 123 m=1,nvad
+ 123            c(j,m)=dath(index1(j),m)
+ 121        continue
+          endif
+          if(.not.part.and..not.final) then
+            do 122 j=1,pnsel
+              do 124 m=1,nvad
+ 124            c(j,m)=dat(index1(j),m)
+ 122        continue
+          endif
 
-	  if((.not.part.and..not.final).or.(.not.fine.and.part)) then
-	    if(nvar.gt.1) then
-	      call rfequat(c,nvmax,nvmax1,hvec,nvm11,nvar,1,nerr)
-	      if(nerr.ge.0) goto 126
-	      jerd=jerd+1
-	      if(.not.all.and.i.gt.2) goto 132
-	      goto 1000
-	    else
-	      if(c(1,1).ne.0.D0) c(1,1)=c(1,2)/c(1,1)
-	    endif
+          if((.not.part.and..not.final).or.(.not.fine.and.part)) then
+            if(nvar.gt.1) then
+              call rfequat(c,nvmax,nvmax1,hvec,nvm11,nvar,1,nerr)
+              if(nerr.ge.0) goto 126
+              jerd=jerd+1
+              if(.not.all.and.i.gt.2) goto 132
+              goto 1000
+            else
+              if(c(1,1).ne.0.D0) c(1,1)=c(1,2)/c(1,1)
+            endif
 
- 126	    continue
+ 126        continue
 
-	    do 136 jnc=1,nvar
- 136	      a(jnc)=c(jnc,1)
-	  endif
+            do 136 jnc=1,nvar
+ 136          a(jnc)=c(jnc,1)
+          endif
 
-	  if (final) then
-	    if(mstock(i,1).ne.1000000.D0) then
-	      do 125 jj=1,nvar
-		a(jj)=mstock(i,jj)
- 125	      continue
-	    else
-	      goto 1111
-	    endif
-	  endif
-	  if (fine.and..not.final) then
-	    if(m1stock((ii-1)*10+i,1).ne.1000000.D0) then
-	      do 131 jj=1,nvar
-		a(jj)=m1stock((ii-1)*10+i,jj)
- 131	      continue
-	    else
-	      goto 1111
-	    endif
-	  endif
+          if (final) then
+            if(mstock(i,1).ne.1000000.D0) then
+              do 125 jj=1,nvar
+                a(jj)=mstock(i,jj)
+ 125          continue
+            else
+              goto 1111
+            endif
+          endif
+          if (fine.and..not.final) then
+            if(m1stock((ii-1)*10+i,1).ne.1000000.D0) then
+              do 131 jj=1,nvar
+                a(jj)=m1stock((ii-1)*10+i,jj)
+ 131          continue
+            else
+              goto 1111
+            endif
+          endif
 
 c     151
-	  do 152 jnc=1,nn
-	    residu(jnc)=0.D0
-	    do 153 j=1,nvar
-	      if(part.and..not.final) then
-		residu(jnc)=residu(jnc)+a(j)*dath(jnc,j)
-	      else
-		residu(jnc)=residu(jnc)+a(j)*dat(jnc,j)
-	      endif
- 153	    continue
-	    if(part.and..not.final) then
-	      residu(jnc)=dath(jnc,nvad)-residu(jnc)
-	    else
-	      residu(jnc)=dat(jnc,nvad)-residu(jnc)
-	    endif
-	    aw(jnc)=residu(jnc)
- 152	  continue
+          do 152 jnc=1,nn
+            residu(jnc)=0.D0
+            do 153 j=1,nvar
+              if(part.and..not.final) then
+                residu(jnc)=residu(jnc)+a(j)*dath(jnc,j)
+              else
+                residu(jnc)=residu(jnc)+a(j)*dat(jnc,j)
+              endif
+ 153        continue
+            if(part.and..not.final) then
+              residu(jnc)=dath(jnc,nvad)-residu(jnc)
+            else
+              residu(jnc)=dat(jnc,nvad)-residu(jnc)
+            endif
+            aw(jnc)=residu(jnc)
+ 152      continue
 
-	  more1=.false.
-	  more2=.false.
-	  nmore=200
-	  nmore2=nmore/2
+          more1=.false.
+          more2=.false.
+          nmore=200
+          nmore2=nmore/2
 
-	  if(intadjust.eq.1) then
+          if(intadjust.eq.1) then
 
 CDDD  CALL INTPR('>>> INTERCEPT ADJUSTMENT 1',-1,i,1)
-	    if(intercept.eq.1.and.((.not.fine.and.part).or.
-     *		 .not.part.or.((nn-nhalf).le.nmore))) then
-	      call rfshsort(aw,nn)
-	      call rfmcduni(aw,nn,nhalf,slutn,bstd,am,am2,
-     *		   factor,nn-nhalf+1)
-	      a(nvar)=a(nvar)+slutn(1)
-	      do 154 jnc=1,nn
- 154		residu(jnc)=residu(jnc)-slutn(1)
-	    else if(intercept.eq.1) then
-	      call rfshsort(aw,nn)
-	      do 184 jj=1,nn
- 184		am2(jj)=abs(aw(jj))
-	      dist2=rffindq(am2,nn,nhalf,index1)
-	      do 174, jj=1,nhalf
- 174		aw2(jj)=aw(index1(jj))
-	      dist2=rffindq(aw2,nhalf,1,index2)
-	      jnc=index1(index2(1))
-	      if(jnc+nmore-nmore2+nhalf-1.gt.nn.or.jnc-nmore2.lt.1)
-     *		   then
-		call rfmcduni(aw,nn,nhalf,slutn,bstd,am,am2,
-     *		     factor,nn-nhalf+1)
-		a(nvar)=a(nvar)+slutn(1)
-		do 169 jnc=1,nn
- 169		  residu(jnc)=residu(jnc)-slutn(1)
-	      else
- 555		do 178 jj=0,nhalf-1+nmore
- 178		  aw2(jj+1)=aw(jnc-nmore2+jj)
-		nlen=nmore+1
-		call rfmcduni(aw2,nhalf+nmore,nhalf,slutn,
-     *		     bstd,am,am2,factor,nlen)
-		if(nlen.eq.1.and..not.more1) then
-		  if(.not.more2) then
-		    nmore=nmore2
-		    nmore2=nmore2+nmore2
-		    more1=.true.
-		    if(jnc-nmore2.ge.1) goto 555
-		  endif
-		else if(nlen.eq.(nmore+1).and..not.more2) then
-		  if(.not.more1) then
-		    nmore=nmore2
-		    nmore2=-nmore2
-		    more2=.true.
-		    if(jnc+nmore-nmore2+nhalf-1.le.nn)
-     *			 goto 555
-		  endif
-		else if(nlen.eq.1.and.more1) then
-		  if(.not.more2) then
-		    nmore2=nmore2+100
-		    if(jnc-nmore2.ge.1) goto 555
-		  endif
-		else if(nlen.eq.(nmore+1).and.more2) then
-		  if(.not.more1) then
-		    nmore2=nmore2+100
-		    if(jnc+nmore-nmore2+nhalf-1.le.nn) goto 555
-		  endif
-		endif
-		a(nvar)=a(nvar)+slutn(1)
-		do 170 jnc=1,nn
- 170		  residu(jnc)=residu(jnc)-slutn(1)
-	      endif
-	    endif
-	  endif
+            if(intercept.eq.1.and.((.not.fine.and.part).or.
+     *           .not.part.or.((nn-nhalf).le.nmore))) then
+              call rfshsort(aw,nn)
+              call rfmcduni(aw,nn,nhalf,slutn,bstd,am,am2,
+     *             factor,nn-nhalf+1)
+              a(nvar)=a(nvar)+slutn(1)
+              do 154 jnc=1,nn
+ 154            residu(jnc)=residu(jnc)-slutn(1)
+            else if(intercept.eq.1) then
+              call rfshsort(aw,nn)
+              do 184 jj=1,nn
+ 184            am2(jj)=abs(aw(jj))
+              dist2=rffindq(am2,nn,nhalf,index1)
+              do 174, jj=1,nhalf
+ 174            aw2(jj)=aw(index1(jj))
+              dist2=rffindq(aw2,nhalf,1,index2)
+              jnc=index1(index2(1))
+              if(jnc+nmore-nmore2+nhalf-1.gt.nn.or.jnc-nmore2.lt.1)
+     *             then
+                call rfmcduni(aw,nn,nhalf,slutn,bstd,am,am2,
+     *               factor,nn-nhalf+1)
+                a(nvar)=a(nvar)+slutn(1)
+                do 169 jnc=1,nn
+ 169              residu(jnc)=residu(jnc)-slutn(1)
+              else
+ 555            do 178 jj=0,nhalf-1+nmore
+ 178              aw2(jj+1)=aw(jnc-nmore2+jj)
+                nlen=nmore+1
+                call rfmcduni(aw2,nhalf+nmore,nhalf,slutn,
+     *               bstd,am,am2,factor,nlen)
+                if(nlen.eq.1.and..not.more1) then
+                  if(.not.more2) then
+                    nmore=nmore2
+                    nmore2=nmore2+nmore2
+                    more1=.true.
+                    if(jnc-nmore2.ge.1) goto 555
+                  endif
+                else if(nlen.eq.(nmore+1).and..not.more2) then
+                  if(.not.more1) then
+                    nmore=nmore2
+                    nmore2=-nmore2
+                    more2=.true.
+                    if(jnc+nmore-nmore2+nhalf-1.le.nn)
+     *                   goto 555
+                  endif
+                else if(nlen.eq.1.and.more1) then
+                  if(.not.more2) then
+                    nmore2=nmore2+100
+                    if(jnc-nmore2.ge.1) goto 555
+                  endif
+                else if(nlen.eq.(nmore+1).and.more2) then
+                  if(.not.more1) then
+                    nmore2=nmore2+100
+                    if(jnc+nmore-nmore2+nhalf-1.le.nn) goto 555
+                  endif
+                endif
+                a(nvar)=a(nvar)+slutn(1)
+                do 170 jnc=1,nn
+ 170              residu(jnc)=residu(jnc)-slutn(1)
+              endif
+            endif
+          endif
 
-	  do 156 jnc=1,nn
- 156	    residu(jnc)=abs(residu(jnc))
-	  dist2=rffindq(residu,nn,nhalf,index2)
+          do 156 jnc=1,nn
+ 156        residu(jnc)=abs(residu(jnc))
+          dist2=rffindq(residu,nn,nhalf,index2)
 c     9555
-	  do 400 step=1,kstep
-	    tottimes=tottimes+1
-	    do 155, j=1,nhalf
-	      temp(j)=index2(j)
- 155	    continue
-	    call rfishsort(temp,nhalf)
-	    do 157 j=1,nhalf
-	      if(.not.part.or.final) then
-		do 158 mm=1,nvad
-		  datt(j,mm)=dat(temp(j),mm)
- 158		continue
-	      else
-		do 159 mm=1,nvad
-		  datt(j,mm)=dath(temp(j),mm)
- 159		continue
-	      endif
- 157	    continue
-	    call rflsreg(nvmax1, nvmax,nvar,n,a,datt, weights, da, h,
-     *		 fckw,hvec,nvm11,jmiss,nvad,nn)
+          do 400 step=1,kstep
+            tottimes=tottimes+1
+            do 155, j=1,nhalf
+              temp(j)=index2(j)
+ 155        continue
+            call rfishsort(temp,nhalf)
+            do 157 j=1,nhalf
+              if(.not.part.or.final) then
+                do 158 mm=1,nvad
+                  datt(j,mm)=dat(temp(j),mm)
+ 158            continue
+              else
+                do 159 mm=1,nvad
+                  datt(j,mm)=dath(temp(j),mm)
+ 159            continue
+              endif
+ 157        continue
+            call rflsreg(nvmax1, nvmax,nvar,n,a,datt, weights, da, h,
+     *           fckw,hvec,nvm11,jmiss,nvad,nn)
 
 c           171
-	    do 172 jnc=1,nn
-	      residu(jnc)=0.D0
-	      do 173 j=1,nvar
-		if(part.and..not.final) then
-		  residu(jnc)=residu(jnc)+a(j)*dath(jnc,j)
-		else
-		  residu(jnc)=residu(jnc)+a(j)*dat(jnc,j)
-		endif
- 173	      continue
-	      if(part.and..not.final) then
-		residu(jnc)=dath(jnc,nvad)-residu(jnc)
-	      else
-		residu(jnc)=dat(jnc,nvad)-residu(jnc)
-	      endif
-	      aw(jnc)=residu(jnc)
- 172	    continue
+            do 172 jnc=1,nn
+              residu(jnc)=0.D0
+              do 173 j=1,nvar
+                if(part.and..not.final) then
+                  residu(jnc)=residu(jnc)+a(j)*dath(jnc,j)
+                else
+                  residu(jnc)=residu(jnc)+a(j)*dat(jnc,j)
+                endif
+ 173          continue
+              if(part.and..not.final) then
+                residu(jnc)=dath(jnc,nvad)-residu(jnc)
+              else
+                residu(jnc)=dat(jnc,nvad)-residu(jnc)
+              endif
+              aw(jnc)=residu(jnc)
+ 172        continue
 
-	    more1=.false.
-	    more2=.false.
-	    nmore=200
-	    nmore2=nmore/2
+            more1=.false.
+            more2=.false.
+            nmore=200
+            nmore2=nmore/2
 
-	    if(intadjust.eq.1) then
+            if(intadjust.eq.1) then
 
 CDDD  CALL INTPR('>>> INTERCEPT ADJUSTMENT 2',-1,step,1)
-	      if(intercept .eq. 1 .and. ((.not.fine.and.part) .or.
-     *		   .not.part.or.((nn-nhalf).le.nmore))) then
-		call rfshsort(aw,nn)
-		call rfmcduni(aw,nn,nhalf,slutn,bstd,am,am2,
-     *		     factor,nn-nhalf+1)
-		a(nvar)=a(nvar)+slutn(1)
-		do 179 jnc=1,nn
-		  residu(jnc)=residu(jnc)-slutn(1)
- 179		continue
-	      else if(intercept.eq.1) then
-		call rfshsort(aw,nn)
-		do 185 jj=1,nn
-		  am2(jj)=abs(aw(jj))
- 185		continue
-		dist2=rffindq(am2,nn,nhalf,index1)
-		do 180, jj=1,nhalf
-		  aw2(jj)=aw(index1(jj))
- 180		continue
-		dist2=rffindq(aw2,nhalf,1,index2)
-		jnc=index1(index2(1))
-		if(jnc+nmore-nmore2+nhalf-1.gt.nn.or.jnc-nmore2.lt.1)
-     *		     then
-		  call rfmcduni(aw,nn,nhalf,slutn,bstd,am,am2,
-     *		       factor,nn-nhalf+1)
-		  a(nvar)=a(nvar)+slutn(1)
-		  do 168 jnc=1,nn
-		    residu(jnc)=residu(jnc)-slutn(1)
- 168		  continue
-		else
- 666		  do 181 jj=0,nhalf-1+nmore
-		    aw2(jj+1)=aw(jnc-nmore2+jj)
- 181		  continue
-		  nlen=nmore+1
-		  call rfmcduni(aw2,nhalf+nmore,nhalf,slutn,bstd,
-     *		       am,am2,factor,nlen)
-		  if(nlen.eq.1.and..not.more1) then
-		    if(.not.more2) then
-		      nmore=nmore2
-		      nmore2=nmore2+nmore2
-		      more1=.true.
-		      if(jnc-nmore2.ge.1) goto 666
-		    endif
-		  else if(nlen.eq.(nmore+1).and..not.more2) then
-		    if(.not.more1) then
-		      nmore=nmore2
-		      nmore2=-nmore2
-		      more2=.true.
-		      if(jnc+nmore-nmore2+nhalf-1.le.nn) goto 666
-		    endif
-		  else if(nlen.eq.1.and.more1) then
-		    if(.not.more2) then
-		      nmore2=nmore2+100
-		      if(jnc-nmore2.ge.1) goto 666
-		    endif
-		  else if(nlen.eq.(nmore+1).and.more2) then
-		    if(.not.more1) then
-		      nmore2=nmore2+100
-		      if(jnc+nmore-nmore2+nhalf-1.le.nn) goto 666
-		    endif
-		  endif
-		  a(nvar)=a(nvar)+slutn(1)
-		  do 182 jnc=1,nn
-		    residu(jnc)=residu(jnc)-slutn(1)
- 182		  continue
-		endif
-	      endif
-	    endif
+              if(intercept .eq. 1 .and. ((.not.fine.and.part) .or.
+     *             .not.part.or.((nn-nhalf).le.nmore))) then
+                call rfshsort(aw,nn)
+                call rfmcduni(aw,nn,nhalf,slutn,bstd,am,am2,
+     *               factor,nn-nhalf+1)
+                a(nvar)=a(nvar)+slutn(1)
+                do 179 jnc=1,nn
+                  residu(jnc)=residu(jnc)-slutn(1)
+ 179            continue
+              else if(intercept.eq.1) then
+                call rfshsort(aw,nn)
+                do 185 jj=1,nn
+                  am2(jj)=abs(aw(jj))
+ 185            continue
+                dist2=rffindq(am2,nn,nhalf,index1)
+                do 180, jj=1,nhalf
+                  aw2(jj)=aw(index1(jj))
+ 180            continue
+                dist2=rffindq(aw2,nhalf,1,index2)
+                jnc=index1(index2(1))
+                if(jnc+nmore-nmore2+nhalf-1.gt.nn.or.jnc-nmore2.lt.1)
+     *               then
+                  call rfmcduni(aw,nn,nhalf,slutn,bstd,am,am2,
+     *                 factor,nn-nhalf+1)
+                  a(nvar)=a(nvar)+slutn(1)
+                  do 168 jnc=1,nn
+                    residu(jnc)=residu(jnc)-slutn(1)
+ 168              continue
+                else
+ 666              do 181 jj=0,nhalf-1+nmore
+                    aw2(jj+1)=aw(jnc-nmore2+jj)
+ 181              continue
+                  nlen=nmore+1
+                  call rfmcduni(aw2,nhalf+nmore,nhalf,slutn,bstd,
+     *                 am,am2,factor,nlen)
+                  if(nlen.eq.1.and..not.more1) then
+                    if(.not.more2) then
+                      nmore=nmore2
+                      nmore2=nmore2+nmore2
+                      more1=.true.
+                      if(jnc-nmore2.ge.1) goto 666
+                    endif
+                  else if(nlen.eq.(nmore+1).and..not.more2) then
+                    if(.not.more1) then
+                      nmore=nmore2
+                      nmore2=-nmore2
+                      more2=.true.
+                      if(jnc+nmore-nmore2+nhalf-1.le.nn) goto 666
+                    endif
+                  else if(nlen.eq.1.and.more1) then
+                    if(.not.more2) then
+                      nmore2=nmore2+100
+                      if(jnc-nmore2.ge.1) goto 666
+                    endif
+                  else if(nlen.eq.(nmore+1).and.more2) then
+                    if(.not.more1) then
+                      nmore2=nmore2+100
+                      if(jnc+nmore-nmore2+nhalf-1.le.nn) goto 666
+                    endif
+                  endif
+                  a(nvar)=a(nvar)+slutn(1)
+                  do 182 jnc=1,nn
+                    residu(jnc)=residu(jnc)-slutn(1)
+ 182              continue
+                endif
+              endif
+            endif
 
-	    do 177 jnc=1,nn
-	      residu(jnc)=abs(residu(jnc))
- 177	    continue
-	    dist2=rffindq(residu,nn,nhalf,index2)
-	    fckw=0.D0
-	    do 176 jnc=1,nhalf
-	      fckw=fckw+residu(jnc)**2
- 176	    continue
+            do 177 jnc=1,nn
+              residu(jnc)=abs(residu(jnc))
+ 177        continue
+            dist2=rffindq(residu,nn,nhalf,index2)
+            fckw=0.D0
+            do 176 jnc=1,nhalf
+              fckw=fckw+residu(jnc)**2
+ 176        continue
 
-	    if(step.ge.2 .and. fckw.eq.fckw1) then
-	      goto 5000
-	    endif
-	    fckw1=fckwi
-	    fckwi=fckw
-	    if(((i.eq.1.and.step.eq.1.and..not.fine)
-     *		 .or.fckw.lt.object).and.(final)) then
-	      object=fckw
-	      objfct=fckw
-	      do 175 jjj=1,nhalf
-		inbest(jjj)=index2(jjj)
- 175	      continue
-	      call rfcovcopy(a,bmeans,nvar,1)
-	    endif
+            if(step.ge.2 .and. fckw.eq.fckw1) then
+              goto 5000
+            endif
+            fckw1=fckwi
+            fckwi=fckw
+            if(((i.eq.1.and.step.eq.1.and..not.fine)
+     *           .or.fckw.lt.object).and.(final)) then
+              object=fckw
+              objfct=fckw
+              do 175 jjj=1,nhalf
+                inbest(jjj)=index2(jjj)
+ 175          continue
+              call rfcovcopy(a,bmeans,nvar,1)
+            endif
 
- 400	  continue
+ 400      continue
 
 cc
- 5000	  if(.not. final) then
-	    if(part .and. .not. fine) then
-	      iii=ii
-	    else
-	      iii=1
+ 5000     if(.not. final) then
+            if(part .and. .not. fine) then
+              iii=ii
+            else
+              iii=1
 cc		   At the end of the algorithm, only the ten
 cc		   best solutions need to be stored.
-	    endif
+            endif
 
-	    if( flag((iii-1)*10+1).eq.1) then
-	      lll=1
-	    else
-	      lll=2
-	    endif
+            if( flag((iii-1)*10+1).eq.1) then
+              lll=1
+            else
+              lll=2
+            endif
 
-	    do 201, j=lll,10
-	      if (fckw .le. mcdndex(j,2,iii)) then
-		if(fckw.ne.mcdndex(j,2,iii)) then
-		  if(.not.fine.and.part) goto 203
-		  goto 205
-		else
-		  do 207 kkk=j,10
-		    if(fckw.eq.mcdndex(kkk,2,iii)) then
-		      do 209, jjj=1,nvar
-			if(part.and..not.fine) then
-			  if(a(jjj).ne.m1stock((iii-1)*10+
-     *			       kkk,jjj)) then
-			    goto 203
-			  endif
-			else
-			  if(a(jjj).ne.mstock(kkk,jjj)) then
-			    goto 205
-			  endif
-			endif
- 209		      continue
-		    endif
- 207		  continue
-		endif
-		goto 1000
+            do 201, j=lll,10
+              if (fckw .le. mcdndex(j,2,iii)) then
+                if(fckw.ne.mcdndex(j,2,iii)) then
+                  if(.not.fine.and.part) goto 203
+                  goto 205
+                else
+                  do 207 kkk=j,10
+                    if(fckw.eq.mcdndex(kkk,2,iii)) then
+                      do 209, jjj=1,nvar
+                        if(part.and..not.fine) then
+                          if(a(jjj).ne.m1stock((iii-1)*10+
+     *                         kkk,jjj)) then
+                            goto 203
+                          endif
+                        else
+                          if(a(jjj).ne.mstock(kkk,jjj)) then
+                            goto 205
+                          endif
+                        endif
+ 209                  continue
+                    endif
+ 207              continue
+                endif
+                goto 1000
 c___            .... ----
- 203		do 221,k=10,j+1,-1
-		  do 225 kk=1,nvar
-		    m1stock((iii-1)*10+k,kk)=
-     *			 m1stock((iii-1)*10+k-1,kk)
- 225		  continue
+ 203            do 221,k=10,j+1,-1
+                  do 225 kk=1,nvar
+                    m1stock((iii-1)*10+k,kk)=
+     *                   m1stock((iii-1)*10+k-1,kk)
+ 225              continue
 
-		  mcdndex(k,1,iii)=mcdndex(k-1,1,iii)
-		  mcdndex(k,2,iii)=mcdndex(k-1,2,iii)
- 221		continue
-		do 227 kk=1,nvar
-		  m1stock((iii-1)*10+j,kk)=a(kk)
- 227		continue
-		mcdndex(j,1,iii)=i
-		mcdndex(j,2,iii)=fckw
-		goto 1000
+                  mcdndex(k,1,iii)=mcdndex(k-1,1,iii)
+                  mcdndex(k,2,iii)=mcdndex(k-1,2,iii)
+ 221            continue
+                do 227 kk=1,nvar
+                  m1stock((iii-1)*10+j,kk)=a(kk)
+ 227            continue
+                mcdndex(j,1,iii)=i
+                mcdndex(j,2,iii)=fckw
+                goto 1000
 c___            .... ----
- 205		do 231,k=10,j+1,-1
-		  do 235 kk=1,nvar
-		    mstock(k,kk)= mstock(k-1,kk)
- 235		  continue
-		  mcdndex(k,1,iii)=mcdndex(k-1,1,iii)
-		  mcdndex(k,2,iii)=mcdndex(k-1,2,iii)
- 231		continue
-		do 237 kk=1,nvar
-		  mstock(j,kk)=a(kk)
- 237		continue
-		mcdndex(j,1,iii)=i
-		mcdndex(j,2,iii)=fckw
-		goto 1000
-	      endif
- 201	    continue
+ 205            do 231,k=10,j+1,-1
+                  do 235 kk=1,nvar
+                    mstock(k,kk)= mstock(k-1,kk)
+ 235              continue
+                  mcdndex(k,1,iii)=mcdndex(k-1,1,iii)
+                  mcdndex(k,2,iii)=mcdndex(k-1,2,iii)
+ 231            continue
+                do 237 kk=1,nvar
+                  mstock(j,kk)=a(kk)
+ 237            continue
+                mcdndex(j,1,iii)=i
+                mcdndex(j,2,iii)=fckw
+                goto 1000
+              endif
+ 201        continue
 
-	  endif
+          endif
 
- 1000	continue
+ 1000   continue
 
  1111 continue
 cc
       if(part .and. .not. fine) then
-	fine=.true.
-	goto 5555
+        fine=.true.
+        goto 5555
       endif
       if(.not. final .and. (.not.part .or. fine)) then
-	final=.true.
-	goto 5555
+        final=.true.
+        goto 5555
       endif
 
  9999 continue
@@ -871,7 +871,7 @@ cc
 c     nstop=0: success;  =1 : "problem": mad ~= 0
 
       if (intercept.eq.0) then
-c     	regression without intercept
+c       regression without intercept
         do 50 j=1,nvad
           xmed(j)=0.0
           do 10 jnc=1,n
@@ -1241,98 +1241,98 @@ ccccc
       jmat=n+nb
       jnk=0
       do 10 j=1,jmat
-	 jnk=(j-1)*nvmax
-	 do 10 nc=1,nvmax
-	    jnk=jnk+1
-	    hvec(jnk)=am(nc,j)
+         jnk=(j-1)*nvmax
+         do 10 nc=1,nvmax
+            jnk=jnk+1
+            hvec(jnk)=am(nc,j)
  10   continue
 
       nznde=n-1
       lclpl=-jdm
       do 120 jhfd=1,n
-	 turn=0.D0
-	 lclpl=lclpl+jdm+1
-	 jdel=lclpl+n-jhfd
-	 do 40 jncb=lclpl,jdel
+         turn=0.D0
+         lclpl=lclpl+jdm+1
+         jdel=lclpl+n-jhfd
+         do 40 jncb=lclpl,jdel
            if(dabs(hvec(jncb)) .gt. dabs(turn)) then
              turn=hvec(jncb)
              ldel=jncb
            endif
- 40	 continue
-	 if(dabs(turn) .le. 1D-8) then
-	    nerr=-1
-	    goto 180
-	 endif
-	 if(ldel-lclpl) 60,80,60
- 60	    deter=-deter
-	    ldel=ldel-jdm
-	    jncb=lclpl-jdm
-	    do 70 jncc=jhfd,jmat
-	       ldel=ldel+jdm
-	       jncb=jncb+jdm
-	       swap=hvec(jncb)
-	       hvec(jncb)=hvec(ldel)
- 70	    hvec(ldel)=swap
- 80	    deter=deter*turn
-	 if(jhfd.eq.n) goto 120
-	 turn=1./turn
-	 jncb=lclpl+1
-	 do 90 jncc=jncb,jdel
- 90	    hvec(jncc)=hvec(jncc)*turn
-	 jncd=lclpl
-	 jrow=jhfd+1
-	 do 110 jncb=jrow,n
-	    jncd=jncd+1
-	    jnce=lclpl
-	    jncf=jncd
-	    do 100 jncc=jrow,jmat
-	       jnce=jnce+jdm
-	       jncf=jncf+jdm
- 100	    hvec(jncf)=hvec(jncf)-hvec(jnce)*hvec(jncd)
- 110	 continue
+ 40      continue
+         if(dabs(turn) .le. 1D-8) then
+            nerr=-1
+            goto 180
+         endif
+         if(ldel-lclpl) 60,80,60
+ 60         deter=-deter
+            ldel=ldel-jdm
+            jncb=lclpl-jdm
+            do 70 jncc=jhfd,jmat
+               ldel=ldel+jdm
+               jncb=jncb+jdm
+               swap=hvec(jncb)
+               hvec(jncb)=hvec(ldel)
+ 70         hvec(ldel)=swap
+ 80         deter=deter*turn
+         if(jhfd.eq.n) goto 120
+         turn=1./turn
+         jncb=lclpl+1
+         do 90 jncc=jncb,jdel
+ 90         hvec(jncc)=hvec(jncc)*turn
+         jncd=lclpl
+         jrow=jhfd+1
+         do 110 jncb=jrow,n
+            jncd=jncd+1
+            jnce=lclpl
+            jncf=jncd
+            do 100 jncc=jrow,jmat
+               jnce=jnce+jdm
+               jncf=jncf+jdm
+ 100        hvec(jncf)=hvec(jncf)-hvec(jnce)*hvec(jncd)
+ 110     continue
  120  continue
 
       nerr=0
       neqa=n+1
       jbegx=nznde*jdm+1
       do 150 jnc=neqa,jmat
-	 jbegx=jbegx+jdm
-	 jendx=jbegx+n
-	 jbegc=n*jdm+1
-	 jendc=jbegc+nznde
-	 do 140 jncb=1,nznde
-	    jendx=jendx-1
-	    jbegc=jbegc-jdm
-	    jendc=jendc-jdm-1
-	    hvec(jendx)=hvec(jendx)/hvec(jendc+1)
-	    swap=hvec(jendx)
-	    jncd=jbegx-1
-	    do 130 jncc=jbegc,jendc
-	       jncd=jncd+1
-	       hvec(jncd)=hvec(jncd)-hvec(jncc)*swap
- 130	    continue
- 140	 continue
-	 hvec(jbegx)=hvec(jbegx)/hvec(1)
+         jbegx=jbegx+jdm
+         jendx=jbegx+n
+         jbegc=n*jdm+1
+         jendc=jbegc+nznde
+         do 140 jncb=1,nznde
+            jendx=jendx-1
+            jbegc=jbegc-jdm
+            jendc=jendc-jdm-1
+            hvec(jendx)=hvec(jendx)/hvec(jendc+1)
+            swap=hvec(jendx)
+            jncd=jbegx-1
+            do 130 jncc=jbegc,jendc
+               jncd=jncd+1
+               hvec(jncd)=hvec(jncd)-hvec(jncc)*swap
+ 130        continue
+ 140     continue
+         hvec(jbegx)=hvec(jbegx)/hvec(1)
  150  continue
       jnc=-jdm
       jbegx=nznde*jdm+1
       jendx=jbegx+nznde
       do 160 jncb=neqa,jmat
-	 jbegx=jbegx+jdm
-	 jendx=jendx+jdm
-	 jnc=jnc+jdm
-	 jncd=jnc
-	 do 165 jncc=jbegx,jendx
-	    jncd=jncd+1
-	    hvec(jncd)=hvec(jncc)
- 165	 continue
+         jbegx=jbegx+jdm
+         jendx=jendx+jdm
+         jnc=jnc+jdm
+         jncd=jnc
+         do 165 jncc=jbegx,jendx
+            jncd=jncd+1
+            hvec(jncd)=hvec(jncc)
+ 165     continue
  160  continue
 
  180  jnk=0
       do 190 j=1,jmat
-	 do 190 nc=1,nvmax
-	    jnk=jnk+1
-	    am(nc,j)=hvec(jnk)
+         do 190 nc=1,nvmax
+            jnk=jnk+1
+            am(nc,j)=hvec(jnk)
  190  continue
       return
       end

@@ -34,6 +34,8 @@ o tolellipse() --> renamed to tolEllipsePlot()
      - maybe *return* something
 
 o plot(mcd. ) [ R/covPlot.R ] : should show the call
+	     Default for 'ask' should be smarter: depend on
+	     prod(par("mfrow")) < #{plots} (which depends on 'classic' and p=2)
 
 o ltsReg():  has  undocumented '$resid'
 	     in addition to '$residuals' and '$raw.residuals';
@@ -89,9 +91,8 @@ o summary.nlrob() is currently a "no-op" -- printing it should summarize
 
 ------
 
-o Add data sets from the MMY-book  -- try to use the same variable names as
-  in the book [for that, need to wait for the book; to look at outputs or
-  S-plus scripts].
+o Add data sets from the MMY-book -- mostly done {do we have *all* ?}
+
 
 --- lmrob --- --- --- --- ---
 
@@ -99,10 +100,6 @@ o more tests in	tests/
 
 o fully implement and test the multivariate case (y = matrix with > 1 col.)
 
-o predict.lmrob() __NEEDED__
-
-o anova.lmrob() __NEEDED__ {tau-test; deviance as in glm; ?? }
-			    S+ : "RWald" & "RF" (= rob. F)
 o src/lmrob.c :
 
    Things to fix:
@@ -117,3 +114,17 @@ o Alternative version of covOGK() for correlation-only
   using's Huber's correlation formula which ensures [-1,1] range
   --> ~/R/MM/Pkg-ex/robustbase/robcorgroesser1.R
   and ~/R/MM/STATISTICS/robust/pairwise-new.R
+
+o package 'riv' (author @ epfl.ch!) has 'slc()'  ~=  cov.S(.)  -- in pure R code
+  doesn't Valentin have a version too?
+  otherwise: test this, ask author for "donation" to robustbase
+
+o adjOutlyingness() :
+    typo-bug is corrected; and I have made it more pretty.
+    Still a bit problematic when denominator = 0
+    Currently leave away all the c/0 = Inf and 0/0 = NaN values.
+
+    MM: Maybe, it's the fact that the   coef = 1.5  should really depend on
+        the sample size  n   and will be too large for small n (??)
+  --> should ask Mia and maybe Guy Brys
+

@@ -106,9 +106,6 @@ tolEllipsePlot <-
     ## MM: this is *NOT* good :
     ## else par(mfrow = c(1, 1))
 
-    ind <- sort(rd, index.return=TRUE)$ix
-    ind <- ind[(n-id.n+1):n]
-
 ##  1. Robust tolerance
 ##  define the plot, plot a box, plot the "good" points,
 ##  plot the outliers either as points or as numbers depending on outflag,
@@ -117,7 +114,10 @@ tolEllipsePlot <-
     box()
     xrange <- par("usr")
     xrange <- xrange[2] - xrange[1]
-    text(x[ind, 1] + xrange/50, x[ind, 2], ind)
+    if(id.n >= 1) {
+	ind <- sort(rd, index.return=TRUE)$ix[(n-id.n+1):n]
+	text(x[ind, 1] + xrange/50, x[ind, 2], ind)
+    }
 
     points(z2, type = "l", lty=lty.leg[1], col=col.leg[1])
 

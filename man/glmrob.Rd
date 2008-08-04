@@ -15,7 +15,7 @@
 glmrob(formula, family, data, weights, subset, na.action,
        start = NULL, offset, method = "Mqle",
        weights.on.x = c("none", "hat", "robCov", "covMcd"), control = NULL,
-       model = TRUE, x = FALSE, y = TRUE, contrasts = NULL, ...)
+       model = TRUE, x = FALSE, y = TRUE, contrasts = NULL, trace = FALSE, ...)
 }
 
 \arguments{
@@ -79,8 +79,10 @@ glmrob(formula, family, data, weights, subset, na.action,
 
   \item{contrasts}{an optional list. See the \code{contrasts.arg}
     of \code{model.matrix.default}.}
-
-  \item{\dots}{further arguments passed to or from other methods.}
+  \item{trace}{logical (or integer) indicating if intermediate results
+    should be printed; defaults to \code{FALSE}.}
+  \item{\dots}{arguments passed to \code{\link{glmrobMqle.control}} when
+    \code{control} is \code{NULL} (as per default).}
 }
 
 \details{

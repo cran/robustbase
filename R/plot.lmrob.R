@@ -6,6 +6,7 @@ function (x, which = 1:5,
           "Residuals vs. Fitted Values" ,
           "Sqrt of abs(Residuals) vs. Fitted Values"),
           panel = points, sub.caption = deparse(x$call), main = "",
+          compute.MD = TRUE, # maybe  (n < 1000 && p < 20)
           ask = prod(par("mfcol")) < length(which) && dev.interactive(),
           ..., p = 0.025)
 {
@@ -18,15 +19,30 @@ function (x, which = 1:5,
     r <- residuals(x)
     n <- length(r)
     sr <- r/x$scale
-    yh <- x$fitted.value
-    y <- x$model[,1]
+    yh <- fitted(x)
     one.fig <- prod(par("mfcol")) == 1
     if (ask) {
         op <- par(ask = TRUE)
         on.exit(par(op))
     }
     if (show[1]) {
-        if( length(x$MD) > 0 ) {
+	if(is.null(x$MD) && compute.MD) {
+	    message("recomputing robust Mahalanobis distances")
+	    x$MD <- ## need to recompute
+		robMD(x = if(!is.null(x$x)) x$x else
+		      if(!is.null(x$model)) model.matrix(x, x$model)
+		      else stop("need 'model' or 'x' component for robust Mahalanobis distances"),
+		      intercept = attr(x$terms,"intercept"))
+	    ## try to "cache" them with the object
+	    if(identical(parent.frame(), .GlobalEnv) &&
+	       exists((cnx <- as.character(nx <- match.call()[["x"]])),
+		      .GlobalEnv)) {
+		assign(cnx, x, envir = .GlobalEnv)
+		message("saving the robust distances 'MD' as part of ",
+			sQuote(cnx))
+	    }
+	}
+        if(!is.null(x$MD)) {
             if (p < 0 || p > 1)
                 stop ("Tolerance range must be between 0% to 100%")
             else chi <- sqrt( qchisq(p = 1-p, df = x$rank) )
@@ -49,6 +65,7 @@ function (x, which = 1:5,
             title(sub = sub.caption, ...)
     }
     if (show[3]) {
+        y <- if(!is.null(x$model)) model.response(x$model) else yh + r
         m1 <- min(yh,y)
         m2 <- max(yh,y)
         plot(yh, y, xlab = "Fitted Values", ylab = "Response",

@@ -1,5 +1,5 @@
 
-R version 2.5.0 alpha (2007-04-05 r41063)
+R version 2.6.1 Patched (2007-12-12 r43668)
 Copyright (C) 2007 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
@@ -229,7 +229,8 @@ x            -0.2504843  0.5394659
 > 
 > rg0 <-  glmrob(cbind(k0, n0-k0) ~ x, family = binomial)
 Warning message:
-fitted probabilities numerically 0 or 1 occurred in: switch(family$family, binomial = { 
+In switch(family$family, binomial = { :
+  fitted probabilities numerically 0 or 1 occurred
 > ## --> warning..
 > rg0. <- glmrob(cbind(k0, n0-k0) ~ x, family = binomial, subset = n0 > 0)
 > 
@@ -266,7 +267,7 @@ x             5.5039     0.6447   8.537   <2e-16 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
 Robustness weights w.r * w.x: 
- 48 weights are ~= 1; the remaining 3 ones:
+ 48 weights are ~= 1. The remaining 3 ones are
     42     44     51 
 0.5127 0.7846 0.7388 
 
@@ -300,7 +301,8 @@ x             5.5461     0.6259   8.861   <2e-16 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
 Robustness weights w.r * w.x: 
- All 51 weights are ~= 1;
+ All 51 weights are ~= 1.
+
 Number of observations: 51 
 Fitted by method ‘Mqle’  (in 1 iterations)
 
@@ -333,7 +335,8 @@ x             5.5464     0.6259   8.861   <2e-16 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
 Robustness weights w.r * w.x: 
- All 51 weights are ~= 1;
+ All 51 weights are ~= 1.
+
 Number of observations: 51 
 Fitted by method ‘Mqle’  (in 1 iterations)
 
@@ -361,5 +364,5 @@ test.acc
 +                     rg3.15  [no.comp], tol = 1e-13))
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  0.885 0.047 1.326 0 0 
+Time elapsed:  0.754 0.035 0.928 0 0 
 > 

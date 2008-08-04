@@ -73,5 +73,10 @@ stopifnot(cc$best == mcc$best,
           all.equal(cc$center, mcc$center, tol = 1e-10),
           all.equal(c(mcc$cov / cc$raw.cov), rep(0.7528695976179, p*p)))
 
-
 cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
+
+## nsamp = "exact" -- here for p=7
+coleman.x <- data.matrix(coleman[, 1:6])
+system.time(CcX <- covMcd(coleman.x, nsamp="exact")) # ~ 3 sec.
+stopifnot(all.equal(CcX$best,
+                    c(2, 5:9, 11,13, 14:16, 19:20), tol=0))

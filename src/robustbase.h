@@ -2,7 +2,7 @@
 
 /* C code which includes this, typically includes <R.h> */
 
-/* ./qn_sn.c : */
+/* --------- ./qn_sn.c : -------- */
 #define Sint int
 
 void Qn0(double *x, Sint *n, double *res);
@@ -11,11 +11,32 @@ void Sn0(double *x, Sint *n, Sint *is_sorted, double *res, double *a2);
  * void Qn    (double *x, Sint *n, Sint *finite_corr, double *res);
  * void Sn    (double *x, Sint *n, Sint *finite_corr, double *res);
 */
+
+/* call via .C() from R : */
 void wgt_himed_i(double *x, Sint *n,  Sint *iw, double *res);
 void wgt_himed  (double *x, Sint *n, double *w, double *res);
 
+/* call from C: */
+double pull(double *a, int n, int k);
 
-/* ./lmrob.c : */
+double whimed_i(double *a, int *iw, int n,
+		double *acand, double *a_srt, int *iw_cand);
+double whimed(double *a, double *w, int n,
+	      double *acand, double *a_srt, double *w_cand);
+
+/* --------- ./mc.c -------- */
+
+/* call via .C() from R : */
+void mc_C(double *z, int *n, double *eps, int *iter, double *out);
+
+/* call from C: *iter and *eps  are both input and output */
+double mc_C_d(double *z, int n, double *eps, int *iter);
+
+
+
+
+/* --------- ./lmrob.c --------- */
+
 void R_lmrob_S(double *X, double *y, int *n, int *P,
 	       int *nRes, double *scale, double *beta_s,
 	       double *C, double *bb,
@@ -30,6 +51,7 @@ void R_lmrob_MM(double *X, double *y, int *n, int *P,
 		double *rho_c, double *loss, double *rel_tol,
 		int *converged, int *trace_lev);
 
+/* ------- ./rffastmcd.f ------------ */
 int F77_NAME(rffastmcd)(
     double *dat, int *n, int *nvar, int *nhalff, int *krep,
     double *initcov, double *initmean, int *inbest, double *det,
@@ -44,6 +66,7 @@ int F77_NAME(rffastmcd)(
     double *c1stock, double *m1stock, double *dath,
     double *cutoff, double *chimed);
 
+/* ------- ./rfltsreg.f ------------ */
 int F77_NAME(rfltsreg)(
     double *dat, int *n, int *nvar,
     int *nhalff, int *krep, int *inbest, double *objfct,

@@ -176,7 +176,9 @@ ltsReg.default <-
     dimny <- dimnames(y)
     rownames <- dimny[[1]]
     yn <- if(!is.null(yname))
-	yname else if(!is.null(dimny[[2]])) dimny[[2]] else "Y"
+	yname else if(!is.null(dimny[[2]])) dimny[[2]]
+    has.yn <- !is.null(yn)
+    if(!has.yn) yn <- "Y"
     storage.mode(y) <- "double"
     storage.mode(x) <- "double"
     if (!oneD) {
@@ -265,7 +267,8 @@ ltsReg.default <-
 	ans$resid <- resid/ans$scale
 	ans$rsquared <- 0
 	ans$intercept <- intercept
-	names(ans$coefficients) <- names(ans$raw.coefficients) <- yn
+        if(has.yn)
+            names(ans$coefficients) <- names(ans$raw.coefficients) <- yn
 
     } ## end {all(x == 1)} --
 
@@ -441,7 +444,7 @@ ltsReg.default <-
 	    ans$method <- paste(ans$method, "\nAn exact fit was found!")
 
 	if (mcd) { ## compute robust distances {for diagnostics, eg. rdiag()plot}
-	    mcd <- covMcd(X, alpha = 1)
+	    mcd <- covMcd(X, alpha = alpha, use.correction=use.correction)
 	    if ( -determinant(mcd$cov, log = TRUE)$modulus > 50 * p) {
 		ans$RD <- "singularity"
 	    }
@@ -463,8 +466,10 @@ ltsReg.default <-
 
     names(ans$fitted.values) <- names(ans$residuals) <- names(ans$lts.wt) <-
 	rownames
-    names(ans$scale) <- names(ans$raw.scale) <- yn
-    names(ans$rsquared) <- names(ans$crit) <- yn
+    if(has.yn) { ## non-sense otherwise:
+	names(ans$scale) <- names(ans$raw.scale) <- yn
+	names(ans$rsquared) <- names(ans$crit) <- yn
+    }
     ans$Y <- y
     ans$X <- if(p > 1 && intercept) x[, c(p, 1:(p - 1))] else x
     dimnames(ans$X) <- list(rownames[ok], names(ans$coefficients))
@@ -850,7 +855,7 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
     means <- double(p)		##	 double	 means(nvar)		p
     bmeans <- double(p)		##	 double	 means(nvar)		p
 
-    .Fortran("rfltsreg",
+    .Fortran(rfltsreg,
 	     xy = xy,
 	     n,
 	     p,
@@ -880,6 +885,5 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
              xmed, xmad, a, da, h, hvec, c,
              cstock, mstock, c1stock, m1stock,
              dath, sd,
-	     means, bmeans,
-	     PACKAGE = "robustbase")[ c("inbest", "objfct") ]
+	     means, bmeans)[ c("inbest", "objfct") ]
 }

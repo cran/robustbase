@@ -19,8 +19,10 @@ tukeyPsi1(x, cc, deriv = 0)
 \value{
   a numeric vector of the same length as \code{x}.
 }
-\note{\code{tukeyPsi1(x, d)} and \code{\link{tukeyChi}(x, d+1)} and  are just
-  re-scaled versions of each other (for \code{d in -1:1}).
+\note{\code{tukeyPsi1(x, d)} and \code{\link{tukeyChi}(x, d+1)} are just
+  re-scaled versions of each other (for \code{d in -1:1}), i.e.,
+  \deqn{\chi^{(\nu)}(x, c) = (6/c^2) \psi^{(\nu-1)}(x,c),}
+  for \eqn{\nu = 0,1,2}.
 
   We use the name \sQuote{tukeyPsi\bold{1}}, because \code{tukeyPsi} is
   reserved for a future \dQuote{Psi Function} class object, see

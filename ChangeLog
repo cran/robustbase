@@ -1,3 +1,163 @@
+2008-08-04  Martin Maechler  <maechler@stat.math.ethz.ch>, really from
+
+	    Valentin Todorov  <valentin.todorov@chello.at>
+
+	* R/ltsReg.R (ltReg.default): if(mcd) call covMcd() with correct alpha
+
+	* R/covMcd.R (covMcd): drop (n-1)/n correction, as cov.wt()
+	contains that per default (in R, not in S-plus!).
+
+	* R/tolEllipse.R (tolEllipsePlot): no text() for id.n == 0
+
+2008-08-04  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/wgt_himed.c: renamed  wgt_himed.c_templ  to
+	* wgt_himed_templ.h:
+
+2008-08-02  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.4-1 ready for release to CRAN.
+
+	* R/ltsReg.R (ltsReg.default): don't add artificial "Y" y-name
+
+	* src/lmrob.c (rwls): first call to sum_rho() is only needed for
+	tracing (was used for lambda iterations).
+
+	* R/glmrob.R (glmrob),
+	* R/glmrobMqle.R (glmrobMqle): introduce 'trace' option to trace
+	the robustness iterations {*not* part of control: does *not*
+	influence result}
+
+	* man/CrohnD.Rd: new data example robust poisson regression
+	* data/CrohnD.rda:
+
+2008-01-25  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/covMcd.R (.fastmcd): fix nsamp="exact" to use "all"
+	* src/rffastmcd.f: krep=0 <==> nsamp="exact" : all := TRUE;
+		new argument i_trace; and use intpr() and dblepr()
+	* man/covMcd.Rd: pass 'trace' to .fastmcd() and Fortran
+	* src/rf-common.f (rfncomb): give "error" message for very
+		large 'comb'
+
+	* tests/tmcd.R: add test for nsmap = "exact"
+
+
+2008-01-05  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* man/ambientNOxCH.Rd: new data set from René Locher,
+	* data/ambientNOxCH.rda: showing some lmrob-nonconvergence
+
+2007-12-22  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/lmrob.c (rwls): if (trace_lev >= 3)  show beta vector.
+
+2007-12-13  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* man/summarizeRobWeights.Rd: add toy example
+
+	* R/lmrob.R (summarizeRobWeights): cosmetic change; notably
+	finishing line when weights were practically 0/1.
+
+	* tests/MCD-specials.Rout.save {adapt from change of 11-07}
+
+2007-11-07  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/covMcd.R (covMcd): if we have singularity, also say so, even
+	if trace is FALSE.
+
+	* R/covMcd.R (singularityMsg): for "on.hyperplane", concatenate
+	long coefficient vector.
+
+2007-10-25  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* man/pulpfiber.Rd:   New data set (p=8 = 4 + 4)
+	* data/pulpfiber.tab: from "Robust Multivariate Regression (2004)".
+
+	* tests/lmrob-ex12.R: use versions of predict[.lmrob]()
+
+2007-10-24  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* man/condroz.Rd: set latin1 encoding (and fix typo)
+
+	* R/lmrob.R (predict.lmrob): define predict() and model.matrix()
+	methods, working via "lm" methods.
+
+	* NAMESPACE: export vcov(<lmrob>)
+
+	* man/summary.lmrob.Rd: some docu of new methods
+
+
+2007-08-02  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/adjoutlyingness.R (adjOutlyingness): small improvements,
+	  getting rid of loops; fix an obvious typo (in original code).
+	  Leave away the Inf and NaN that from  abs(Y[] - m) / ( tup | tlo)
+
+2007-07-21  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Author): add Tobias
+
+	* src/rmc.c (h_kern): revert to absolute test; many more experiments
+	* tests/mc-etc.R (x3): a smallish "extreme" case of "non-convergence"
+
+2007-07-20  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* tests/mc-etc.R: new testing of mc() and related
+
+	* src/rmc.c (mc_C_d): changed work[] and weight[] to 0-indexing;
+		this is hopefully the last bug ...
+
+	* R/adjbox.R (adjbox.formula): use adjbox(), not boxplot()!
+	* man/adjboxStats.Rd: added
+
+2007-07-20  Tobias Verbeke  <tobias.verbeke@businessdecision.com>
+
+	* R/adjbox.R: Skewness-adjusted boxplot ported from Matlab LibRA
+	* man/adjbox.Rd:
+
+	* data/los.rda, man/los.Rd:
+	* data/condroz.rda, man/condroz.Rd: two dataset related to medcouple
+
+2007-07-19  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/adjoutlyingness.R: new (also from the Antwerpen MC collection)
+
+	* DESCRIPTION (Depends): R >= 2.3.1, so we can use
+	* NAMESPACE (useDynLib): .registration = TRUE
+	* R/*.R (.C, .Fortran): now can use name variable instead of string
+	and drop 'PACKAGE = ".."'
+
+
+2007-07-18  Tobias Verbeke and Martin Maechler <maechler@R-project.org>
+
+	* src/rmc.c, src/robustbase.h (rmc): code for medcouple (MC);
+		needs debugging: infinite loops and segmentation faults
+	* R/mc.R (mc): new mc() for MedCouple
+
+2007-07-16  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.4-0 - definitely made progress
+
+	* R/plot.lmrob.R (plot.lmrob): recompute robust Mahalanobis
+	distances and cache them with the object.
+
+2007-07-10  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/lmrob.R (summarizeRobWeights): new defaults; work but warn
+	when 'eps' and 'eps1' lead to weights both close to 0 and 1.
+
+	* R/covPlot.R: don't warn for which = "all"
+	* man/covPlot.Rd: example
+
+2007-06-28  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* data/kootenay.tab: add "famous" data set
+	* man/kootenay.Rd:
+
+	* data/cushny.R: add the other "famous" simple data set
+	* man/cushny.Rd:
+
 2007-06-20  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* DESCRIPTION (Version): 0.2-8  ready to be released
@@ -123,7 +283,7 @@
     * src/rffastmcd.f: ditto
 
     * inst/test_MCD.R (mortality, mort3): add example {near singular}
-    * tests/tmcd.R: thest "near singular" example, using new tolSolve:
+    * tests/tmcd.R: test "near singular" example, using new tolSolve:
 
     * R/rrcov.control.R (rrcov.control): new tolSolve = 1e-14
 

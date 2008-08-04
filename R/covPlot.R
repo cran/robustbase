@@ -276,7 +276,7 @@ covPlot <-
         if(p == 2)
             tolEllipsePlot(x, m.cov = m.cov, cutoff = cutoff,
                            id.n = id.n, classic = classic, tol = tol)
-        else
+	else if(which != "all")
             warning("For tolerance ellipses the dimension 'p' must be 2!")
     }
 

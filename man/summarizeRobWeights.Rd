@@ -8,7 +8,7 @@
 \usage{
 summarizeRobWeights(w, digits = getOption("digits"),
                     header = "Robustness weights:",
-                    eps = 1e-04, eps1 = eps, \dots)
+ 	            eps = 0.1 / length(w), eps1 = 1e-3, \dots)
 }
 \arguments{
   \item{w}{numeric vector of robustness weigths.}
@@ -31,6 +31,10 @@ summarizeRobWeights(w, digits = getOption("digits"),
   and \code{\link{glmrob}} make use of \code{summarizeRobWeights()}.
 }
 \examples{
-%% TODO: find an explicit one, particularly for "playing with" eps
+w <- c(1,1,1,1,0,1,1,1,1,0,1,1,.9999,.99999, .5,.6,1e-12)
+summarizeRobWeights(w) # two outside ~= {0,1}
+summarizeRobWeights(w, eps1 = 5e-5)# now three outside {0,1}
+
+## See the summary(<lmrob>) outputs
 }
 \keyword{utilities}

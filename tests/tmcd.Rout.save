@@ -1,6 +1,6 @@
 
-R version 2.4.1 Patched (2007-03-25 r40912)
-Copyright (C) 2007 The R Foundation for Statistical Computing
+R version 2.7.1 Patched (2008-08-02 r46219)
+Copyright (C) 2008 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -44,8 +44,8 @@ height  weight
   38.3    33.1  
 Robust Estimate of Covariance:
         height  weight
-height     173     333
-weight     333     726
+height     157     303
+weight     303     660
 --------------------------------------------------------
             phosphor  18   2  10     6.878847 
 Best subsample: 
@@ -64,8 +64,8 @@ Robust Estimate of Location:
    13.4     38.8  
 Robust Estimate of Covariance:
          inorg  organic
-inorg      194      197
-organic    197      274
+inorg      181      184
+organic    184      256
 --------------------------------------------------------
             starsCYG  47   2  25    -8.031215 
 Best subsample: 
@@ -84,8 +84,8 @@ Robust Estimate of Location:
      4.41       4.95  
 Robust Estimate of Covariance:
            log.Te  log.light
-log.Te     0.0175     0.0523
-log.light  0.0523     0.3643
+log.Te     0.0171     0.0511
+log.light  0.0511     0.3555
 --------------------------------------------------------
            stackloss  21   3  12     5.472581 
 Best subsample: 
@@ -104,9 +104,9 @@ Robust Estimate of Location:
       59.5        20.8        87.3  
 Robust Estimate of Covariance:
             Air.Flow  Water.Temp  Acid.Conc.
-Air.Flow        13.7        12.8        12.5
-Water.Temp      12.8        20.2        13.4
-Acid.Conc.      12.5        13.4        50.8
+Air.Flow        12.6        11.7        11.5
+Water.Temp      11.7        18.5        12.3
+Acid.Conc.      11.5        12.3        46.6
 --------------------------------------------------------
              coleman  20   5  13     1.286808 
 Best subsample: 
@@ -125,11 +125,11 @@ Robust Estimate of Location:
      2.76      48.38       6.12      25.00       6.40  
 Robust Estimate of Covariance:
            salaryP  fatherWc  sstatus  teacherSc  motherLev
-salaryP      0.412      2.91   -0.434      0.247      0.122
-fatherWc     2.909   2122.76  538.263     20.527     56.194
-sstatus     -0.434    538.26  195.256      6.242     16.499
-teacherSc    0.247     20.53    6.242      1.279      0.904
-motherLev    0.122     56.19   16.499      0.904      1.698
+salaryP      0.381      2.69   -0.400      0.228      0.113
+fatherWc     2.685   1959.47  496.858     18.948     51.871
+sstatus     -0.400    496.86  180.236      5.762     15.230
+teacherSc    0.228     18.95    5.762      1.180      0.835
+motherLev    0.113     51.87   15.230      0.835      1.567
 --------------------------------------------------------
             salinity  28   3  16     1.326364 
 Best subsample: 
@@ -148,15 +148,15 @@ Robust Estimate of Location:
 10.08   2.78  22.78  
 Robust Estimate of Covariance:
        X1     X2     X3
-X1  14.50   1.40  -4.43
-X2   1.40   5.33  -2.00
-X3  -4.43  -2.00   3.32
+X1  13.87   1.34  -4.24
+X2   1.34   5.10  -1.92
+X3  -4.24  -1.92   3.17
 --------------------------------------------------------
                 wood  20   5  13   -36.270094 
 Best subsample: 
  [1]  1  2  3  5  9 10 12 13 14 15 17 18 20
-Outliers:  5 
-[1]  4  6  8 11 19
+Outliers:  7 
+[1]  4  6  7  8 11 16 19
 -------------
 Minimum Covariance Determinant (MCD) estimator.
 Call:
@@ -168,12 +168,12 @@ Robust Estimate of Location:
    x1     x2     x3     x4     x5  
 0.587  0.122  0.531  0.538  0.892  
 Robust Estimate of Covariance:
-           x1         x2         x3         x4         x5
-x1   0.016327   3.06e-03   0.005136  -9.54e-04  -2.65e-03
-x2   0.003063   7.89e-04   0.002067  -8.47e-05   3.85e-05
-x3   0.005136   2.07e-03   0.010802  -1.42e-03   5.74e-04
-x4  -0.000954  -8.47e-05  -0.001419   4.63e-03   2.98e-03
-x5  -0.002654   3.85e-05   0.000574   2.98e-03   4.51e-03
+          x1         x2        x3         x4         x5
+x1   0.01507   2.83e-03   0.00474  -8.81e-04  -2.45e-03
+x2   0.00283   7.29e-04   0.00191  -7.82e-05   3.55e-05
+x3   0.00474   1.91e-03   0.00997  -1.31e-03   5.30e-04
+x4  -0.00088  -7.82e-05  -0.00131   4.28e-03   2.75e-03
+x5  -0.00245   3.55e-05   0.00053   2.75e-03   4.16e-03
 --------------------------------------------------------
                  hbk  75   3  39    -1.047858 
 Best subsample: 
@@ -193,9 +193,9 @@ Robust Estimate of Location:
 1.54  1.78  1.69  
 Robust Estimate of Covariance:
         X1      X2     X3
-X1  1.6803  0.0753  0.174
-X2  0.0753  1.7103  0.209
-X3  0.1742  0.2089  1.588
+X1  1.6528  0.0741  0.171
+X2  0.0741  1.6823  0.205
+X3  0.1713  0.2055  1.562
 --------------------------------------------------------
              Animals  28   2  15    14.555543 
 Best subsample: 
@@ -214,8 +214,8 @@ Robust Estimate of Location:
  18.7   64.9  
 Robust Estimate of Covariance:
        body  brain
-body   2690   4562
-brain  4562  16346
+body   2511   4258
+brain  4258  15257
 --------------------------------------------------------
                 milk  86   8  47   -28.848323 
 Best subsample: 
@@ -234,24 +234,24 @@ Robust Estimate of Location:
     X1      X2      X3      X4      X5      X6      X7      X8  
   1.03   35.89   33.08   26.14   25.12   25.05  123.17   14.38  
 Robust Estimate of Covariance:
-          X1        X2        X3        X4        X5        X6        X7
-X1  5.24e-07  0.000143  0.000181  0.000178  0.000158  0.000137  0.000712
-X2  1.43e-04  2.311774  0.288053  0.228027  0.125129  0.291554  2.044520
-X3  1.81e-04  0.288053  1.360039  1.007873  0.993727  0.984186  0.851043
-X4  1.78e-04  0.228027  1.007873  0.808773  0.772841  0.758280  0.709014
-X5  1.58e-04  0.125129  0.993727  0.772841  0.819483  0.774384  0.690107
-X6  1.37e-04  0.291554  0.984186  0.758280  0.774384  0.786237  0.734133
-X7  7.12e-04  2.044520  0.851043  0.709014  0.690107  0.734133  4.864061
-X8  1.70e-05  0.265487  0.230893  0.157946  0.131312  0.149723  0.444912
+          X1        X2        X3        X4        X5        X6      X7
+X1  5.16e-07  0.000141  0.000179  0.000175  0.000156  0.000135  0.0007
+X2  1.41e-04  2.274487  0.283407  0.224349  0.123111  0.286851  2.0115
+X3  1.79e-04  0.283407  1.338103  0.991617  0.977699  0.968312  0.8373
+X4  1.75e-04  0.224349  0.991617  0.795728  0.760376  0.746050  0.6976
+X5  1.56e-04  0.123111  0.977699  0.760376  0.806266  0.761894  0.6790
+X6  1.35e-04  0.286851  0.968312  0.746050  0.761894  0.773555  0.7223
+X7  7.00e-04  2.011544  0.837316  0.697578  0.678976  0.722292  4.7856
+X8  1.68e-05  0.261205  0.227169  0.155399  0.129194  0.147308  0.4377
           X8
-X1  1.70e-05
-X2  2.65e-01
-X3  2.31e-01
-X4  1.58e-01
-X5  1.31e-01
-X6  1.50e-01
-X7  4.45e-01
-X8  1.89e-01
+X1  1.68e-05
+X2  2.61e-01
+X3  2.27e-01
+X4  1.55e-01
+X5  1.29e-01
+X6  1.47e-01
+X7  4.38e-01
+X8  1.86e-01
 --------------------------------------------------------
             bushfire  38   5  22    18.135810 
 Best subsample: 
@@ -270,11 +270,11 @@ Robust Estimate of Location:
 105  147  274  218  279  
 Robust Estimate of Covariance:
        V1     V2     V3    V4    V5
-V1    594    459  -2903  -653  -533
-V2    459    405  -1930  -394  -333
-V3  -2903  -1930  17147  4213  3348
-V4   -653   -394   4213  1110   867
-V5   -533   -333   3348   867   683
+V1    567    439  -2771  -624  -509
+V2    439    387  -1843  -376  -318
+V3  -2771  -1843  16367  4021  3196
+V4   -624   -376   4021  1059   827
+V5   -509   -318   3196   827   652
 --------------------------------------------------------
 ========================================================
 > ##                vvvv no timing for 'R CMD Rdiff' outputs
@@ -299,8 +299,8 @@ height  weight
   38.3    33.1  
 Robust Estimate of Covariance:
         height  weight
-height     173     333
-weight     333     726
+height     157     303
+weight     303     660
 --------------------------------------------------------
             phosphor  18   2  10     6.878847 
 Best subsample: 
@@ -319,8 +319,8 @@ Robust Estimate of Location:
    13.4     38.8  
 Robust Estimate of Covariance:
          inorg  organic
-inorg      194      197
-organic    197      274
+inorg      181      184
+organic    184      256
 --------------------------------------------------------
             starsCYG  47   2  25    -8.031215 
 Best subsample: 
@@ -339,8 +339,8 @@ Robust Estimate of Location:
      4.41       4.95  
 Robust Estimate of Covariance:
            log.Te  log.light
-log.Te     0.0175     0.0523
-log.light  0.0523     0.3643
+log.Te     0.0171     0.0511
+log.light  0.0511     0.3555
 --------------------------------------------------------
            stackloss  21   3  12     5.472581 
 Best subsample: 
@@ -359,9 +359,9 @@ Robust Estimate of Location:
       59.5        20.8        87.3  
 Robust Estimate of Covariance:
             Air.Flow  Water.Temp  Acid.Conc.
-Air.Flow        13.7        12.8        12.5
-Water.Temp      12.8        20.2        13.4
-Acid.Conc.      12.5        13.4        50.8
+Air.Flow        12.6        11.7        11.5
+Water.Temp      11.7        18.5        12.3
+Acid.Conc.      11.5        12.3        46.6
 --------------------------------------------------------
              coleman  20   5  13     1.286808 
 Best subsample: 
@@ -380,11 +380,11 @@ Robust Estimate of Location:
      2.76      48.38       6.12      25.00       6.40  
 Robust Estimate of Covariance:
            salaryP  fatherWc  sstatus  teacherSc  motherLev
-salaryP      0.412      2.91   -0.434      0.247      0.122
-fatherWc     2.909   2122.76  538.263     20.527     56.194
-sstatus     -0.434    538.26  195.256      6.242     16.499
-teacherSc    0.247     20.53    6.242      1.279      0.904
-motherLev    0.122     56.19   16.499      0.904      1.698
+salaryP      0.381      2.69   -0.400      0.228      0.113
+fatherWc     2.685   1959.47  496.858     18.948     51.871
+sstatus     -0.400    496.86  180.236      5.762     15.230
+teacherSc    0.228     18.95    5.762      1.180      0.835
+motherLev    0.113     51.87   15.230      0.835      1.567
 --------------------------------------------------------
             salinity  28   3  16     1.326364 
 Best subsample: 
@@ -403,15 +403,15 @@ Robust Estimate of Location:
 10.08   2.78  22.78  
 Robust Estimate of Covariance:
        X1     X2     X3
-X1  14.50   1.40  -4.43
-X2   1.40   5.33  -2.00
-X3  -4.43  -2.00   3.32
+X1  13.87   1.34  -4.24
+X2   1.34   5.10  -1.92
+X3  -4.24  -1.92   3.17
 --------------------------------------------------------
                 wood  20   5  13   -36.270094 
 Best subsample: 
  [1]  1  2  3  5  9 10 12 13 14 15 17 18 20
-Outliers:  5 
-[1]  4  6  8 11 19
+Outliers:  7 
+[1]  4  6  7  8 11 16 19
 -------------
 Minimum Covariance Determinant (MCD) estimator.
 Call:
@@ -423,12 +423,12 @@ Robust Estimate of Location:
    x1     x2     x3     x4     x5  
 0.587  0.122  0.531  0.538  0.892  
 Robust Estimate of Covariance:
-           x1         x2         x3         x4         x5
-x1   0.016327   3.06e-03   0.005136  -9.54e-04  -2.65e-03
-x2   0.003063   7.89e-04   0.002067  -8.47e-05   3.85e-05
-x3   0.005136   2.07e-03   0.010802  -1.42e-03   5.74e-04
-x4  -0.000954  -8.47e-05  -0.001419   4.63e-03   2.98e-03
-x5  -0.002654   3.85e-05   0.000574   2.98e-03   4.51e-03
+          x1         x2        x3         x4         x5
+x1   0.01507   2.83e-03   0.00474  -8.81e-04  -2.45e-03
+x2   0.00283   7.29e-04   0.00191  -7.82e-05   3.55e-05
+x3   0.00474   1.91e-03   0.00997  -1.31e-03   5.30e-04
+x4  -0.00088  -7.82e-05  -0.00131   4.28e-03   2.75e-03
+x5  -0.00245   3.55e-05   0.00053   2.75e-03   4.16e-03
 --------------------------------------------------------
                  hbk  75   3  39    -1.047858 
 Best subsample: 
@@ -448,9 +448,9 @@ Robust Estimate of Location:
 1.54  1.78  1.69  
 Robust Estimate of Covariance:
         X1      X2     X3
-X1  1.6803  0.0753  0.174
-X2  0.0753  1.7103  0.209
-X3  0.1742  0.2089  1.588
+X1  1.6528  0.0741  0.171
+X2  0.0741  1.6823  0.205
+X3  0.1713  0.2055  1.562
 --------------------------------------------------------
              Animals  28   2  15    14.555543 
 Best subsample: 
@@ -469,8 +469,8 @@ Robust Estimate of Location:
  18.7   64.9  
 Robust Estimate of Covariance:
        body  brain
-body   2690   4562
-brain  4562  16346
+body   2511   4258
+brain  4258  15257
 --------------------------------------------------------
                 milk  86   8  47   -28.902301 
 Best subsample: 
@@ -490,23 +490,23 @@ Robust Estimate of Location:
   1.03   35.97   33.13   26.17   25.15   25.08  123.18   14.39  
 Robust Estimate of Covariance:
           X1        X2        X3        X4        X5        X6        X7
-X1  6.32e-07  6.21e-05  0.000226  0.000223  0.000199  0.000184  0.000826
-X2  6.21e-05  1.95e+00  0.310403  0.238424  0.154144  0.266028  2.115707
-X3  2.26e-04  3.10e-01  1.549647  1.141295  1.110358  1.138861  0.899494
-X4  2.23e-04  2.38e-01  1.141295  0.906291  0.858642  0.875429  0.739460
-X5  1.99e-04  1.54e-01  1.110358  0.858642  0.893047  0.875242  0.721182
-X6  1.84e-04  2.66e-01  1.138861  0.875429  0.875242  0.920950  0.741532
-X7  8.26e-04  2.12e+00  0.899494  0.739460  0.721182  0.741532  5.215574
-X8  8.15e-06  3.48e-01  0.265962  0.170683  0.149067  0.163267  0.514534
+X1  6.21e-07  6.11e-05  0.000222  0.000220  0.000195  0.000181  0.000813
+X2  6.11e-05  1.91e+00  0.305315  0.234515  0.151617  0.261667  2.081023
+X3  2.22e-04  3.05e-01  1.524243  1.122585  1.092155  1.120191  0.884748
+X4  2.20e-04  2.35e-01  1.122585  0.891433  0.844566  0.861078  0.727338
+X5  1.95e-04  1.52e-01  1.092155  0.844566  0.878407  0.860894  0.709359
+X6  1.81e-04  2.62e-01  1.120191  0.861078  0.860894  0.905852  0.729376
+X7  8.13e-04  2.08e+00  0.884748  0.727338  0.709359  0.729376  5.130073
+X8  8.02e-06  3.42e-01  0.261602  0.167884  0.146623  0.160590  0.506099
           X8
-X1  8.15e-06
-X2  3.48e-01
-X3  2.66e-01
-X4  1.71e-01
-X5  1.49e-01
-X6  1.63e-01
-X7  5.15e-01
-X8  2.08e-01
+X1  8.02e-06
+X2  3.42e-01
+X3  2.62e-01
+X4  1.68e-01
+X5  1.47e-01
+X6  1.61e-01
+X7  5.06e-01
+X8  2.04e-01
 --------------------------------------------------------
             bushfire  38   5  22    18.135810 
 Best subsample: 
@@ -525,11 +525,11 @@ Robust Estimate of Location:
 105  147  274  218  279  
 Robust Estimate of Covariance:
        V1     V2     V3    V4    V5
-V1    594    459  -2903  -653  -533
-V2    459    405  -1930  -394  -333
-V3  -2903  -1930  17147  4213  3348
-V4   -653   -394   4213  1110   867
-V5   -533   -333   3348   867   683
+V1    567    439  -2771  -624  -509
+V2    439    387  -1843  -376  -318
+V3  -2771  -1843  16367  4021  3196
+V4   -624   -376   4021  1059   827
+V5   -509   -318   3196   827   652
 --------------------------------------------------------
 ========================================================
 > doMCDdata(nrep = 12, time=FALSE, method = "MASS")
@@ -881,15 +881,15 @@ Robust Estimate of Location:
   MO70    MAGE    CI68    MDOC    DENS    NONW    EDUC    IN69  
 112.62  287.63  164.63  153.01   19.54    2.21  557.37  107.18  
 Robust Estimate of Covariance:
-         MO70      MAGE     CI68     MDOC     DENS      NONW  EDUC     IN69
-MO70   659.67   579.892   127.84   111.69    -5.75    13.442  -924  -136.67
-MAGE   579.89   879.511    -3.02   291.29   -97.41    -0.197  -512     5.70
-CI68   127.84    -3.021   817.71  -365.42   -47.49     7.643  -857     7.54
-MDOC   111.69   291.286  -365.42  2173.46   -91.65     1.494   433   124.32
-DENS    -5.75   -97.415   -47.49   -91.65   185.27    10.923  -383   -63.67
-NONW    13.44    -0.197     7.64     1.49    10.92     2.590  -100    -9.83
-EDUC  -923.59  -511.558  -857.45   432.56  -382.92  -100.188  6940   522.45
-IN69  -136.67     5.695     7.54   124.32   -63.67    -9.829   522   136.67
+         MO70      MAGE     CI68     MDOC     DENS     NONW  EDUC     IN69
+MO70   645.32   567.286   125.06   109.26    -5.63   13.150  -904  -133.69
+MAGE   567.29   860.391    -2.96   284.95   -95.30   -0.193  -500     5.57
+CI68   125.06    -2.955   799.93  -357.48   -46.46    7.476  -839     7.38
+MDOC   109.26   284.954  -357.48  2126.21   -89.66    1.462   423   121.61
+DENS    -5.63   -95.297   -46.46   -89.66   181.24   10.686  -375   -62.28
+NONW    13.15    -0.193     7.48     1.46    10.69    2.534   -98    -9.62
+EDUC  -903.51  -500.437  -838.81   423.16  -374.60  -98.010  6789   511.09
+IN69  -133.69     5.571     7.38   121.61   -62.28   -9.615   511   133.70
 > ## rescale variables:
 > scaleV <- c(0.1, 0.1, 1, 1, .001, 0.1, 0.1, 100)
 > mm <- data.matrix(mort3) * rep(scaleV, each = nrow(mort3))
@@ -898,10 +898,11 @@ IN69  -136.67     5.695     7.54   124.32   -63.67    -9.829   522   136.67
 > try(## error: with "old default tolerance:
 +   covMcd(mm, control= rrcov.control(tol = 1e-10))
 + )
-Error in solve.default(cov, ...) : system is computationally singular: reciprocal condition number = 4.85293e-11
+Error in solve.default(cov, ...) : 
+  system is computationally singular: reciprocal condition number = 4.85293e-11
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  2.764 0.268 4.108 0 0 
+Time elapsed:  1.878 0.071 2.013 0 0 
 > 
 > ## Now, some small sample cases:
 > 
@@ -947,17 +948,18 @@ Log(Det.):  4.30
 Robust Estimate of Location:
 [1]   2.50  -6.50   1.25
 Robust Estimate of Covariance:
-       [,1]    [,2]    [,3]
-[1,]   3.30   -9.24    0.99
-[2,]  -9.24  364.90  -37.94
-[3,]   0.99  -37.94    4.45
+        [,1]    [,2]     [,3]
+[1,]   2.474   -6.93    0.742
+[2,]  -6.928  273.67  -28.456
+[3,]   0.742  -28.46    3.341
 Warning message:
-n < 2 * p, i.e., possibly too small sample size in: covMcd(X, use.correction = FALSE) 
+In covMcd(X, use.correction = FALSE) :
+  n < 2 * p, i.e., possibly too small sample size
 > str(cc) ## best = 2 3 4 5
 List of 18
  $ method     : chr "Minimum Covariance Determinant Estimator."
  $ call       : language covMcd(x = X, use.correction = FALSE)
- $ cov        : num [1:3, 1:3]   3.30  -9.24   0.99  -9.24 364.90 ...
+ $ cov        : num [1:3, 1:3]   2.474  -6.928   0.742  -6.928 273.675 ...
  $ center     : num [1:3] 2.5 -6.5 1.25
  $ n.obs      : int 5
  $ best       : int [1:4] 1 2 3 4
@@ -968,7 +970,7 @@ List of 18
  $ raw.weights: num [1:5] 1 1 1 1 0
  $ crit       : num 73.3
  $ raw.mah    : num [1:5]    1.52    1.52    1.52    1.52 2724.44
- $ mah        : num [1:5]    1.14    1.14    1.14    1.14 2043.33
+ $ mah        : num [1:5]    1.52    1.52    1.52    1.52 2724.44
  $ mcd.wt     : num [1:5] 1 1 1 1 0
  $ X          : num [1:5, 1:3] 1 2 3 4 5 8 -24 -1 -9 -6 ...
   ..- attr(*, "dimnames")=List of 2
@@ -997,18 +999,19 @@ Log(Det.):  15.6
 Robust Estimate of Location:
 [1]   0.333   3.000   0.683  -4.267
 Robust Estimate of Covariance:
-       [,1]    [,2]     [,3]    [,4]
-[1,]  382.8  73.396  -98.765  123.49
-[2,]   73.4  69.078   -0.894   -1.05
-[3,]  -98.8  -0.894  151.352  -18.04
-[4,]  123.5  -1.049  -18.043   68.41
+       [,1]    [,2]     [,3]     [,4]
+[1,]  319.0  61.163  -82.304  102.906
+[2,]   61.2  57.565   -0.745   -0.874
+[3,]  -82.3  -0.745  126.126  -15.035
+[4,]  102.9  -0.874  -15.035   57.008
 Warning message:
-n < 2 * p, i.e., possibly too small sample size in: covMcd(X, use.correction = FALSE) 
+In covMcd(X, use.correction = FALSE) :
+  n < 2 * p, i.e., possibly too small sample size
 > str(cc) ## best = 1 2 4 5 6 7
 List of 18
  $ method     : chr "Minimum Covariance Determinant Estimator."
  $ call       : language covMcd(x = X, use.correction = FALSE)
- $ cov        : num [1:4, 1:4] 382.8  73.4 -98.8 123.5  73.4 ...
+ $ cov        : num [1:4, 1:4] 319.0  61.2 -82.3 102.9  61.2 ...
  $ center     : num [1:4]  0.333  3.000  0.683 -4.267
  $ n.obs      : int 7
  $ best       : int [1:6] 1 2 3 4 6 7
@@ -1019,7 +1022,7 @@ List of 18
  $ raw.weights: num [1:7] 1 1 1 1 0 1 1
  $ crit       : num 6011409
  $ raw.mah    : num [1:7]  2.546  2.477  3.224  0.835 24.765 ...
- $ mah        : num [1:7]  2.121  2.065  2.687  0.695 20.638 ...
+ $ mah        : num [1:7]  2.546  2.477  3.224  0.835 24.765 ...
  $ mcd.wt     : num [1:7] 1 1 1 1 0 1 1
  $ X          : num [1:7, 1:4] 8 -24 -1 -9 -6 6 22 0 3 0 ...
   ..- attr(*, "dimnames")=List of 2
@@ -1044,19 +1047,31 @@ Log(Det.):  7.67
 Robust Estimate of Location:
 [1]  -4.00   0.40   1.38  -4.68
 Robust Estimate of Covariance:
-       [,1]   [,2]   [,3]   [,4]
-[1,]  281.4  -41.5  -95.3  143.9
-[2,]  -41.5    8.8   21.4  -14.8
-[3,]  -95.3   21.4  197.7  -20.7
-[4,]  143.9  -14.8  -20.7   90.0
+       [,1]    [,2]   [,3]   [,4]
+[1,]  225.1  -33.21  -76.3  115.1
+[2,]  -33.2    7.04   17.1  -11.8
+[3,]  -76.3   17.08  158.1  -16.6
+[4,]  115.1  -11.83  -16.6   72.0
 Warning message:
-n < 2 * p, i.e., possibly too small sample size in: covMcd(X, use.correction = FALSE) 
+In covMcd(X, use.correction = FALSE) :
+  n < 2 * p, i.e., possibly too small sample size
 > mcc <- MASS::cov.mcd(X)
 > stopifnot(cc$best == mcc$best,
 +           all.equal(cc$center, mcc$center, tol = 1e-10),
 +           all.equal(c(mcc$cov / cc$raw.cov), rep(0.7528695976179, p*p)))
 > 
-> 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  2.816 0.276 4.163 0 0 
+Time elapsed:  1.922 0.074 2.059 0 0 
+> 
+> ## nsamp = "exact" -- here for p=7
+> coleman.x <- data.matrix(coleman[, 1:6])
+> system.time(CcX <- covMcd(coleman.x, nsamp="exact")) # ~ 3 sec.
+Warning in .fastmcd(x, h, nsamp, trace = as.integer(trace)) :
+  Computing all 77520 subsets of size 7 out of 20
+ This may take a very long time!
+
+   user  system elapsed 
+  1.131   0.000   1.131 
+> stopifnot(all.equal(CcX$best,
++                     c(2, 5:9, 11,13, 14:16, 19:20), tol=0))
 > 

@@ -107,3 +107,19 @@ o) we have had some problems, but they are solved now
 22) lmrob(): use *relative* error for convergence check in RWLS
 	     (MM-)iterations; allow to set the tolerance for these
 	     allow some trace output
+
+0.4-0 [never released to CRAN]:
+
+23) medcouple etc -
+
+24) lmrob(): vcov() now exported;  model.matrix() & predict()
+	     now work too.
+0.4-1:
+
+25) glmrob(..., trace=TRUE) is now possible
+
+26) lmrob():
+   Have split previous lmrob.MM() into lmrob..M..fit() and .vcov.MM(),
+   *however* the internal code allows only Tukey's biweight, i.e.,
+   redescending psi.
+   Still, lmrob..M..fit() computes a simple M-estimator there.

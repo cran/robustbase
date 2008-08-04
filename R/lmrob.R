@@ -40,9 +40,9 @@ lmrob <-
 
     if (is.empty.model(mt)) {
 	x <- NULL
-	z <- list(coefficients = if (is.matrix(y))
-		    matrix(,0,3) else numeric(0), residuals = y,
-		  fitted.values = 0 * y, weights = w, rank = 0,
+	z <- list(coefficients = if (is.matrix(y)) matrix(,0,3) else numeric(0),
+                  residuals = y, fitted.values = 0 * y,
+                  cov = matrix(,0,0), weights = w, rank = 0,
 		  df.residual = NROW(y), converged = TRUE)
 	if(!is.null(offset)) z$fitted.values <- offset
     }
@@ -55,6 +55,8 @@ lmrob <-
 	if(!is.null(offset))
 	    stop("'offset' not yet implemented for this estimator")
 	z <- lmrob.fit.MM(x, y, control = control)
+        nc <- names(z$coef)
+        dimnames(z$cov) <- list(nc,nc)
     }
 
     class(z) <- "lmrob"
@@ -64,13 +66,8 @@ lmrob <-
     z$xlevels <- .getXlevels(mt, mf)
     z$call <- cl
     z$terms <- mt
-    if( control$compute.rd && !is.null(x)) {
-	x0 <- if(attr(mt, "intercept") == 1) x[, -1, drop=FALSE] else x
-	if(ncol(x0) >= 1) {
-	    rob <- covMcd(x0)
-	    z$MD <- sqrt( mahalanobis(x0, rob$center, rob$cov) )
-	}
-    }
+    if(control$compute.rd && !is.null(x))
+        z$MD <- robMD(x, attr(mt, "intercept"))
     if (model)
 	z$model <- mf
     if (ret.x)
@@ -81,6 +78,14 @@ lmrob <-
     z
 }
 
+## internal function, used in lmrob() and maybe plot.lmrob()
+robMD <- function(x, intercept, ...) {
+    if(intercept == 1) x <- x[, -1, drop=FALSE]
+    if(ncol(x) >= 1) {
+	rob <- covMcd(x, ...)
+	sqrt( mahalanobis(x, rob$center, rob$cov) )
+    }
+}
 
 print.lmrob <- function(x, digits = max(3, getOption("digits") - 3), ...)
 {
@@ -100,20 +105,36 @@ print.lmrob <- function(x, digits = max(3, getOption("digits") - 3), ...)
 
 vcov.lmrob <- function (object, ...) { object$cov }
 
+## residuals.default works for "lmrob"  {unless we'd allow re-weighted residuals
+## fitted.default works for "lmrob"
+
+## This seems to work - via lm
+model.matrix.lmrob <- function (object, ...) {
+    stats::model.matrix.lm(object, ...)
+}
+
+## learned from MASS::rlm() : via "lm" as well
+predict.lmrob <- function (object, newdata = NULL, scale = NULL, ...)
+{
+    class(object) <- c(class(object), "lm")
+    object$qr <- qr(sqrt(object$weights) * object$x)
+    predict.lm(object, newdata = newdata, scale = object$s, ...)
+}
+
+
 summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...)
 {
-    z <- object
-    if (is.null(z$terms))
+    if (is.null(object$terms))
 	stop("invalid 'lmrob' object:  no terms component")
-    p <- z$rank
-    df <- z$degree.freedom
+    p <- object$rank
+    df <- object$degree.freedom
     if (p > 0) {
 	n <- p + df
-	se <- sqrt(diag(z$cov))
-	est <- z$coefficients
+	se <- sqrt(diag(object$cov))
+	est <- object$coefficients
 	tval <- est/se
-	ans <- z[c("call", "terms", "residuals", "scale", "weights",
-		   "converged", "iter", "control")]
+	ans <- object[c("call", "terms", "residuals", "scale", "weights",
+			"converged", "iter", "control")]
 	ans$df <- df
 	ans$coefficients <-
 	    if( ans$converged )
@@ -122,17 +143,17 @@ summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...
 	dimnames(ans$coefficients) <-
 	    list(names(est), c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
 
-	ans$cov.unscaled <- z$cov
+	ans$cov.unscaled <- object$cov
 	dimnames(ans$cov.unscaled) <- dimnames(ans$coefficients)[c(1,1)]
 	if (correlation) {
 	    ans$correlation <- ans$cov.unscaled / outer(se, se)
 	    ans$symbolic.cor <- symbolic.cor
 	}
     } else { ## p = 0: "null model"
-	ans <- z
+	ans <- object
 	ans$coefficients <- matrix(, 0, 4)
 	ans$df <- df
-	ans$cov.unscaled <- z$cov
+	ans$cov.unscaled <- object$cov
     }
     class(ans) <- "summary.lmrob"
     ans
@@ -233,7 +254,7 @@ printControl <-
 
 summarizeRobWeights <-
     function(w, digits = getOption("digits"), header = "Robustness weights:",
-	     eps = 1e-4, eps1 = eps, ...)
+	     eps = 0.1 / length(w), eps1 = 1e-3, ...)
 {
     ## Purpose: nicely print a "summary" of robustness weights
     stopifnot(is.numeric(w))
@@ -243,12 +264,18 @@ summarizeRobWeights <-
     if(n <= 10) print(w, digits = digits, ...)
     else {
 	n1 <- sum(w1 <- abs(w - 1) < eps1)
-	n0 <- sum(w0 <- abs(w) < eps / n)
+	n0 <- sum(w0 <- abs(w) < eps)
+        if(any(w0 & w1))
+            warning("weights should not be both close to 0 and close to 1!\n",
+                    "You should use different 'eps' and/or 'eps1'")
 	if(n0 > 0 || n1 > 0) {
 	    if(n0 > 0) {
+                formE <- function(e) formatC(e, digits = max(2, digits-3), width=1)
 		i0 <- which(w0)
-		c3 <- paste("with |weight| < ", formatC(eps / n, digits = digits),
-			    ";", sep='')
+		maxw <- max(w[w0])
+		c3 <- paste("with |weight| ",
+			    if(maxw == 0) "= 0" else paste("<=", formE(maxw)),
+			    " ( < ", formE(eps), ");", sep='')
 		cat0(if(n0 > 1) {
 		       cc <- sprintf("%d observations c(%s)",
 				     n0, strwrap(paste(i0, collapse=",")))
@@ -263,21 +290,23 @@ summarizeRobWeights <-
 	    if(n1 > 0)
 		cat0(ngettext(n1, "one weight is",
 			     sprintf("%s%d weights are",
-				     if(n1 == n)"All " else '', n1)), "~= 1;")
+				     if(n1 == n)"All " else '', n1)), "~= 1.")
 	    n.rem <- n - n0 - n1
-	    if(n.rem == 0)
+	    if(n.rem <= 0) { # < 0 possible if w0 & w1 overlap
+		if(n1 > 0) cat("\n")
 		return(invisible())
-	    cat0("the remaining",
-		 ngettext(n.rem, "one", sprintf("%d ones", n.rem)))
+	    }
+	    cat0("The remaining",
+		 ngettext(n.rem, "one", sprintf("%d ones", n.rem)), "are")
 	    if(is.null(names(w)))
 		names(w) <- as.character(seq(along = w))
 	    w <- w[!w1 & !w0]
 	    if(n.rem <= 10) {
-		cat(":\n")
+		cat("\n")
 		print(w, digits = digits, ...)
 		return(invisible())
 	    }
-	    else cat(" are summarized as\n")
+	    else cat(" summarized as\n")
 	}
 	print(summary(w, digits = digits), digits = digits, ...)
     }

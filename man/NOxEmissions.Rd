@@ -28,7 +28,10 @@
   measurements.
 }
 \source{
-  René Locher, E-mail to R-SIG-robust mailing list, on 2006-04-20.
+  René Locher (at ZHAW, Switzerland).
+%% E-mail to R-SIG-robust mailing list, on 2006-04-20.
+}
+\seealso{another NOx dataset, \code{\link{ambientNOxCH}}.
 }
 % \references{
 %   ~~ possibly secondary sources and usages ~~

@@ -114,10 +114,13 @@ anovaLmrobPair <- function(FMfit, reduced.model, initCoef, test)
 		    stop("Please fit the nested models by lmrob")
 		FMfit$coef[RMod]
 	    } else initCoef
-	RMfit <- lmrob.MM(x = X[,RMod], y = y, beta.initial = iC,
-			  scale = s0, control = FMfit$control)
+
+	RMfit <- lmrob..M..fit(x = X[,RMod], y = y,
+			       beta.initial = iC, scale = s0,
+			       c.psi = FMfit$control$tuning.psi,
+			       control = FMfit$control)
 	FMres <- as.vector(y - X %*% FMfit$coef)
-	RMres <- as.vector(y - X[,RMod] %*% RMfit$coef)
+	RMres <- RMfit$resid ## as.vector(y - X[,RMod] %*% RMfit$coef)
 	FM_sRho <- sum(psi(FMres/s0, deriv = -1))
 	RM_sRho <- sum(psi(RMres/s0, deriv = -1))
 	tauStar <- mean(psi(FMres/s0,	deriv = 1)) /

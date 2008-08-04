@@ -2,7 +2,8 @@ glmrob <-
 function (formula, family, data, weights, subset,
 	  na.action, start = NULL, offset, method = "Mqle",
 	  weights.on.x = c("none", "hat", "robCov", "covMcd"), control = NULL,
-	  model = TRUE, x = FALSE, y = TRUE, contrasts = NULL, ...)
+	  model = TRUE, x = FALSE, y = TRUE, contrasts = NULL, trace = FALSE,
+          ...)
 {
     call <- match.call()
     if (is.character(family))
@@ -57,12 +58,12 @@ function (formula, family, data, weights, subset,
 		  glmrobCubif(X = X, y = Y, weights = weights, start = start,
 			      offset = offset, family = family,
 			      weights.on.x = weights.on.x, control = control,
-			      intercept = attr(mt, "intercept") > 0),
+			      intercept = attr(mt, "intercept") > 0,trace=trace),
 		  "Mqle" =
 		  glmrobMqle(X = X, y = Y, weights = weights, start = start,
 			     offset = offset, family = family,
 			     weights.on.x = weights.on.x, control = control,
-			     intercept = attr(mt, "intercept") > 0),
+			     intercept = attr(mt, "intercept") > 0, trace=trace),
 		  stop("invalid 'method': ", method))
     ##-	    if (any(offset) && attr(mt, "intercept") > 0) {
     ##-		fit$null.deviance <- glm.fit(x = X[, "(Intercept)", drop = FALSE],

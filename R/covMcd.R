@@ -140,7 +140,7 @@ covMcd <- function(x,
             weights <- as.numeric(mah < quantiel) # 0/1
             sum.w <- sum(weights)
             ans <- c(ans, cov.wt(x, wt = weights, cor = cor))
-            ans$cov <- sum.w/(sum.w - 1) * ans$cov
+            ## ans$cov <- sum.w/(sum.w - 1) * ans$cov
 
             ## Consistency factor for reweighted MCD
             if(sum.w != n) {
@@ -188,7 +188,7 @@ covMcd <- function(x,
         return(ans)
     } ## end {alpha=1} --
 
-    mcd <- .fastmcd(x, h, nsamp)
+    mcd <- .fastmcd(x, h, nsamp, trace=as.integer(trace))
 
     ## Compute the consistency correction factor for the raw MCD
     ##  (see calfa in Croux and Haesbroeck)
@@ -221,7 +221,7 @@ covMcd <- function(x,
             weights <- as.numeric(((x - center)/scale)^2 < quantiel) # 0/1
             sum.w <- sum(weights)
             ans <- c(ans, cov.wt(x, wt = weights, cor = cor))
-            ans$cov <- sum.w/(sum.w - 1) * ans$cov
+            ## ans$cov <- sum.w/(sum.w - 1) * ans$cov
 
             ## Apply the correction factor for the reweighted cov
             if(sum.w == n) {
@@ -320,7 +320,7 @@ covMcd <- function(x,
         }
 
         ans <- c(ans, cov.wt(x, wt = weights, cor))
-        ans$cov <- sum.w/(sum.w - 1) * ans$cov
+        ## ans$cov <- sum.w/(sum.w - 1) * ans$cov
         ans$cov <- ans$cov * cdelta.rew * correct.rew
 
         ##vt:: add also the best found subsample to the result list
@@ -368,6 +368,10 @@ covMcd <- function(x,
     ans$raw.cnp2 <- raw.cnp2
     ans$cnp2 <- cnp2
     class(ans) <- "mcd"
+    ## even when not 'trace': say if we have singularity!
+    if(is.list(ans$singularity))
+        cat(strwrap(singularityMsg(ans$singularity, ans$n.obs)), sep ="\n")
+
     return(ans)
 }
 
@@ -421,7 +425,8 @@ singularityMsg <- function(singList, n.obs)
                           paste(obsMsg(count, n.obs), "hyperplane with equation ",
                                 "a_1*(x_i1 - m_1) + ... + a_p*(x_ip - m_p) = 0",
                                 " with (m_1,...,m_p) the mean of these observations",
-                                " and coefficients a_i from the vector   a <- ", astring)
+                                " and coefficients a_i from the vector   a <- ",
+                                paste(astring, collapse="\n "))
                       }))
        },
        ## Otherwise
@@ -592,7 +597,7 @@ MCDcnp2.rew <- function(p, n, alpha)
 } ## end{ MCDcnp2.rew }
 
 
-.fastmcd <- function(x, h, nsamp)
+.fastmcd <- function(x, h, nsamp, trace = 0)
 {
     dx <- dim(x)
     n <- dx[1]
@@ -606,105 +611,106 @@ MCDcnp2.rew <- function(p, n, alpha)
 
     ##   vt::03.02.2006 - added options "best" and "exact" for nsamp
     if(!missing(nsamp)) {
-    if(is.numeric(nsamp) && (nsamp < 0 || nsamp == 0 && p > 1)) {
-        warning("Invalid number of trials nsamp= ", nsamp,
+        if(is.numeric(nsamp) && (nsamp < 0 || nsamp == 0 && p > 1)) {
+            warning("Invalid number of trials nsamp= ", nsamp,
                     " ! Using default.\n")
-        nsamp <- -1
-    } else if(nsamp == "exact" || nsamp == "best") {
-        myk <- p + 1 ## was 'p'; but p+1 ("nsel = nvar+1") is correct
-        if(n > 2*nmini-1) {
+            nsamp <- -1
+        } else if(nsamp == "exact" || nsamp == "best") {
+            myk <- p + 1 ## was 'p'; but p+1 ("nsel = nvar+1") is correct
+            if(n > 2*nmini-1) {
                 ## TODO: make 'nmini' user configurable; however that
                 ##      currently needs changes to the fortran source
                 ##  and re-compilation!
-        warning("Options 'best' and 'exact' not allowed for n greater than ",
-            2*nmini-1,".\nUsing default.\n")
-        nsamp <- -1
-        } else {
-        nall <- choose(n, myk)
-        if(nall > 5000 && nsamp == "best") {
-            nsamp <- 5000
-            warning("'nsamp = \"best\"' allows maximally 5000 subsets;\n",
-                "computing these subsets of size ",
+                warning("Options 'best' and 'exact' not allowed for n greater than ",
+                        2*nmini-1,".\nUsing default.\n")
+                nsamp <- -1
+            } else {
+                nall <- choose(n, myk)
+                if(nall > 5000 && nsamp == "best") {
+                    nsamp <- 5000
+                    warning("'nsamp = \"best\"' allows maximally 5000 subsets;\n",
+                            "computing these subsets of size ",
                             myk," out of ",n,"\n")
-        } else { ## "exact" or ("best"  &  nall < 5000)
-            nsamp <- 0 ## all subsamples
-            if(nall > 5000)
-            warning("Computing all ", nall, " subsets of size ",myk,
-                " out of ",n,
-                "\n This may take a very long time!\n",
-                immediate. = TRUE)
+                } else {   ## "exact" or ("best"  &  nall < 5000)
+                    nsamp <- 0 ## all subsamples -> special treatment in Fortran
+                    if(nall > 5000)
+                        warning("Computing all ", nall, " subsets of size ",myk,
+                                " out of ",n,
+                                "\n This may take a very long time!\n",
+                                immediate. = TRUE)
+                }
+            }
         }
-        }
-    }
 
-    if(!is.numeric(nsamp) || nsamp == -1) { # still not defined - set it to the default
-        defCtrl <- rrcov.control() # default control
-        if(!is.numeric(nsamp))
-        warning("Invalid number of trials nsamp= ",nsamp,
-            " ! Using default nsamp= ",defCtrl$nsamp,"\n")
-        nsamp <- defCtrl$nsamp  # take the default nsamp
-    }
+        if(!is.numeric(nsamp) || nsamp == -1) { # still not defined
+            ## set it to the default :
+            defCtrl <- rrcov.control()
+            if(!is.numeric(nsamp))
+                warning("Invalid number of trials nsamp= ",nsamp,
+                        " ! Using default nsamp= ",defCtrl$nsamp,"\n")
+            nsamp <- defCtrl$nsamp      # take the default nsamp
+        }
     }
 
     ##   Allocate temporary storage for the Fortran implementation,
     ##   directly in the .Fortran() call.
     ##    (if we used C, we'd rather allocate there, and be quite faster!)
 
-    .Fortran("rffastmcd",
-         x = if(is.double(x)) x else as.double(x),
-         n =    as.integer(n),
-         p =    as.integer(p),   ## = 'nvar'  in Fortran
-         nhalff =   as.integer(h),
-         nsamp  =   as.integer(nsamp),# = 'krep'
-         initcovariance = double(p * p),
-         initmean       = double(p),
-         best       = rep.int(as.integer(10000), h),
-         mcdestimate = double(1),    ## = 'det'
-         weights   = integer(n),
-         exactfit  = integer(1), # output indicator: 0: ok; 1: ..., 2: ..
-         coeff     = matrix(double(5 * p), nrow = 5, ncol = p), ## plane
-         kount     = integer(1),
-         adjustcov = double(p * p), ## << never used -- FIXME
-         integer(1),## << 'seed' no longer used -- FIXME
-         temp   = integer(n),
-         index1 = integer(n),
-         index2 = integer(n),
-         nmahad = double(n),
-         ndist  = double(n),
-         am     = double(n),
-         am2    = double(n),
-         slutn  = double(n),
+    .Fortran(rffastmcd,
+             x = if(is.double(x)) x else as.double(x),
+             n =    as.integer(n),
+             p =    as.integer(p), ## = 'nvar'  in Fortran
+             nhalff =   as.integer(h),
+             nsamp  =   as.integer(nsamp), # = 'krep'
+             initcovariance = double(p * p),
+             initmean       = double(p),
+             best       = rep.int(as.integer(10000), h),
+             mcdestimate = double(1), ## = 'det'
+             weights   = integer(n),
+             exactfit  = integer(1), # output indicator: 0: ok; 1: ..., 2: ..
+             coeff     = matrix(double(5 * p), nrow = 5, ncol = p), ## plane
+             kount     = integer(1),
+             adjustcov = double(p * p), ## << never used -- FIXME
+             integer(1), ## << 'seed' no longer used -- FIXME
+             temp   = integer(n),
+             index1 = integer(n),
+             index2 = integer(n),
+             nmahad = double(n),
+             ndist  = double(n),
+             am     = double(n),
+             am2    = double(n),
+             slutn  = double(n),
 
-         med   = double(p),
-         mad   = double(p),
-         sd    = double(p),
-         means = double(p),
-         bmeans= double(p),
-         w     = double(p),
-         fv1   = double(p),
-         fv2   = double(p),
+             med   = double(p),
+             mad   = double(p),
+             sd    = double(p),
+             means = double(p),
+             bmeans= double(p),
+             w     = double(p),
+             fv1   = double(p),
+             fv2   = double(p),
 
-         rec   = double(p+1),
-         sscp1 = double((p+1)*(p+1)),
-         cova1 = double(p * p),
-         corr1 = double(p * p),
-         cinv1 = double(p * p),
-         cova2 = double(p * p),
-         cinv2 = double(p * p),
-         z     = double(p * p),
+             rec   = double(p+1),
+             sscp1 = double((p+1)*(p+1)),
+             cova1 = double(p * p),
+             corr1 = double(p * p),
+             cinv1 = double(p * p),
+             cova2 = double(p * p),
+             cinv2 = double(p * p),
+             z     = double(p * p),
 
-         cstock = double(10 * p * p),# (10,nvmax2)
-         mstock = double(10 * p),    # (10,nvmax)
-         c1stock = double(km10 * p * p), # (km10,nvmax2)
-         m1stock = double(km10 * p), # (km10,nvmax)
-         dath = double(nmaxi * p),   # (nmaxi,nvmax)
+             cstock = double(10 * p * p), # (10,nvmax2)
+             mstock = double(10 * p),     # (10,nvmax)
+             c1stock = double(km10 * p * p), # (km10,nvmax2)
+             m1stock = double(km10 * p),     # (km10,nvmax)
+             dath = double(nmaxi * p),       # (nmaxi,nvmax)
 
-         cutoff = qchisq(0.975, p),
-         chimed = qchisq(0.5,   p),
-
-         PACKAGE = "robustbase")[ ## keep the following ones:
-         c("initcovariance", "initmean", "best", "mcdestimate",
-           "weights", "exactfit", "coeff", "kount", "adjustcov") ]
+             cutoff = qchisq(0.975, p),
+             chimed = qchisq(0.5,   p),
+             i.trace= as.integer(trace)
+             )[ ## keep the following ones:
+               c("initcovariance", "initmean", "best", "mcdestimate",
+                 "weights", "exactfit", "coeff", "kount", "adjustcov") ]
 }
 
 ##

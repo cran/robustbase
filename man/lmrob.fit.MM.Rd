@@ -1,46 +1,53 @@
 \name{lmrob.fit.MM}
 \alias{lmrob.fit.MM}
-\title{ MM-regression estimators  }
+\title{ MM-estimator for regression }
 \description{
-  Fit function for MM-regression estimators
+  Compute MM-estimators of regression:  An S-estimator is
+  used as starting value, and an M-estimator with fixed scale and
+  redescending psi-function is used from there.
 }
 \usage{
-lmrob.fit.MM(x, y, control,
-             init.S = lmrob.S(x = x, y = y, control = control))
+lmrob.fit.MM(x, y, control)
 }
 \arguments{
   \item{x}{design matrix (\eqn{n \times p}{n x p}) typically including a
     column of \code{1}s for the intercept.}
   \item{y}{numeric response vector (of length \eqn{n}).}
   \item{control}{A list of control parameters as returned
-    by \code{\link{lmrob.control}}.}
-  \item{init.S}{a \code{\link{list}} with components \code{coef},
-    \code{scale}, and \code{cov} specifying an initial S-estimate, such
-    as resulting from \code{\link{lmrob.S}(..)}.}
-  %% FIXME: used in practice, should also contain convergence info
-  %% ---- *AND* that should be propagated lmrob.S() --> lmrob.fit.MM() --> lmrob()
+    by \code{\link{lmrob.control}}, used for both the initial S-estimate
+    and the subsequent M-estimate.}
 }
-\details{This function is used by \code{\link{lmrob}} and typically not
-  to be used on its own.
+\details{This function is the basic fitting function for MM-estimation,
+  called by \code{\link{lmrob}} and typically not to be used on its own.
+
+  It calls \code{\link{lmrob.S}(..)} and uses it as initial estimator.
+  Note that the inference used (covariance matrix) depends crucially on
+  the S-estimator used, and hence it is currently no longer possible to
+  specify the S-estimator at this level.
 }
 \value{
   A list with components
-  \item{fitted.values}{}
-  \item{residuals}{}
-  \item{weights}{}
+  \item{fitted.values}{\eqn{X \beta}{X beta}, i.e. \code{X \%*\% coefficients}.}
+  \item{residuals}{the raw residuals, \code{y - fitted.values}}
+  \item{weights}{robustness weights derived from the final M-estimator
+    residuals (even when not converged).}
   \item{rank}{}
   \item{degree.freedom}{\code{n - rank}}% more!
-  \item{coefficients}{regression coefficient estimators}
+  \item{coefficients}{estimated regression coefficient vector}
   \item{initial.coefficients}{}% = iCoef,
   \item{scale}{the robustly estimated error standard deviation}% = final.MM$scale,
-  \item{cov}{}% = cov.matrix,
+  \item{cov}{variance-covariance matrix of \code{coefficients}, if the
+    RWLS iterations have converged, otherwise the vcov-matrix of the
+    initial estimator.}
   \item{control}{}% = control,
   \item{iter}{}% = final.MM$iter, <<<<<< also 'init.S' !
-  \item{converged}{}% = final.MM$converged) <<<< also 'init.S'
+  \item{converged}{logical indicating if the RWLS iterations have converged.}
+  \item{init.S}{the whole initial S-estimator result, including its own
+    \code{converged} flag, see \code{\link{lmrob.S}}.}
 }
 \seealso{
   \code{\link{lmrob}},
-  \code{\link{lmrob.MM}},
+  \code{\link{lmrob..M..fit}},
   \code{\link{lmrob.S}}
 }
 \keyword{robust}

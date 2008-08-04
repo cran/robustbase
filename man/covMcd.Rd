@@ -29,8 +29,9 @@ covMcd(x, cor = FALSE, alpha = 1/2, nsamp = 500, seed = NULL,
     needed.  In this case a warning message will be displayed saying
     that the computation can take a very long time.}
   \item{seed}{initial seed for random generator, see \code{\link{rrcov.control}}.}
-  \item{trace}{logical indicating if intermediate results should be
-    printed; defaults to \code{FALSE}.}
+  \item{trace}{logical (or integer) indicating if intermediate results
+    should be printed; defaults to \code{FALSE}; values \eqn{\ge 2}{>= 2}
+    also produce print from the internal (Fortran) code.}
   \item{use.correction}{ whether to use finite sample correction
     factors; defaults to \code{TRUE}.}
   \item{control}{a list with estimation options - this includes those

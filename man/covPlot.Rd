@@ -128,15 +128,10 @@ data(hbk)
 hbk.x <- data.matrix(hbk[, 1:3])
 cOGK <- covOGK(hbk.x, n.iter = 2, sigmamu = scaleTau2,
                weight.fn = hard.rejection)
-%% this "\dont*{} case is needed for R <= 2.3.1 :
-\dontrun{ covPlot(hbk.x, m.cov = cOGK, classic = TRUE, ask= TRUE)}
-\dontshow{covPlot(hbk.x, m.cov = cOGK, classic = TRUE, ask= FALSE)}
-
-\dontshow{
-op <- par(mfrow = c(3,3))
-plot(mcd, classic = TRUE) ## -> which = "all" (7 plots)
-par(op)
-}
+covPlot(hbk.x, m.cov = cOGK, classic = TRUE)
+% %% this "\dont*{} case is needed for R <= 2.3.1 :
+% \dontrun{ covPlot(hbk.x, m.cov = cOGK, classic = TRUE, ask= TRUE)}
+% \dontshow{covPlot(hbk.x, m.cov = cOGK, classic = TRUE, ask= FALSE)}
 }
 \keyword{hplot}
 \keyword{robust}

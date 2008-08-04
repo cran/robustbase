@@ -139,7 +139,7 @@ covOGK <- function(X, n.iter = 2,
 
 
 ## a version with weights and consistency (but only one tuning const!!)
-## is in /u/maechler/R/other-people/Mspline/Mspline/R/scale.tau.R
+## is in /u/maechler/R/other-people/Mspline/Mspline/R/scaleTau.R
 ##
 scaleTau2 <- function(x, c1 = 4.5, c2 = 3.0, consistency = TRUE,
                       mu.too = FALSE, ...)

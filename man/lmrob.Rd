@@ -61,7 +61,7 @@ lmrob(formula, data, subset, weights, na.action,
   robust and highly efficient estimator (with
   50\% breakdown point and 95\% asymptotic efficiency
   for normal errors).  The computation is carried out by a call to
-  \code{\link{lmrob.MM}()}.
+  \code{\link{lmrob.fit.MM}()}.
 
   It uses an S-estimator (Rousseeuw
   and Yohai, 1984) for the errors which
@@ -109,7 +109,7 @@ lmrob(formula, data, subset, weights, na.action,
 \author{ Matias Salibian-Barrera }
 \seealso{
   \code{\link{lmrob.control}};
-  for the algorithms \code{\link{lmrob.S}} and \code{\link{lmrob.MM}};
+  for the algorithms \code{\link{lmrob.S}} and \code{\link{lmrob.fit.MM}};
   and for methods,
   \code{\link{summary.lmrob}},
   \code{\link{print.lmrob}}, and \code{\link{plot.lmrob}}.
@@ -126,6 +126,10 @@ plot(starsCYG)
 abline(lmST, col = "red")
 abline(RlmST, col = "blue")
 summary(RlmST)
+vcov(RlmST)
+stopifnot(all.equal(fitted(RlmST),
+                    predict(RlmST, newdata = starsCYG),
+                    tol = 1e-14))
 }
 \keyword{robust}
 \keyword{regression}

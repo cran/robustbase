@@ -1,5 +1,5 @@
 
-R version 2.5.1 beta (2007-06-19 r41995)
+R version 2.6.1 Patched (2007-12-12 r43668)
 Copyright (C) 2007 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
@@ -43,10 +43,10 @@ Robust residual standard error: 1
 Convergence in 11 IRWLS iterations
 
 Robustness weights: 
- observation 16 is an outlier with |weight| < 3.571e-06; 
- one weight is ~= 1; the remaining 26 ones are summarized as
+ observation 16 is an outlier with |weight| = 0 ( < 0.0036); 
+ 2 weights are ~= 1. The remaining 25 ones are summarized as
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.5335  0.8480  0.9779  0.9146  0.9952  0.9998 
+ 0.5335  0.8269  0.9760  0.9112  0.9952  0.9989 
 Algorithmic parameters: 
 tuning.chi         bb tuning.psi refine.tol    rel.tol 
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
@@ -155,8 +155,8 @@ Robust residual standard error: 1.134
 Convergence in 11 IRWLS iterations
 
 Robustness weights: 
- observation 18 is an outlier with |weight| < 5e-06; 
- the remaining 19 ones are summarized as
+ observation 18 is an outlier with |weight| = 0 ( < 0.005); 
+ The remaining 19 ones are summarized as
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.1491  0.9412  0.9847  0.9279  0.9947  0.9982 
 Algorithmic parameters: 
@@ -199,10 +199,10 @@ Robust residual standard error: 0.4715
 Convergence in 15 IRWLS iterations
 
 Robustness weights: 
- 4 observations c(11,20,30,34) are outliers with |weight| < 2.128e-06; 
- 2 weights are ~= 1; the remaining 41 ones are summarized as
+ 4 observations c(11,20,30,34) are outliers with |weight| = 0 ( < 0.0021); 
+ 4 weights are ~= 1. The remaining 39 ones are summarized as
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.6533  0.9229  0.9632  0.9351  0.9882  0.9999 
+ 0.6533  0.9171  0.9593  0.9318  0.9848  0.9986 
 Algorithmic parameters: 
 tuning.chi         bb tuning.psi refine.tol    rel.tol 
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
@@ -238,10 +238,11 @@ Robust residual standard error: 0.7964
 Convergence in 9 IRWLS iterations
 
 Robustness weights: 
- 10 observations c(1,2,3,4,5,6,7,8,9,10) are outliers with |weight| < 1.333e-06; 
- the remaining 65 ones are summarized as
+ 10 observations c(1,2,3,4,5,6,7,8,9,10)
+	 are outliers with |weight| = 0 ( < 0.0013); 
+ 7 weights are ~= 1. The remaining 58 ones are summarized as
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.8549  0.9320  0.9710  0.9589  0.9936  0.9998 
+ 0.8549  0.9281  0.9630  0.9540  0.9868  0.9987 
 Algorithmic parameters: 
 tuning.chi         bb tuning.psi refine.tol    rel.tol 
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
@@ -272,9 +273,9 @@ Robust residual standard error: 2.591
 Convergence in 36 IRWLS iterations
 
 Robustness weights: 
- 2 weights are ~= 1; the remaining 10 ones:
-     2      3      4      5      6      7      8      9     11     12 
-0.9887 0.9301 0.9608 0.9082 0.9262 0.9963 0.1140 0.9666 0.6149 0.9998 
+ 3 weights are ~= 1. The remaining 9 ones are
+     2      3      4      5      6      7      8      9     11 
+0.9887 0.9301 0.9608 0.9082 0.9262 0.9963 0.1140 0.9666 0.6149 
 Algorithmic parameters: 
 tuning.chi         bb tuning.psi refine.tol    rel.tol 
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
@@ -311,10 +312,10 @@ Robust residual standard error: 1.912
 Convergence in 17 IRWLS iterations
 
 Robustness weights: 
- observation 21 is an outlier with |weight| < 4.762e-06; 
- the remaining 20 ones are summarized as
+ observation 21 is an outlier with |weight| = 0 ( < 0.0048); 
+ 2 weights are ~= 1. The remaining 18 ones are summarized as
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.1215  0.8806  0.9493  0.8848  0.9896  0.9998 
+ 0.1215  0.8757  0.9428  0.8721  0.9797  0.9978 
 Algorithmic parameters: 
 tuning.chi         bb tuning.psi refine.tol    rel.tol 
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
@@ -326,5 +327,5 @@ seed : int(0)
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # "stats"
-Time elapsed:  0.822 0.077 1.448 0 0 
+Time elapsed:  0.688 0.046 0.956 0 0 
 > 

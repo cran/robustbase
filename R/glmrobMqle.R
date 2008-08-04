@@ -4,15 +4,16 @@
 glmrobMqle <-
     function(X, y, weights = NULL, start = NULL, offset = NULL,
 	     family, weights.on.x = "none",
-	     control = glmrobMqle.control(), intercept = TRUE)
+	     control = glmrobMqle.control(), intercept = TRUE,
+             trace = FALSE)
 {
     ## To DO:
     ## o weights are not really implemented. e.g. as "user weights for poisson"
     ## o offset is not fully implemented (really? -- should have test case!)
 
     X <- as.matrix(X)
-    xnames <- dimnames(X)[[2]]
-    ynames <- names(y)
+##     xnames <- dimnames(X)[[2]]
+##     ynames <- names(y)
     nobs <- NROW(y)
     ncoef <- ncol(X)
     if (is.null(weights))
@@ -111,7 +112,22 @@ glmrobMqle <-
 	eval(Epsi.init)
     })
 
+
 ### Iterations
+
+    if(trace && ncoef) {
+        cat("Initial theta: \n")
+        local({names(theta) <- names(start); print(theta) })
+
+	w.th.1 <- 7 # width of one number
+	width.th <- ncoef*(w.th.1 + 1) - 1
+	cat(sprintf("%3s | %*s | %12s\n",
+		    "it", width.th, "d{theta}", "rel.change"))
+	mFormat <- function(x, wid) {
+	    r <- formatC(x, digits=2, width=wid)
+	    sprintf("%*s", wid, sub("e([+-])0","e\\1", r))
+	}
+    }
 
     sni <- sqrt(ni)
     conv <- FALSE
@@ -135,7 +151,13 @@ glmrobMqle <-
 	eta <- as.vector(X %*% theta) + offset
 	mu <- linkinv(eta)
 	## Check convergence: relative error < tolerance
-	conv <- sqrt(sum(Dtheta^2)/max(1e-20, sum(thetaOld^2))) <= control$acc
+	relE <- sqrt(sum(Dtheta^2)/max(1e-20, sum(thetaOld^2)))
+	conv <- relE <= control$acc
+        if(trace) {
+            cat(sprintf("%3d | %*s | %12g\n", nit, width.th,
+                        paste(mFormat(Dtheta, w.th.1),
+                              collapse=" "), relE))
+        }
 	if(conv)
 	    break
 	thetaOld <- theta

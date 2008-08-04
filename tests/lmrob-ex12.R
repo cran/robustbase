@@ -139,5 +139,15 @@ res2 <- lmrob(lconc~dist, data = dat2)
 res2 <- lmrob(lconc~dist, data = dat2, trace.lev = 3)
 ##                                     -------------
 summary(res2)
+stopifnot(dim(model.matrix(res2)) == c(9,2))
+
+## Check predict():
+dd <- seq(300, 2000, by = 50)
+with(dat2, plot(dist, lconc, pch=20, cex=2, xlim = range(dd)))
+new.d <- data.frame(dist=dd)
+fit.dd <- predict(res2, new.d)
+lines(dd, fit.dd, col=2, type="o")
+predict(res2, new.d, se=TRUE)$se.fit
+matlines(dd, predict(res2, new.d, interval="confidence")[, 2:3], col=3)
 
 cat('Time elapsed: ', proc.time(),'\n') # "stats"

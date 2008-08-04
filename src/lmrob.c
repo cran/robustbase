@@ -1,4 +1,4 @@
-/* -*- mode: c; kept-new-versions: 30; kept-old-versions: 20 -*-
+/* -*- mode: c; kept-new-versions: 30; kept-old-versions: 20 -*- */
 
 /* file lmrob.c
  * was	roblm/src/roblm.c - version 0.6	 by Matias Salibian-Barreras
@@ -205,14 +205,14 @@ void R_lmrob_MM(double *X, double *y, int *n, int *P,
     double **x;
     int N = *n, p = *P, i, j;
     x = (double **) Calloc(N, double *);
-    for(i=0; i < N; i++)
-	x[i]= (double *) Calloc( (p+1), double);
+
     /* rearranges X into a matrix of n x p,
      * i.e. [, 0:(p-1)] and cbind()'s  y as column [,p] : */
     for(i=0; i < N; i++) {
+	double *x_i = x[i] = (double *) Calloc( (p+1), double);
 	for(j=0; j < p; j++)
-	    x[i][j]=X[j*N+i];
-	x[i][p]=y[i];
+	    x_i[j]=X[j*N+i];
+	x_i[p]=y[i];
     }
 
 /* starting from the S-estimate (beta_initial), use
@@ -496,8 +496,12 @@ void mat_mat(double **a, double **b, double **c, int n,
 	}
 }
 
-/* RWLS iterations starting from i_estimate --
- * ---- this is the "lmrob_MM" algorithm
+/* RWLS iterations starting from i_estimate,
+ * ---- the workhorse of the "lmrob_MM" algorithm;
+ * in itself,  ``just'' an M-estimator :
+ *
+ * FIXME: rather than using C-matrices  **a, **b, and copying
+ *        should use BLAS and Lapack
  */
 int rwls(double **a, int n, int p,
 	 double *estimate, double *i_estimate,
@@ -527,10 +531,10 @@ int rwls(double **a, int n, int p,
     /* main loop */
     while(!converged &&	 ++iterations < *max_it) {
 
-	double r,s, loss2;
+	double r,s;
 	int k;
 #ifdef LAMBDA_Iterations_remnant_no_longer_needed
-	double lambda;
+	double loss2, lambda;
 	int iter_lambda;
 #endif
 
@@ -555,10 +559,17 @@ int rwls(double **a, int n, int p,
 		s += a[i][j] * beta2[j];
 	    resid[i] = a[i][p] - s;
 	}
-	loss2 = sum_rho(resid,n,rho_c);
-
-	if(trace_lev >= 2)
-	    Rprintf(" it %4d: L(b2) = %12g ", iterations, loss2);
+#ifdef LAMBDA_Iterations_remnant_no_longer_needed
+	    loss2 = sum_rho(resid,n,rho_c);
+#endif
+	if(trace_lev >= 2) {
+#ifdef LAMBDA_Iterations_remnant_no_longer_needed
+	    *loss = loss2;
+#else
+	    *loss = sum_rho(resid,n,rho_c);
+#endif
+	    Rprintf(" it %4d: L(b2) = %12g ", iterations, *loss);
+	}
 
 	/* S version of the following code:
 	 * A <- matrix(0, p, p)
@@ -635,8 +646,16 @@ int rwls(double **a, int n, int p,
 #endif /*lambda iterations */
 
 	d_beta = norm1_diff(beta1,beta2, p);
-	if(trace_lev >= 2)
+	if(trace_lev >= 2) {
+	    if(trace_lev >= 3) {
+		Rprintf("\n  b2 = (");
+		for(j=0; j < p; j++)
+		    Rprintf("%s%11g", (j > 0)? ", " : "", beta0[j]);
+		Rprintf(");");
+	    }
 	    Rprintf(" ||b1 - b2||_1 = %g\n", d_beta);
+	}
+
 
 #ifdef LAMBDA_Iterations_remnant_no_longer_needed
 	converged = d_beta <= epsilon * fmax2(epsilon, norm1(beta0, p));

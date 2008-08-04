@@ -1,6 +1,6 @@
 
-R version 2.5.0 alpha (2007-04-05 r41063)
-Copyright (C) 2007 The R Foundation for Statistical Computing
+R version 2.7.1 Patched (2008-08-02 r46219)
+Copyright (C) 2008 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -445,6 +445,7 @@ F-statistic: 0.909 on 3 and 61 DF,  p-value: 0.442
 + }
 > 
 > test_rsquared()
+Initial scale 0 because more than 'h' (=16) observations are identical.
 
 Call:
 ltsReg.default(x = y1, y = x1, alpha = 0.8)
@@ -455,6 +456,7 @@ Intercept         y1
 
 Scale estimate 18.0 
 
+Initial scale 0 because more than 'h' (=16) observations are identical.
 
 Call:
 ltsReg.default(x = y1, y = x1, intercept = FALSE, alpha = 0.8)
@@ -471,8 +473,7 @@ Call:
 ltsReg.default(y = Y)
 
 Coefficients:
-   Y  
-44.6  
+[1]  44.6
 
 Scale estimate 19.7 
 
@@ -481,8 +482,7 @@ Call:
 ltsReg.default(y = Y, intercept = TRUE)
 
 Coefficients:
-   Y  
-44.6  
+[1]  44.6
 
 Scale estimate 19.7 
 
@@ -491,8 +491,7 @@ Call:
 ltsReg.default(y = Y, intercept = FALSE)
 
 Coefficients:
-   Y  
-44.6  
+[1]  44.6
 
 Scale estimate 20 
 
@@ -501,8 +500,7 @@ Call:
 ltsReg.default(y = Y, alpha = 1)
 
 Coefficients:
-   Y  
-33.0  
+[1]  33.0
 
 Scale estimate 19.3 
 
@@ -511,8 +509,7 @@ Call:
 ltsReg.formula(formula = Y ~ 1)
 
 Coefficients:
-   Y  
-44.6  
+[1]  44.6
 
 Scale estimate 19.7 
 
@@ -526,13 +523,12 @@ Call:
 ltsReg.formula(formula = Y ~ 1, alpha = 1)
 
 Coefficients:
-   Y  
-33.0  
+[1]  33.0
 
 Scale estimate 19.3 
 
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  0.982 0.071 1.787 0 0 
+Time elapsed:  0.776 0.051 0.869 0 0 
 > 
