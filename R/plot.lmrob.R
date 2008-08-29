@@ -14,7 +14,7 @@ function (x, which = 1:5,
         stop("Use only with 'lmrob' objects")
     show <- rep(FALSE, 5)
     if (!is.numeric(which) || any(which < 1) || any(which > 5))
-        stop("`which' must be in 1:5")
+        stop("'which' must be in 1:5")
     show[which] <- TRUE
     r <- residuals(x)
     n <- length(r)

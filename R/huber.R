@@ -8,10 +8,6 @@ huberM <-
 		 else wgt.himedian(abs(x - mu), weights),
 	     warn0scale = getOption("verbose"))
 {
-    ## Purpose: a "safe" version of MASS::huber()
-    ## -----------------------------------------------
-    ## --->  ?huberM
-    ## -------------------------------------------------------------------------
     ## Author: Martin Maechler, Date: 6 Jan 2003
 
     ## implicit 'na.rm = TRUE':
@@ -26,13 +22,13 @@ huberM <-
             sum(weights)
         } else n
     it <- 0:0
-    if(sum.w == 0) # e.g `x' was all NA
+    if(sum.w == 0) # e.g 'x' was all NA
 	return(list(mu = NA, s = NA, it = it)) # instead of error
 
     if (s <= 0) {
-        if(s < 0) stop("negative scale `s'")
+        if(s < 0) stop("negative scale 's'")
         if(warn0scale && n > 1)
-            warning("scale `s' is zero -- returning initial `mu'")
+            warning("scale 's' is zero -- returning initial 'mu'")
     }
     else {
         wsum <- if(is.null(weights)) sum else function(u) sum(u * weights)
@@ -57,7 +53,7 @@ huber <- function (y, k = 1.5, tol = 1e-06)
 {
     y <- y[!is.na(y)]
     n <- length(y)
-    if(n == 0) # e.g `y' was all na
+    if(n == 0) # e.g 'y' was all na
 	return(list(mu = NA, s = NA))# instead of error
     mu <- median(y)
     s <- mad(y)

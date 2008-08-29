@@ -1,3 +1,19 @@
+2008-08-29  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.4-3  for CRAN release
+
+	* tests/mc-strict.R: define 'isMac' and tweak the tests;
+	thanks to reports from Rory Winston.
+
+2008-08-09  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* NAMESPACE: import stats::cov {since others hide it!}
+
+2008-08-05  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/huber.R (huberM): replace `s' by 's' in errors and warnings.
+	* R/qnsn.R, R/plot.lmrob.R, R/ltsReg.R, R/ltsPlot.R: ditto
+
 2008-08-04  Martin Maechler  <maechler@stat.math.ethz.ch>, really from
 
 	    Valentin Todorov  <valentin.todorov@chello.at>
@@ -8,6 +24,8 @@
 	contains that per default (in R, not in S-plus!).
 
 	* R/tolEllipse.R (tolEllipsePlot): no text() for id.n == 0
+
+	* DESCRIPTION (Version): 0.4-2 released to CRAN.
 
 2008-08-04  Martin Maechler  <maechler@stat.math.ethz.ch>
 

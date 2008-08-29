@@ -719,7 +719,7 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
 	    fp.alpha.n <- fp.500.n + (fp.875.n - fp.500.n)/0.375 * (alpha - 0.5)
 	else ##	 0.875 < alpha <= 1
 	    fp.alpha.n <- fp.875.n + (1 - fp.875.n)/0.125 * (alpha - 0.875)
-	## MM: sqrt() {below} is ``different logic'' than below.. (??)
+	## MM: sqrt() {below} is ''different logic'' than below.. (??)
 	fp.alpha.n <- sqrt(fp.alpha.n)
     }
     else {

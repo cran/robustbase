@@ -63,7 +63,7 @@ wgt.himedian <- function(x, weights = rep(1,n))
     n <- length(x <- as.double(x))
     stopifnot(storage.mode(weights) %in% c("integer", "double"))
     if(n != length(weights))
-	stop("`weights' must have same length as `x'")
+	stop("'weights' must have same length as 'x'")
     ## if(is.integer(weights)) message("using integer weights")
     .C(if(is.integer(weights)) wgt_himed_i else wgt_himed,
        x, n, weights,

@@ -20,9 +20,9 @@
   \emph{J. Physiol.} \bold{32}, 501--510.
 
   These data were used by Student(1908) as the first illustration of the
-  paired t-test; then cited by Fisher (1925) and thereforth copied in
-  numerous books as an example of a normally distributed sample, see,
-  e.g., Anderson (1958).
+  paired t-test, see also \code{\link[datasets]{sleep}}; then cited by
+  Fisher (1925) and thereforth copied in numerous books as an example of
+  a normally distributed sample, see, e.g., Anderson (1958).
 }
 \references{
   Student (1908)
@@ -43,6 +43,7 @@
 }
 \examples{
 data(cushny)
+
 plot(cushny,  rep(0, 10), pch = 3, cex = 3,
      ylab = "", yaxt = "n")
 plot(jitter(cushny),  rep(0, 10), pch = 3, cex = 2,
@@ -54,5 +55,11 @@ myPt(  mean(cushny), col = "pink3")
 myPt(median(cushny), col = "light blue")
 legend("topright", c("mean", "median"), lwd = 2,
        col = c("pink3", "light blue"), inset = .01)
+
+## The 'sleep' data from the standard 'datasets' package:
+d.sleep <- local({ gr <- with(datasets::sleep, split(extra, group))
+                   gr[[2]] - gr[[1]] })
+stopifnot(all.equal(cushny,
+                    sort(d.sleep), tol=1e-15))
 }
 \keyword{datasets}

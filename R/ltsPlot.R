@@ -268,7 +268,7 @@ ltsPlot <- function(x,
 	id.n.default <- FALSE
 	id.n <- as.integer(id.n)
 	if(id.n < 0 || id.n > n)
-	    stop("`id.n' must be in {1,..,",n,"}")
+	    stop("'id.n' must be in {1,..,",n,"}")
     }
 
     if(!classic)

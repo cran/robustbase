@@ -2,7 +2,7 @@
 useDynLib(robustbase, .registration=TRUE)# -> R >= 2.3.0
 
 importFrom("graphics", plot)# < more ?
-importFrom("stats", anova, coef, family, fitted,
+importFrom("stats", anova, coef, cov, family, fitted,
 	   logLik, model.frame, predict, residuals, terms, vcov)
 ## ^^^^ MASS has a bit more; take it as example
 
