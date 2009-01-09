@@ -29,10 +29,10 @@ stopifnot(all.equal(unname(coef(rg1.)), c(-2.37585864, 4.902389143), tol=1e-9),
           all.equal(vcov(rg1.), vcov(rg1), tol = 1e-4))
 rg1$iter
 which(rg1.$w.r != 1) ## 7 of them :
-str(rg1.)
+str(rg1.["family" != names(rg1.)])
+
 rg2 <- glmrob(cbind(k , ni-k ) ~ x, family = binomial,
                acc = 1e-10, tcc = 3) # large cutoff: almost classical
-
 vcov(rg2) # << already close to limit
 rg10 <- glmrob(cbind(k , ni-k ) ~ x, family = binomial, tcc = 10)
 rgL  <- glmrob(cbind(k , ni-k ) ~ x, family = binomial, tcc = 100)

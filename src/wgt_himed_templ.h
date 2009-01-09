@@ -1,13 +1,9 @@
-/*------ Definition of a template for [diln]gCMatrix_colsums(...) : *
- *			 --------     ~~~~~~~~~~~~~~~~~~~~~~
- * i.e., included several times from ./dgCMatrix.c
+/*------ Definition of a template for whimed(_i) : *
+ *			 --------     ~~~~~~
+ * i.e., included several times from ./wgt_himed.c
  *				     ~~~~~~~~~~~~~
  */
 
-
-/* for all cases with an 'x' slot -- i.e. almost all cases ;
- * just redefine this in the other cases:
- */
 
 #ifdef _d_whimed_
 

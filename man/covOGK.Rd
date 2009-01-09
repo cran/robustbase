@@ -58,6 +58,11 @@ s_IQR(x, mu.too = FALSE, na.rm = FALSE)
   available as well, see the \emph{Examples} below,
   \bold{but} their names and calling sequences are
   still subject to discussion and may be changed in the future.
+
+  The current default, \code{weight.fn = hard.rejection} corresponds to
+  the proposition in the litterature, but Martin Maechler strongly
+  believes that the hard threshold currently in use is too arbitrary,
+  and further that \emph{soft} thresholding should be used instead, anyway.
 }
 \value{
   \code{covOGK()} currently returns a list with components

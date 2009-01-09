@@ -16,7 +16,7 @@
 }
 \source{
   Cushny, A.R. and Peebles, A.R. (1905)
-  The action of optical isomers. {II}. Hyoscines.
+  The action of optical isomers. II. Hyoscines.
   \emph{J. Physiol.} \bold{32}, 501--510.
 
   These data were used by Student(1908) as the first illustration of the

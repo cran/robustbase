@@ -59,26 +59,26 @@ covOGK <- function(X, n.iter = 2,
     ## Iteration loop.
     for(iter in 1:n.iter) { ## only a few iterations
 
-        ## Compute the vector of standard deviations d and
-        ## the covariance matrix U.
+	## Compute the vector of standard deviations d and
+	## the covariance matrix U.
 
-        d <- apply(Z, 2, sigmamu, ...)
-        Z <- sweep(Z, 2, d, '/')
+	d <- apply(Z, 2, sigmamu, ...)
+	Z <- sweep(Z, 2, d, '/')
 
-        for(i in 2:p) { # only need lower triangle of U
-            for(j in 1:(i - 1))
-                U[i, j] <- rcov(Z[ ,i], Z[ ,j], ...)
-        }
+	for(i in 2:p) { # only need lower triangle of U
+	    for(j in 1:(i - 1))
+		U[i, j] <- rcov(Z[ ,i], Z[ ,j], ...)
+	}
 
-        ## Compute the eigenvectors of U and store them as columns of E:
-        ## eigen(U, symmetric) only needs left/lower triangle
-        E <- eigen(U, symmetric = TRUE)$vectors
+	## Compute the eigenvectors of U and store them as columns of E:
+	## eigen(U, symmetric) only needs left/lower triangle
+	E <- eigen(U, symmetric = TRUE)$vectors
 
-        ## Compute A and store it for each iteration
-        A[[iter]] <- d * E
+	## Compute A and store it for each iteration
+	A[[iter]] <- d * E
 
-        ## Project the data onto the eigenvectors
-        Z <- Z %*% E
+	## Project the data onto the eigenvectors
+	Z <- Z %*% E
     }
 
     ## End of orthogonalization iterations.
@@ -98,17 +98,17 @@ covOGK <- function(X, n.iter = 2,
     ## covariance matrix estimates.  See equation (5).
 
     ## MM[FIXME]: 1st iteration (often the only one!) can be made *much* faster
-    ##    -----
+    ##	  -----
     covmat <- diag(sqrt.gamma^2)
 
     for(iter in n.iter:1) {
-        covmat <- A[[iter]] %*% covmat %*% t(A[[iter]])
-        center <- A[[iter]] %*% center
+	covmat <- A[[iter]] %*% covmat %*% t(A[[iter]])
+	center <- A[[iter]] %*% center
     }
 
     center <- as.vector(center)
 
-    ## Compute the reweighted estimate.  First, compute the
+    ## Compute the reweighted estimate.	 First, compute the
     ## weights using the user specified weight function.
 
     weights <- weight.fn(distances, p, ...)
@@ -118,23 +118,25 @@ covOGK <- function(X, n.iter = 2,
     ## matrix estimates.
 
     ## MM FIXME 2 : Don't need any of this, if all weights == 1
-    ##    -----    (which is not uncommon) ==> detect that "fast"
+    ##	  -----	   (which is not uncommon) ==> detect that "fast"
 
     wcenter <- colSums(X * weights) / sweights
     Z <- sweep(X, 2, wcenter) * sqrt(weights)
     wcovmat <- crossprod(Z) / sweights
 
     list(center = center,
-         cov = covmat,
-         wcenter = wcenter,
-         wcov = wcovmat,
-         weights = weights,
-         distances = distances,
-         sigmamu = deparse(substitute(sigmamu)),
-         rcov = deparse(substitute(rcov)),
-         call = call,
-         ## data.name = data.name,
-         data = if(keep.data) X)
+	 cov = covmat,
+	 wcenter = wcenter,
+	 wcov = wcovmat,
+	 weights = weights,
+	 distances = distances,
+	 n.iter = n.iter,
+	 sigmamu = deparse(substitute(sigmamu)),
+	 weight.fn = deparse(substitute(weight.fn)),
+	 rcov = deparse(substitute(rcov)),
+	 call = call,
+	 ## data.name = data.name,
+	 data = if(keep.data) X)
 }
 
 

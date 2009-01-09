@@ -11,7 +11,7 @@
 }
 \usage{
 covMcd(x, cor = FALSE, alpha = 1/2, nsamp = 500, seed = NULL,
-       trace = FALSE, use.correction = TRUE, control)
+       trace = FALSE, use.correction = TRUE, control = rrcov.control())
 }
 \arguments{
   \item{x}{a matrix or data frame. }
@@ -35,7 +35,8 @@ covMcd(x, cor = FALSE, alpha = 1/2, nsamp = 500, seed = NULL,
   \item{use.correction}{ whether to use finite sample correction
     factors; defaults to \code{TRUE}.}
   \item{control}{a list with estimation options - this includes those
-    above provided in the function specification.  If \code{control} is
+    above provided in the function specification, see
+    \code{\link{rrcov.control}} for the defaults.  If \code{control} is
     supplied, the parameters from it will be used.  If parameters are
     passed also in the invocation statement, they will override the
     corresponding elements of the control object.}

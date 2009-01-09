@@ -14,7 +14,7 @@
 %% FIXME: leave these away -- or explain: -- they code patient sub-groups
     \item{\code{ID}}{the numeric patient IDs}
     \item{\code{nrAdvE}}{the number of adverse events}
-    \item{\code{BMI}}{Body MASS Index, i.e., \eqn{weight[kg] / (height[m])^2}}
+    \item{\code{BMI}}{Body MASS Index, i.e., \eqn{weight[kg] / (height[m])^2}.}
     \item{\code{height}}{in cm}
     \item{\code{country}}{a factor with levels \code{0} and \code{1}}
     \item{\code{sex}}{the person's gender, a binary factor with levels

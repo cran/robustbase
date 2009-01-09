@@ -4,13 +4,13 @@ c--   fastLTS ( ./rfltsreg.f )  and
 c--   fastMCD ( ./rffastmcd.f )
 c
 c
-      subroutine rfrangen(n, nsel, index, seed)
+      subroutine rfrangen(n, nsel, index)
 c
 c     Randomly draws nsel cases out of n cases.
 c     Here, index is the index set.
 c
       implicit none
-      integer n, nsel, index(nsel), seed
+      integer n, nsel, index(nsel)
 c     real uniran
       double precision unifrnd
       integer i,j, num
@@ -260,13 +260,13 @@ c    while(l < lr)
       end
 ccccc
 ccccc
-      subroutine rfrdraw(a,n,seed,ntot,mini,ngroup,kmini)
+      subroutine rfrdraw(a,n,ntot,mini,ngroup,kmini)
 cc
 cc  Draws ngroup nonoverlapping subdatasets out of a dataset of size n,
 cc  such that the selected case numbers are uniformly distributed from 1 to n.
 cc
       implicit none
-      integer ntot, kmini, a(2,ntot), n, seed, mini(kmini), ngroup
+      integer ntot, kmini, a(2,ntot), n, mini(kmini), ngroup
 c
       double precision unifrnd
 c

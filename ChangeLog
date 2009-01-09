@@ -1,3 +1,26 @@
+2009-01-10  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/rf-common.f (rfrangen): drop unused 'seed' argument
+	(rfrdraw): ditto
+
+	* src/rffastmcd.f: get rid of TABs (gfortran -Wall  complains)
+
+	* man/exAM.Rd, man/possumDiv.Rd, ...: Rd_parse fixes
+
+2008-11-28  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/OGK.R (covOGK): also return n.iter and weight.fn.
+	* man/covOGK.Rd: note about the "silly" weight.fn
+
+2008-10-15  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/lmrob.MM.R (lmrob.S): fix error message s/larger/smaller/
+	thanks to Keith Ponting.
+
+2008-10-01  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/wgt_himed_templ.h: fix leading comment
+
 2008-08-29  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* DESCRIPTION (Version): 0.4-3  for CRAN release

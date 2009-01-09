@@ -462,12 +462,12 @@ CDDD  CALL INTPR('>>> LOOPING...I: ',-1,i,1)
           step=0
  132      if((part.and..not.fine).or.(.not.part.and..not.final)) then
             if(part) then
-              call rfrangen(mini(ii),nsel,index1,seed)
+              call rfrangen(mini(ii),nsel,index1)
             else
               if(all) then
                 call rfgenpn(n,nsel,index1)
               else
-                call rfrangen(n,nsel,index1,seed)
+                call rfrangen(n,nsel,index1)
               endif
             endif
           endif

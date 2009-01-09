@@ -9,11 +9,11 @@ rmc <- function(x, na.rm = FALSE, ...) {
 }
 
 
-### generic function
+## Generic function
 mc <- function (x, ...)
       UseMethod("mc")
 
-### default for vectors
+## Default method (for numeric vectors):
 mc.default <- function(x, na.rm = FALSE,
 		       doReflect = (length(x) <= 100),
 ## experiment:                       eps1 = 1e-13, eps2 = eps1, maxit = 100,

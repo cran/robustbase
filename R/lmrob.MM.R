@@ -161,7 +161,7 @@ lmrob.S <- function(x, y, control, trace.lev = 0)
     if(nGr <= p) stop("'control$n.group' must be larger than 'p'")
     large_n <- (n > 2000)
     if(large_n & nGr * groups > n)
-	stop("'groups * n.group' must be larger than 'n' for 'large_n' algorithm")
+	stop("'groups * n.group' must be smaller than 'n' for 'large_n' algorithm")
     if(nGr <= p + 10) ## FIXME (be smarter ..)
 	warning("'control$n.group' is not much larger than 'p', probably too small")
     if(length(seed <- control$seed) > 0) {

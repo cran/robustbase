@@ -34,7 +34,7 @@
 }
 \details{
   if \code{compute.MD = TRUE} and the robust Mahalanobis distances need
-  to be computed, they are stored (dQuote{cached}) with the object
+  to be computed, they are stored (\dQuote{cached}) with the object
   \code{x} when this function has been called from top-level.
 }
 \seealso{ \code{\link{lmrob}}, also for examples, \code{\link{plot.lm}}.

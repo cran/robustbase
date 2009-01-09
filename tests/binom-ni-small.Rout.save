@@ -1,6 +1,6 @@
 
-R version 2.6.1 Patched (2007-12-12 r43668)
-Copyright (C) 2007 The R Foundation for Statistical Computing
+R version 2.9.0 Under development (unstable) (2009-01-09 r47527)
+Copyright (C) 2009 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -110,18 +110,18 @@ x            4.061024  0.6512647  6.235596 4.500620e-10
 [1] 5
 > which(rg1.$w.r != 1) ## 7 of them :
 [1] 11 18 23 29 34 36 46
-> str(rg1.)
-List of 26
- $ coefficients     : Named num [1:2] -2.38  4.90
+> str(rg1.["family" != names(rg1.)])
+List of 25
+ $ coefficients     : Named num [1:2] -2.38 4.9
   ..- attr(*, "names")= chr [1:2] "(Intercept)" "x"
- $ residuals        : Named num [1:51] -0.528  0.622 -0.582  0.435 -0.981 ...
+ $ residuals        : Named num [1:51] -0.528 0.622 -0.582 0.435 -0.981 ...
   ..- attr(*, "names")= chr [1:51] "1" "2" "3" "4" ...
  $ fitted.values    : Named num [1:51] 0.085 0.093 0.102 0.111 0.121 ...
   ..- attr(*, "names")= chr [1:51] "1" "2" "3" "4" ...
  $ w.r              : num [1:51] 1 1 1 1 1 1 1 1 1 1 ...
  $ w.x              : num [1:51] 1 1 1 1 1 1 1 1 1 1 ...
  $ ni               : num [1:51] 3 6 3 6 7 1 4 7 4 4 ...
- $ cov              : num [1:2, 1:2]  0.144 -0.253 -0.253  0.550
+ $ cov              : num [1:2, 1:2] 0.144 -0.253 -0.253 0.55
   ..- attr(*, "dimnames")=List of 2
   .. ..$ : chr [1:2] "(Intercept)" "x"
   .. ..$ : chr [1:2] "(Intercept)" "x"
@@ -134,24 +134,11 @@ List of 26
   .. ..$ : chr [1:2] "(Intercept)" "x"
   .. ..$ : chr [1:2] "(Intercept)" "x"
  $ tcc              : num 1.34
- $ family           :List of 11
-  ..$ family    : chr "binomial"
-  ..$ link      : chr "logit"
-  ..$ linkfun   :function (mu)  
-  ..$ linkinv   :function (eta)  
-  ..$ variance  :function (mu)  
-  ..$ dev.resids:function (y, mu, wt)  
-  ..$ aic       :function (y, n, mu, wt, dev)  
-  ..$ mu.eta    :function (eta)  
-  ..$ initialize:  expression({     if (NCOL(y) == 1) {         if (is.factor(y))              y <- y != levels(y)[1]         n <- rep.int(1, nobs)         if (any(y < 0 | y > 1))              stop("y values must be 0 <= y <= 1")         mustart <- (weights * y + 0.5)/(weights + 1)         m <- weights * y         if (any(abs(m - round(m)) > 0.001))              warning("non-integer #successes in a binomial glm!")     }     else if (NCOL(y) == 2) {         if (any(abs(y - round(y)) > 0.001))              warning("non-integer counts in a binomial glm!")         n <- y[, 1] + y[, 2]         y <- ifelse(n == 0, 0, y[, 1]/n)         weights <- weights * n         mustart <- (n * y + 0.5)/(n + 1)     }     else stop("for the binomial family, y must be a vector of 0 and 1's\n",          "or a 2 column matrix where col 1 is no. successes and col 2 is no. failures") })
-  ..$ validmu   :function (mu)  
-  ..$ valideta  :function (eta)  
-  ..- attr(*, "class")= chr "family"
  $ linear.predictors: Named num [1:51] -2.38 -2.28 -2.18 -2.08 -1.98 ...
   ..- attr(*, "names")= chr [1:51] "1" "2" "3" "4" ...
  $ deviance         : NULL
  $ iter             : int 11
- $ y                : Named num [1:51] 0.000 0.167 0.000 0.167 0.000 ...
+ $ y                : Named num [1:51] 0 0.167 0 0.167 0 ...
   ..- attr(*, "names")= chr [1:51] "1" "2" "3" "4" ...
  $ converged        : logi TRUE
  $ model            :'data.frame':	51 obs. of  2 variables:
@@ -170,13 +157,13 @@ List of 26
   .. .. ..- attr(*, "order")= int 1
   .. .. ..- attr(*, "intercept")= int 1
   .. .. ..- attr(*, "response")= int 1
-  .. .. ..- attr(*, ".Environment")=<R_GlobalEnv> 
+  .. .. ..- attr(*, ".Environment")=<environment: R_GlobalEnv> 
   .. .. ..- attr(*, "predvars")= language list(cbind(k, ni - k), x)
   .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "nmatrix.2" "numeric"
   .. .. .. ..- attr(*, "names")= chr [1:2] "cbind(k, ni - k)" "x"
  $ call             : language glmrob(formula = cbind(k, ni - k) ~ x, family = binomial, acc = 1e-10)
  $ formula          :Class 'formula' length 3 cbind(k, ni - k) ~ x
-  .. ..- attr(*, ".Environment")=<R_GlobalEnv> 
+  .. ..- attr(*, ".Environment")=<environment: R_GlobalEnv> 
  $ terms            :Classes 'terms', 'formula' length 3 cbind(k, ni - k) ~ x
   .. ..- attr(*, "variables")= language list(cbind(k, ni - k), x)
   .. ..- attr(*, "factors")= int [1:2, 1] 0 1
@@ -187,11 +174,11 @@ List of 26
   .. ..- attr(*, "order")= int 1
   .. ..- attr(*, "intercept")= int 1
   .. ..- attr(*, "response")= int 1
-  .. ..- attr(*, ".Environment")=<R_GlobalEnv> 
+  .. ..- attr(*, ".Environment")=<environment: R_GlobalEnv> 
   .. ..- attr(*, "predvars")= language list(cbind(k, ni - k), x)
   .. ..- attr(*, "dataClasses")= Named chr [1:2] "nmatrix.2" "numeric"
   .. .. ..- attr(*, "names")= chr [1:2] "cbind(k, ni - k)" "x"
- $ data             :<R_GlobalEnv> 
+ $ data             :<environment: R_GlobalEnv> 
  $ offset           : NULL
  $ control          :List of 4
   ..$ acc     : num 1e-10
@@ -201,10 +188,9 @@ List of 26
  $ method           : chr "Mqle"
  $ contrasts        : NULL
  $ xlevels          : list()
- - attr(*, "class")= chr [1:2] "glmrob" "glm"
+> 
 > rg2 <- glmrob(cbind(k , ni-k ) ~ x, family = binomial,
 +                acc = 1e-10, tcc = 3) # large cutoff: almost classical
-> 
 > vcov(rg2) # << already close to limit
             (Intercept)          x
 (Intercept)   0.1430407 -0.2501886
@@ -364,5 +350,5 @@ test.acc
 +                     rg3.15  [no.comp], tol = 1e-13))
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  0.754 0.035 0.928 0 0 
+Time elapsed:  0.55 0.039 0.608 0 0 
 > 

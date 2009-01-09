@@ -73,7 +73,7 @@
   Lindenmayer, D.~B., Cunningham, R.~B., Tanton, M.~T., Nix, H.~A. and
   Smith, A.~P. (1991)
   The conservation of arboreal marsupials in the montane ash forests of
-  the central highlands of victoria, south-east australia: {III}. The habitat
+  the central highlands of victoria, south-east australia: III. The habitat
   requirements of leadbeater's possum \emph{gymnobelideus leadbeateri} and
   models of the diversity and abundance of arboreal marsupials.
   \emph{Biological Conservation} \bold{56}, 295--315.
@@ -81,7 +81,7 @@
   Lindenmayer, D.~B., Cunningham, R.~B., Tanton, M.~T., Smith, A.~P. and
   Nix, H.~A. (1990)
   The conservation of arboreal marsupials in the montane ash forests of
-  the victoria, south-east australia, {I}. Factors influencing the occupancy of
+  the victoria, south-east australia, I. Factors influencing the occupancy of
   trees with hollows, \emph{Biological Conservation} \bold{54}, 111--131.
 
   See also the references in \code{\link{glmrob}}.

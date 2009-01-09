@@ -16,8 +16,8 @@
     method="MM")} \dQuote{works}.
 }
 \source{
-  Antille, G. and {El May}, H. (1992)
-  The use of slices in the {LMS} and the method of density slices:
+  Antille, G. and El May, H. (1992)
+  The use of slices in the LMS and the method of density slices:
   Foundation and comparison.\cr
   In Yadolah Dodge and Joe Whittaker, editors, \emph{COMPSTAT:
   Proc.\ 10th Symp.\ Computat.\ Statist., Neuchatel}, \bold{1}, 441--445;
