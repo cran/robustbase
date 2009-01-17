@@ -1,3 +1,12 @@
+2009-01-17  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.4-5 : bug-fixing release
+
+	* tests/tmcd.R: add a regression test for the bug
+
+	* src/rffastmcd.f: rfrdraw() w/o 'seed'
+	* src/rfltsreg.f: ditto
+
 2009-01-10  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* src/rf-common.f (rfrangen): drop unused 'seed' argument

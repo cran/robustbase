@@ -266,7 +266,7 @@ cc  Draws ngroup nonoverlapping subdatasets out of a dataset of size n,
 cc  such that the selected case numbers are uniformly distributed from 1 to n.
 cc
       implicit none
-      integer ntot, kmini, a(2,ntot), n, mini(kmini), ngroup
+      integer n, ntot, kmini, a(2,ntot), mini(kmini), ngroup
 c
       double precision unifrnd
 c

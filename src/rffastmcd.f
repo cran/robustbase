@@ -449,7 +449,7 @@ c              n > (5*nmini-1) :
          if(ngroup.gt.kmini) ngroup=kmini
          nrep=int((krep*1.D0)/ngroup)
          minigr=mini(1)+mini(2)+mini(3)+mini(4)+mini(5)
-         call rfrdraw(subdat,n,seed,minigr,mini,ngroup,kmini)
+         call rfrdraw(subdat,n,minigr,mini,ngroup,kmini)
       else
 c          krep == 0  or   n <= (2*nmini-1) = 599
 

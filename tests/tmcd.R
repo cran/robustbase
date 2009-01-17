@@ -24,6 +24,14 @@ try(## error: with "old default tolerance:
 
 cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
 
+## A "large" example {that seg.faulted in version 0.4-4}:
+set.seed(1)
+n <- 1000; X <- matrix(round(100*rnorm(n * 3)), n, 3)
+cX <- covMcd(X)
+cX
+cat('Time elapsed: ', proc.time(),'\n')
+
+
 ## Now, some small sample cases:
 
 ## maximal values:

@@ -250,7 +250,7 @@ cc
         nrep=int((krep*1.D0)/ngroup)
         minigr=mini(1)+mini(2)+mini(3)+mini(4)+mini(5)
 cccc  CALL INTPR('>>> RFLTSREG ... minigr=',-1,iseed,1)
-        call rfrdraw(subdat,n,seed,minigr,mini,ngroup,kmini)
+        call rfrdraw(subdat,n,minigr,mini,ngroup,kmini)
       else
         minigr=n
         nhalf=nhalff
