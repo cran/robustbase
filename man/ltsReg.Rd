@@ -110,7 +110,7 @@ ltsReg(x, \dots)
 \value{
   The function \code{ltsReg} returns an object of class \code{"lts"}.
   The \code{\link{summary}} method function is used to obtain (and
-  print) a summary table of the results, and \code{\link[ltsPlot]{plot}()}
+  print) a summary table of the results, and \code{\link[=ltsPlot]{plot}()}
   can be used to plot them, see the the specific help pages.
 
   The generic accessor functions \code{\link{coefficients}},

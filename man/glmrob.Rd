@@ -224,6 +224,49 @@ Efit4 <- glmrob(Ysum ~ Age10 + Base4*Trt, family = poisson,
                 control = glmrobMqle.control(tcc=1.2, maxit=100))
 )
 
+### -------- Gamma family -- data from example(glm) ---
+
+clotting <- data.frame(
+            u = c(5,10,15,20,30,40,60,80,100),
+         lot1 = c(118,58,42,35,27,25,21,19,18),
+         lot2 = c(69,35,26,21,18,16,13,12,12))
+summary(cl <- glm   (lot1 ~ log(u), data=clotting, family=Gamma))
+summary(ro <- glmrob(lot1 ~ log(u), data=clotting, family=Gamma))
+
+clotM5.high <- within(clotting, { lot1[5] <- 60 })
+op <- par(mfrow=2:1, mgp = c(1.6, 0.8, 0), mar = c(3,3:1))
+plot( lot1  ~ log(u), data=clotM5.high)
+plot(1/lot1 ~ log(u), data=clotM5.high)
+par(op)
+## Obviously, there the first observation is an outlier with respect to both
+## representations!
+
+cl5.high <- glm   (lot1 ~ log(u), data=clotM5.high, family=Gamma)
+ro5.high <- glmrob(lot1 ~ log(u), data=clotM5.high, family=Gamma)
+with(ro5.high, cbind(w.x, w.r))## the 5th obs. is downweighted heavily!
+
+plot(1/lot1 ~ log(u), data=clotM5.high)
+abline(cl5.high, lty=2, col="red")
+abline(ro5.high, lwd=2, col="blue") ## result is ok (but not "perfect")
+
+%% FIXME: Need work -- option of starting from
+%% -----  see Andreas' ~/R/MM/Pkg-ex/robustbase/glmrob-gamma-ARu.R
+
+% ## a "regular outlier" in the middle :
+% clotM4.3 <- within(clotting, { lot1[4] <- 1000 })
+% ## .. not even this one works : ... need *robust* start ?!
+% try(cl4.3 <- glm   (lot1 ~ log(u), data=clotM4.3, family=Gamma))
+% try(ro4.3 <- glmrob(lot1 ~ log(u), data=clotM4.3, family=Gamma))
+
+% ## The new option to start from "lmrobMM" --- not yet ok either
+% try(
+% ro4.3 <- glmrob(lot1 ~ log(u), data=clotM4.3, family=Gamma,
+%                 start = "lmrobMM")
+% )
+% ## summary(ro4.3)
+
+%% TODO the "same" with lot2 :
+%% summary(glm(lot2 ~ log(u), data=clotting, family=Gamma))
 }
 \keyword{robust}
 \keyword{regression}

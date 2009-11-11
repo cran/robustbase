@@ -12,8 +12,9 @@ glmrobMqle <-
     ## o offset is not fully implemented (really? -- should have test case!)
 
     X <- as.matrix(X)
+## never used:
 ##     xnames <- dimnames(X)[[2]]
-##     ynames <- names(y)
+##     ynames <- if (is.matrix(y)) rownames(y) else names(y)
     nobs <- NROW(y)
     ncoef <- ncol(X)
     if (is.null(weights))
@@ -40,13 +41,14 @@ glmrobMqle <-
 	       "covMcd" = wts_RobDist(X, intercept, covFun = covMcd),
 	       stop("Weighting method", sQuote(weights.on.x),
 		    " is not implemented"))
-    } else ## ncoef == 0
-    rep.int(1,nobs)
+    }
+    else ## ncoef == 0
+        rep.int(1,nobs)
 
 
 ### Initializations
 
-    tcc <- control$tcc
+    stopifnot(control$maxit >= 1, (tcc <- control$tcc) >= 0)
     ## note that 'weights' are used and set by binomial()$initialize !
     eval(family$initialize) ## --> n, mustart, y and weights (=ni)
     ni <- as.vector(weights)# dropping attributes for computation
@@ -71,28 +73,33 @@ glmrobMqle <-
     eta <- as.vector(X %*% theta)
     mu <- linkinv(eta) # mu estimates pi (in [0,1]) at the binomial model
     if (!(validmu(mu) && valideta(eta)))
-	stop("Can't find valid starting values: You need help")
+	stop("Cannot find valid starting values: You need help")
     ##
     switch(family$family,
 	   "binomial" = {
-               if(paste(R.version$major, R.version$minor, sep=".") < 2.3)
-                   ## pbinom(., size=0) wrongly gave NaN
-                   pbinom <- function (q, size, prob,
-                                       lower.tail = TRUE, log.p = FALSE) {
-                       stats::pbinom(q, pmax2(1,size), prob, lower.tail, log.p)
-                   }
 	       Epsi.init <- EpsiBin.init
 	       Epsi <- EpsiBin
 	       EpsiS <- EpsiSBin
 	       Epsi2 <- Epsi2Bin
+               phiEst <- phiEst.cl <- 1
 	   },
 	   "poisson" = {
 	       Epsi.init <- EpsiPois.init
 	       Epsi <- EpsiPois
 	       EpsiS <- EpsiSPois
 	       Epsi2 <- Epsi2Pois
+               phiEst <- phiEst.cl <- expression({1})
 	   },
-	   stop("family", sQuote(family), "not yet implemented")
+           "Gamma" = { ## added by ARu
+             Epsi.init <- EpsiGamma.init
+             Epsi <- EpsiGamma
+             EpsiS <- EpsiSGamma
+             Epsi2 <- Epsi2Gamma
+             phiEst.cl <- phiGammaEst.cl
+             phiEst <- phiGammaEst
+           },
+           ## else
+           stop(gettextf("family '%s' not yet implemented", family$family))
 	   )
 
 
@@ -100,13 +107,20 @@ glmrobMqle <-
 	Vmu <- variance(mu)
 	if (any(is.na(Vmu)))  stop("NAs in V(mu)")
 	if (any(Vmu == 0))    stop("0s in V(mu)")
-	sV <- sqrt(Vmu)
-	residP <- (y - mu)* sni/sV
+	sVF <- sqrt(Vmu)   # square root of variance function
+	residP <- (y - mu)* sni/sVF  # Pearson residuals
+    })
+
+    comp.scaling <- expression({
+      sV <- sVF * sqrt(phi)
+      residPS <- residP/sqrt(phi) # scaled Pearson residuals
     })
 
     comp.Epsi.init <- expression({
+	## d mu / d eta :
 	dmu.deta <- mu.eta(eta)
 	if (any(is.na(dmu.deta))) stop("NAs in d(mu)/d(eta)")
+	## "Epsi init" :
 	H <- floor(mu*ni - tcc* sni*sV)
 	K <- floor(mu*ni + tcc* sni*sV)
 	eval(Epsi.init)
@@ -119,24 +133,26 @@ glmrobMqle <-
         cat("Initial theta: \n")
         local({names(theta) <- names(start); print(theta) })
 
-	w.th.1 <- 7 # width of one number
+        digits <- max(1, getOption("digits") - 5)
+	w.th.1 <- 6+digits # width of one number; need 8 for 2 digits: "-4.8e-11"
 	width.th <- ncoef*(w.th.1 + 1) - 1
 	cat(sprintf("%3s | %*s | %12s\n",
 		    "it", width.th, "d{theta}", "rel.change"))
 	mFormat <- function(x, wid) {
-	    r <- formatC(x, digits=2, width=wid)
+	    r <- formatC(x, digits=digits, width=wid)
 	    sprintf("%*s", wid, sub("e([+-])0","e\\1", r))
 	}
     }
 
     sni <- sqrt(ni)
+    eval(comp.V.resid) #-> (Vmu, sVF, residP)
+    phi <- eval(phiEst.cl)
     conv <- FALSE
     if(ncoef) for (nit in 1:control$maxit) {
-
-	eval(comp.V.resid)
-	eval(comp.Epsi.init)
+        eval(comp.scaling) #-> (sV, residPS)
+        eval(comp.Epsi.init)
 	## Computation of alpha and (7) using matrix column means:
-	cpsi <- pmax2(-tcc, pmin(residP,tcc)) - eval(Epsi)
+	cpsi <- pmax2(-tcc, pmin(residPS,tcc)) - eval(Epsi)
 	EEq <- colMeans(cpsi * w.x * sni/sV * dmu.deta * X)
 	##
 	## Solve  1/n (t(X) %*% B %*% X) %*% delta.coef	  = EEq
@@ -150,6 +166,11 @@ glmrobMqle <-
 	theta <- thetaOld + Dtheta
 	eta <- as.vector(X %*% theta) + offset
 	mu <- linkinv(eta)
+
+        ## estimation of the dispersion parameter
+        eval(comp.V.resid)
+        phi <- eval(phiEst)
+
 	## Check convergence: relative error < tolerance
 	relE <- sqrt(sum(Dtheta^2)/max(1e-20, sum(thetaOld^2)))
 	conv <- relE <= control$acc
@@ -180,13 +201,14 @@ glmrobMqle <-
 		   warning("fitted rates numerically 0 occurred")
 	   })
 
-    eval(comp.V.resid)
+    eval(comp.V.resid) #-> (Vmu, sVF, residP)
+    eval(comp.scaling) #-> (sV, residPS)
 
     ## Estimated asymptotic covariance of the robust estimator
     if(ncoef) {
 	eval(comp.Epsi.init)
 	alpha <- colMeans(eval(Epsi) * w.x * sni/sV * dmu.deta * X)
-	DiagA <- eval(Epsi2) / (ni*Vmu)* w.x^2* (ni*dmu.deta)^2
+	DiagA <- eval(Epsi2) / (ni*sV^2)* w.x^2* (ni*dmu.deta)^2
 	matQ  <- crossprod(X, DiagA*X)/nobs - tcrossprod(alpha, alpha)
 
 	DiagB <- eval(EpsiS) / (sni*sV)* w.x * (ni*dmu.deta)^2
@@ -211,12 +233,14 @@ glmrobMqle <-
 	##No  Mn <- M; Mn[ok, ok] <- matQ  ; matQ  <- Mn
     }
 
-    w.r <- pmin(1, tcc/abs(residP))
-    names(mu) <- names(eta) <- names(residP) # re-add after computation
-    list(coefficients = theta, residuals = residP, fitted.values = mu,
-	 w.r = w.r, w.x = w.x, ni = ni, cov = asCov, matM = matM, matQ = matQ,
-	 tcc = tcc, family = family, linear.predictors = eta, deviance = NULL,
-	 iter = nit, y = y, converged = conv)
+    w.r <- pmin(1, tcc/abs(residPS))
+    names(mu) <- names(eta) <- names(residPS) # re-add after computation
+    list(coefficients = theta, residuals = residP, # s.resid = residPS,
+         fitted.values = mu,
+	 w.r = w.r, w.x = w.x, ni = ni, dispersion = phi, cov = asCov,
+         matM = matM, matQ = matQ, tcc = tcc, family = family,
+         linear.predictors = eta, deviance = NULL, iter = nit, y = y,
+         converged = conv)
 }
 
 
@@ -273,8 +297,12 @@ glmrobMqle.control <-
 ##   FIXME(2): Some of these fail when Huber's "c", 'tcc' is = +Inf
 ##   -----    --> ../../robGLM1/R/rglm.R
 
+## FIXME:  Do use a "robFamily", a  *list* of functions
+## ------  which all have the same environment
+##   ===> can get same efficiency as expressions, but better OO
 
-## --- Poisson -- family ---
+
+### --- Poisson -- family ---
 
 EpsiPois.init <- expression(
 {
@@ -304,7 +332,7 @@ EpsiSPois <- expression(
 })
 
 
-## --- Binomial -- family ---
+### --- Binomial -- family ---
 
 EpsiBin.init <- expression({
     pK <- pbinom(K, ni, mu)
@@ -344,3 +372,92 @@ EpsiSBin <- expression(
 	    tcc*(pK - ifelse(ni == 1, K > 0,  pKm1))) + ifelse(ni == 0, 0, QlV / (sni*sV))
 })
 
+### --- Gamma -- family ---
+
+Gmn <- function(t, nu) {
+    ## Gm corrresponds to G * nu^((nu-1)/2) / Gamma(nu)
+    snu <- sqrt(nu)
+    snut <- snu+t
+    r <- numeric(length(snut))
+    ok <- snut > 0
+    r[ok] <- {
+	nu <- nu[ok]; snu <- snu[ok]; snut <- snut[ok]
+	exp((nu-1)/2*log(nu) - lgamma(nu) - snu*snut + nu*log(snut))
+    }
+    r
+}
+
+EpsiGamma.init <- expression({
+
+    nu <- 1/phi      ## form parameter nu
+    snu <- 1/sqrt(phi) ## sqrt (nu)
+
+    pPtc <- pgamma(snu + c(-tcc,tcc), shape=nu, rate=snu)
+    pMtc <- pPtc[1]
+    pPtc <- pPtc[2]
+
+    aux2 <- tcc*snu
+    GLtcc <- Gmn(-tcc,nu)
+    GUtcc <- Gmn( tcc,nu)
+})
+
+EpsiGamma <- expression( tcc*(1-pPtc-pMtc) + GLtcc - GUtcc )
+
+EpsiSGamma <- expression( ((GLtcc - GUtcc) + snu*(pPtc-pMtc))/mu )
+
+Epsi2Gamma <- expression({
+    (tcc^2*(pMtc+1-pPtc)+ (pPtc-pMtc) +
+     (GLtcc*(1-aux2) - GUtcc*(1+aux2))/snu )
+})
+
+
+phiGammaEst.cl <- expression(
+{
+    ## Classical moment estimation of the dispersion parameter phi
+    sum(((y - mu)/mu)^2)/(nobs-ncoef)
+})
+
+phiGammaEst <- expression(
+{
+    ## robust estimation of the dispersion parameter by
+    ## Huber's porposal 2
+    sphi <- uniroot(Huberprop2, interval=range(residP^2),
+                    ns.resid=residP, mu=mu, Vmu=Vmu, tcc=tcc)$root
+})
+
+if(FALSE) ## ...  (MM ?? FIXME : use  EpsiGamma.init(), Epsi2Gamma() !! )
+Huberprop2.gehtnicht <- function(phi, ns.resid, mu, Vmu, tcc)
+{
+    sV <- sqrt(Vmu*phi)
+    H <- floor(mu - tcc* sV)
+    K <- floor(mu + tcc* sV)
+    nobs <- length(mu)
+    ##
+    eval(Epsi.init)
+    compEpsi2 <- eval(Epsi2)
+    ##
+    ## return h :=
+    sum(pmax2(-tcc,pmin(ns.resid*snu,tcc))^2) -  nobs*compEpsi2
+}
+
+Huberprop2 <- function(phi, ns.resid, mu, Vmu, tcc)
+{
+    sV <- sqrt(Vmu*phi)
+    H <- floor(mu - tcc* sV)
+    K <- floor(mu + tcc* sV)
+    nobs <- length(mu)
+
+    nu <- 1/phi         ## form parameter  nu
+    snu <- 1/sqrt(phi)  ## sqrt (nu)
+    pPtc <- pgamma(snu + c(-tcc,tcc), shape=nu, rate=snu)
+    pMtc <- pPtc[1]
+    pPtc <- pPtc[2]
+
+    ts <- tcc*snu
+    GLtcc <- Gmn(-tcc,nu) *(1-ts)/snu
+    GUtcc <- Gmn( tcc,nu) *(1+ts)/snu
+    ##
+    compEpsi2 <- tcc^2 + (pPtc - pMtc)*(1-tcc^2) + GLtcc - GUtcc
+    ## return h :=
+    sum(pmax2(-tcc,pmin(ns.resid*snu,tcc))^2) -  nobs*compEpsi2
+}

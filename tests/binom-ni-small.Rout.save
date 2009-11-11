@@ -1,5 +1,5 @@
 
-R version 2.9.0 Under development (unstable) (2009-01-09 r47527)
+R version 2.9.0 Patched (2009-06-03 r48707)
 Copyright (C) 2009 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
@@ -111,7 +111,7 @@ x            4.061024  0.6512647  6.235596 4.500620e-10
 > which(rg1.$w.r != 1) ## 7 of them :
 [1] 11 18 23 29 34 36 46
 > str(rg1.["family" != names(rg1.)])
-List of 25
+List of 26
  $ coefficients     : Named num [1:2] -2.38 4.9
   ..- attr(*, "names")= chr [1:2] "(Intercept)" "x"
  $ residuals        : Named num [1:51] -0.528 0.622 -0.582 0.435 -0.981 ...
@@ -121,6 +121,7 @@ List of 25
  $ w.r              : num [1:51] 1 1 1 1 1 1 1 1 1 1 ...
  $ w.x              : num [1:51] 1 1 1 1 1 1 1 1 1 1 ...
  $ ni               : num [1:51] 3 6 3 6 7 1 4 7 4 4 ...
+ $ dispersion       : num 1
  $ cov              : num [1:2, 1:2] 0.144 -0.253 -0.253 0.55
   ..- attr(*, "dimnames")=List of 2
   .. ..$ : chr [1:2] "(Intercept)" "x"
@@ -251,14 +252,14 @@ Coefficients:
 (Intercept)  -2.8901     0.3499  -8.260   <2e-16 ***
 x             5.5039     0.6447   8.537   <2e-16 ***
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 Robustness weights w.r * w.x: 
  48 weights are ~= 1. The remaining 3 ones are
     42     44     51 
 0.5127 0.7846 0.7388 
 
 Number of observations: 51 
-Fitted by method ‘Mqle’  (in 5 iterations)
+Fitted by method 'Mqle'  (in 5 iterations)
 
 (Dispersion parameter for binomial family taken to be 1)
 
@@ -285,12 +286,12 @@ Coefficients:
 (Intercept)  -2.9454     0.3420  -8.611   <2e-16 ***
 x             5.5461     0.6259   8.861   <2e-16 ***
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 Robustness weights w.r * w.x: 
  All 51 weights are ~= 1.
 
 Number of observations: 51 
-Fitted by method ‘Mqle’  (in 1 iterations)
+Fitted by method 'Mqle'  (in 1 iterations)
 
 (Dispersion parameter for binomial family taken to be 1)
 
@@ -319,12 +320,12 @@ Coefficients:
 (Intercept)  -2.9456     0.3420  -8.612   <2e-16 ***
 x             5.5464     0.6259   8.861   <2e-16 ***
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 Robustness weights w.r * w.x: 
  All 51 weights are ~= 1.
 
 Number of observations: 51 
-Fitted by method ‘Mqle’  (in 1 iterations)
+Fitted by method 'Mqle'  (in 1 iterations)
 
 (Dispersion parameter for binomial family taken to be 1)
 
@@ -350,5 +351,5 @@ test.acc
 +                     rg3.15  [no.comp], tol = 1e-13))
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  0.55 0.039 0.608 0 0 
+Time elapsed:  0.61 0.116 0.772 0 0 
 > 

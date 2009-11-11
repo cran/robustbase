@@ -123,3 +123,6 @@ o) we have had some problems, but they are solved now
    *however* the internal code allows only Tukey's biweight, i.e.,
    redescending psi.
    Still, lmrob..M..fit() computes a simple M-estimator there.
+
+27) glmrob() : 'family = gaussian' is possible and just diverts to lmrob().
+

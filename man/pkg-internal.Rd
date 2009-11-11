@@ -21,8 +21,8 @@ glmrobMqle(X, y, weights = NULL, start = NULL, offset = NULL,
 % glmrobMqleEpsi2B    (mu, Vmu, ni, H, K, tcc)
 % glmrobMqleEpsi2Pois (mu, Vmu, ni, H, K, tcc)
 
-glmrobMqleDiffQuasiDevB   (mu, mu0, y, ni, w.x, tcc)
-glmrobMqleDiffQuasiDevPois(mu, mu0, y, ni, w.x, tcc)
+glmrobMqleDiffQuasiDevB   (mu, mu0, y, ni, w.x, phi, tcc)
+glmrobMqleDiffQuasiDevPois(mu, mu0, y, ni, w.x, phi, tcc)
 
 wts_HiiDist(X)
 wts_RobDist(X, intercept, covFun)

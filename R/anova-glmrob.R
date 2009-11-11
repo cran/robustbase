@@ -119,6 +119,7 @@ anovaGlmrobPair <- function(obj1, obj2, test)
         quasiDev <- switch(full.mfit$family$family,
                            poisson = glmrobMqleDiffQuasiDevPois,
                            binomial =  glmrobMqleDiffQuasiDevB,
+                           Gamma =  glmrobMqleDiffQuasiDevGamma,
                            stop("This family is not implemented"))
 
         ## note that qdev and qdev0 do depend on an incorrectly specified
@@ -129,7 +130,7 @@ anovaGlmrobPair <- function(obj1, obj2, test)
         Dquasi.dev <- quasiDev(mu = full.mfit$fitted.values,
                                mu0 = reduced.mfit$fitted.values,
                                y = full.mfit$y, ni = full.mfit$ni,
-                               w.x = full.mfit$w.x,
+                               w.x = full.mfit$w.x, phi=full.mfit$dispersion,
                                tcc = full.mfit$tcc)
       }
       ## Asymptotic distribution: variance and weights of the sum of chi2
@@ -140,6 +141,7 @@ anovaGlmrobPair <- function(obj1, obj2, test)
 
       d.ev <- Re(eigen(matQ %*% (solve(matM)-Mplus))$values)
       d.ev <- d.ev[1:df] ## just the q (=df) lagest eigenvalues are needed
+
       if(any(d.ev < 0)) warning("some eigenvalues are negative")
 
       ## p-value: exact computation for q=1, approximated for q>1 (q=df)

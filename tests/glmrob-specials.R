@@ -25,7 +25,7 @@ rm1
 (s1 <- summary(rm1))
 str(s1)
 stopifnot(all.equal(c(coef(s1)),
-                    c(1.390672035557, 0.01621361360095,
-                      85.77187478275, 0), tol = 1e-13))
+		    c(1.390672035557, 0.016213613600955,
+		      85.77187478275, 0), tol = 1e-13))# 32-b: 4.7e-15
 
 cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''

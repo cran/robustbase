@@ -10,12 +10,13 @@ function (formula, family, data, weights, subset,
 	family <- get(family, mode = "function", envir = parent.frame())
     if (is.function(family))
 	family <- family()
-    if (is.null(family$family)) {
-	print(family)
-	stop("'family' not recognized")
-    }
-    if (!(family$family %in% c("binomial", "poisson"))) {
-	if(family$family == "gaussian") {
+    fami <- family$family
+    if(is.null(fami))
+	stop(gettextf("'%s' is not a valid family (see ?family)",
+		      as.character(call[["family"]])))
+
+    if (!(fami %in% c("binomial", "poisson", "Gamma"))) {
+	if(fami == "gaussian") {
 	    if(weights.on.x != "none")
 		stop("Use lmrob(formula, ...) for the Gaussian case;\n",
 		     " 'weights.on.x' needs to be changed")
@@ -25,7 +26,8 @@ function (formula, family, data, weights, subset,
 			 contrasts = contrasts, ...) )
 	}
 	else
-	    stop("Robust fitting method not yet implemented for this family")
+	    stop(gettextf("Robust GLM fitting not yet implemented for family %s",
+			  fami))
     }
     if(is.null(control)) # -> use e.g., glmrobMqle.control()
 	control <- get(paste("glmrob", method, ".control", sep = ""))(...)
@@ -41,18 +43,37 @@ function (formula, family, data, weights, subset,
     mf <- eval(mf, parent.frame())
     if(method == "model.frame") return(mf)
     mt <- attr(mf, "terms")
-    Y <- model.response(mf, "numeric")
+    Y <- model.response(mf, "any")# "numeric" or "factor"
+    if (length(dim(Y)) == 1) {
+        nm <- rownames(Y)
+        dim(Y) <- NULL
+        if (!is.null(nm))
+            names(Y) <- nm
+    }
     X <- if (!is.empty.model(mt))
-	model.matrix(mt, mf, contrasts)
-    else matrix(, NROW(Y), 0)
+	model.matrix(mt, mf, contrasts) else matrix(, NROW(Y), 0)
     weights <- model.weights(mf)
     offset <- model.offset(mf)
     if (!is.null(weights) && any(weights < 0))
 	stop("'weights' must be non-negative")
     if (!is.null(offset) && length(offset) != NROW(Y))
-	stop("Number of offsets is ", length(offset), ", should equal ",
-	     NROW(Y), " (number of observations)")
+	stop(gettextf("Number of offsets is %d, should rather equal %d (number of observations)",
+		      length(offset), NROW(Y)))
     weights.on.x <- match.arg(weights.on.x)
+    if(!is.null(start) && !is.numeric(start)) {
+	## initialization methods
+	if(!is.character(start))
+	    stop("'start' must be a numeric vector, NULL, or a character string")
+	start <-
+	    switch(start,
+		   "lmrobMM" = {
+		       if(!is.null(weights))
+			   warnings("weights are not yet used in computing start estimate")
+		       lmrob.fit.MM(X, family$linkinv(Y),
+				    control=lmrob.control())$coefficients
+		   },
+		   stop("invalid 'start' string"))
+    }
     fit <- switch(method,
 		  "cubif" =
 		  glmrobCubif(X = X, y = Y, weights = weights, start = start,
@@ -90,14 +111,14 @@ function (formula, family, data, weights, subset,
 
 summary.glmrob <- function(object, correlation=FALSE, symbolic.cor=FALSE, ...)
 {
-    dispersion <- 1
+    dispersion <- object$dispersion
+    if(is.null(dispersion)) dispersion <- 1
     coefs <- object$coefficients
     aliased <- is.na(coefs)# needs care; also used in print method
     if(any(aliased))
 	coefs <- coefs[!aliased]
     covmat <- object$cov
-    var.cf <- diag(covmat)
-    s.err <- sqrt(var.cf)
+    s.err <- sqrt(diag(covmat))
     zvalue <- coefs/s.err
     pvalue <- 2 * pnorm(-abs(zvalue))
     coef.table <- cbind("Estimate" = coefs, "Std. Error" = s.err,
@@ -111,7 +132,7 @@ summary.glmrob <- function(object, correlation=FALSE, symbolic.cor=FALSE, ...)
 		  df.null= NULL, df= NULL, ## (because of 0 weights; hmm,...)
 		  aliased = aliased,
 		  coefficients = coef.table, dispersion = dispersion,
-		  cov.unscaled = covmat))
+		  cov.scaled = covmat))
     if (correlation) {
 	ans$correlation <- cov2cor(covmat)
 	ans$symbolic.cor <- symbolic.cor
@@ -124,7 +145,9 @@ summary.glmrob <- function(object, correlation=FALSE, symbolic.cor=FALSE, ...)
 vcov.glmrob <- function (object, ...)
 {
     so <- summary(object, corr = FALSE, ...)
-    so$dispersion * so$cov.unscaled
+    ## so$dispersion * so$cov.unscaled
+    ## chanced from cov.unscaled to cov.scaled
+    so$cov.scaled
 }
 
 

@@ -1,3 +1,39 @@
+2009-11-11  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* tests/glmrob-1.R: add moe explicit glmrob() tests;
+	including the simple puzzling 1-outlier problem.
+
+	* R/glmrobMqle.R: do use getRversion() !
+
+2009-06-27  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* data/wagnerGrowth.rda: add the "wagner data" (continuous + categorical)
+	* man/wagnerGrowth.Rd: ditto
+
+2009-06-05  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/glmrob.R (glmrob): add the option  start = "lmrobMM", using
+	a *robust* start for {essentially} glm().
+	* man/glmrob.Rd: add an example for that   <<<<<______________ FIXME
+
+2009-06-04  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.5-0; *not* released
+
+	* tests/glmrob-1.R: more glmrob() examples
+
+2009-06-03  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/glmrobMqle.R (mFormat): make 'trace=TRUE' also depend on
+	getOption("digits").
+
+	* R/glmrobMqle.R, R/glmrob.R: changes from Andreas Ruckstuhl,
+	to support family = "Gamma".
+	Unfortunately, these at first also very slightly change binomial,
+	poisson. ==> few small changes by MM.
+
+	* R/glmrob.R (glmrob): allow y (in "y ~ ...") to be *factor*
+
 2009-01-17  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* DESCRIPTION (Version): 0.4-5 : bug-fixing release

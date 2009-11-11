@@ -43,27 +43,25 @@ o ltsReg():  has  undocumented '$resid'
 
 --- glmrob --
 
+o predict.glmrob() __NEEDED__ and probably also residuals.glmrob()
+  should allow a 'type = *' specification like the *.glm() methods.
+
 o glmrob(*, weights.on.x = "robCov")  currently uses  MASS::cov.rob(), i.e.
   "MVE" and Andreas had a comment that "mcd" is worse.
   But still, I (MM) strongly believe we should use  covMcd() instead.
   HOWEVER: Need something better when 'X' has (binary!) factors!
   "hat" +- works, but needs more work
 
-o Maybe  we should consider  'family = gaussian'  {analogy to glm()}
-  as a possible setting, and just divert to  lmrob() in that case
-
 o psi.*(....,  rho = FALSE/TRUE)   functions from Andreas
   should be replaced by using the new  psi_func  objects
   --> ./R/psi-funs-AR.R  &  ./man/pkg-internal.Rd
 
-o predict.glmrob() __NEEDED__ and probably also residuals.glmrob()
-  should allow a 'type = *' specification like the *.glm() methods.
-
-
-o glmrob() needs tests in ./tests/   [maybe take from man/glmrob.Rd]
-	   take those from Martin's old 'robGLM1' package (need more!)
-o --> first test already shows that Martin's tests for "huberC == Inf"
+o glmrob() needs a bit more tests in ./tests/
+           [also consider those from man/glmrob.Rd]
+   take those from Martin's old 'robGLM1' package (need more!)
+o  --> first test already shows that Martin's tests for "huberC == Inf"
       were *not* yet moved from robGLM1 to glmrob()...
+   (in other words:  glmrob() should work
 
 o also, ni = 0 does not work quite as it should ( ./tests/binom-ni-small.R )
 

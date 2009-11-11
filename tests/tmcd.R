@@ -24,11 +24,18 @@ try(## error: with "old default tolerance:
 
 cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
 
-## A "large" example {that seg.faulted in version 0.4-4}:
+## "large" examples using different algo branches {seg.fault in version 0.4-4}:
 set.seed(1)
-n <- 1000; X <- matrix(round(100*rnorm(n * 3)), n, 3)
+
+n <- 600 ## - partitioning will be triggered
+X <- matrix(round(100*rnorm(n * 3)), n, 3)
 cX <- covMcd(X)
 cX
+n <- 2000 ## - nesting will be triggered
+X <- matrix(round(100*rnorm(n * 3)), n, 3)
+cX <- covMcd(X)
+cX
+
 cat('Time elapsed: ', proc.time(),'\n')
 
 

@@ -1,5 +1,5 @@
 
-R version 2.8.1 Patched (2009-01-16 r47630)
+R version 2.9.0 Under development (unstable) (2009-01-20 r47658)
 Copyright (C) 2009 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
@@ -902,11 +902,13 @@ Error in solve.default(cov, ...) :
   system is computationally singular: reciprocal condition number = 4.85293e-11
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  4.496 0.056 4.753 0 0 
+Time elapsed:  2.314 0.088 2.449 0 0 
 > 
-> ## A "large" example {that seg.faulted in version 0.4-4}:
+> ## "large" examples using different algo branches {seg.fault in version 0.4-4}:
 > set.seed(1)
-> n <- 1000; X <- matrix(round(100*rnorm(n * 3)), n, 3)
+> 
+> n <- 600 ## - partitioning will be triggered
+> X <- matrix(round(100*rnorm(n * 3)), n, 3)
 > cX <- covMcd(X)
 > cX
 Minimum Covariance Determinant (MCD) estimator.
@@ -916,14 +918,32 @@ covMcd(x = X)
 
 Log(Det.):  25.1 
 Robust Estimate of Location:
-[1]  -2.2967   0.0873   3.2423
+[1]   0.141  -6.083  -0.703
 Robust Estimate of Covariance:
-       [,1]   [,2]   [,3]
-[1,]  10869   -443    760
-[2,]   -443  10610    274
-[3,]    760    274  10812
+      [,1]   [,2]   [,3]
+[1,]  9646   -114    389
+[2,]  -114  11221    250
+[3,]   389    250  11726
+> n <- 2000 ## - nesting will be triggered
+> X <- matrix(round(100*rnorm(n * 3)), n, 3)
+> cX <- covMcd(X)
+> cX
+Minimum Covariance Determinant (MCD) estimator.
+Call:
+covMcd(x = X)
+-> Method:  Minimum Covariance Determinant Estimator. 
+
+Log(Det.):  24.9 
+Robust Estimate of Location:
+[1]   0.201   1.455  -2.296
+Robust Estimate of Covariance:
+          [,1]  [,2]     [,3]
+[1,]  10083.87   225     7.31
+[2,]    224.92  9885   237.96
+[3,]      7.31   238  9862.80
+> 
 > cat('Time elapsed: ', proc.time(),'\n')
-Time elapsed:  4.664 0.06 4.947 0 0 
+Time elapsed:  2.549 0.09 2.686 0 0 
 > 
 > 
 > ## Now, some small sample cases:
@@ -1083,7 +1103,7 @@ In covMcd(X, use.correction = FALSE) :
 +           all.equal(c(mcc$cov / cc$raw.cov), rep(0.7528695976179, p*p)))
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  4.744 0.068 5.056 0 0 
+Time elapsed:  2.611 0.098 2.755 0 0 
 > 
 > ## nsamp = "exact" -- here for p=7
 > coleman.x <- data.matrix(coleman[, 1:6])
@@ -1093,7 +1113,7 @@ Warning in .fastmcd(x, h, nsamp, trace = as.integer(trace)) :
  This may take a very long time!
 
    user  system elapsed 
-  3.368   0.012   3.544 
+  1.747   0.000   1.746 
 > stopifnot(all.equal(CcX$best,
 +                     c(2, 5:9, 11,13, 14:16, 19:20), tol=0))
 > 

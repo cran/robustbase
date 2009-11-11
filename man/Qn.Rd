@@ -19,7 +19,7 @@ s_Qn(x, mu.too = FALSE, \dots)
   \item{finite.corr}{logical indicating if the finite sample bias
     correction factor should be applied.  Default to \code{TRUE} unless
     \code{constant} is specified.}
-  \item{mu.too}{logical indicating if the \code{\link[stats]{median(x)}} should
+  \item{mu.too}{logical indicating if the \code{\link[stats]{median}(x)} should
     also be returned for \code{s_Qn()}.}
   \item{\dots}{potentially further arguments for \code{s_Qn()} passed to
     \code{Qn()}.}
