@@ -1,6 +1,6 @@
 Package: robustbase
-Version: 0.5-0
-Date: 2009-11-11
+Version: 0.5-0-1
+Date: 2009-11-18
 Title: Basic Robust Statistics
 Author: Original code by many authors, notably Peter Rousseeuw and
         Christophe Croux, see file 'Copyrights'; Valentin Todorov
@@ -23,6 +23,6 @@ Suggests: MASS
 LazyLoad: yes
 LazyData: yes
 License: GPL (>= 2)
-Packaged: 2009-11-18 13:12:41 UTC; maechler
+Packaged: 2009-11-18 20:57:39 UTC; maechler
 Repository: CRAN
-Date/Publication: 2009-11-18 14:01:23
+Date/Publication: 2009-11-22 19:39:28

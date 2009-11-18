@@ -1,3 +1,9 @@
+2009-11-18  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.5-0_1
+
+	* tests/mc-strict.R: don't use the longmemo example for now.
+
 2009-11-11  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* tests/glmrob-1.R: add moe explicit glmrob() tests;
