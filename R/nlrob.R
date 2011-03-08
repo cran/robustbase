@@ -99,11 +99,26 @@ nlrob <-
 	tmp <- weights != 0
 	w[tmp] <- w[tmp]/weights[tmp]
     }
-    out <- list(m = out$m, call = match.call(), formula = oform, new.formula = formula,
+
+    ## --- Estimated asymptotic covariance of the robust estimator
+   if (!converged && !method.exit) {
+        asCov <- NA
+    } else {
+        AtWAinv <- chol2inv(out$m$Rmat())
+        dimnames(AtWAinv) <- list(names(coef), names(coef))
+        tau <- (mean(psi(resid/Scale, ...)^2) /
+                (mean(psi(resid/Scale, deriv=TRUE, ...))^2))
+        asCov <- AtWAinv * Scale^2 * tau
+    }
+
+    ## returned object:
+    out <- list(m = out$m, call = match.call(), formula = oform,
+                new.formula = formula,
 		coefficients = coef, residuals = resid,
 		fitted.values = y - out$residuals,
-		Scale = Scale, w = w, status = status, psi = psi,
-		data = dataName,
+		Scale = Scale, w = w, w.r = psi(resid/Scale, ...),
+                cov=asCov, status = status, iter=iiter,
+                psi = psi, data = dataName,
 		dataClasses = attr(attr(mf, "terms"), "dataClasses"))
     ##MM: Where would this "label" really make sense?
     ##MM: attr(out$fitted.values, "label") <- "Fitted values"
@@ -157,15 +172,66 @@ residuals.nlrob <- function (object, ...)
 }
 
 
-### FIXME !
-summary.nlrob <- function (object, ...)
+summary.nlrob <- function (object, correlation = FALSE, symbolic.cor = FALSE, ...)
 {
-    cat("   summary.nlrob() -- not yet implemented.\n\n")
-    ## that may be a good start:
-    nlsSum <- stats:::summary.nls(object, ...)
-    ## but we need to change the call;
-    ## additionally show robustness weights, and --- most importantly ---
-    ## "Fix the inference" (z-values / sandwich-STD.ERR. ?)
-    object
+    w <- object$w ## weights * w.r, scaled such that sum(w)=1
+    n <- sum(w > 0)
+    param <- coef(object)
+    p <- length(param)
+    rdf <- n - p
+    ans <- object[c("formula", "residuals", "Scale", "w", "w.r", "cov",
+		    "call", "status", "iter", "control")]
+    ans$df <- c(p, rdf)
+    cf <-
+	if(ans$status == "converged") {
+	    se <- sqrt(diag(object$cov))
+	    tval <- param/se
+	    cbind(param, se, tval, 2 * pt(abs(tval), rdf, lower.tail = FALSE))
+	} else cbind(param, NA, NA, NA)
+    dimnames(cf) <- list(names(param),
+			 c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
+    ans$coefficients <- cf
+    if(correlation && rdf > 0 && ans$status == "converged") {
+	ans$correlation <- object$cov / outer(se, se)
+	ans$symbolic.cor <- symbolic.cor
+    }
+    class(ans) <- "summary.nlrob"
+    ans
 }
 
+print.summary.nlrob <-
+    function (x, digits = max(3, getOption("digits") - 3),
+            symbolic.cor = x$symbolic.cor,
+            signif.stars = getOption("show.signif.stars"), ...)
+{
+    cat("\nFormula: ")
+    cat(paste(deparse(x$formula), sep = "\n", collapse = "\n"), "\n", sep = "")
+    df <- x$df
+    rdf <- df[2L]
+    cat("\nParameters:\n")
+    printCoefmat(x$coefficients, digits = digits, signif.stars = signif.stars,
+		 ...)
+    if(x$status == "converged") {
+	cat("\nRobust residual standard error:",
+	    format(signif(x$Scale, digits)), "\n")
+	correl <- x$correlation
+	if (!is.null(correl)) {
+	    p <- NCOL(correl)
+	    if (p > 1) {
+		cat("\nCorrelation of Parameter Estimates:\n")
+		if(is.logical(symbolic.cor) && symbolic.cor) {
+		    print(symnum(correl, abbr.colnames = NULL))
+		} else {
+		    correl <- format(round(correl, 2), nsmall = 2, digits = digits)
+		    correl[!lower.tri(correl)] <- ""
+		    print(correl[-1, -p, drop=FALSE], quote = FALSE)
+		}
+	    }
+	}
+	cat("Convergence in", x$iter, "IRWLS iterations\n\n")
+	summarizeRobWeights(x$w.r, digits = digits, ...)
+    }
+    else
+	cat("** IRWLS iterations did *not* converge!\n\n")
+    invisible(x)
+}

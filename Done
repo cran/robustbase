@@ -126,3 +126,10 @@ o) we have had some problems, but they are solved now
 
 27) glmrob() : 'family = gaussian' is possible and just diverts to lmrob().
 
+svn r215, 219 | rkst (+mm) | 2010-10-29:
+28) predict.glmrob() and better predict.lmrob()
+
+svn r220 | rkst | 2010-11-05:
+29) summary.nlrob() + print() method summarizing robustness weights is there
+
+

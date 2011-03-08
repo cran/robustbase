@@ -125,8 +125,9 @@ cc
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      subroutine rffastmcd(dat,n,nvar,nhalff,krep,initcov,initmean,
+      subroutine rffastmcd(dat,n,nvar,nhalff, krep, nmini,
 c     ------ nhalff = quan = h(alpha);  krep == nsamp
+     *     initcov,initmean,
      *     inbest,det,weight,fit,coeff,kount,adcov,
      *     iseed,
      *     temp, index1, index2, nmahad, ndist, am, am2, slutn,
@@ -152,7 +153,8 @@ cc      To change the number of subdatasets and their size, the values of
 cc      kmini and nmini can be changed.
 cc
       parameter (kmini=5)
-      parameter (nmini=300)
+cc This is now also an optionally changeable argument:
+cc    parameter (nmini=300)
 cc
 cc      The number of iteration steps in stages 1,2 and 3 can be changed
 cc      by adapting the parameters k1, k2, and k3.
@@ -177,18 +179,20 @@ C     parameter (nvmax1=nvmax+1)
 C     parameter (nvmax2=nvmax*nvmax)
 C     parameter (nvm12=nvmax1*nvmax1)
       parameter (km10=10*kmini)
-      parameter (nmaxi=nmini*kmini)
+c- nmaxi: now *variable* as nmini is:
+c-    parameter (nmaxi=nmini*kmini)
 cc
+      integer nmaxi
       integer rfncomb
 c unused   integer rfnbreak
       integer ierr,matz,seed,tottimes,step
       integer pnsel
       integer flag(km10)
       integer mini(kmini)
-      integer subdat(2,nmaxi)
+      integer subdat(2,nmini*kmini)
       double precision mcdndex(10,2,kmini)
-      integer subndex(450)
-c FIXME               ^^^ how does this depend on (kmini,nmini,...) ???
+c subndx(): vector of length = maximal value of  mini(j) {j in 1:kmini} below
+      integer subndex(nmini * 3 / 2)
       integer replow
       integer fit
 cc      double precision chi2(50)
@@ -234,7 +238,7 @@ cc.     double precision faclts(11)
       double precision mstock(10,nvar)
       double precision c1stock(km10,nvar*nvar)
       double precision m1stock(km10,nvar*nvar)
-      double precision dath(nmaxi,nvar)
+      double precision dath(nmini*kmini,nvar)
 
       double precision percen
 
@@ -356,7 +360,7 @@ cc    seed = starting value for random generator
 cc    matz = auxiliary variable for the subroutine rs, indicating whether
 cc           or not eigenvectors are calculated
 cc    nsel = number of variables + 1
-cc    ngroup = number of subdatasets
+cc    ngroup = number of subdatasets, is in {1,2,.., kmini}
 cc    part = logical value, true if the dataset is split up
 cc    fine = logical value, becomes true when the subsets are merged
 cc    final = logical value, to indicate the final stage of the algorithm
@@ -368,6 +372,7 @@ cc
       seed=iseed
       matz=1
       nsel=nvar+1
+      nmaxi = nmini*kmini
       ngroup=1
       part=.false.
       fine=.false.
@@ -451,7 +456,7 @@ c              n > (5*nmini-1) :
          minigr=mini(1)+mini(2)+mini(3)+mini(4)+mini(5)
          call rfrdraw(subdat,n,minigr,mini,ngroup,kmini)
       else
-c          krep == 0  or   n <= (2*nmini-1) = 599
+c          krep == 0  or   n <=  2*nmini-1  ( = 599 by default)
 
          minigr=n
          nhalf=nhalff
@@ -822,7 +827,7 @@ cc  stage of the algorithm.
 cc  If not, the observations on the hyperplane are extended to nhalf
 cc  observations by adding the observations in the merged dataset with
 cc  smallest orthogonal distances to that hyperplane.
-cc  For small datasets or for larger datasets with n <= nmini*kmini,
+cc  For small datasets or for larger datasets with n <= nmaxi := nmini*kmini,
 cc  the algorithm already stops when one solution becomes singular,
 cc  since we then have an exact fit.
 cc
@@ -924,8 +929,8 @@ cc
                   call rfdis(dath,z,ndist,nmaxi,nvmax,nn,nvar, means)
                   call rfshsort(ndist,nn)
                   qorder=ndist(nhalf)
-                  if(dabs(qorder-0.D0).lt.10.D-8.and.kount.eq.0
-     *                 .and.n.gt.nmini*kmini) then
+                  if(dabs(qorder-0.D0).lt.10.D-8 .and. kount.eq.0
+     *                 .and. n.gt.nmaxi) then
                      kount=nhalf
                      do 137,kkk=nhalf+1,nn
                         if(dabs(ndist(kkk)-0.D0).lt.10.D-8) then
@@ -940,15 +945,13 @@ cc
      *                    kmini,cova1,means,i,mcdndex,kount)
                      kount=1
                      goto 1000
+                  else if(dabs(qorder-0.D0).lt.10.D-8 .and.
+     *                    kount.ne.0 .and. n.gt.nmaxi) then
+                     goto 1000
                   else
-                     if(dabs(qorder-0.D0).lt.10.D-8.and.
-     *                    kount.ne.0.and.n.gt.nmini*kmini) then
-                        goto 1000
-                     else
-                        flag(1)=1
-                        dist2=rffindq(ndist,nn,nhalf,index2)
-                        goto 9555
-                     endif
+                     flag(1)=1
+                     dist2=rffindq(ndist,nn,nhalf,index2)
+                     goto 9555
                   endif
                endif
             endif
@@ -1083,7 +1086,7 @@ cc
                det=det*pivot
                if(pivot.lt.eps) then
                  if(final .or. .not.part .or.
-     *              (fine.and. .not.final .and. n .le. nmini*kmini))
+     *              (fine.and. .not.final .and. n .le. nmaxi))
      *            then
                     call transfo(cova1,means,dat,med,mad,nvar,n)
                     call rs(nvar,nvar,cova1,w,matz,z,fv1,fv2,ierr)

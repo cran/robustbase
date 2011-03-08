@@ -3,12 +3,11 @@
 \title{Compute M-estimators of regression}
 \description{
   This function performs RWLS iterations to find an
-  M-estimator of regression with Tukey's bisquare psi-function.  When
-  started from an S-estimated \code{beta.initial}, this results in an
-  MM-estimator.
+  M-estimator of regression.  When started from an S-estimated
+  \code{beta.initial}, this results in an MM-estimator.
 }
 \usage{
-lmrob..M..fit(x, y, beta.initial, scale, c.psi, control)
+lmrob..M..fit(x, y, beta.initial, scale, control, obj)
 }
 \arguments{
   \item{x}{design matrix (\eqn{n \times p}{n x p}) typically including a
@@ -18,14 +17,15 @@ lmrob..M..fit(x, y, beta.initial, scale, c.psi, control)
     estimate.  Usually the result of an S-regression estimator.}
   \item{scale}{robust residual scale estimate. Usually
     an S-scale estimator.}
-  \item{c.psi}{the tuning constant of the \eqn{\psi /}{} psi-function of
-    the M-estimator used.}
   \item{control}{list of control parameters, as returned
     by \code{\link{lmrob.control}}.  Currently, only the components
-    \code{c("max.it", "rel.tol","trace.lev")} are accessed.}
+    \code{c("max.it", "rel.tol","trace.lev", "psi", "tuning.psi",
+      "method")} are accessed.}
+  \item{obj}{an optional \code{lmrob}-object. If given, this is used to
+    set values for the other arguments.}
 }
 \details{
-  This function is used by \code{\link{lmrob.fit.MM}} %% and *fit.M() %% << TODO
+  This function is used by \code{\link{lmrob.fit}} %% and *fit.M() %% << TODO
   and typically not to be used on its own.
 }
 \value{A list with the following elements:
@@ -40,8 +40,7 @@ lmrob..M..fit(x, y, beta.initial, scale, c.psi, control)
   Yohai, 1987
 }
 \seealso{
-  \code{\link{lmrob.fit.MM}}, \code{\link{lmrob}};
-  for M-estimators with more flexibility, e.g., choice of rho/psi:
+  \code{\link{lmrob.fit}}, \code{\link{lmrob}};
   \code{\link[MASS]{rlm}} from package \pkg{MASS}.
 }
 \author{Matias Salibian-Barrera and Martin Maechler}
@@ -53,20 +52,24 @@ y <- stack.loss
 ## 1) initial LTS:
 m0 <- ltsReg(X[,-1], y)
 ## 2) M-estimate started from LTS:
-m1 <- lmrob..M..fit(X, y, beta.initial = coef(m0),
-                    scale = m0$scale, c.psi = 1.6,
-                    control = lmrob.control())
+m1 <- lmrob..M..fit(X, y, beta.initial = coef(m0), scale = m0$scale,
+                    control = lmrob.control(tuning.psi = 1.6,
+		                            psi = 'bisquare'))
 cbind(m0$coef, m1$coef)
 ## the scale is kept fixed:
 stopifnot(identical(unname(m0$scale), m1$scale))
 
 ##  robustness weights: are
-r.s <- with(m1, resid/scale) # scaled residuals
+r.s <- with(m1, residuals/scale) # scaled residuals
 m1.wts <- robustbase:::tukeyPsi1(r.s, cc = 1.6) / r.s
 summarizeRobWeights(m1.wts)
 ##--> outliers 1,3,4,13,21
 which(m0$lts.wt == 0) # 1,3,4,21 but not 13
 
+
+## Add M-step to SMD-estimate
+m2 <- lmrob(stack.loss ~ ., data = stackloss, method = 'SMD')
+m3 <- lmrob..M..fit(obj = m2)
 }
 \keyword{robust}
 \keyword{regression}

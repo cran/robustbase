@@ -1,7 +1,8 @@
 
-R version 2.8.0 Patched (2008-11-27 r47025)
-Copyright (C) 2008 The R Foundation for Statistical Computing
+R version 2.13.0 Under development (unstable) (2011-03-07 r54691)
+Copyright (C) 2011 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
+Platform: x86_64-unknown-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -28,7 +29,7 @@ Call:
 covMcd(x = x)
 -> Method:  Univariate location and scale estimation. 
 
-Log(Det.):  -2.130 
+Log(Det.):  -2.13 
 Robust Estimate of Location:
      x  
 0.1922  
@@ -69,7 +70,7 @@ Call:
 covMcd(x = x)
 -> Method:  Univariate location and scale estimation. 
 
-Log(Det.):  -2.130 
+Log(Det.):  -2.13 
 Robust Estimate of Location:
      x  
 0.1922  
@@ -362,5 +363,5 @@ Robust Estimate of Covariance:
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  0.456 0.145 0.633 0 0 
+Time elapsed:  0.27 0.02 0.294 0 0 
 > 

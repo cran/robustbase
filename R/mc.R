@@ -16,9 +16,8 @@ mc <- function (x, ...)
 ## Default method (for numeric vectors):
 mc.default <- function(x, na.rm = FALSE,
 		       doReflect = (length(x) <= 100),
-## experiment:                       eps1 = 1e-13, eps2 = eps1, maxit = 100,
-                       eps1 = .Machine$double.xmin, eps2 = eps1, maxit = 100,
-                       trace.lev = 0, full.result = FALSE,
+                       eps1 = .Machine$double.eps, eps2 = .Machine$double.xmin,
+                       maxit = 100, trace.lev = 0, full.result = FALSE,
                        ...)
 {
     x <- as.numeric(x)

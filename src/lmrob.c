@@ -1,4 +1,5 @@
-/* -*- mode: c; kept-new-versions: 30; kept-old-versions: 20 -*- */
+/* -*- mode: c; kept-new-versions: 40; kept-old-versions: 20 -*-
+ * Indentation (etc) style:  C-c . gnu */
 
 /* file lmrob.c
  * was	roblm/src/roblm.c - version 0.6	 by Matias Salibian-Barreras
@@ -24,13 +25,20 @@
 	     and effectively discarded the seed_rand argument below
    -  Done:  drop 'register' : today's compilers do optimize well!
    -  Done:  using Calloc() / Free() instead of malloc()/free()
- */
+*/
+
+/* kollerma:
+   Added alternative psi functions callable via psifun, chifun and
+   wgtfun. ipsi is used to distinguish between the different types.
+   The ipsi argument works for the S-estimator as well as for the
+   MM-estimator.
+*/
 
 #include <R.h>
 #include <Rmath.h>
 
 #include <R_ext/BLAS.h>
-
+#include <R_ext/Applic.h>
 
 #include "robustbase.h"
 
@@ -41,20 +49,20 @@ void fast_s_large_n(double *X, double *y,
 		    int *nn, int *pp, int *nRes,
 		    int *ggroups, int *nn_group,
 		    int *K, int *max_k, double *rel_tol, int *converged,
-		    int *best_r, double *bb, double *rrhoc,
+		    int *best_r, double *bb, double *rrhoc, int *iipsi,
 		    double *bbeta, double *sscale, int *trace_lev);
 
 void fast_s(double *X, double *y,
 	    int *nn, int *pp, int *nRes,
 	    int *K, int *max_k, double *rel_tol, int *converged,
-	    int *best_r, double *bb, double *rrhoc,
+	    int *best_r, double *bb, double *rrhoc, int *iipsi,
 	    double *bbeta, double *sscale, int *trace_lev);
 
 int rwls(double **a, int n, int p,
 	 double *estimate, double *i_estimate,
 	 double *resid, double *loss,
 	 double scale, double epsilon,
-	 int *max_it, const double rho_c, int trace_lev);
+	 int *max_it, double *rho_c, const int ipsi, int trace_lev);
 
 #ifdef _NO_LONGUER_USED_
 void sample_n_outof_N(int n, int N, int *x);
@@ -68,15 +76,49 @@ double norm (double *x, int n);
 double norm1(double *x, int n);
 double norm_diff (double *x, double *y, int n);
 double norm1_diff(double *x, double *y, int n);
+double normcnst(double *c, int ipsi);
 
-double rho_biwgt(double x, double c);
-double psi_biwgt(double x, double c);
+double rho(double x, double *c, int ipsi);
+double psi(double x, double *c, int ipsi);
+double psip(double x, double *c, int ipsi);
+double wgt(double x, double *c, int ipsi);
 
-double sum_rho	(double *x, int n, double c);
-double sum_rho_sc(double *r, double scale, int n, int p, double c);
+double rho_biwgt(double x, double *c);
+double psi_biwgt(double x, double *c);
+double psip_biwgt(double x, double *c);
+double wgt_biwgt(double x, double *c);
+
+double rho_gwgt(double x, double *c);
+double psi_gwgt(double x, double *c);
+double psip_gwgt(double x, double *c);
+double wgt_gwgt(double x, double *c);
+
+double rho_opt(double x, double *c);
+double psi_opt(double x, double *c);
+double psip_opt(double x, double *c);
+double wgt_opt(double x, double *c);
+
+double rho_hmpl(double x, double *c);
+double psi_hmpl(double x, double *c);
+double psip_hmpl(double x, double *c);
+double wgt_hmpl(double x, double *c);
+
+double rho_ggw(double x, double *c);
+void psi_ggw_vec(double *x, int n, void *k);
+double psi_ggw(double x, double *c);
+double psip_ggw(double x, double *c);
+double wgt_ggw(double x, double *c);
+
+double rho_lin(double x, double *c);
+double psi_lin(double x, double *c);
+double psip_lin(double x, double *c);
+double wgt_lin(double x, double *c);
+
+double sum_rho	(double *x, int n, double *c, int ipsi);
+double sum_rho_sc(double *r, double scale, int n, int p, double *c, int ipsi);
 
 void get_weights_rhop(double *r, double s, int n,
-		      double rhoc, double *w);
+		      double *rrhoc, int ipsi, double *w);
 
 int refine_fast_s(double **x, double *y, double *weights,
 		  int n, int p, double *res,
@@ -85,7 +127,7 @@ int refine_fast_s(double **x, double *y, double *weights,
 		  double *beta_cand,
 		  int kk, Rboolean *conv, int max_k, double rel_tol,
 		  int trace_lev,
-		  double b, double rhoc, double initial_scale,
+		  double b, double *rrhoc, int ipsi, double initial_scale,
 		  double *beta_ref, double *scale);
 
 #ifdef _UNUSED_
@@ -97,7 +139,7 @@ void fast_s_irwls(double **x, double *y,
 int fast_s_with_memory(double **x, double *y,
 		       int *nn, int *pp, int *nRes,
 		       int *K, int *max_k, double *rel_tol, int *trace_lev,
-		       int *best_r, int *ind_space, double *bb, double *rrhoc,
+		       int *best_r, int *ind_space, double *bb, double *rrhoc, int *iipsi,
 		       double **best_betas, double *best_scales);
 
 /* for "tracing" only : */
@@ -108,7 +150,7 @@ double kthplace(double *, int, int);
 
 int find_max(double *a, int n);
 
-double find_scale(double *r, double b, double rhoc,
+double find_scale(double *r, double b, double *rrhoc, int ipsi,
 		  double initial_scale, int n, int p);
 
 void r_sum_w_x(double **x, double *w, int n, int p,
@@ -132,7 +174,6 @@ void scalar_mat(double **a, double b, double **c, int n, int m);
 void scalar_vec(double *a, double b, double *c, int n);
 void sum_mat(double **a, double **b, double **c, int n, int m);
 void sum_vec(double *a, double *b, double *c, int n);
-
 
 #define SETUP_FAST_S(_n_, _p_)					\
     ind_space =  (int *) R_alloc(n, sizeof(int));		\
@@ -158,7 +199,6 @@ void sum_vec(double *a, double *b, double *c, int n);
 /* #define COPY_beta(BETA_FROM, BETA_TO) \ */
 /*     F77_CALL(dcopy)(&p, BETA_FROM, &one, BETA_TO, &one);  */
 
-
 #define ZERO 1e-10
 #define INFI 1e+20
 /*UNUSED #define MAX_ITER_REFINE_S 50 */
@@ -169,23 +209,30 @@ void sum_vec(double *a, double *b, double *c, int n);
 /* This function computes an S-regression estimator */
 void R_lmrob_S(double *X, double *y, int *n, int *P,
 	       int *nRes, double *scale, double *beta_s,
-	       double *rrhoc, double *bb,
+	       double *rrhoc, int *iipsi, double *bb,
 	       int *best_r, int *Groups, int *N_group,
 	       int *K_s, int *max_k, double *rel_tol, int *converged,
 	       int *trace_lev)
 {
-    /* best_r = 't' of Salibian-Barrera_Yohai(2006),
-     *	      = no. of best candidates to be iterated further
-     *		("refined") */
+  /* best_r = 't' of Salibian-Barrera_Yohai(2006),
+   *	      = no. of best candidates to be iterated further
+   *		("refined") */
+
+  /* Rprintf("R_lmrob_s %d\n", *iipsi); */
+
+  if ( *nRes > 0) {
     if( *n > 2000 )
-	fast_s_large_n(X, y, n, P, nRes,
-		       Groups, N_group,
-		       K_s, max_k, rel_tol, converged,
-		       best_r, bb, rrhoc, beta_s, scale, trace_lev);
+      fast_s_large_n(X, y, n, P, nRes,
+		     Groups, N_group,
+		     K_s, max_k, rel_tol, converged,
+		     best_r, bb, rrhoc, iipsi, beta_s, scale, trace_lev);
     else
-	fast_s(X, y, n, P, nRes,
-	       K_s, max_k, rel_tol, converged,
-	       best_r, bb, rrhoc, beta_s, scale, trace_lev);
+      fast_s(X, y, n, P, nRes,
+	     K_s, max_k, rel_tol, converged,
+	     best_r, bb, rrhoc, iipsi, beta_s, scale, trace_lev);
+  } else {
+    *scale = find_scale(y, *bb, rrhoc, *iipsi, *scale, *n, *P);
+  }
 }
 
 /* This function performs RWLS iterations starting from
@@ -199,7 +246,7 @@ void R_lmrob_S(double *X, double *y, int *n, int *P,
 void R_lmrob_MM(double *X, double *y, int *n, int *P,
 		double *beta_initial, double *scale,
 		double *beta_m, double *resid,
-		int *max_it, double *rho_c, double *loss,
+		int *max_it, double *rho_c, int *ipsi, double *loss,
 		double *rel_tol, int *converged, int *trace_lev)
 {
     double **x;
@@ -220,7 +267,7 @@ void R_lmrob_MM(double *X, double *y, int *n, int *P,
 
     *converged = rwls(x,N,p,beta_m, beta_initial, resid, loss,
 		      *scale, *rel_tol,
-		      max_it, *rho_c, *trace_lev);
+		      max_it, rho_c, *ipsi, *trace_lev);
     if (!converged)
 	COPY_beta(beta_initial, beta_m);
 
@@ -282,36 +329,689 @@ int lu(double **a, int *P, double *x)
     return(0);
 }
 
+/*----------------------------------------------------------------------------*/
 
-double rho_biwgt(double x, double c)
+void R_psifun(double *xx, double *cc, int *iipsi, int *dderiv, int *llength) {
+  /*
+   * Calculate psi for vectorized x with psip(0) = 1
+   * deriv -1: rho(x)  {*not* normalized}
+   * deriv  0: psi(x) = rho'(x)
+   * deriv  1: psi'(x)= rho''(x)   {we always have psip(0) == 1}
+   */
+  double nc = (*dderiv == -1) ? normcnst(cc, *iipsi) : 0./* -Wall */;
+
+// put the for() loop *inside* the switch (--> speed for llength >> 1) :
+#define for_i_llength  for(int i = 0; i < *llength; i++)
+
+  switch(*dderiv) {
+    case -1: for_i_llength xx[i] = rho(xx[i], cc, *iipsi) / nc; break;
+    default:
+    case 0: for_i_llength xx[i] = psi (xx[i], cc, *iipsi); break;
+    case 1: for_i_llength xx[i] = psip(xx[i], cc, *iipsi); break;
+  }
+}
+
+void R_chifun(double *xx, double *cc, int *iipsi, int *dderiv, int *llength) {
+  /*
+   * Calculate chi for vectorized x with rho(inf) = 1
+   * deriv 0: chi (x)  = rho(x) / rho(Inf) =: rho(x) * nc  == our rho() C-function
+   * deriv 1: chi'(x)  = psi(x)  * nc
+   * deriv 2: chi''(x) = psi'(x) * nc
+   */
+  double nc = (*dderiv > 0) ? normcnst(cc, *iipsi) : 0./* -Wall */;
+
+  switch(*dderiv) {
+    default:
+    case 0: for_i_llength xx[i] = rho (xx[i], cc, *iipsi); break;
+    case 1: for_i_llength xx[i] = psi (xx[i], cc, *iipsi) * nc; break;
+    case 2: for_i_llength xx[i] = psip(xx[i], cc, *iipsi) * nc; break;
+  }
+}
+
+void R_wgtfun(double *xx, double *cc, int *iipsi, int *llength) {
+  /*
+   * Calculate wgt for vectorized x
+   */
+  for_i_llength xx[i] = wgt(xx[i], cc, *iipsi);
+}
+#undef for_i_llength
+
+double normcnst(double *k, int ipsi) {
+  /*
+   * return normalizing constant for psi functions
+   */
+
+  double c = k[0];
+
+  switch(ipsi) {
+  default:
+  case 1: return(6./(c*c)); // biweight
+  case 2: return(1./(c*c)); // GaussWeight
+  case 3: return(1./3.25/(c*c)); // Optimal
+  case 4: return(2./(k[0]*(k[1]+k[2]-k[0]))); // Hampel
+  case 5: // GGW
+    switch((int)c) {
+    default:
+    case 0: return(1./ k[4]); break; // k[4] == cc[5] in R -- must be correct!
+    case 1: return(1./5.309853); break;
+    case 2: return(1./2.804693); break;
+    case 3: return(1./0.3748076); break;
+    case 4: return(1./4.779906); break;
+    case 5: return(1./2.446574); break;
+    case 6: return(1./0.4007054); break;
+    };
+  case 6: // lin psip
+      return((6*(k[2]-1))/(k[2]*k[1]*(3*k[1]+2*k[0])+(k[0]+k[1])*(k[0]+k[1])));
+  }
+}
+
+
+double rho(double x, double *c, int ipsi)
+{
+  /*
+   * return the correct rho according to ipsi
+   * this is normalized to 1
+   */
+  switch(ipsi) {
+  default:
+  case 1: return(rho_biwgt(x, c)); // biweight
+  case 2: return(rho_gwgt(x, c)); // GaussWeight
+  case 3: return(rho_opt(x, c)); // Optimal
+  case 4: return(rho_hmpl(x, c)); // Hampel
+  case 5: return(rho_ggw(x, c)); // GGW
+  case 6: return(rho_lin(x, c)); // lin psip
+  }
+}
+
+double psi(double x, double *c, int ipsi)
+{
+  /*
+   * return the correct psi according to ipsi
+   * this is actually rho' and not psi
+   */
+  switch(ipsi) {
+  default:
+  case 1: return(psi_biwgt(x, c)); // biweight
+  case 2: return(psi_gwgt(x, c)); // GaussWeight
+  case 3: return(psi_opt(x, c)); // Optimal
+  case 4: return(psi_hmpl(x, c)); // Hampel
+  case 5: return(psi_ggw(x, c)); // GGW
+  case 6: return(psi_lin(x, c)); // LGW := "lin psip" := piecewise linear psi'()
+  }
+}
+
+double psip(double x, double *c, int ipsi)
+{
+  /*
+   * return the correct ppsi according to ipsi
+   * this is actually rho'' and not psip
+   */
+  switch(ipsi) {
+  default:
+  case 1: return(psip_biwgt(x, c)); // biweight
+  case 2: return(psip_gwgt(x, c)); // GaussWeight
+  case 3: return(psip_opt(x, c)); // Optimal
+  case 4: return(psip_hmpl(x, c)); // Hampel
+  case 5: return(psip_ggw(x, c)); // GGW
+  case 6: return(psip_lin(x, c)); // LGW = lin psip
+  }
+}
+
+double wgt(double x, double *c, int ipsi)
+{
+  /*
+   * return the correct wgt according to ipsi
+   * wgt: rho'(x) / x
+   */
+  switch(ipsi) {
+  default:
+  case 1: return(wgt_biwgt(x, c)); // biweight
+  case 2: return(wgt_gwgt(x, c)); // GaussWeight
+  case 3: return(wgt_opt(x, c)); // Optimal
+  case 4: return(wgt_hmpl(x, c)); // Hampel
+  case 5: return(wgt_ggw(x, c)); // GGW
+  case 6: return(wgt_lin(x, c)); // LGW = lin psip
+  }
+}
+
+double rho_biwgt(double x, double *c)
 {
 /*
  * Tukey's bisquare loss function  == R's  tukeyChi()
  */
-    if (fabs(x) > c)
+    if (fabs(x) > (*c))
 	return(1.);
     else {
-	double t;
-	t = x / c;
+	double t = x / (*c);
 	t *= t; /* = t^2 */
 	return( t*(3. + t*(-3. + t)) );
     }
 }
 
-double psi_biwgt(double x, double c)
+double psi_biwgt(double x, double *c)
 {
 /*
  * First derivative of Tukey's bisquare loss function
  */
-    if (fabs(x) > c)
+    if (fabs(x) > (*c))
 	return(0.);
     else {
-	double u;
-	x /= c;
-	u = 1. - x*x;
-	return( x * u * u );
+      double a = x / (*c),
+	     u = 1. - a*a;
+      return( x * u * u );
     }
 }
+
+double psip_biwgt(double x, double *c)
+{
+/*
+ * Second derivative of Tukey's bisquare loss function
+ */
+    if (fabs(x) > (*c))
+	return(0.);
+    else {
+      double x2;
+      x /= *c;
+      x2 = x*x;
+      return( (1. - x2) * (1 - 5 * x2));
+    }
+}
+
+double wgt_biwgt(double x, double *c)
+{
+/*
+ * Weights for Tukey's bisquare loss function
+ */
+  if( fabs(x) > *c )
+    return(0.);
+  else {
+    double a = x / (*c);
+    a = (1. - a)*(1. + a);
+    return( a * a );
+  }
+}
+
+// -------- gwgt == Gauss Weight Loss function =: "Welsch" ---------------------
+
+double rho_gwgt(double x, double *c)
+{
+  /*
+   * Gauss Weight Loss function
+   */
+  double ac = x / (*c);
+  return(-expm1(-(ac*ac)/2));
+}
+
+// Largest x  such that  exp(-x) does not underflow :
+static double MIN_Exp = -708.4; // ~ = M_LN2 * DBL_MIN_EXP = -log(2) * 1022 = -708.3964 */
+
+// Largest x  such that  exp(-x^2/2) does not underflow :
+static double MAX_Ex2 = 37.7; // ~ = sqrt(- 2. * M_LN2 * DBL_MIN_EXP);
+  /* max {x | exp(-x^2/2) < .Machine$double.xmin } =
+   * min {x |  x^2 > -2*log(2)* .Machine$double.min.exp } =
+   *  = sqrt(-2*log(2)* .Machine$double.min.exp) = {IEEE double}
+   *  = sqrt(log(2) * 2044) = 37.64031 */
+
+double psi_gwgt(double x, double *c)
+{
+  /*
+   * Gauss Weight Psi()
+   */
+  double a = x / (*c);
+  if(fabs(a) > MAX_Ex2)
+      return 0.;
+  else
+      return x*exp(-(a*a)/2);
+}
+
+double psip_gwgt(double x, double *c)
+{
+  /*
+   * Gauss Weight Psi'()
+   */
+  x /= (*c);
+  if(fabs(x) > MAX_Ex2)
+      return 0.;
+  else {
+    double ac = x*x;
+    return exp(-ac/2) * (1. - ac);
+  }
+}
+
+double wgt_gwgt(double x, double *c)
+{
+  /*
+   * Gauss Weight Loss function
+   */
+  double a = x / (*c);
+  return(exp(-(a*a)/2));
+}
+
+double rho_opt(double x, double *c)
+{
+  /*
+   * Optimal psi Function, thank you robust package
+   */
+  double ac = x / (*c), // AX=S/XK
+      ax = fabs(ac); // AX=ABST/XK
+  if (ax > 3) // IF (AX .GT. 3.D0) THEN
+    return(1); // rlRHOm2=3.25D0*XK*XK
+  else if (ax > 2.) {
+    const double R1 = -1.944/2., R2 = 1.728/4., R3 = -0.312/6., R4 = 0.016/8.;
+    return((R1*R_pow(ax,2)+R2*R_pow(ax,4)+R3*R_pow(ax,6)+R4*R_pow(ax,8)+1.792)/3.25);
+	   // rlRHOm2=XK*XK*(R1*AX**2+R2*AX**4+R3*AX**6+R4*AX**8+1.792D0)
+  }
+  else //      ELSE
+    return(ac*ac/6.5); // rlRHOm2=S2/2.D0
+}
+
+double psi_opt(double x, double *c)
+{
+  /*
+   * Optimal psi Function, thank you robust package
+   */
+  double R1 = -1.944, R2 = 1.728, R3 = -0.312, R4 = 0.016;
+  double ax, ac;
+  ac = x / (*c); // AX=S/XK
+  ax = fabs(ac); // AX=ABST/XK
+  if (ax > 3.) //    IF (AX .GT. 3.D0) THEN
+    return(0); // rlPSIm2=0.D0
+  else if (ax > 2.) { //  ELSE IF(AX .GT. 2.D0) THEN
+    if (ac > 0.) //     IF (AX .GT. 0.D0) THEN
+      return(fmax2(0., (*c)*(R4*R_pow(ac,7)+R3*R_pow(ac,5)+R2*R_pow(ac,3)+R1*ac)));
+    // rlPSIm2=DMAX1(0.D0,XK*(R4*AX**7+R3*AX**5+R2*AX**3+R1*AX))
+    else // ELSE
+      return(-fabs((*c)*(R4*R_pow(ac,7)+R3*R_pow(ac,5)+R2*R_pow(ac,3)+R1*ac)));
+    //  rlPSIm2=-DABS(XK*(R4*AX**7+R3*AX**5+R2*AX**3+R1*AX))
+  } // ENDIF
+  else
+    return(x); // rlPSIm2=S
+}
+
+double psip_opt(double x, double *c)
+{
+  /*
+   * psi'() for Optimal psi Function, thank you robust package
+   */
+  double ac = x / (*c),
+    ax = fabs(ac);
+  if (ax > 3.)
+    return 0;
+  else if (ax > 2.) {
+    const double R1 = -1.944, R2 = 1.728, R3 = -0.312, R4 = 0.016;
+    ax *= ax; // = |x/c| ^ 2
+    return R1 + ax*(3*R2 + ax*(5*R3 + ax * 7*R4));
+  } else
+    return 1;
+}
+
+double wgt_opt(double x, double *c)
+{
+  /*
+   * w(.) for optimal psi Function, thank you robust package
+   */
+  double ac = x / (*c),
+    ax = fabs(ac);
+  if (ax > 3.)
+    return 0.;
+  else if (ax > 2.) {
+    const double R1 = -1.944, R2 = 1.728, R3 = -0.312, R4 = 0.016;
+    ax *= ax; // = |x/c| ^ 2
+    return fmax2(0., R1+ ax*(R2 + ax*(R3 + ax*R4)));
+  }
+  else
+    return 1.;
+}
+
+double rho_hmpl(double x, double *k)
+{
+  /*
+   * rho()  for Hampel's redescending psi function
+   * constants  (a, b, c) == k[0:2]   s.t.
+   * slope of psi is 1 in the center and (-)1/2 outside
+   *
+   * This function is normalized s.t. rho(inf) = 1
+   */
+  double u = fabs(x),
+	nc = k[0]*(k[1]+k[2]-k[0])/2;
+
+  if (u <= k[0])
+    return( x*x/2 / nc );
+  else if (u <= k[1])
+    return( ( u - k[0]/2 ) * k[0] / nc );
+  else if (u <= k[2])
+    return( ( k[1] - k[0]/2 + (u - k[1]) * (1 - ( u - k[1] ) / ( k[2] - k[1] ) / 2 )) * k[0] / nc);
+  else
+    return( 1 );
+}
+
+double psi_hmpl(double x, double *k)
+{
+  /*
+   * psi()  for Hampel's redescending psi function
+   * constants  (a, b, c) == k[0:2]   s.t.
+   * slope of psi is 1 in the center and (-)1/2 outside
+   */
+    double sx = sign(x), u = fabs(x);
+
+  if (u <= k[0])
+    return( x );
+  else if (u <= k[1])
+    return sx * k[0];
+  else if (u <= k[2])
+    return sx * k[0] * (k[2] - u) / (k[2] - k[1]);
+  else
+    return 0.;
+}
+
+double psip_hmpl(double x, double *k)
+{
+  /*
+   * psi'()  for Hampel's redescending psi function
+   * constants  (a, b, c) == k[0:2]   s.t.
+   * slope of psi is 1 in the center and (-)1/2 outside
+   */
+  double u = fabs(x);
+
+  if (u <= k[0])
+    return( 1 );
+  else if (u <= k[1])
+    return( 0 );
+  else if (u <= k[2])
+    return( k[0] / ( k[1] - k[2] ) );
+  else
+    return( 0 );
+}
+
+double wgt_hmpl(double x, double *k)
+{
+  /*
+   * w(x) = psi(x)/x  for Hampel's redescending psi function
+   * Hampel redescending psi function
+   * constants  (a, b, c) == k[0:2]   s.t.
+   * slope of psi is 1 in the center and (-)1/2 outside
+   */
+  double u = fabs(x);
+
+  if (u <= k[0])
+    return( 1 );
+  else if (u <= k[1])
+    return( k[0] / u );
+  else if (u <= k[2])
+    return( k[0] * ( k[2] - u ) / ( k[2] - k[1] ) / u );
+  else
+    return( 0 );
+}
+
+double rho_ggw(double x, double *k)
+{
+  /*
+   * Gauss Weight with constant center
+   */
+  if (k[0] > 0) { // for hard-coded constants
+    const double C[6][20] = { // 0: b = 1, 95% efficiency
+      {0.094164571656733, -0.168937372816728, 0.00427612218326869,
+       0.336876420549802, -0.166472338873754, 0.0436904383670537,
+       -0.00732077121233756, 0.000792550423837942, -5.08385693557726e-05,
+       1.46908724988936e-06, -0.837547853001024, 0.876392734183528,
+       -0.184600387321924, 0.0219985685280105, -0.00156403138825785,
+       6.16243137719362e-05, -7.478979895101e-07, -3.99563057938975e-08,
+       1.78125589532002e-09, -2.22317669250326e-11},
+      // 1: b = 1, 85% efficiency
+      {0.174505224068561, -0.168853188892986, 0.00579250806463694,
+       0.624193375180937, -0.419882092234336, 0.150011303015251,
+       -0.0342185249354937, 0.00504325944243195, -0.0004404209084091,
+       1.73268448820236e-05, -0.842160072154898, 1.19912623576069,
+       -0.345595777445623, 0.0566407000764478, -0.00560501531439071,
+       0.000319084704541442, -7.4279004383686e-06, -2.02063746721802e-07,
+       1.65716101809839e-08, -2.97536178313245e-10},
+      // 2: b = 1, bp 0.5
+      {1.41117142330711, -0.168853741371095, 0.0164713906344165,
+       5.04767833986545, -9.65574752971554, 9.80999125035463,
+       -6.36344090274658, 2.667031271863, -0.662324374141645,
+       0.0740982983873332, -0.84794906554363, 3.4315790970352,
+       -2.82958670601597, 1.33442885893807, -0.384812004961396,
+       0.0661359078129487, -0.00557221619221031, -5.42574872792348e-05,
+       4.92564168111658e-05, -2.80432020951381e-06},
+      // 3: b = 1.5, 95% efficiency
+      {0.104604570079252, 0.0626649856211545, -0.220058184826331,
+       0.403388189975896, -0.213020713708997, 0.102623342948069,
+       -0.0392618698058543, 0.00937878752829234, -0.00122303709506374,
+       6.70669880352453e-05, 0.632651530179424, -1.14744323908043,
+       0.981941598165897, -0.341211275272191, 0.0671272892644464,
+       -0.00826237596187364, 0.0006529134641922, -3.23468516804340e-05,
+       9.17904701930209e-07, -1.14119059405971e-08},
+      // 4: b = 1.5, 85% efficiency
+      {0.205026436642222, 0.0627464477520301, -0.308483319391091,
+       0.791480474953874, -0.585521414631968, 0.394979618040607,
+       -0.211512515412973, 0.0707208739858416, -0.0129092527174621,
+       0.000990938134086886, 0.629919019245325, -1.60049136444912,
+       1.91903069049618, -0.933285960363159, 0.256861783311473,
+       -0.0442133943831343, 0.00488402902512139, -0.000338084604725483,
+       1.33974565571893e-05, -2.32450916247553e-07},
+      // 5: b = 1.5, bp 0.5
+      {1.35010856132000, 0.0627465630782482, -0.791613168488525,
+       5.21196700244212, -9.89433796586115, 17.1277266427962,
+       -23.5364159883776, 20.1943966645350, -9.4593988142692,
+       1.86332355622445, 0.62986381140768, -4.10676399816156,
+       12.6361433997327, -15.7697199271455, 11.1373468568838,
+       -4.91933095295458, 1.39443093325178, -0.247689078940725,
+       0.0251861553415515, -0.00112130382664914}};
+
+    double end[6] = {18.5527638190955, 13.7587939698492,
+		     4.89447236180905,
+		     11.4974874371859, 8.15075376884422,
+		     3.17587939698492};
+    int j;
+    double c;
+    switch((int)k[0]) {
+    default: error("rho_ggw: Case not implemented.");
+    case 1: j = 0; c = 1.694;     break;
+    case 2: j = 1; c = 1.2442567; break;
+    case 3: j = 2; c = 0.4375470; break;
+    case 4: j = 3; c = 1.063;     break;
+    case 5: j = 4; c = 0.7593544; break;
+    case 6: j = 5; c = 0.2959132; break;
+    }
+    x = fabs(x);
+//----- MM : FIXME ------ use Horner or another good polyn.eval scheme! ----
+    if (x <= c)
+      return(C[j][0]*x*x);
+    else if (x <= 3*c)
+      return(C[j][1] + C[j][2]*x + C[j][3]*x*x + C[j][4]*R_pow(x, 3) +
+	     C[j][5]*R_pow(x, 4) + C[j][6]*R_pow(x, 5) + C[j][7]*R_pow(x, 6) +
+	     C[j][8]*R_pow(x, 7) + C[j][9]*R_pow(x, 8));
+    else if (x <= end[j])
+      return(C[j][10] + C[j][11]*x + C[j][12]*x*x + C[j][13]*R_pow(x, 3) +
+	     C[j][14]*R_pow(x, 4) + C[j][15]*R_pow(x, 5) +
+	     C[j][16]*R_pow(x, 6) + C[j][17]*R_pow(x, 7) +
+	     C[j][18]*R_pow(x, 8) + C[j][19]*R_pow(x, 9));
+    else return(1.);
+  } else {
+    // calculate integral
+    x = fabs(x);
+    double a = 0.0;
+    double epsabs = R_pow(DOUBLE_EPS, 0.25);
+    double result;
+    double abserr;
+    int neval, ier, last, limit = 100, lenw = 4 * limit;
+    int *iwork; double *work;
+    iwork = (int *) R_alloc(limit, sizeof(int));
+    work = (double *) R_alloc(lenw, sizeof(double));
+    Rdqags(psi_ggw_vec, (void *)k, &a, &x, &epsabs, &epsabs,
+	   &result, &abserr, &neval, &ier,
+	   &limit, &lenw, &last,
+	   iwork, work);
+    if (ier >= 1) {
+      error("error while calling Rdqagi: %i", "ier");
+    }
+    return(result/k[4]);
+  }
+}
+
+void psi_ggw_vec(double *x, int n, void *k)
+{
+    for (int i = 0; i<n; i++) {
+	x[i] = psi_ggw(x[i], k);
+    }
+}
+
+double psi_ggw(double x, double *k)
+{
+  /*
+   * Gauss Weight with constant center
+   */
+#define SET_ABC_GGW(NAME)					\
+  /* set a,b,c */						\
+  double a, b, c;						\
+  switch((int)k[0]) {						\
+  default: error(#NAME "_ggw: Case not implemented.");		\
+      /* user specified: */					\
+  case 0: a = k[1];      b = k[2]; c = k[3]; break;		\
+      /* Set of predefined cases: */				\
+  case 1: a = 0.648;     b = 1.;   c = 1.694; break;		\
+  case 2: a = 0.4760508; b = 1.;   c = 1.2442567; break;	\
+  case 3: a = 0.1674046; b = 1.;   c = 0.4375470; break;	\
+  case 4: a = 1.387;     b = 1.5;  c = 1.063; break;		\
+  case 5: a = 0.8372485; b = 1.5;  c = 0.7593544; break;	\
+  case 6: a = 0.2036741; b = 1.5;  c = 0.2959132; break;	\
+  }								\
+  double ax = fabs(x);
+
+  SET_ABC_GGW(psi);
+  if (ax < c) return x;
+  else {
+    a = -R_pow(ax-c,b)/2/a;
+    return (a < MIN_Exp) ? 0. : x*exp(a);
+  }
+}
+
+double psip_ggw(double x, double *k)
+{
+  /*
+   * Gauss Weight with constant center
+   */
+  SET_ABC_GGW(psip);
+  if (ax < c) return 1.;
+  else {
+    double ea;
+    a *= 2.;
+    ea = -R_pow(ax-c,b)/a;
+    return (ea < MIN_Exp) ? 0. : exp(ea) * (1 - b/a*ax*R_pow(ax-c,b-1));
+  }
+}
+
+double wgt_ggw(double x, double *k)
+{
+  /*
+   * Gauss Weight with constant center
+   */
+  SET_ABC_GGW(wgt);
+  return (ax < c) ? 1. : exp(-R_pow(ax-c,b)/2/a);
+}
+#undef SET_ABC_GGW
+
+
+// LGW := "lin psip" := piecewise linear psi'() ---------------------------
+
+double psip_lin (double x, double *k)
+{
+  double ax = fabs(x);
+  if (ax <= k[1])
+    return(1.);
+  else {
+    double k01 = k[0] + k[1];
+    if (/*k[1] < ax && */ ax <= k01)
+      return(((1. - k[2]) * (ax - k[1]) - (ax - k01)) / k[0]);
+    else {
+      double
+	s5 = k[2] - 1.,
+	s6 = -2 * k01 + k[0] * k[2];
+      if (/* k01 < ax && */ ax < k01 - s6 / s5)
+	return(-pow(s5, 2.) * (ax - k01 + s6 / s5) / s6);
+      else
+	return 0.;
+    }
+  }
+}
+
+double psi_lin (double x, double *k)
+{
+  double ax = fabs(x);
+  if (ax <= k[1])
+    return(x);
+  else {
+    double k01 = k[0] + k[1];
+    if (ax <= k01)
+      return((double) (x>0 ? 1 : (x<0 ? -1 : 0)) *
+	     (ax - k[2] * pow(ax - k[1], 2.) / k[0] / 2.));
+    else {
+      double
+	s5 = k[2] - 1.,
+	s6 = -2 * k01 + k[0] * k[2];
+      if (/* k01 < ax && */ ax < k01 - s6 / s5)
+	return((double) (x>0 ? 1 : -1) *
+	       (-s6/2. - pow(s5, 2.) / s6 * (pow(ax - k01, 2.) / 2. + s6 / s5 * (ax - k01))));
+      else
+	return 0.;
+    }
+  }
+}
+
+double rho_lin (double x, double *k)
+{
+  double ax = fabs(x), k01 = k[0] + k[1];
+  if (ax <= k[1])
+    return((3. * k[2] - 3.) /
+	   (k[2] * k[1] * (3. * k[1] + 2. * k[0]) +
+	    pow(k01, 2.)) * x * x);
+  else if (/* k[1] < ax && */ ax <= k01) {
+    double s0 = ax - k[1];
+    return((6. * k[2] - 6.) /
+	   (k[2] * k[1] * (3. * k[1] + 2. * k[0]) + pow(k01, 2.)) *
+	   (x * x / 2. - k[2] / k[0] * pow(s0, 3.) / 6.));
+  }
+  else {
+    double
+      s5 = k[2] - 1.,
+      s6 = -2 * k01 + k[0] * k[2];
+    if (/* k01 < ax && */ ax < k01 - s6 / s5) {
+      double s7 = ax - k01, k01_2 = pow(k01, 2.);
+      return((6. * s5) /
+	     (k[2] * k[1] * (3. * k[1] + 2. * k[0]) + k01_2) *
+	     (k01_2 / 2. - k[2] * k[0] * k[0] / 6. -
+	      s7/2. * (s6 + s7 * (s5 + s7 * s5 * s5 / 3. / s6))));
+    }
+    else
+      return 1.;
+  }
+}
+
+double wgt_lin (double x, double *k)
+{
+  double ax = fabs(x);
+  if (ax <= k[1])
+    return(1.);
+  else {
+    double k01 = k[0] + k[1];
+    if (ax <= k01) {
+      double s0 = ax - k[1];
+      return(1. - k[2] * s0 * s0 / (2 * ax * k[0]));
+    }
+    else {
+      double
+	s5 = k[2] - 1.,
+	s6 = -2 * k01 + k[0] * k[2];
+      if (ax < k01 - s6 / s5) {
+	double s7 = ax - k01;
+	return(-(s6/2. + s5 * s5 / s6 * s7 * (s7/2. + s6 / s5)) / ax);
+      }
+      else
+	return(0.);
+    }
+  }
+}
+/*============================================================================*/
 
 
 /* this function finds the k-th place in the
@@ -468,6 +1168,14 @@ void dif_vec(double *a, double *b, double *c, int n)
     for(i=0; i < n; i++) c[i] = a[i] - b[i];
 }
 
+/* c = a / b */
+void div_vec(double *a, double *b, double *c, int n)
+{
+    int i;
+    for(i=0; i < n; i++) c[i] = a[i] / b[i];
+}
+
+
 /* C = A - B */
 void dif_mat(double **a, double **b, double **c, int n, int m)
 {
@@ -509,7 +1217,7 @@ int rwls(double **a, int n, int p,
 	 double scale, double epsilon,
 	 int *max_it, /* on Input:  maximal number of iterations;
 			 on Output: number of iterations */
-	 const double rho_c, int trace_lev)
+	 double *rho_c, const int ipsi, int trace_lev)
 {
     double **b, *beta1, *beta2, *beta0, *weights;
     double d_beta = 0.;
@@ -544,10 +1252,11 @@ int rwls(double **a, int n, int p,
 	    for(j=0; j < p; j++)
 		s += a[i][j] * beta1[j];
 	    r = a[i][p]- s;
-	    if(fabs(r/scale) < 1e-7)
-		weights[i] = 1.0 / scale / rho_c;
-	    else
-		weights[i] = psi_biwgt(r/scale, rho_c) / r;
+	    weights[i] = wgt(r/scale, rho_c, ipsi);
+	    /* if(fabs(r/scale) < 1e-7) */
+	    /* 	weights[i] = 1.0 / scale / rho_c; */
+	    /* else */
+	    /* 	weights[i] = psi_biwgt(r/scale, rho_c) / r; */
 	}
 
 	COPY_beta(beta1, beta2);
@@ -560,13 +1269,13 @@ int rwls(double **a, int n, int p,
 	    resid[i] = a[i][p] - s;
 	}
 #ifdef LAMBDA_Iterations_remnant_no_longer_needed
-	    loss2 = sum_rho(resid,n,rho_c);
+	loss2 = sum_rho(resid,n,rho_c,ipsi);
 #endif
 	if(trace_lev >= 2) {
 #ifdef LAMBDA_Iterations_remnant_no_longer_needed
 	    *loss = loss2;
 #else
-	    *loss = sum_rho(resid,n,rho_c);
+	    *loss = sum_rho(resid,n,rho_c,ipsi);
 #endif
 	    Rprintf(" it %4d: L(b2) = %12g ", iterations, *loss);
 	}
@@ -603,7 +1312,7 @@ int rwls(double **a, int n, int p,
 		s += a[i][j] * beta1[j];
 	    resid[i] = a[i][p] - s;
 	}
-	*loss = sum_rho(resid,n,rho_c);
+	*loss = sum_rho(resid,n,rho_c,ipsi);
 
 #ifdef LAMBDA_Iterations_remnant_no_longer_needed
 	/* Is beta1 good enough? --
@@ -627,7 +1336,7 @@ int rwls(double **a, int n, int p,
 		    s += a[i][j] * beta0[j];
 		resid[i] = a[i][p] - s;
 	    }
-	    *loss = sum_rho(resid,n,rho_c);
+	    *loss = sum_rho(resid,n,rho_c,ipsi);
 
 	    if(trace_lev >= 3 && iter_lambda % 20 == 1)
 		Rprintf("  %4d | %11g , %12g\n", iter_lambda, lambda, *loss);
@@ -700,7 +1409,7 @@ void zero_vec(double *a, int n)
     int i;
     for(i=0; i < n; i++) a[i] = 0.;
 }
-
+
 
 /*
  *
@@ -721,7 +1430,7 @@ void fast_s_large_n(double *X, double *y,
 		    int *nn, int *pp, int *nRes,
 		    int *ggroups, int *nn_group,
 		    int *K, int *max_k, double *rel_tol, int *converged,
-		    int *best_r, double *bb, double *rrhoc,
+		    int *best_r, double *bb, double *rrhoc, int *iipsi,
 		    double *bbeta, double *sscale,
 		    int *trace_lev)
 {
@@ -744,15 +1453,16 @@ void fast_s_large_n(double *X, double *y,
  *	       to use in the random subsample
  * *best_r = no. of best candidates to be iterated further ("refined")
  * *bb	   = right-hand side of S-equation (typically 1/2)
- * *rrhoc  = tuning constant for Tukey's bi-square loss
+ * *rrhoc  = tuning constant for loss function
  *	     (this should be associated with *bb)
+ * *iipsi  = indicator for type of psi function to be used
  * *bbeta  = final estimator
  * *sscale = associated scale estimator (or -1 when problem)
 */
     int i,j,k, k2, it_k;
     int n = *nn, p = *pp, kk = *K;
-    int groups = *ggroups, n_group = *nn_group;
-    double b = *bb, rhoc = *rrhoc, sc, best_sc, worst_sc;
+    int groups = *ggroups, n_group = *nn_group, ipsi = *iipsi;
+    double b = *bb, sc, best_sc, worst_sc;
     int pos_worst_scale;
     Rboolean conv;
 
@@ -814,7 +1524,7 @@ void fast_s_large_n(double *X, double *y,
 	if( !fast_s_with_memory(xsamp+i*n_group, ysamp+i*n_group,
 				&n_group, pp, nRes, K, max_k, rel_tol,
 				trace_lev, best_r, ind_space, bb, rrhoc,
-				best_betas + i* *best_r,
+				iipsi, best_betas + i* *best_r,
 				best_scales+ i* *best_r)) {
 
 	    *sscale = -1.; /* problem */
@@ -834,13 +1544,23 @@ void fast_s_large_n(double *X, double *y,
     zero_mat(final_best_betas, *best_r, p);
     k = n_group * groups;
     for(i=0; i < (*best_r * groups); i++) {
+	if(*trace_lev >= 3) {
+	    Rprintf("sample[%3d]: before refine_(*, conv=FALSE):\n", i);
+	    Rprintf("beta_cand : "); disp_vec(best_betas[i],p);
+	    Rprintf("with scale %.15g\n", best_scales[i]);
+
+	}
 	refine_fast_s(xsamp, ysamp, weights, k, p, res,
 		      tmp, tmp2, tmp_mat, tmp_mat2, best_betas[i],
 		      kk, &conv/* = FALSE*/, *max_k, *rel_tol, *trace_lev,
-		      b, rhoc, best_scales[i], /* -> */ beta_ref, &sc);
-	if ( sum_rho_sc(res, worst_sc, k, p, rhoc) < b ) {
+		      b, rrhoc, ipsi, best_scales[i], /* -> */ beta_ref, &sc);
+	if(*trace_lev >= 3) {
+	  Rprintf("after refine: beta_ref : "); disp_vec(beta_ref,p);
+	  Rprintf("with scale %.15g\n", sc);
+	}
+	if ( sum_rho_sc(res, worst_sc, k, p, rrhoc, ipsi) < b ) {
 	    /* scale will be better */
-	    sc = find_scale(res, b, rhoc, sc, k, p);
+	  sc = find_scale(res, b, rrhoc, ipsi, sc, k, p);
 	    k2 = pos_worst_scale;
 	    final_best_scales[ k2 ] = sc;
 	    COPY_beta(beta_ref, final_best_betas[k2]);
@@ -859,7 +1579,7 @@ void fast_s_large_n(double *X, double *y,
 	it_k = refine_fast_s(x, y, weights, n, p, res, tmp, tmp2,
 			     tmp_mat, tmp_mat2, final_best_betas[i], kk,
 			     &conv/* = TRUE */, *max_k, *rel_tol, *trace_lev,
-			     b, rhoc, final_best_scales[i],
+			     b, rrhoc, ipsi, final_best_scales[i],
 			     /* -> */ beta_ref, &sc);
 	if(*trace_lev)
 	    Rprintf(" best [%d]: %d iterations, i.e. %sconverged\n",
@@ -903,7 +1623,7 @@ cleanup_and_return:
 int fast_s_with_memory(double **x, double *y,
 		       int *nn, int *pp, int *nRes,
 		       int *K, int *max_k, double *rel_tol, int *trace_lev,
-		       int *best_r, int *ind_space, double *bb, double *rrhoc,
+		       int *best_r, int *ind_space, double *bb, double *rrhoc, int *iipsi,
 		       double **best_betas, double *best_scales)
 {
 /*
@@ -918,8 +1638,9 @@ int fast_s_with_memory(double **x, double *y,
  * *K	   = number of refining steps for each candidate
  * *best_r = number of (refined) to be retained for full iteration
  * *bb	   = right-hand side of the S-equation (typically 1/2)
- * *rrhoc  = tuning constant for Tukey's bi-square rho()
+ * *rrhoc  = tuning constant for loss function
  *	     (this should be associated with *bb)
+ * *iipsi  = indicator for type of loss function to be used
  * *best_betas	= returning the best ... coefficient vectors
  * *best_scales = returning their associated residual scales
 */
@@ -927,7 +1648,8 @@ int fast_s_with_memory(double **x, double *y,
     int n = *nn, p = *pp, nResample = *nRes, *b_i;
     Rboolean lu_sing, conv = FALSE;
     double **x_samp, *beta_cand, *beta_ref, *res;
-    double b = *bb, rhoc = *rrhoc, sc, worst_sc = INFI;
+    int ipsi = *iipsi;
+    double b = *bb, sc, worst_sc = INFI;
     double *weights;
     int pos_worst_scale, is_ok = 1;
     double *tmp, *tmp2, **tmp_mat2, **tmp_mat;
@@ -991,13 +1713,13 @@ int fast_s_with_memory(double **x, double *y,
 	refine_fast_s(x, y, weights, n, p, res,
 		      tmp, tmp2, tmp_mat, tmp_mat2, beta_cand,
 		      *K, &conv/* = FALSE*/, *max_k, *rel_tol, *trace_lev,
-		      b, rhoc, -1., /* -> */ beta_ref, &sc);
+		      b, rrhoc, ipsi, -1., /* -> */ beta_ref, &sc);
 
 	/* FIXME: if sc ~ 0 ---> return beta_cand and be done */
 
-	if ( sum_rho_sc(res, worst_sc, n, p, rhoc) < b )	{
+	if ( sum_rho_sc(res, worst_sc, n, p, rrhoc, ipsi) < b )	{
 	    /* scale will be better */
-	    sc = find_scale(res, b, rhoc, sc, n, p);
+	  sc = find_scale(res, b, rrhoc, ipsi, sc, n, p);
 	    k = pos_worst_scale;
 	    best_scales[ k ] = sc;
 	    for(j=0; j < p; j++)
@@ -1027,7 +1749,7 @@ cleanup_and_return:
 void fast_s(double *X, double *y,
 	    int *nn, int *pp, int *nRes,
 	    int *K, int *max_k, double *rel_tol, int *converged,
-	    int *best_r, double *bb, double *rrhoc,
+	    int *best_r, double *bb, double *rrhoc, int *iipsi,
 	    double *bbeta, double *sscale, int *trace_lev)
 {
 /* *X  = the n x p  design matrix (incl. intercept if appropriate),
@@ -1041,17 +1763,20 @@ void fast_s(double *X, double *y,
  * *converged: will become FALSE  iff at least one of the best_r iterations
  *	       did not converge (in max_k steps to rel_tol precision)
  * *bb	   = right-hand side of the S-equation (typically 1/2)
- * *rrhoc  = tuning constant for Tukey's bi-square rho()
+ * *rrhoc  = tuning constant for loss function
  *	     (this should be associated with *bb)
+ * *iipsi  = indicator for type of loss function to be used
  * *bbeta  = final estimator
  * *sscale = associated scale estimator (or -1 when problem)
 */
     int i,j,k, it_k, no_try_samples;
-    int n = *nn, p = *pp, nResample = *nRes;
+    int n = *nn, p = *pp, nResample = *nRes, ipsi = *iipsi;
     Rboolean lu_sing, conv;
-    double b = *bb, rhoc = *rrhoc;
+    double b = *bb;
     double sc, best_sc, worst_sc, aux;
     int pos_worst_scale;
+
+    /* Rprintf("fast_s %d\n", ipsi); */
 
     /* (Pointers to) Arrays - to be allocated */
     int *ind_space, *b_i;
@@ -1125,7 +1850,7 @@ void fast_s(double *X, double *y,
 	refine_fast_s(x, y, weights, n, p, res,
 		      tmp, tmp2, tmp_mat, tmp_mat2, beta_cand,
 		      *K, &conv/* = FALSE*/, *max_k, *rel_tol, *trace_lev,
-		      b, rhoc, -1., /* -> */ beta_ref, &sc);
+		      b, rrhoc, ipsi, -1., /* -> */ beta_ref, &sc);
 	if(*trace_lev >= 2) {
 	    double del = norm_diff(beta_cand, beta_ref, p);
 	    Rprintf("sample[%3d]: after refine_(*, conv=FALSE):\n", i);
@@ -1140,9 +1865,9 @@ void fast_s(double *X, double *y,
 	    COPY_beta(beta_cand, bbeta);
 	    goto cleanup_and_return;
 	}
-	if ( sum_rho_sc(res, worst_sc, n, p, rhoc) < b )	{
+	if ( sum_rho_sc(res, worst_sc, n, p, rrhoc, ipsi) < b )	{
 	    /* scale will be better */
-	    sc = find_scale(res, b, rhoc, sc, n, p);
+	  sc = find_scale(res, b, rrhoc, ipsi, sc, n, p);
 	    k = pos_worst_scale;
 	    best_scales[ k ] = sc;
 	    COPY_beta(beta_ref, best_betas[k]);
@@ -1163,7 +1888,7 @@ void fast_s(double *X, double *y,
 	it_k = refine_fast_s(x, y, weights, n, p, res, tmp, tmp2,
 			     tmp_mat, tmp_mat2, best_betas[i], *K,
 			     &conv /* = TRUE */, *max_k, *rel_tol, *trace_lev,
-			     b, rhoc, best_scales[i], /* -> */ beta_ref, &aux);
+			     b, rrhoc, ipsi, best_scales[i], /* -> */ beta_ref, &aux);
 	if(*trace_lev)
 	    Rprintf("i=%2d: %sconvergence (%d iter.):",
 		    i, (conv) ? "" : "NON ", it_k);
@@ -1210,7 +1935,7 @@ int refine_fast_s(double **x, double *y, double *weights,
 		  double **tmp_mat, double **tmp_mat2, double *beta_cand,
 		  int kk, Rboolean *conv, int max_k, double rel_tol,
 		  int trace_lev,
-		  double b, double rhoc, double initial_scale,
+		  double b, double *rrhoc, int ipsi, double initial_scale,
 		  double *beta_ref, double *scale)
 {
 /*
@@ -1259,9 +1984,9 @@ int refine_fast_s(double **x, double *y, double *weights,
     for(i=0; i < kk; i++) {
 
 	/* one step for the scale */
-	s0 = s0 * sqrt( sum_rho_sc(res, s0, n, p, rhoc) / b );
+      s0 = s0 * sqrt( sum_rho_sc(res, s0, n, p, rrhoc, ipsi) / b );
 	/* compute weights for IRWLS */
-	get_weights_rhop(res, s0, n, rhoc, weights);
+      get_weights_rhop(res, s0, n, rrhoc, ipsi, weights);
 	/* compute the matrix for IRWLS */
 	r_sum_w_x_xprime(x, weights, n, p, tmp_mat, tmp_mat2);
 	/* compute the vector for IRWLS */
@@ -1319,23 +2044,25 @@ void fast_s_irwls(double **x, double *y,
 }
 #endif
 
-void get_weights_rhop(double *r, double s, int n, double rhoc,
+void get_weights_rhop(double *r, double s, int n, double *rrhoc, int ipsi,
 		      double *w)
 {
     int i;
-    double a;
-    for(i=0; i < n; i++) {
-	a = r[i] / s / rhoc;
-	if( fabs(a) > 1 )
-	    w[i] = 0;
-	else {
-	    a = (1 - a)*(1 + a);
-	    w[i] = a * a;
-	}
-    }
+    /* double a; */
+    for(i=0; i < n; i++)
+      w[i] = wgt(r[i] / s, rrhoc, ipsi);
+      /* { */
+      /* 	a = r[i] / s / rrhoc; */
+      /* 	if( fabs(a) > 1 ) */
+      /* 	  w[i] = 0; */
+      /* 	else { */
+      /* 	  a = (1 - a)*(1 + a); */
+      /* 	  w[i] = a * a; */
+      /* 	} */
+      /* } */
 }
 
-double find_scale(double *r, double b, double rhoc,
+double find_scale(double *r, double b, double *rrhoc, int ipsi,
 		  double initial_scale, int n, int p)
 {
     int max_it = MAX_ITER_FIND_SCALE, it = 0;
@@ -1344,7 +2071,7 @@ double find_scale(double *r, double b, double rhoc,
     while( (++it < max_it) && (fabs(e) > ZERO) )
     {
 	scale = initial_scale *
-	    sqrt( sum_rho_sc(r, initial_scale, n, p, rhoc) / b ) ;
+	  sqrt( sum_rho_sc(r, initial_scale, n, p, rrhoc, ipsi) / b ) ;
 	e = fabs( scale / initial_scale - 1);
 	initial_scale = scale;
     }
@@ -1403,21 +2130,21 @@ void r_sum_w_x_xprime(double **x, double *w, int n, int p,
 }
 
 
-double sum_rho(double *x, int n, double c)
+double sum_rho(double *x, int n, double *c, int ipsi)
 {
     int i;
     double s = 0;
     for(i=0; i < n; i++)
-	s += rho_biwgt(x[i], c);
+      s += rho(x[i], c, ipsi);
     return(s);
 }
 
-double sum_rho_sc(double *r, double scale, int n, int p, double c)
+double sum_rho_sc(double *r, double scale, int n, int p, double *c, int ipsi)
 {
     int i;
     double s = 0;
     for(i=0; i < n; i++)
-	s += rho_biwgt(r[i]/scale, c);
+      s += rho(r[i]/scale, c, ipsi);
     return(s / ((double) n - p));
 }
 
@@ -1546,4 +2273,85 @@ void disp_mat(double **a, int n, int m)
 	for(j=0; j < m; j++) Rprintf("%10.8f ",a[i][j]);
     }
     Rprintf("\n");
+}
+
+void R_find_D_scale(double *rr, double *kkappa, double *ttau, int *llength,
+		    double *sscale, double *cc, int *iipsi, int *ttype, double *rel_tol,
+		    int *max_k, int *converged)
+{
+  /* compute D_scale using iterative algorithm
+     type: 1: d1
+           2: d2
+	   3: dt1
+	   4: dt2
+  */
+  double scale, tsum1, tsum2, w, a;
+
+  *converged = 0;
+  for (int k=0; k < *max_k; k++) {
+    scale = *sscale;
+    tsum1 = 0;
+    tsum2 = 0;
+    // calculate weights
+    for(int i=0; i < *llength; i++) {
+      w = wgt(rr[i] / ttau[i] / scale, cc, *iipsi);
+      switch(*ttype) {
+      case 1: // d1
+	     a = rr[i]/ttau[i];
+	     tsum1 += a*a*w;
+	     tsum2 += w; break;
+      case 2: // d2
+	     a = rr[i]/ttau[i]*w;
+	     tsum1 += a*a;
+	     tsum2 += w*w; break;
+      default:
+      case 3: // dt1
+	     tsum1 += rr[i]*rr[i]*w;
+	     tsum2 += w*ttau[i]*ttau[i]; break;
+      case 4: // d2
+	     a = rr[i]*w;
+	     tsum1 += a*a;
+	     a = ttau[i]*w;
+	     tsum2 += a*a; break;
+      };
+    }
+
+    *sscale = sqrt(tsum1 / tsum2 / *kkappa);
+
+    // Rprintf("\n type = %d, scale = %10.8f \n", *ttype, *sscale);
+
+    if (fabs(scale - *sscale) < *rel_tol * fmax2(*rel_tol, scale)) {
+      *converged = 1;
+      break;
+    }
+  }
+}
+
+/* specialized function calc_fitted */
+/* calculates fitted values from simulation output array. */
+/* this is used to process simulation output in the */
+/* lmrob_simulation vignette */
+void R_calc_fitted(double *XX, double *bbeta, double *RR, int *nn, int *pp, int *nnrep,
+		 int *nnproc, int *nnerr)
+{
+  unsigned long A, B, C, D, E;
+  A = (unsigned long)*nnerr; B = (unsigned long)*nnproc; C = (unsigned long)*nnrep; 
+  D = (unsigned long)*nn; E = (unsigned long)*pp;
+  // calculate fitted values over errstr, procstr and replicates
+  for(unsigned long a = 0; a < A; a++) { // errstr
+    for(unsigned long b = 0; b < B; b++) { // procstr
+      for(unsigned long c = 0; c < C; c++) { // replicates
+	// check for NAs
+	if (!ISNA(bbeta[c + /* 0*C + */  b*C*E + a*B*E*C])) {
+	  for(unsigned long d = 0; d < D; d++) { // observations
+	    RR[d + c*D + b*C*D + a*B*C*D] = 0; // initialize result
+	    for(unsigned long e = 0; e < E; e++) { // predictors
+	      RR[d + c*D + b*C*D + a*B*C*D] += bbeta[c + e*C + b*C*E + a*B*E*C] * 
+		XX[d + e*D + c*E*D + a*C*E*D];
+	    }
+	  }
+	}
+      }
+    }
+  }
 }

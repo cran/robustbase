@@ -8,11 +8,13 @@ library(robustbase)
 source(system.file("mcnaive.R", package = "robustbase"))# mcNaive()
 
 allEQ <- function(x,y) all.equal(x,y, tol = 1e-12)
-DO <- function(...) system.time(stopifnot(...))
+##
+c.time <- function(...) cat('Time elapsed: ', ..., '\n')
+S.time <- function(expr) c.time(system.time(expr))
+DO <- function(...) S.time(stopifnot(...))
 
 DO(0 == sapply(1:100, function(n) mc(seq_len(n))))
 DO(0 == sapply(1:100, function(n) mc(seq_len(n), doRefl=FALSE)))
-
 
 DO(0 == sapply(1:100, function(n) mcNaive(seq_len(n), "simple")))
 DO(0 == sapply(1:100, function(n) mcNaive(seq_len(n), "h.use" )))
@@ -33,8 +35,8 @@ stopifnot(allEQ(1/6, mc(x2)),
 x4 <- c(1:5,7,10,15,25, 1e15) ## - bombed in orignal algo
 mcNaive(x4,"h.use") # 0.5833333
 stopifnot(allEQ( 7/12, mcNaive(x4, "h.use")),
-	  allEQ( 7/12, mc( x4, doRefl= FALSE, eps1=.Machine$double.xmin)),
-	  allEQ(-7/12, mc(-x4, doRefl= FALSE, eps1=.Machine$double.xmin)))
+	  allEQ( 7/12, mc( x4, doRefl= FALSE)),
+	  allEQ(-7/12, mc(-x4, doRefl= FALSE)))
 
 
 set.seed(17)
@@ -51,57 +53,54 @@ for(n in 3:50) {
     }
 };  cat("\n")
 
-
-DO(0 == sapply(1:100, function(n)
-   mc(seq_len(n), doRefl=FALSE, eps1=.Machine$double.xmin)))
-
 ###----  Strict tests of adjOutlyingness():
 
-## works for this (!) seed:
-##FIXME This now (2009-11-18) fails on some 32-bit archs (eg. 'deb1'):
-##FIXME set.seed(1); system.time(a1 <- adjOutlyingness(longley))
-##2 FIXME: fails on Uwe's windows:
-##2 set.seed(11); system.time(a1 <- adjOutlyingness(longley))
+set.seed(1);  S.time(a1.1 <- adjOutlyingness(longley))
+set.seed(11); S.time(a1.2 <- adjOutlyingness(longley))
 ##
-set.seed(2); system.time(a2 <- adjOutlyingness(hbk))
-set.seed(3); system.time(a3 <- adjOutlyingness(hbk[, 1:3]))# the 'X' space
-set.seed(4); system.time(a4 <- adjOutlyingness(milk))
-set.seed(5); system.time(a5 <- adjOutlyingness(wood))
-set.seed(6); system.time(a6 <- adjOutlyingness(wood[, 1:5]))# the 'X' space
+set.seed(2); S.time(a2 <- adjOutlyingness(hbk))
+set.seed(3); S.time(a3 <- adjOutlyingness(hbk[, 1:3]))# the 'X' space
+set.seed(4); S.time(a4 <- adjOutlyingness(milk))
+set.seed(5); S.time(a5 <- adjOutlyingness(wood))
+set.seed(6); S.time(a6 <- adjOutlyingness(wood[, 1:5]))# the 'X' space
 
-## FIXME:  32-bit <-> 64-bit different results {tested on Linux only}
+## 32-bit <-> 64-bit different results {tested on Linux only}
 is32 <- .Machine$sizeof.pointer == 4 ## <- should work for Linux/MacOS/Windows
 isMac <- Sys.info()["sysname"] == "Darwin"
+Rnk <- function(u) rank(unname(u), ties.method = "first")
+## for later testing:
+dput(Rnk(a3$adjout),, {})
+dput(Rnk(a4$adjout),, {})
+
 stopifnot(which(!a2$nonOut) == 1:14,
 	  which(!a3$nonOut) == 1:14,
 	  which(!a4$nonOut) == if(is32 && !isMac) c(1, 2, 41, 70) else c(12, 70),
 	  ## 'longley', 'wood' have no outliers in the "adjOut" sense:
-          ## FIXME: longley is platform dependent too
-##2	  if(isMac) TRUE else sum(a1$nonOut) >= 15,
-          a5$nonOut, a6$nonOut,
-          ## milk (n = 86) :
-	  if(is32 && !isMac) ## FIXME: This is platform (32 <-> 64) dependent!
-          ## <FIXME more> -- not even the same on all 32-bit
-          ## rank(unname(a4$adjout)) ==
-          abs(rank(unname(a4$adjout)) -
-          c(83, 85, 59, 62, 11,   26, 27, 15, 43, 24,   73, 82, 78, 79, 81,
-            76, 77, 63, 72, 68,   30, 11, 36, 18, 56,  47.5, 51, 65, 49, 14,
-            42, 55,  6, 16, 22,   41, 40, 29, 11, 53,   84, 67, 46, 80, 11,
-            11, 75, 70, 69, 64,   52, 66, 35,  5,  3,    1, 33, 23, 47.5, 17,
-            4, 50, 38.5,38.5,31,  20,  7, 57, 37, 86,   34, 25, 44, 71, 74,
-            21, 58,  2, 28, 32,    8, 19, 60, 61, 45,   54)
-              ) <= 5
-          ## </FIXME more>
-            else TRUE,
-
-          ## hbk (n = 75) :
-          rank(a3$adjout) ==
-          c(62, 64, 68, 71, 70,   65, 66, 63, 69, 67,   73, 75, 72, 74, 18,
-            52, 44,  4, 12, 24,    6, 24, 15, 24, 59,   14, 24, 16, 45, 39,
-            49, 33,  9, 54, 24,    2, 24, 50, 56, 10,   32, 41, 43, 37, 60,
-            36, 61, 24, 13, 11,   48, 55, 47, 42, 17,   30, 51, 24,  7, 38,
-            24, 58, 40, 24, 24,   34,  3, 53, 57,  5,    1,  8, 31, 35, 46)
-          )
+	  ## FIXME: longley is platform dependent too
+	  if(isMac) TRUE else sum(a1.2$nonOut) >= 15,
+	  a5$nonOut, a6$nonOut,
+	  ## hbk (n = 75) :
+	  abs(Rnk(a3$adjout) -
+	     c(62, 64, 68, 71, 70,   65, 66, 63, 69, 67,   73, 75, 72, 74, 18,
+	       52, 44,	4, 12, 19,    6, 20, 15, 21, 59,   14, 22, 16, 45, 39,
+	       49, 33,	9, 54, 23,    2, 24, 50, 56, 10,   32, 40, 43, 39, 60,
+	       36, 61, 25, 13, 11,   48, 55, 47, 42, 17,   30, 51, 26,	7, 37,
+	       27, 58, 39, 28, 29,   34,  3, 53, 57,  5,    1,	8, 31, 35, 46)
+	      ) <= 3,
+	  ## milk (n = 86) : -- Quite platform dependent!
+      {
+	  r <- Rnk(a4$adjout)
+	  r64 <- ## the 64-bit (FC13 Linux) values:
+	      c(79, 83, 54, 57,	 9,   20, 27, 15, 59, 23,   74, 85, 80, 82, 84,
+		78, 77, 58, 75, 64,   30, 10, 36, 35, 72,   69, 70, 61, 46, 14,
+		41, 51,	 6, 16, 26,   42, 40, 29, 11, 49,   81, 63, 45, 76, 12,
+		13, 73, 66, 65, 60,   48, 62, 33,  5,  3,    1, 37, 22, 68, 17,
+		 4, 47, 38, 39, 31,   19,  7, 52, 34, 86,   24, 25, 43, 67, 71,
+		21, 53, 2, 28, 32,     8, 18, 55, 56, 44,   50)
+	  ## for the biggest part (79 out of 86), the ranks are "close":
+	  table(d <- (r - r64)[-c(9, 24:27, 59, 71)]) # 32b Linux: 0 .. 6
+	  abs(d) <= 7
+      })
 
 
 
@@ -129,4 +128,4 @@ if(identical(1L, grep("linux", R.version[["os"]]))) { ##----- Linux - only ----
     print(Smem[c("MemTotal", "SwapTotal")])
 }
 
-proc.time()
+c.time(proc.time())

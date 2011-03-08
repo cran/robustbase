@@ -25,7 +25,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      *     weights,temp,index1,index2,aw2,aw,residu,y,nmahad,ndist,
      *     am,am2,slutn,
      *     jmiss,xmed,xmad,a,da,h,hvec,c,cstock,mstock,c1stock,
-     *     m1stock,dath,sd,means,bmeans)
+     *     m1stock,dath,sd,means,bmeans, i_trace)
 c
 c    dat   = cbind(x,y)   hence  n x (p+1)
 c    nvar  = p
@@ -36,6 +36,7 @@ c    krep  = nsamp  (e.g. = 5000 for "best")
 c
       implicit none
       integer kmini, nmini, k1,k2,k3,km10,nmaxi,maxmini
+      integer i_trace
 c
 ccc   parameter (nvmax=115)
 ccc   parameter (nmax=57000)
@@ -45,6 +46,11 @@ cc
       parameter (k1=2)
       parameter (k2=2)
       parameter (k3=100)
+
+cc  krep := the total number of trial subsamples
+cc          to be drawn when n exceeds 2*nmini;
+c           krep = 0  :<==>  "exact"  <==>  all possible subsamples
+
 cc
 ccc   parameter (nvmax1=nvmax+1)
 ccc   parameter (nvmax2=nvmax*nvmax)
@@ -132,9 +138,10 @@ ccc   double precision bmeans(nvmax)
 
       data faclts/2.6477,2.5092,2.3826,2.2662,2.1587,
      *     2.0589,1.9660,1.879,1.7973,1.7203,1.6473/
-cc
-cc
-CDDD  CALL INTPR('>>> Enter RFLTSREG ... nvar=',-1,nvar,1)
+
+      if(i_trace .ge. 2) then
+         call intpr('Entering rfltsreg() - krep: ',-1,krep,1)
+      endif
 
       call rndstart
 C     -------- == GetRNGstate() in C
@@ -189,7 +196,7 @@ cc
       mini(3)=0
       mini(4)=0
       mini(5)=0
-      if(n.gt.(2*nmini-1)) then
+      if(krep.gt.0 .and. n.gt.(2*nmini-1)) then
         kstep=k1
         part=.true.
         ngroup=int(n/(nmini*1.D0))
@@ -252,12 +259,19 @@ cc
 cccc  CALL INTPR('>>> RFLTSREG ... minigr=',-1,iseed,1)
         call rfrdraw(subdat,n,minigr,mini,ngroup,kmini)
       else
+c          krep == 0  or   n <=  2*nmini-1  ( = 599 by default)
+
         minigr=n
         nhalf=nhalff
         kstep=k1
-        if(n.le.replow(nsel)) then
+
+C VT::25.11.2010 - added krep==0 means "exact" (all combinations)        
+        if(krep.eq.0 .or. n.le.replow(nsel)) then
 c		use all combinations; happens iff  nsel = nvar = p <= 6
-          nrep=rfncomb(nsel,n)
+           nrep=rfncomb(nsel,n)
+           if(i_trace .ge. 2) then
+               call intpr('will use *all* combinations: ',-1,nrep,1)
+           endif
         else
           nrep = krep
           all=.false.
@@ -361,6 +375,11 @@ cc             nfac=nvad-1
 c---- - - - - - - - - Outermost loop - - - - - - - - - - - - - - - - - - -
 c----
  5555 object=10.D25
+
+      if(i_trace .ge. 2) then
+         call intpr('Main loop - number of trials nrep: ',-1,nrep,1)
+      endif
+
       if(.not. part .or. final) then
          nn=n
       endif

@@ -33,22 +33,32 @@ glmrobMqle <-
     if (is.null(validmu	 <- family$validmu))  validmu <-  function(mu) TRUE
 
     w.x <- if(ncoef) {
-	switch(weights.on.x,
-	       "none" = rep.int(1, nobs),
-	       "hat" = wts_HiiDist(X = X),
-	       "robCov" = wts_RobDist(X, intercept, covFun = MASS::cov.rob),
-                                        # ARu said  'method="mcd" was worse'
-	       "covMcd" = wts_RobDist(X, intercept, covFun = covMcd),
-	       stop("Weighting method", sQuote(weights.on.x),
-		    " is not implemented"))
+        if(is.character(weights.on.x)){
+            switch(weights.on.x,
+                   "none" = rep.int(1, nobs),
+                   "hat" = wts_HiiDist(X = X)^4,
+                   "robCov" = wts_RobDist(X, intercept, covFun = MASS::cov.rob),
+                                        # ARu said 'method="mcd" was worse'
+                   "covMcd" = wts_RobDist(X, intercept, covFun = covMcd),
+                   stop("Weighting method", sQuote(weights.on.x),
+                        " is not implemented"))
+        }
+        else{
+            if(length(weights.on.x) != nobs)
+                stop(gettextf("weights.on.x needs %d none negative values",
+                              nobs))
+            if(any(weights.on.x) < 0)
+                stop("All weights.on.x must be none negative")
+        }
     }
     else ## ncoef == 0
         rep.int(1,nobs)
 
-
 ### Initializations
-
     stopifnot(control$maxit >= 1, (tcc <- control$tcc) >= 0)
+
+    ## note that etastart and mustart are used to make 'family$initialize' run
+    etastart <-  NULL;  mustart <- NULL
     ## note that 'weights' are used and set by binomial()$initialize !
     eval(family$initialize) ## --> n, mustart, y and weights (=ni)
     ni <- as.vector(weights)# dropping attributes for computation
@@ -90,7 +100,15 @@ glmrobMqle <-
 	       Epsi2 <- Epsi2Pois
                phiEst <- phiEst.cl <- expression({1})
 	   },
-           "Gamma" = { ## added by ARu
+           "gaussian" = {
+               Epsi.init <- EpsiGaussian.init
+               Epsi <- EpsiGaussian
+               EpsiS <- EpsiSGaussian
+               Epsi2 <- Epsi2Gaussian
+               phiEst.cl <- phiGaussianEst.cl
+               phiEst <- phiGaussianEst
+           },
+          "Gamma" = { ## added by ARu
              Epsi.init <- EpsiGamma.init
              Epsi <- EpsiGamma
              EpsiS <- EpsiSGamma
@@ -147,12 +165,14 @@ glmrobMqle <-
     sni <- sqrt(ni)
     eval(comp.V.resid) #-> (Vmu, sVF, residP)
     phi <- eval(phiEst.cl)
+    ## Determine the range of phi values based on the distribution of |residP|
+    Rphi <- c(1e-12, 3*median(abs(residP)))^2
     conv <- FALSE
     if(ncoef) for (nit in 1:control$maxit) {
         eval(comp.scaling) #-> (sV, residPS)
         eval(comp.Epsi.init)
 	## Computation of alpha and (7) using matrix column means:
-	cpsi <- pmax2(-tcc, pmin(residPS,tcc)) - eval(Epsi)
+	cpsi <- pmax.int(-tcc, pmin(residPS,tcc)) - eval(Epsi)
 	EEq <- colMeans(cpsi * w.x * sni/sV * dmu.deta * X)
 	##
 	## Solve  1/n (t(X) %*% B %*% X) %*% delta.coef	  = EEq
@@ -265,7 +285,7 @@ wts_RobDist <- function(X, intercept, covFun)
 	dist2 <- mahalanobis(X, center = rep(0,ncol(X)), cov = Mu)
     }
     ncoef <- ncol(X) ## E[chi^2_p] = p
-    1/sqrt(1+ pmax2(0, 8*(dist2 - ncoef)/sqrt(2*ncoef)))
+    1/sqrt(1+ pmax.int(0, 8*(dist2 - ncoef)/sqrt(2*ncoef)))
 }
 
 
@@ -337,10 +357,10 @@ EpsiSPois <- expression(
 EpsiBin.init <- expression({
     pK <- pbinom(K, ni, mu)
     pH <- pbinom(H, ni, mu)
-    pKm1 <- pbinom(K-1, pmax2(0, ni-1), mu)
-    pHm1 <- pbinom(H-1, pmax2(0, ni-1), mu)
-    pKm2 <- pbinom(K-2, pmax2(0, ni-2), mu)
-    pHm2 <- pbinom(H-2, pmax2(0, ni-2), mu)
+    pKm1 <- pbinom(K-1, pmax.int(0, ni-1), mu)
+    pHm1 <- pbinom(H-1, pmax.int(0, ni-1), mu)
+    pKm2 <- pbinom(K-2, pmax.int(0, ni-2), mu)
+    pHm2 <- pbinom(H-2, pmax.int(0, ni-2), mu)
 
     ## QlV = Q / V, where Q = Sum_j (j - mu_i)^2 * P[Y_i = j]
     ## i.e.  Q =	     Sum_j j(j-1)* P[.] +
@@ -370,6 +390,30 @@ EpsiSBin <- expression(
     ## expression matrix M = (X' B X)/n
     mu/Vmu*(tcc*(pH - ifelse(ni == 1, H >= 1, pHm1)) +
 	    tcc*(pK - ifelse(ni == 1, K > 0,  pKm1))) + ifelse(ni == 0, 0, QlV / (sni*sV))
+})
+
+### --- Gaussian -- family ---
+
+EpsiGaussian.init <- expression({
+    dc <- dnorm(tcc)
+    pc <- pnorm(tcc)
+})
+
+EpsiGaussian <- expression( 0 )
+
+EpsiSGaussian <- expression( 2*pc-1 )
+
+Epsi2Gaussian <- expression( 2*tcc^2*(1-pc)-2*tcc*dc+2*pc-1 )
+
+phiGaussianEst.cl <- expression(
+{
+    ## Classical estimation of the dispersion paramter phi = sigma^2
+    sum(((y - mu)/mu)^2)/(nobs - ncoef)
+})
+
+phiGaussianEst <- expression(
+{
+    sphi <- mad(residP, center=0)^2
 })
 
 ### --- Gamma -- family ---
@@ -421,7 +465,7 @@ phiGammaEst <- expression(
 {
     ## robust estimation of the dispersion parameter by
     ## Huber's porposal 2
-    sphi <- uniroot(Huberprop2, interval=range(residP^2),
+    sphi <- uniroot(Huberprop2, interval=Rphi,
                     ns.resid=residP, mu=mu, Vmu=Vmu, tcc=tcc)$root
 })
 
@@ -437,7 +481,7 @@ Huberprop2.gehtnicht <- function(phi, ns.resid, mu, Vmu, tcc)
     compEpsi2 <- eval(Epsi2)
     ##
     ## return h :=
-    sum(pmax2(-tcc,pmin(ns.resid*snu,tcc))^2) -  nobs*compEpsi2
+    sum(pmax.int(-tcc,pmin(ns.resid*snu,tcc))^2) -  nobs*compEpsi2
 }
 
 Huberprop2 <- function(phi, ns.resid, mu, Vmu, tcc)
@@ -459,5 +503,5 @@ Huberprop2 <- function(phi, ns.resid, mu, Vmu, tcc)
     ##
     compEpsi2 <- tcc^2 + (pPtc - pMtc)*(1-tcc^2) + GLtcc - GUtcc
     ## return h :=
-    sum(pmax2(-tcc,pmin(ns.resid*snu,tcc))^2) -  nobs*compEpsi2
+    sum(pmax.int(-tcc,pmin(ns.resid*snu,tcc))^2) -  nobs*compEpsi2
 }

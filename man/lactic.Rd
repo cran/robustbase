@@ -1,6 +1,5 @@
 \name{lactic}
 \alias{lactic}
-\docType{lactic}
 %% FIXME: shorter
 \title{Lactic Acid Concentration Measurement Data}
 \description{

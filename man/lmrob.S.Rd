@@ -17,16 +17,20 @@ lmrob.S(x, y, control, trace.lev = 0)
     no tracing.}
 }
 \details{
-  This function is used by \code{\link{lmrob.fit.MM}} and not
+  This function is used by \code{\link{lmrob.fit}} and not
   intended to be used on its own (because an S-estimator has too low
   efficiency \sQuote{on its own}).
 }
 \value{
   A list with components
-  \item{coef}{numeric vector (length \eqn{p}) of S-regression coefficient estimates.}
+  \item{coefficients}{numeric vector (length \eqn{p}) of S-regression coefficient estimates.}
   \item{scale}{the S-scale residual estimate}% 'residual estimate' ?? % resid. VAR !?
-  \item{cov}{covariance matrix (\eqn{p \times p}{p x p}) of the
-    coefficient estimates.}
+  % \item{cov}{covariance matrix (\eqn{p \times p}{p x p}) of the
+  %   coefficient estimates.}
+  \item{fitted.values}{numeric vector (length \eqn{n}) of the fitted
+    values.}
+  \item{residuals}{numberic vector (legnth \eqn{n}) of the residuals.}
+  \item{weights}{numeric vector (length \eqn{n}) of the robustness weights.}
   \item{k.iter}{(maximal) number of refinement iterations used.}
   \item{converged}{logical indicating if \bold{all} refinement
     iterations had converged.}
@@ -47,11 +51,12 @@ X1  <- cbind(1, X.)
 set.seed(12)
 m.lmS <- lmrob.S(x=X1, y=y,
                     control = lmrob.control(nRes = 20), trace.lev=1)
-m.lmS[c("coef","scale")]
-stopifnot(all.equal(m.lmS$coef,
-                    10 * (1:4),        tol = 0.005),
+m.lmS[c("coefficients","scale")]
+all.equal(m.lmS$coef, 10 * (1:4), tol = 0.005, check.attributes = FALSE)
+stopifnot(all.equal(m.lmS$coef, 10 * (1:4),
+                    tol = 0.005, check.attributes = FALSE),
           all.equal(m.lmS$scale, 1/10, tol = 0.09))
 }
-\author{ Matias Salibian-Barrera (and Martin Maechler for minor details) }
+\author{ Matias Salibian-Barrera and Manuel Koller (and Martin Maechler for minor details) }
 \keyword{robust}
 \keyword{regression}

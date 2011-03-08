@@ -10,7 +10,7 @@
      Determinant) estimator.
 }
 \usage{
-covMcd(x, cor = FALSE, alpha = 1/2, nsamp = 500, seed = NULL,
+covMcd(x, cor = FALSE, alpha = 1/2, nsamp = 500, nmini = 300, seed = NULL,
        trace = FALSE, use.correction = TRUE, control = rrcov.control())
 }
 \arguments{
@@ -21,13 +21,17 @@ covMcd(x, cor = FALSE, alpha = 1/2, nsamp = 500, seed = NULL,
     over which the determinant is minimized, i.e., \code{alpha*n}
     observations are used for computing the determinant.  Allowed values
     are between 0.5 and 1 and the default is 0.5.}
-  \item{nsamp}{ number of subsets used for initial estimates or \code{"best"}
+  \item{nsamp}{number of subsets used for initial estimates or \code{"best"}
     or \code{"exact"}.  Default is \code{nsamp = 500}.  For
     \code{nsamp = "best"} exhaustive enumeration is done, as long as the
-    number of trials does not exceed 5000. For \code{"exact"},
+    number of trials does not exceed 100'000 (\code{= nLarge}).  For \code{"exact"},
     exhaustive enumeration will be attempted however many samples are
-    needed.  In this case a warning message will be displayed saying
+    needed.  In this case a warning message may be displayed saying
     that the computation can take a very long time.}
+  \item{nmini}{for large \eqn{n}, the algorithm splits the data into
+    maximally \eqn{k_{\mathrm{rep}} = 5}{krep = 5} subsets of size
+    \code{nmini}. %% FIXME? -- more accurately and in detail ?!
+    The original algorithm had \code{nmini = 300} hard coded.}
   \item{seed}{initial seed for random generator, see \code{\link{rrcov.control}}.}
   \item{trace}{logical (or integer) indicating if intermediate results
     should be printed; defaults to \code{FALSE}; values \eqn{\ge 2}{>= 2}

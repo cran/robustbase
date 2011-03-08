@@ -1,6 +1,6 @@
 library(robustbase)
 
-source(system.file("test_MCD.R", package = "robustbase"))
+source(system.file("test_MCD.R", package = "robustbase"))#-> doMCDdata
 ##          ../inst/test_MCD.R
 
 ## -- now do it:
@@ -92,6 +92,7 @@ cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
 
 ## nsamp = "exact" -- here for p=7
 coleman.x <- data.matrix(coleman[, 1:6])
-system.time(CcX <- covMcd(coleman.x, nsamp="exact")) # ~ 3 sec.
+cat('Time : ', system.time(CcX <- covMcd(coleman.x, nsamp="exact")),
+    "\n")# ~ 3 sec. on a fast 2003 machine (Intel Xeon 2400 MHz)
 stopifnot(all.equal(CcX$best,
                     c(2, 5:9, 11,13, 14:16, 19:20), tol=0))

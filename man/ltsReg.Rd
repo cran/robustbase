@@ -18,7 +18,7 @@ ltsReg(x, \dots)
 
 \method{ltsReg}{default}(x, y, intercept = TRUE, alpha = 1/2, nsamp = 500,
        adjust = FALSE, mcd = TRUE, qr.out = FALSE, yname = NULL,
-       seed = NULL, use.correction=TRUE, control, \dots)
+       seed = NULL, trace = FALSE, use.correction=TRUE, control, \dots)
 }
 \arguments{
   \item{formula}{a \code{\link{formula}} of the form \code{y ~ x1 + x2 + ...}.}
@@ -72,6 +72,9 @@ ltsReg(x, \dots)
     \code{\link{qr}}); defaults to false.}
   \item{yname}{the name of the dependent variable.  Default is \code{yname = NULL}}
   \item{seed}{initial seed for random generator, see \code{\link{rrcov.control}}.}
+  \item{trace}{logical (or integer) indicating if intermediate results
+    should be printed; defaults to \code{FALSE}; values \eqn{\ge 2}{>= 2}
+    also produce print from the internal (Fortran) code.}
   \item{use.correction}{ whether to use finite sample correction factors.
     Default is \code{use.correction=TRUE}}
   %% MM:  want control also for formula !?!?!?!?!!
@@ -155,7 +158,10 @@ ltsReg(x, \dots)
   \item{lts.wt}{
     vector like y containing weights that can be used in a weighted
     least squares.  These weights are 1 for points with reasonably
-    small raw residuals, and 0 for points with large raw residuals.
+    small residuals, and 0 for points with large residuals.
+  }
+  \item{raw.weights}{
+    vector containing the raw weights based on the raw residuals and raw scale.
   }
   \item{method}{character string naming the method (Least Trimmed Squares).}
   \item{X}{the input data as a matrix (including intercept column if

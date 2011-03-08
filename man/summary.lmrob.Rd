@@ -5,7 +5,6 @@
 \alias{vcov.lmrob}
 \alias{print.summary.lmrob}
 \alias{model.matrix.lmrob}
-\alias{predict.lmrob}
 %
 \description{
   Summary method for \R object of class \code{"lmrob"} and
@@ -13,9 +12,9 @@
 
   Further, methods \code{\link{fitted}()}, \code{\link{residuals}()} or
   \code{\link{weights}()} work (via the default methods), and
-  \code{\link{predict}()}, \code{\link{vcov}()},
-  \code{\link{model.matrix}()} have explicitly defined \code{lmrob}
-  methods.
+  \code{\link{predict}()} (see \code{\link{predict.lmrob}},
+  \code{\link{vcov}()}, \code{\link{model.matrix}()} have explicitly
+  defined \code{lmrob} methods.
 }
 \usage{
 \method{summary}{lmrob}(object, correlation = FALSE,
@@ -24,10 +23,8 @@
       symbolic.cor= x$symbolic.cor,
       signif.stars = getOption("show.signif.stars"), \dots)
 
-\method{vcov}{lmrob}(object, \dots)
+\method{vcov}{lmrob}(object, cov = object$control$cov, \dots)
 \method{model.matrix}{lmrob}(object, \dots)
-
-\method{predict}{lmrob}(object, newdata = NULL, scale = NULL, \dots)
 }
 \arguments{
   \item{object}{an \R object of class \code{lmrob}, typically created by
@@ -44,13 +41,12 @@
   \item{signif.stars}{logical variable indicating
     whether to use stars to display different levels of
     significance in the individual t-tests.}
-  \item{newdata}{data.frame with \dQuote{new} data values at which
-    prediction should be done; see \code{\link{predict}}.}
-  \item{scale}{scale (estimate) to be used; see \code{\link{predict.lm}}.}
+  \item{cov}{covariance estimation function to use.}
   \item{\dots}{potentially more arguments passed to methods.}
 }
-\seealso{\code{\link{lmrob}}, \code{\link{summary.lm}},
-    \code{\link{print}}, \code{\link{summary}}.
+\seealso{\code{\link{lmrob}}, \code{\link{predict.lmrob}},
+  \code{\link{summary.lm}},
+  \code{\link{print}}, \code{\link{summary}}.
 }
 \examples{
 mod1 <- lmrob(stack.loss ~ ., data = stackloss)

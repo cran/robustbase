@@ -7,8 +7,8 @@
   \code{glmrob} is used to fit generalized linear models by robust
   methods.  The models are specified by giving a symbolic description of
   the linear predictor and a description of the error distribution.
-  Currently, robust methods are implemented only for discrete response
-  distributions, i.e. \code{\link{family} = binomial} or \code{ = poisson}.
+  Currently, robust methods are implemented for \code{\link{family} =
+  binomial},  \code{ = poisson}, \code{ = Gamma} and \code{ = gaussian}.
 }
 
 \usage{
@@ -88,7 +88,8 @@ glmrob(formula, family, data, weights, subset, na.action,
 \details{
   \code{method="Mqle"} fits a generalized linear
   model using Mallows or Huber type robust estimators, as described in
-  Cantoni and Ronchetti (2001).  In contrast to the implementation
+  Cantoni and Ronchetti (2001) and Cantoni and Ronchetti (2006).  In
+  contrast to the implementation
   described in Cantoni (2004), the pure influence algorithm is
   implemented.
   \cr
@@ -120,17 +121,13 @@ glmrob(formula, family, data, weights, subset, na.action,
     Preason's residuals.}
   \item{w.x}{weights used to down-weight observations based on the
     position of the observation in the design space.}
+  \item{dispersion}{robust estimation of dispersion paramter if appropriate}
   \item{cov}{the estimated asymptotic covariance matrix of the estimated
     coefficients.}
   \item{tcc}{the tuning constant c in Huber's psi-function.}
   \item{family}{the \code{\link{family}} object used.}
   \item{linear.predictors}{the linear fit on link scale.}
-  \item{deviance}{up to a constant, minus twice the maximized
-    log-likelihood.  Where sensible, the constant is chosen so that a
-    saturated model has deviance zero.}
-  \item{null.deviance}{The deviance for the null model, comparable with
-    \code{deviance}. The null model will include the offset, and an
-    intercept if there is one in the model}
+  \item{deviance}{NULL; Exists because of compatipility reasons.}
   \item{iter}{the number of iterations used by the influence algorithm.}
   \item{converged}{logical. Was the IWLS algorithm judged to have converged?}
   \item{call}{the matched call.}
@@ -158,17 +155,28 @@ glmrob(formula, family, data, weights, subset, na.action,
   Robust Inference for Generalized Linear Models.
   \emph{JASA} \bold{96} (455), 1022--1030.
 
-  E.Cantoni (2004)
+  E. Cantoni (2004)
   Analysis of Robust Quasi-deviances for Generalized Linear Models.
   \emph{Journal of Statistical Software}, \bold{10},
-  \url{http://www.jstatsoft.org}
+  \url{http://www.jstatsoft.org/v10/i04}
+
+  E. Cantoni and E. Ronchetti (2006)
+  A robust approach for skewed and heavy-tailed outcomes in the analysis
+  of health care expenditures.
+  \emph{Journal of Health Economics} \bold{25}, 198--213.
+
+  S. Heritier, E. Cantoni, S. Copt, M.-P. Victoria-Feser (2009)
+  \emph{Robust Methods in Biostatistics}. Wiley Series in Probability
+  and Statistics.
 }
 
 \author{Andreas Ruckstuhl}
-
 %%\note{ }
 
-\seealso{\code{\link{glmrobMqle.control}}}
+\seealso{
+  \code{\link{predict.glmrob}} for prediction;
+  \code{\link{glmrobMqle.control}}
+}
 \examples{
 ## Binomial response --------------
 data(carrots)

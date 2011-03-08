@@ -125,7 +125,7 @@ doMCDdata <- function(nrep = 1, time = nrep >= 3, short = time, full = !short,
     cat("========================================================\n")
     ##    domcd(x1000$X,data(x1000), nrep)
     ##    domcd(x5000$X,data(x5000), nrep)
-}
+} ## {doMCDdata}
 
 if(FALSE){
     data(mortality, package = "riv")
@@ -137,7 +137,7 @@ if(FALSE){
     mort3 <- mm
     dput(mort3)
 }
-
+## which gives the equivalent of
 mort3 <-
  data.frame(MO70 = c(140, 101, 86, 102, 115, 121, 118, 76.6,
             131, 112, 111, 112, 117, 118, 123, 122, 81.7, 108, 111, 109,

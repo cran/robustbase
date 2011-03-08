@@ -1,23 +1,37 @@
 \name{Qn}
 \alias{Qn}
+\alias{Qn.old}
 \alias{s_Qn}
 %
 \title{Robust Location-Free Scale Estimate More Efficient than MAD}
 \description{
   Compute the robust scale estimator \eqn{Q_n}{Qn}, an efficient
   alternative to the MAD.
+
+  See the references for more.
 }
 \usage{
-Qn(x, constant = 2.2219, finite.corr = missing(constant))
+Qn(x, constant = 2.21914, finite.corr = missing(constant))
 
 s_Qn(x, mu.too = FALSE, \dots)
 }
 \arguments{
   \item{x}{numeric vector of observations.}
   \item{constant}{number by which the result is multiplied; the default
-    achieves consisteny for normally distributed data.}
+    achieves consistency for normally distributed data.  Note that until
+    Nov.~2010, \dQuote{thanks} to a typo in the very first papers, a slightly
+    wrong default constant, 2.2219, was used instead of the correct one
+    which is equal to \code{1 / (sqrt(2) * qnorm(5/8))}.
+
+    If you need the old slightly off version for historical
+    reproducibility, you can use \code{Qn.old()}.
+
+    Note that the relative difference is only about 1 in 1000, and that
+    the correction should not affect the finite sample corrections for
+    \eqn{n \le 9}{n <= 9}.
+  }
   \item{finite.corr}{logical indicating if the finite sample bias
-    correction factor should be applied.  Default to \code{TRUE} unless
+    correction factor should be applied.  Defaults to \code{TRUE} unless
     \code{constant} is specified.}
   \item{mu.too}{logical indicating if the \code{\link[stats]{median}(x)} should
     also be returned for \code{s_Qn()}.}
@@ -35,7 +49,10 @@ s_Qn(x, mu.too = FALSE, \dots)
   \code{\link{covOGK}(*, sigmamu = s_Qn)}.
 }
 \details{
-  ............  FIXME ........
+  As the (default, consistency) constant needed to be corrected,
+  the finite sample correction has been based on a much more extensive
+  simulation, and on a 3rd or 4th degree polynomial model in \eqn{1/n}
+  for odd or even n, respectively.
 }
 \references{
   Rousseeuw, P.J. and Croux, C. (1993)

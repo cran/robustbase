@@ -43,8 +43,9 @@ o ltsReg():  has  undocumented '$resid'
 
 --- glmrob --
 
-o predict.glmrob() __NEEDED__ and probably also residuals.glmrob()
-  should allow a 'type = *' specification like the *.glm() methods.
+o Want residuals.glmrob() which allows a 'type = *' specification like
+  the *.glm() methods:
+  residuals(<glmrob>) gives "bad error" -- because of missing  object$df.residual
 
 o glmrob(*, weights.on.x = "robCov")  currently uses  MASS::cov.rob(), i.e.
   "MVE" and Andreas had a comment that "mcd" is worse.
@@ -66,7 +67,7 @@ o  --> first test already shows that Martin's tests for "huberC == Inf"
 o also, ni = 0 does not work quite as it should ( ./tests/binom-ni-small.R )
 
 o obj $ df ...  maybe should be defined -- for "glm" methods to be
-  applicable
+  applicable  --> e.g. for predict(<glmrob>, interval="..") !
 
 o summary.glmrob() should be better documented;
   we should decide if the current return value is fine.
@@ -83,9 +84,6 @@ o drop1() would be nice
 --- nlrob ---
 
 o nlrob() needs tests in ./tests/ -- you can take some from man/nlrob.Rd
-
-o summary.nlrob() is currently a "no-op" -- printing it should summarize
-		  robustness weights!
 
 ------
 

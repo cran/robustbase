@@ -1,13 +1,14 @@
 \name{lmrob}
 \alias{lmrob}
-\title{MM-Estimators for Linear Regression}
+\title{MM-type Estimators for Linear Regression}
 \description{
-  Computes fast MM-estimators for linear (regression) models.
+  Computes fast MM-type estimators for linear (regression) models.
 }
 \usage{
-lmrob(formula, data, subset, weights, na.action,
-      model = TRUE, x = !control$compute.rd, y = FALSE, singular.ok = TRUE,
-      contrasts = NULL, offset = NULL, control = lmrob.control(...), ...)
+lmrob(formula, data, subset, weights, na.action, method = "MM",
+      model = TRUE, x = !control$compute.rd, y = FALSE,
+      singular.ok = TRUE, contrasts = NULL, offset = NULL,
+      control = NULL, ...)
 }
 \arguments{
   \item{formula}{a symbolic description of the model to be fit.  See
@@ -34,6 +35,9 @@ lmrob(formula, data, subset, weights, na.action,
     default is \code{\link{na.omit}}.  Another possible value is
     \code{NULL}, no action.  Value \code{\link{na.exclude}} can be useful.}
 
+  \item{method}{string specifying the estimator-chain. \code{MM}
+    is interpreted as \code{SM}. See \emph{Details}.}
+
   \item{model, x, y}{logicals.  If \code{TRUE} the corresponding
     components of the fit (the model frame, the model matrix, the
     response) are returned.}
@@ -55,33 +59,52 @@ lmrob(formula, data, subset, weights, na.action,
     instead of via \code{control}.}
 }
 \details{
-  This function computes an MM-regression estimator
-  as described in Yohai (1987).  It uses a bi-square re-desceding
-  score function, and by default it returns a highly
-  robust and highly efficient estimator (with
-  50\% breakdown point and 95\% asymptotic efficiency
-  for normal errors).  The computation is carried out by a call to
-  \code{\link{lmrob.fit.MM}()}.
+  This function computes an MM-type regression estimator
+  as described in Yohai (1987) and Koller and Stahel (2011).  By default
+  it uses a bi-square re-desceding score function, and it returns a
+  highly robust and highly efficient estimator (with 50\% breakdown
+  point and 95\% asymptotic efficiency for normal errors). The
+  computation is carried out by a call to \code{\link{lmrob.fit}()}.
 
-  It uses an S-estimator (Rousseeuw
-  and Yohai, 1984) for the errors which
-  is also computed with a bi-square score function.
-  The S-estimator is computed using the
-  Fast-S algorithm of Salibian-Barrera and Yohai (2006), calling the
-  function \code{\link{lmrob.S}}.
+  The argument \code{setting} of \code{\link{lmrob.control}} is provided
+  to set alternative defaults as suggested in Koller and Stahel (2011)
+  (use \code{setting='KS2011'}). For details, see
+  \code{\link{lmrob.control}}.
 
-  Standard errors are computed using the
-  formulas of Croux, Dhaene and Hoorelbeke (2003).
+  As initial estimator it uses an S-estimator (Rousseeuw and Yohai,
+  1984) which is computed using the Fast-S algorithm of Salibian-Barrera
+  and Yohai (2006), calling the function \code{\link{lmrob.S}}. The
+  following chain of estimates is customizable via the \code{method}
+  argument of \code{\link{lmrob.control}}. There are currently two types
+  of estimates available: \code{M} and \code{D}. The first corresponds
+  to the standard M-regression estimate. \code{D} stands for the Design
+  Adaptive Scale estimate as proposed in Koller and Stahel (2011). The
+  \code{method} argument takes a string that specifies the estimates to
+  be calculated as a chain. Setting \code{method='SMDM'} will result in
+  an intial S-estimate, followed by an M-estimate, a Design Adaptive
+  Scale estimate and a final M-step. For methods involving a
+  \code{D}-step, the default psi value of psi is changed to \code{lqq}.
+
+  By default, standard errors are computed using the formulas of Croux,
+  Dhaene and Hoorelbeke (2003) (\code{\link{lmrob.control}} option
+  \code{cov=".vcov.avar1"}). This method, however, works only for
+  MM-estimates. For other \code{method} arguments, the covariance matrix
+  estimate used is based on the asymptotic normality of the estimated
+  coefficients (\code{cov=".vcov.w"}) as described in Koller and Stahel
+  (2011).
 }
 \value{
   An object of class \code{lmrob}. A list that includes the
   following components:
-  \item{coefficients}{The MM-estimator of the coefficient vector}
-  \item{initial.coefficients}{the S-estimator}
-  \item{scale}{The scale as returned by S-estimator and used in the M one.}
+  \item{coefficients}{The estimate of the coefficient vector}
+  \item{init.S}{The list returned by \code{\link{lmrob.S} (for
+      MM-estimates only}}
+  \item{init}{A similar list that contains the results of intermediate
+  estimates (not for MM-estimates).}
+  \item{scale}{The scale as used in the M estimator.}
   \item{cov}{The estimated covariance matrix of the regression coefficients}
-  \item{residuals}{Residuals associated with the MM-estimator}
-  \item{fitted.values}{Fitted values associated with the MM-estimator}
+  \item{residuals}{Residuals associated with the estimator}
+  \item{fitted.values}{Fitted values associated with the estimator}
   \item{weights}{the \dQuote{robustness weights} \eqn{\psi(r_i/S) / (r_i/S)}.}
   \item{converged}{\code{TRUE} if the IRWLS iterations have converged}
 }
@@ -89,6 +112,10 @@ lmrob(formula, data, subset, weights, na.action,
   Croux, C., Dhaene, G. and Hoorelbeke, D. (2003)
   \emph{Robust standard errors for robust estimators},
   Discussion Papers Series 03.16, K.U. Leuven, CES.
+
+  Koller, M. and Stahel, W.A. (2011), Sharpening Wald-type inference in
+  robust regression for small samples, \emph{submitted to Computational
+  Statistics and Data Analysis}.
 
   Rousseeuw, P.J. and Yohai, V.J. (1984)
   Robust regression by means of S-estimators,
@@ -100,28 +127,29 @@ lmrob(formula, data, subset, weights, na.action,
   Salibian-Barrera, M. and Yohai, V.J. (2006)
   A fast algorithm for S-regression estimates,
   \emph{Journal of Computational and Graphical Statistics},
-  in press. %%% <<< FIXME
+  \bold{15}(2), 414--427.
 
   Yohai, V.J. (1987)
   High breakdown-point and high efficiency estimates for regression.
   \emph{The Annals of Statistics} \bold{15}, 642--65.
 }
-\author{ Matias Salibian-Barrera }
+\author{ Matias Salibian-Barrera and Manuel Koller}
 \seealso{
   \code{\link{lmrob.control}};
-  for the algorithms \code{\link{lmrob.S}} and \code{\link{lmrob.fit.MM}};
+  for the algorithms \code{\link{lmrob.S}} and \code{\link{lmrob.fit}};
   and for methods,
-  \code{\link{summary.lmrob}},
+  \code{\link{predict.lmrob}}, \code{\link{summary.lmrob}},
   \code{\link{print.lmrob}}, and \code{\link{plot.lmrob}}.
 }
 \examples{
 data(coleman)
 summary( m1 <- lmrob(Y ~ ., data=coleman) )
+summary( m2 <- lmrob(Y ~ ., data=coleman, setting = 'KS2011') )
 
 data(starsCYG, package = "robustbase")
 ## Plot simple data and fitted lines
 plot(starsCYG)
- lmST <-    lm(log.light ~ log.Te, data = starsCYG)
+  lmST <-    lm(log.light ~ log.Te, data = starsCYG)
 (RlmST <- lmrob(log.light ~ log.Te, data = starsCYG))
 abline(lmST, col = "red")
 abline(RlmST, col = "blue")

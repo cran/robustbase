@@ -97,6 +97,7 @@ ltsReg.default <-
 	      qr.out = FALSE,
 	      yname = NULL,
 	      seed = NULL,
+          trace = FALSE,
 	      use.correction = TRUE,
 	      control,
 	      ...)
@@ -113,8 +114,6 @@ ltsReg.default <-
 	if(nsamp == defCtrl$nsamp)    nsamp <- control$nsamp
 	if(identical(seed, defCtrl$seed)) seed <- control$seed
 
-	##	  if(print.it == defCtrl$print.it)
-	##	      print.it <- control$print.it
 	if(use.correction == defCtrl$use.correction)
 	    use.correction <- control$use.correction
 	if(adjust == defCtrl$adjust)
@@ -198,7 +197,7 @@ ltsReg.default <-
     dimnames(x) <- list(dnx[[1]], xn) # also works  if(is.null(dnx))
     y <- as.vector(y)
 
-    if (all(x == 1)) { ## includes 'oneD' and empty x (p = 0)
+    if(all(x == 1)) { ## includes 'oneD' and empty x (p = 0)
 	if(qr.out) {
 	    warning("'qr.out = TRUE' for univariate location is disregarded")
 	    qr.out <- FALSE
@@ -210,8 +209,8 @@ ltsReg.default <-
 	    center <- as.vector(mean(y))
 	    ## xbest <- NULL
 	} else {
-	    sh <- .fastmcd(as.matrix(y), as.integer(h), nsamp = 0)
-
+            sh <- .fastmcd(as.matrix(y), as.integer(h), nsamp = 0, # (y *is* 1-dim.!)
+                           nmini = 300)
 	    center <- as.double(sh$initmean)
 	    qalpha <- qchisq(h/n, 1)
 	    calphainvers <- pgamma(qalpha/2, 1/2 + 1)/(h/n)
@@ -231,15 +230,17 @@ ltsReg.default <-
 		    alpha = alpha,
 		    quan  = h,
 		    raw.resid = resid/scale)
-
-	if (abs(scale) < 1e-07) {
-	    weights <- as.numeric(abs(resid) < 1e-07)
+    ans$raw.weights <- rep(NA, length(na.y))
+	if(abs(scale) < 1e-07)
+    {
+	    ans$raw.weights[ok] <- weights <- as.numeric(abs(resid) < 1e-07)
 	    ans$scale <- ans$raw.scale <- 0
 	    ans$crit <- 0
 	}
-	else {
+	else
+    {
 	    ans$raw.scale <- scale
-	    weights <- as.numeric(abs(resid/scale) <= quantiel)
+	    ans$raw.weights[ok] <- weights <- as.numeric(abs(resid/scale) <= quantiel)
 	    reweighting <- cov.wt(as.matrix(y), wt = weights)
 	    ans$coefficients <- reweighting$center
 	    ans$scale <- sqrt(sum(weights)/(sum(weights) - 1) * reweighting$cov)
@@ -293,6 +294,7 @@ ltsReg.default <-
 	    else function(cf) cf
 
 	ans <- list(alpha = alpha)
+    ans$raw.weights <- rep(NA, length(na.y))
 
 	if(alpha == 1) { ## alpha == 1 -----------------------
 	    ## old, suboptimal: z <- lsfit(x, y, intercept = FALSE)
@@ -310,14 +312,14 @@ ltsReg.default <-
 	    ##cat("++++++ B - alpha == 1... - s0=",s0,"\n")
 	    if(abs(s0) < 1e-07) {
 		fitted <- x %*% z$coef
-		weights <- as.numeric(abs(resid) <= 1e-07)
+		ans$raw.weights[ok] <- weights <- as.numeric(abs(resid) <= 1e-07)
 		ans$scale <- ans$raw.scale <- 0
 		ans$coefficients <- ans$raw.coefficients
 	    }
 	    else {
 		ans$raw.scale <- s0
 		ans$raw.resid <- resid / s0
-		weights <- as.numeric(abs(ans$raw.resid) <= quantiel)
+		ans$raw.weights[ok] <- weights <- as.numeric(abs(ans$raw.resid) <= quantiel)
 		sum.w <- sum(weights)
 		## old, suboptimal: z <- lsfit(x, y, wt = weights, intercept = FALSE)
 		z <- lm.wfit(x, y, w = weights)
@@ -362,7 +364,7 @@ ltsReg.default <-
 
 	    h <- h.alpha.n(alpha, n, rk)
 
-	    z <- .fastlts(x, y, h, nsamp, intercept, adjust)
+	    z <- .fastlts(x, y, h, nsamp, intercept, adjust, trace=as.integer(trace))
 
 	    ## vt:: lm.fit.qr == lm.fit(...,method=qr,...)
 	    ##	cf <- lm.fit.qr(x[z$inbest, , drop = FALSE], y[z$inbest])$coef
@@ -384,14 +386,14 @@ ltsReg.default <-
 	    s0 <- s0 / sqrt(1 - (2 * n)/(h / qn.q) * dnorm(qn.q)) * correct
 
 	    if (abs(s0) < 1e-07) {
-		weights <- as.numeric(abs(resid) <= 1e-07)
+		ans$raw.weights[ok] <- weights <- as.numeric(abs(resid) <= 1e-07)
 		ans$scale <- ans$raw.scale <- 0
 		ans$coefficients <- ans$raw.coefficients
 	    }
 	    else {
 		ans$raw.scale <- s0
 		ans$raw.resid <- resid/ans$raw.scale
-		weights <- as.numeric(abs(resid/s0) <= quantiel)
+		ans$raw.weights[ok] <- weights <- as.numeric(abs(resid/s0) <= quantiel)
 		sum.w <- sum(weights)
 
 		## old, suboptimal: z1 <- lsfit(x, y, wt = weights, intercept = FALSE)
@@ -422,7 +424,8 @@ ltsReg.default <-
 	    ## unneeded: names(ans$coefficients) <- names(ans$raw.coefficients)
 	    ans$crit <- z$objfct
 	    if (intercept) {
-		sh <- .fastmcd(as.matrix(y), as.integer(h), nsamp = 0)
+                sh <- .fastmcd(as.matrix(y), as.integer(h), nsamp = 0, # (y *is* 1-dim.!)
+                               nmini = 300)
 		y <- as.vector(y) ## < ??
 		sh <- as.double(sh$adjustcov)
 		iR2 <- (sh0/sh)^2
@@ -481,18 +484,6 @@ ltsReg.default <-
     ans$call <- match.call()
     return(ans)
 } ## {ltsReg.default}
-
-##predict.lts <- function (object, newdata, na.action = na.pass, ...)
-##{
-##    if (missing(newdata)) return(fitted(object))
-##    ## work hard to predict NA for rows with missing data
-##    Terms <- delete.response(terms(object))
-##    m <- model.frame(Terms, newdata, na.action = na.action,
-##		       xlev = object$xlevels)
-##    if(!is.null(cl <- attr(Terms, "dataClasses"))) .checkMFClasses(cl, m)
-##    X <- model.matrix(Terms, m, contrasts = object$contrasts)
-##    drop(X %*% object$coefficients)
-##}
 
 summary.lts <- function (object, correlation = FALSE, ...)
 {
@@ -768,7 +759,7 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
     return(1/fp.alpha.n)
 } ## LTScnp2.rew
 
-.fastlts <- function(x, y, h.alph, nsamp, intercept, adjust)
+.fastlts <- function(x, y, h.alph, nsamp, intercept, adjust, trace = 0)
 {
     dx <- dim(x)
     n <- dx[1]
@@ -782,7 +773,10 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
 
     ##	 vt::03.02.2006 - added options "best" and "exact" for nsamp
     if(!missing(nsamp)) {
-	if(!is.numeric(nsamp) || nsamp <= 0) {
+##
+##	VT::16.11.2010 - I wonder where did this come from!
+##	if(!is.numeric(nsamp) || nsamp <= 0) {
+	if(is.numeric(nsamp) && nsamp <= 0) {
 	    warning("Invalid number of trials nsamp=",nsamp,"! Using default.\n")
 	    nsamp <- -1
 	} else if(nsamp == "exact" || nsamp == "best") {
@@ -885,5 +879,6 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
              xmed, xmad, a, da, h, hvec, c,
              cstock, mstock, c1stock, m1stock,
              dath, sd,
-	     means, bmeans)[ c("inbest", "objfct") ]
+	     means, bmeans,
+         i.trace= as.integer(trace))[ c("inbest", "objfct") ]
 }

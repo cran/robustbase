@@ -9,12 +9,13 @@
 adjboxStats(x, coef = 1.5, a = -4, b = 3, do.conf = TRUE, do.out = TRUE)
 }
 \arguments{
-  \item{x}{ ~~Describe \code{x} here~~ }
-  \item{coef}{ ~~Describe \code{coef} here~~ }
-  \item{a}{ ~~Describe \code{a} here~~ }
-  \item{b}{ ~~Describe \code{b} here~~ }
-  \item{do.conf}{ ~~Describe \code{do.conf} here~~ }
-  \item{do.out}{ ~~Describe \code{do.out} here~~ }
+  \item{x}{a numeric vector for which adjusted boxplot statistics are computed.}
+  \item{coef}{number determining how far \sQuote{whiskers} extend out
+    from the box, see \code{\link{boxplot.stats}}.}
+  \item{a, b}{scaling factors multiplied by the medcouple
+    \code{\link{mc}()} to determine outlyer boundaries; see the references.}
+  \item{do.conf,do.out}{logicals; if \code{FALSE}, the \code{conf} or
+    \code{out} component respectively will be empty in the result.}
 }
 % \details{
 %   ~~ If necessary, more details than the description above ~~
@@ -33,7 +34,8 @@ adjboxStats(x, coef = 1.5, a = -4, b = 3, do.conf = TRUE, do.out = TRUE)
     of the whiskers.}
 }
 \author{ R Core Development Team, slightly adapted by Tobias Verbeke }
-\note{The code slightly modifies the code of \code{\link{boxplot.stats}}.
+\note{The code only slightly modifies the code of \R's
+  \code{\link{boxplot.stats}}.
 }
 \seealso{\code{\link{adjbox}()}, also for references,
   the function which mainly uses this one;
@@ -44,7 +46,5 @@ data(condroz)
 astat <- adjboxStats(condroz[,"Ca"])
 astat
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
 \keyword{robust}
 \keyword{univar}

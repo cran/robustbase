@@ -34,6 +34,7 @@ covMcd <- function(x,
            cor = FALSE,
            alpha = 1/2,
            nsamp = 500,
+           nmini = 300,
            seed = NULL,
            trace = FALSE,
            use.correction = TRUE,
@@ -188,7 +189,7 @@ covMcd <- function(x,
         return(ans)
     } ## end {alpha=1} --
 
-    mcd <- .fastmcd(x, h, nsamp, trace=as.integer(trace))
+    mcd <- .fastmcd(x, h, nsamp, nmini, trace=as.integer(trace))
 
     ## Compute the consistency correction factor for the raw MCD
     ##  (see calfa in Croux and Haesbroeck)
@@ -597,7 +598,7 @@ MCDcnp2.rew <- function(p, n, alpha)
 } ## end{ MCDcnp2.rew }
 
 
-.fastmcd <- function(x, h, nsamp, trace = 0)
+.fastmcd <- function(x, h, nsamp, nmini, trace = 0)
 {
     dx <- dim(x)
     n <- dx[1]
@@ -605,11 +606,13 @@ MCDcnp2.rew <- function(p, n, alpha)
 
     ##   parameters for partitioning {equal to those in Fortran !!}
     kmini <- 5
-    nmini <- 300
+    ## nmini <- 300
     km10 <- 10*kmini
     nmaxi <- nmini*kmini
 
-    ##   vt::03.02.2006 - added options "best" and "exact" for nsamp
+    ## vt::03.02.2006 - added options "best" and "exact" for nsamp
+    ##
+    nLarge <- 100000 # <-- Nov.2009; was 5000
     if(!missing(nsamp)) {
         if(is.numeric(nsamp) && (nsamp < 0 || nsamp == 0 && p > 1)) {
             warning("Invalid number of trials nsamp= ", nsamp,
@@ -621,23 +624,28 @@ MCDcnp2.rew <- function(p, n, alpha)
                 ## TODO: make 'nmini' user configurable; however that
                 ##      currently needs changes to the fortran source
                 ##  and re-compilation!
-                warning("Options 'best' and 'exact' not allowed for n greater than ",
+                warning("Options 'best' and 'exact' not allowed for n greater than  2*nmini-1 =",
                         2*nmini-1,".\nUsing default.\n")
                 nsamp <- -1
             } else {
                 nall <- choose(n, myk)
-                if(nall > 5000 && nsamp == "best") {
-                    nsamp <- 5000
-                    warning("'nsamp = \"best\"' allows maximally 5000 subsets;\n",
-                            "computing these subsets of size ",
-                            myk," out of ",n,"\n")
-                } else {   ## "exact" or ("best"  &  nall < 5000)
+                msg <- paste("subsets of size", myk, "out of", n)
+                if(nall > nLarge && nsamp == "best") {
+                    nsamp <- nLarge
+                    warning("'nsamp = \"best\"' allows maximally ",
+                            format(nLarge, scientific=FALSE),
+                            " subsets;\ncomputing these ", msg,
+                            immediate. = TRUE)
+                } else {   ## "exact" or ("best"  &  nall < nLarge)
                     nsamp <- 0 ## all subsamples -> special treatment in Fortran
-                    if(nall > 5000)
-                        warning("Computing all ", nall, " subsets of size ",myk,
-                                " out of ",n,
-                                "\n This may take a very long time!\n",
-                                immediate. = TRUE)
+                    if(nall > nLarge) {
+                        msg <- paste("Computing all", nall, msg)
+                        if(nall > 10*nLarge)
+                            warning(msg, "\n This may take a",
+                                    if(nall/nLarge > 100) " very", " long time!\n",
+                                    immediate. = TRUE)
+                        else message(msg)
+                    }
                 }
             }
         }
@@ -652,6 +660,12 @@ MCDcnp2.rew <- function(p, n, alpha)
         }
     }
 
+    if(nsamp > (mx <- .Machine$integer.max)) {
+	warning("nsamp > i_max := maximal integer -- not allowed;\n",
+		" set to i_max = ", mx)
+	nsamp <- mx
+    }
+
     ##   Allocate temporary storage for the Fortran implementation,
     ##   directly in the .Fortran() call.
     ##    (if we used C, we'd rather allocate there, and be quite faster!)
@@ -662,6 +676,7 @@ MCDcnp2.rew <- function(p, n, alpha)
              p =    as.integer(p), ## = 'nvar'  in Fortran
              nhalff =   as.integer(h),
              nsamp  =   as.integer(nsamp), # = 'krep'
+             nmini  =   as.integer(nmini),
              initcovariance = double(p * p),
              initmean       = double(p),
              best       = rep.int(as.integer(10000), h),

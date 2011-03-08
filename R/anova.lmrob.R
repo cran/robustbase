@@ -10,6 +10,9 @@ anova.lmrob <- function(object, ..., test = c("Wald", "Deviance"))
 		paste(deparse(dotargs[named]), collapse = ", "))
     dotargs <- dotargs[!named]
     test <- match.arg(test)
+    ## method argument has to end with 'M' (req. for refitting)
+    if (test == "Deviance" && !grepl('M$', object$control$method))
+      stop("For test = 'Deviance', the estimator chain has to end with 'M'")
     if (length(dotargs) > 0) {
 	length.tl <- function(x) length(attr(terms(x),"term.labels"))
 	isFormula <- unlist(lapply(dotargs, function(x) class(x) == "formula"))
@@ -68,7 +71,8 @@ anovaLmrobList <- function (object, modform, initCoef, test)
     variables <- c(list(formula(terms(object))), modform)
     topnote <- paste("Model ", format(1:nmodels), ": ", variables,
 		     sep = "", collapse = "\n")
-    note <- "Largest model fitted by lmrob(), i.e. MM"
+    note <- paste("Largest model fitted by lmrob(), i.e.",
+                  object$control$method)
     ## paste("Models fitted by method '", methods[1], "'", sep="")
     structure(as.data.frame(tbl), heading = c(title, "", topnote, note,""),
 	      class = c("anova", "data.frame"))
@@ -105,7 +109,8 @@ anovaLmrobPair <- function(FMfit, reduced.model, initCoef, test)
 	y <- FMfit$residuals + FMfit$fitted.values
 	s0 <- FMfit$scale
 	psi <- function(u, deriv = 0)
-	    tukeyPsi1(u, deriv, cc = FMfit$control$tuning.psi)
+	    lmrob.psifun(u, cc = FMfit$control$tuning.psi,
+                         psi = FMfit$control$psi, deriv)
 	iC <-
 	    if(is.null(initCoef)) {
 		res <- as.vector(y - X[,RMod] %*% FMfit$coef[RMod])
@@ -117,7 +122,6 @@ anovaLmrobPair <- function(FMfit, reduced.model, initCoef, test)
 
 	RMfit <- lmrob..M..fit(x = X[,RMod], y = y,
 			       beta.initial = iC, scale = s0,
-			       c.psi = FMfit$control$tuning.psi,
 			       control = FMfit$control)
 	FMres <- as.vector(y - X %*% FMfit$coef)
 	RMres <- RMfit$resid ## as.vector(y - X[,RMod] %*% RMfit$coef)

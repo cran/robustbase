@@ -4,14 +4,14 @@
 %%% -----
 \title{Control object for the estimation parameters }
 \description{
-     Auxilary function for passing the estimation options as parameters to the
+     Auxiliary function for passing the estimation options as parameters to the
      estimation functions.
 
      \bold{NOTE: The name  WILL change !!!!}
 }
 \usage{
-rrcov.control(alpha = 1/2, nsamp = 500, seed = NULL, tolSolve = 1e-14,
-              trace = FALSE,
+rrcov.control(alpha = 1/2, nsamp = 500, nmini = 300,
+              seed = NULL, tolSolve = 1e-14, trace = FALSE,
               use.correction = TRUE, adjust = FALSE)
 }
 \arguments{
@@ -26,6 +26,9 @@ rrcov.control(alpha = 1/2, nsamp = 500, seed = NULL, tolSolve = 1e-14,
     exhaustive enumeration will be attempted however many samples
     are needed. In this case a warning message will be displayed
     saying that the computation can take a very long time. }
+  \item{nmini}{for \code{\link{covMcd}}: For large \eqn{n}, the algorithm
+    splits the data into maximally \eqn{k_{\mathrm{rep}} = 5}{krep = 5}
+    subsets of size \code{nmini}.}%%- more details  see --- ./covMcd.Rd
   \item{seed}{initial seed for R's random number generator; see
     \code{\link{.Random.seed}} and the description of the \code{seed}
     argument in \code{\link{lmrob.control}}.}
@@ -41,11 +44,11 @@ rrcov.control(alpha = 1/2, nsamp = 500, seed = NULL, tolSolve = 1e-14,
     \code{adjust = FALSE}.}
 }
 \details{
-For details about the estimation options see the corresponding estimation functions.
+  For details about the estimation options see the corresponding
+  estimation functions.
 }
 \value{
   A list with components, as the parameters passed  by the invocation
-
 }
 \author{Valentin Todorov}
 % \references{

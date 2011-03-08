@@ -11,8 +11,8 @@
 \usage{
 mc(x, \dots)
 \method{mc}{default}(x, na.rm = FALSE, doReflect = (length(x) <= 100),
-     eps1 = .Machine$double.xmin, eps2 = eps1, maxit = 100, trace.lev = 0,
-     full.result = FALSE, \dots)
+     eps1 = .Machine$double.eps, eps2 = .Machine$double.xmin,
+     maxit = 100, trace.lev = 0, full.result = FALSE, \dots)
 }
 \arguments{
   \item{x}{a numeric vector}

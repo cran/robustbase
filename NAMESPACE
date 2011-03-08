@@ -12,7 +12,7 @@ importFrom("stats", anova, coef, cov, family, fitted,
 ## we also currently use MASS::cov.rob(); but probably only temporarily
 
 ## Functions defined in this package
-export(Sn, Qn,
+export(Sn, Qn, Qn.old,
        s_Sn, s_Qn, s_mad, s_IQR,
 
        summarizeRobWeights,
@@ -35,8 +35,8 @@ export(Sn, Qn,
 ##     tukeyPsi, # = biweight / bisquare
        tukeyChi, tukeyPsi1, # <- used by lmrob.*()
 
-       lmrob,
-       lmrob.fit.MM, lmrob..M..fit,
+       lmrob, lmrob.fit,
+       lmrob.fit.MM, lmrob..M..fit, lmrob..D..fit,
        lmrob.S,
        lmrob.control,
 
@@ -73,6 +73,7 @@ S3method(plot, lts)
 S3method(plot, mcd)
 S3method(plot, lmrob)
 S3method(predict, lmrob)
+S3method(predict, glmrob)
 S3method(predict, nlrob)
 
 S3method(print, glmrob)
@@ -82,6 +83,7 @@ S3method(print, nlrob)
 S3method(print, lmrob)
 S3method(print, summary.glmrob)
 S3method(print, summary.lmrob)
+S3method(print, summary.nlrob)
 S3method(print, summary.lts)
 
 S3method(residuals, nlrob)

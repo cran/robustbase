@@ -26,20 +26,24 @@ adjOutlyingness(x, ndir = 250, clower = 3, cupper = 4,
     interquartile range (\code{\link{IQR}}) is multiplied to determine
     \sQuote{boxplot hinges}-like upper and lower bounds.}
   \item{qr.tol}{positive tolerance to be used for \code{\link{qr}} and
-    \code{\link{solve.qr}} for determining the \code{ndir} directions
+    \code{\link{solve.qr}} for determining the \code{ndir} directions,
     each determined by a random sample of \eqn{p} (out of \eqn{n})
     observations.}
 }
+\note{
+ The result is \emph{random} as it depends on the sample of
+ \code{ndir} directions chosen.
+}
 \details{
-
   \bold{FIXME}:  Details in the comment of the Matlab code;
   also in the reference(s).
-%% SEE ~/R/MM/STATISTICS/robust/MC/mcmatl/adjoutlyingness.m
-%% ---- which has notes about input/output etc of the corresponding
-%%      Matlab code
+  %% SEE /u/maechler/R/MM/STATISTICS/robust/MC/mcmatl/adjoutlyingness.m
+  %% ---- which has notes about input/output etc of the corresponding
+  %%      Matlab code
 
- The method as described can be useful as preprocessing in
- FASTICA (\url{http://www.cis.hut.fi/projects/ica/fastica/}
+  The method as described can be useful as preprocessing in
+  FASTICA (\url{http://www.cis.hut.fi/projects/ica/fastica/};
+  see also the \R package \pkg{fastICA}.
 }
 \value{
   a list with components

@@ -1,8 +1,378 @@
+2011-03-08  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version, Suggests): 0.7-3 and added xtable and
+	ggplot2 to Suggests.
+
+	* inst/doc/lmrob_simulation.Rnw: re- or moved dependencies that are
+	not required or just needed for data generation.
+
+	* inst/doc/error.distributions.R: removed dependency on skewt.
+
+2011-02-10  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): Version: 0.7-2
+
+	* inst/doc/lmrob_simulation.Rnw: updated title.
+	* inst/doc/lmrob_simulation.bib: updated references.
+	* man/lmrob.control.Rd: as above.
+	* man/lmrob.Rd: as above.
+
+2011-01-28  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/glmrobMqle.R (Huberprop2, ...),
+	* R/psi-rho-funs.R (huberPsi): replace pmin2/pmax2 by
+	pmin.int()/pmax.int().
+
+2011-01-26  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	* R/psi-rho-funs.R (psiFunc, chgDefaults): default arguments are
+	now also set for the E... slots
+	* tests/psi-rho-etc.R: updated comments
+	* tests/psi-rho-etc.Rout.save: updated accordingly
+
+2011-01-20  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	Updated reference to Koller and Stahel 2011 paper.
+
+	* man/lmrob.control.Rd: updated reference. KS2010 -> KS2011.
+	* man/lmrob.Rd: see above
+	* inst/doc/lmrob_simulation.bib: updated ks2011 reference.
+	* inst/doc/lmrob_simulation.Rnw: see above
+	* R/lmrob.MM.R (lmrob.control): setting argument: KS2011 instead of
+	KS2010
+
+2011-01-18  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	* tests/psi-rho-etc.R: added tests to document bug in psi_func
+	class and pmin2/pmax2 functions.
+	* tests/psi-rho-etc.Rout.save: results as they should be
+
+	* inst/doc/lmrob_simulation.Rnw: added table with tuning constants
+	used in simulation.
+
+2010-12-04  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/qnsn.R (Qn): even better finite sample correction,
+	from an analysis of a Qn simulation.
+	(Qn.old): provide, if needed for back-compatibility.
+
+2010-12-02  Valentin Todorov  <valentin.todorov@chello.at>
+
+	* R/ltsReg.R, man/ltsReg.Rd, tests/LTS-specials.R: the raw weights
+	'raw.weights' added to the returned object
+
+	* R/ltsReg.R, src/rfltsreg.f, man/ltsReg.Rd: options nsamp="exact"
+	and nsamp="best" fixed; Added 'trace' parameter
+
+2010-12-02  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* tests/mc-strict.R (adjOutlyingness): adapt tests to the fixed
+	mc() code; using some tolerance... still need to be tested on Win/Mac/..
+
+	* R/nlrob.R (summary.nlrob): do not compute 'se' if not converged;
+	update help page;
+	(print.summary.nlrob): print  "non-convergence"
+
+	* man/summary.nlrob.Rd, man/predict.lmrob.Rd, ..: update and
+	trivial changes.
+
+	* R/qnsn.R (Qn): fixed the consistency constant (thanks to Peter
+	Ruckdeschel), slightly adapting the finite sample factors for n = 2:9.
+
+2010-12-02  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.6-9
+
+	* R/mc.c: fixed several bugs, consequent use of eps[0] and eps[1]
+	to avoid numerical problems, fixed memory corruption bug that
+	caused segfaults from time to time.
+
+	* tests/mc-etc.R: see below
+	* tests/mc-etc.Rout.save: see below
+	* tests/mc-strict: updated tests and results
+
+	* man/mc.Rd: see below
+	* R/mc.R (mc.default): updated eps1 and eps2 defaults.
+
+	* inst/doc/lmrob_simulation.Rnw: minor cosmetic changes
+	* inst/doc/graphics.functions.R: added some helper functions to
+	ease working with color palettes used by ggplot2.
+
+2006-10-27  Andreas Ruckstuhl  <rks@zhwin.ch>
+	and
+2010-10-28  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.6-8
+
+	* R/lmrobPredict.R, R/glmrobPredict.R: new more careful prediction
+	methods, now documented in
+	* man/predict.lmrob.Rd,	man/predict.glmrob.Rd:
+	and no longer in
+	* man/summary.lmrob.Rd:
+
+2010-10-13  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.6-7
+
+	* R/lmrob.MM.R (lmrob.psifun, lmrob.rhofun, lmrob.wgtfun):
+	as.double caused input to loose dimension attribute, fixed.
+
+	* inst/doc/lmrob_simulation.Rnw: Updated vignette title. Enhanced
+	aggregation procedure.
+	* inst/doc/lmrob_simulation.Bib: Fixed entry KS2010, no more
+	trouble with bibtex.
+	* inst/doc/aggr_results.Rdata: updated simulation results. n = 400
+	missing for now.
+	* inst/doc/error.distributions.R: added cskt distribution: centered
+	skewed t-distribution.
+	* inst/doc/simulation.results.R: small changes in proclist generation.
+
+2010-10-11  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.6-6
+	(Depends): Depends on R 2.9.0 (use of grepl)
+
+	* man/lmrob.Rd: Design Adapted Scale estimate renamed to Design
+	Adaptive Scale estimate
+	* man/lmrob.fit.Rd: ditto
+	* man/lmrob..D..fit.Rd: ditto
+
+2010-10-08  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.6-5
+
+	* inst/doc: added directory.
+	* inst/doc/lmrob_simulation.Rnw: vignette containing simulation
+	study of Koller and Stahel (2010).
+	* inst/doc/lmrob_simulation.bib: bibtex file for vignette
+	* inst/doc/graphics.functions.R: R code used in vignette, graphics
+	helper functions.
+	* inst/doc/error.distributions.R: R code used in vignette, custom
+	distribution functions.
+	* inst/doc/simulation.functions.R: R code used in vignette,
+	functions used in simulations.
+	* inst/doc/estimating.functions.R: R code used in vignette, extra
+	estimating functions.
+	* inst/doc/asymptotic.max.bias.Rdata: Cache of calculations, to
+	speed up vignette making.
+	* inst/doc/aggr_results.Rdata: Cache of calculations, to
+	speed up vignette making.
+	* .Rbuildignore: Omitting temporary Sweave output files from the
+	build.
+
+	* src/init.c: added function to process simulation output (used in
+	vignette).
+	* src/lmrob.c (R_calc_fitted): ditto
+	* src/robustbase.h: ditto
+
+2010-10-08  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.6-4
+
+	* inst/CITATION: Added my name.
+
+	* man/lmrob.control.Rd: Added more information to
+	"setting"-Argument.
+	* man/lmrob.Rd: ditto. Added example for "setting" argument.
+
+	* R/lmrob.R (lmrob): Moved call of lmrob.control to function code.
+
+	* R/lmrob.MM.R (lmrob.control): Changed setting KS2010: uses lqq
+	instead of ggw. Fixed bug when using unknown setting.
+
+	* R/lmrob.MM.R (lmrob.fit): Check for initial estimator. Issues
+	warning if neq S.
+
+2010-08-13  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.6-3
+
+	* R/lmrob.MM.R (lmrob.psifun, ..., ghq): cosmetic changes; cleaner
+	* src/lmrob.c (rho, psi, psip, ...): cleaner; partly faster; also
+	ok for x = +-Inf....
+
+	* tests/lmrob-psifns.R: test psi(), rho(), etc -- also nice plots:
+	tests/rob-psifns.pdf after .. check.
+
+2010-08-13  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	* R/lmrob.MM.R: changed the naming of lgw to the more accurate lqq
+	"linear, quadratic, quadratic" (by construction of psi prime).
+
+	* tests/lmrob-psifuns.R: changed the naming of lgw to the more
+	accurate lqq
+	* man/lmrob.control.Rd: ditto
+
+	* man/summary.lmrob.Rd: updated documentation to account for "cov"
+	argument of vcov.
+
+	* R/lmrob.R (lmrob): warning and check for method argument improved.
+
+2010-08-05  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.6-2
+
+	* R/lmrob.MM.R (lmrob.const): replaced lmrob.ggw.const by
+	lmrob.const, which now supports ggw and lgw.
+	(lmrob.control, lmrob.lgw.findc, lmrob.conv.cc, lmrob.psi2ipsi):
+	support for lgw psi function.
+	(lmrob.efficiency, lmrob.bp): functions to calculate the efficiency
+	and breakdown point of an M-estimator.
+	(lmrob.tau, lmrob.tau.fast.coefs): Updated constants in all.equal
+	check for Hampel psi function. Updated constants for all the
+	supported psi functions.
+	(lmrob..D..fit): switched order of updating covariance matrix and
+	updating control$method. This caused the correction factors to be
+	set incorrectly in some cases.
+
+	* src/lmrob.c (normcnst, rho_lin, psi_lin, psip_lin, wgt_lin)
+	(rho, psi, psip): Added support lgw psi function.
+	* man/lmrob.control.Rd: updated to account for lgw.
+
+	* tests/lmrob-psifns.R: added tests lgw psi function
+	* tests/lmrob-psifns.Rout.save: updated accordingly
+
+	* tests/lmrob-methods.Rout.save: updated, since constants for
+	calculation of taus changed slightly
+
+	* R/lmrob.R (vcov.lmrob): added possibility to calculate covariance
+	matrix with another estimation method.
+
+
+2010-07-12  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.6-1
+
+	* src/lmrob.c (normcnst, rho_ggw, psi_ggw_vec, psi_ggw, psip_ggw)
+	(wgt_ggw): Added support for custom constants for psi ggw.
+
+	* R/lmrob.MM.R (.vcov.w): Modified constants for ggw psi function.
+	(lmrob.control): Added method to calculate constants for ggw psi
+	function.
+	(lmrob.conv.cc, lmrob.ggw.mx, lmrob.ggw.ms, lmrob.ggw.ac)
+	(lmrob.ggw.bp, lmrob.ggw.finda, lmrob.ggw.findc, lmrob.ggw.const):
+	Methods to calculate constants for ggw psi.
+	(lwgt): control argument optional.
+
+	* tests/lmrob-psifns.R: added tests for custom tuning constants
+	* tests/lmrob-psifns.Rout.save: added tests for custom tuning
+	constants
+
+	* experi-psi-rho-funs.R: added ggwPsi function, standardized
+	s.t. Dpsi(0) = 1. Putting this into R/psi-rho-funs.R results in an
+	error while "preparing for lazy-loading".
+
+2010-06-25  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.6-0
+
+	* NAMESPACE: dropped lmrob.control.sfs
+
+	* R/lmrob.R (lmrob): "method" argument
+	* man/lmrob.Rd: "method" argument
+
+	* R/lmrob.MM.R (lmrob.control, lmrob.control.sfs): argument
+	setting="KS2010" replaces lmrob.control.sfs. Setting a method
+	involving a D step, sets default psi to ggw.
+
+	* man/lmrob.control.Rd: "setting" argument
+
+	* tests/lmrob-methods.R: "methods" and "psi" argument
+	* tests/lmrob-methods.Rout.save: call output in summary changed
+	* tests/lmrob-psifns.Rout.save: call output in summary changed
+
+	* man/lmrob.control.Rd: Documentation details for tuning constants
+	and alternative constants for .85 efficiency at the normal.
+
+2010-06-24  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.5-1.1
+
+	* tests/lmrob-psifns.R: added Hampel psi function example and
+	updated coefficients of ggw.
+
+	* src/lmrob.c: replaced "gws" with "ggw" in function names, "gwgt"
+	with "welsh", replaced pow() with R_pow(), implemented support for
+	coefficient vectors. Fixed problem with "ggw" on 32-bit machines.
+
+	* R/lmrob.MM.R: changed the way coefficients for psi functions are
+	handled: coefficient vectors are now supported.
+
+	* R/lmrob.MM.R (lmrob..M..fit): class attribute for init entry in
+	lmrob..M..fit was missing.
+
+2010-06-23  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	* tests/lmrob-methods.R: tests for compatibility between manual
+	construction of different methods with specifying method argument
+	in lmrob.
+	* tests/lmrob-methods.Rout.save: expected results
+	* tests/lmrob-psifns.R: tests for the support of different psi
+	functions.
+	* tests/lmrob-psifns.Rout.save: expected results
+	* tests/lmrob-data.Rout.save: updated results to reflect slightly
+	modified summary output (more options)
+
+	* man/lmrob.Rd: updated to reflect changes in options
+	* man/lmrob..D..fit.Rd: added documentation
+	* man/lmrob..M..fit.Rd: updated example
+	* man/lmrob.control.Rd: updated to reflect changes in options
+	* man/lmrob.fit.Rd: updated from lmrob.fit.MM to reflect changes in
+	options
+	* man/lmrob.fit.MM.Rd: moved to lmrob.fit.Rd
+	* man/lmrob.S.Rd: coef -> coefficients in example
+
+	* R/anova.lmrob.R (length.tl, anovaLmrobPair, anovaLmrobList):
+	Added checks to ensure soundness of result for methods other than
+	"MM".
+
+
+2010-06-21  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	* R/lmrob.MM.R (lmrob.control, lmrob.control.sfs, lmrob.fit.MM)
+	(.vcov.w, .vcov.avar1, lmrob..M..fit, lmrob.S, lmrob..D..fit)
+	(lmrob.kappa, lmrob.tau, lmrob.hatmatrix, lmrob.leverages)
+	(lmrob.psi2ipsi, lmrob.psifun, lmrob.chifun, lmrob.wgtfun)
+	(residuals.lmrob.S, lmrob.E, ghq): Support for psi functions
+	other than bisquare as well as SMDM estimates.
+
+	* R/lmrob.R (lmrob): Support for psi functions other than bisquare
+	as well as SMDM estimates. Replaced lmrob.fit.MM by lmrob.fit.
+
+	* src/robustbase.h: declarations of new functions in lmrob.c
+	* src/init.c: definitions of new functions in lmrob.c
+	* src/lmrob.c: added support for psi functions other than
+	bisquare, including vectorized accessor functions ("R_psifun",
+	"R_chifun" and "R_wgtfun"). "wgt" is now always used to calculate
+	robustness weights. Function to calculate scale estimate
+	iteratively ("R_find_D_scale").
+
+	* NAMESPACE: added lmrob.fit, lmrob..D..fit and lmrob.control.sfs
+	to export.
+
+	* DESCRIPTION: added my name to the list.
+
+2010-04-01  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.5-1
+
+2009-11-19  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/covMcd.R (.fastmcd): nLarge = 100'000 (instead of previous 5000),
+	for now.  nsamp <= integer.max  is asserted now.
+
+	* R/covMcd.R (covMcd): nmini = 300 is now an optional argument.
+	* R/rrcov.control.R (rrcov.control): 'nmini = 300' ...
+	* R/ltsReg.R (ltsReg.default): .fastmcd(..., nmini = 300)
+
+	* src/rffastmcd.f (rffastmcd):  new argument  nmini
+
 2009-11-18  Martin Maechler  <maechler@stat.math.ethz.ch>
 
-	* DESCRIPTION (Version): 0.5-0_1
+	* DESCRIPTION (Version): 0.5-0-1, released to CRAN
 
 	* tests/mc-strict.R: don't use the longmemo example for now.
+		(platform dependence !)
 
 2009-11-11  Martin Maechler  <maechler@stat.math.ethz.ch>
 

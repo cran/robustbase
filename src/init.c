@@ -31,7 +31,7 @@ static R_NativePrimitiveArgType wgt_himed_t[] = {
 
 static R_NativePrimitiveArgType R_lmrob_S_t[] = {
     REALSXP, REALSXP, INTSXP, INTSXP, INTSXP, REALSXP, REALSXP,
-    /* rrhoc */ REALSXP, REALSXP,
+    /* rrhoc */ REALSXP, INTSXP, REALSXP,
     /* best_r */ INTSXP, INTSXP, INTSXP,
     /* K_s */ INTSXP, INTSXP, REALSXP,
     /* converged */ LGLSXP, INTSXP
@@ -41,8 +41,31 @@ static R_NativePrimitiveArgType R_lmrob_MM_t[] = {
     REALSXP, REALSXP, INTSXP, INTSXP,
     /* beta_initial */ REALSXP, REALSXP,
     /* beta_m */ REALSXP, REALSXP,
-    /* max_it */ INTSXP, REALSXP,
+    /* max_it */ INTSXP, REALSXP, INTSXP,
     /* loss */ REALSXP, REALSXP, LGLSXP, INTSXP
+};
+
+static R_NativePrimitiveArgType R_psifun_t[] = {
+    REALSXP, REALSXP, INTSXP, INTSXP, INTSXP
+};
+
+static R_NativePrimitiveArgType R_chifun_t[] = {
+    REALSXP, REALSXP, INTSXP, INTSXP, INTSXP
+};
+
+static R_NativePrimitiveArgType R_wgtfun_t[] = {
+    REALSXP, REALSXP, INTSXP, INTSXP
+};
+
+static R_NativePrimitiveArgType R_find_D_scale_t[] = {
+    REALSXP, REALSXP, REALSXP, INTSXP, REALSXP,
+    /* c */ REALSXP, INTSXP, INTSXP, REALSXP,
+    /* max_k */ INTSXP, INTSXP
+};
+
+static R_NativePrimitiveArgType R_calc_fitted_t[] = {
+    REALSXP, REALSXP, REALSXP, INTSXP, INTSXP, INTSXP, 
+    INTSXP, INTSXP
 };
 
 static const R_CMethodDef CEntries[]  = {
@@ -53,6 +76,11 @@ static const R_CMethodDef CEntries[]  = {
     CDEF(wgt_himed),
     CDEF(R_lmrob_S),
     CDEF(R_lmrob_MM),
+    CDEF(R_psifun),
+    CDEF(R_chifun),
+    CDEF(R_wgtfun),
+    CDEF(R_find_D_scale),
+    CDEF(R_calc_fitted),
     {NULL, NULL, 0}
 };
 
@@ -62,8 +90,8 @@ static const R_CMethodDef CEntries[]  = {
 
 
 static R_FortranMethodDef FortEntries[] = {
-    {"rffastmcd", (DL_FUNC) &F77_SUB(rffastmcd), 47},/* ./rffastmcd.f */
-    {"rfltsreg",  (DL_FUNC) &F77_SUB(rfltsreg), 41}, /* ./rfltsreg.f */
+    {"rffastmcd", (DL_FUNC) &F77_SUB(rffastmcd), 48},/* ./rffastmcd.f */
+    {"rfltsreg",  (DL_FUNC) &F77_SUB(rfltsreg), 42}, /* ./rfltsreg.f */
     {NULL, NULL, 0}
 };
 

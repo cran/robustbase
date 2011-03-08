@@ -14,9 +14,8 @@ set.seed(17)
 for(n in 1:100) {
     cat(sprintf("n =%3d:\n------\n", n))
     mcval <- mc(rlnorm(n), trace=TRUE, doRefl=FALSE)
-    cat(sprintf(" --> mc(rlnorm(%d)) = %g\n", n, mcval))
+    cat(sprintf(" --> mc(rlnorm(%d)) = %.6f\n", n, mcval))
 }
-
 
 allEQ <- function(x,y) all.equal(x,y, tol = 1e-12)
 
@@ -36,9 +35,9 @@ try( mc(x4) )# not converged  !!
 str(robustbase:::mcComp( x4, doRefl= FALSE, maxit = 15, trace= 3))## = 0: conv.quickly
 str(robustbase:::mcComp(-x4, doRefl= FALSE, maxit = 15, trace= 3)) # *not* conv!
 
-## a much more extreme eps seems the cure:
-str(robustbase:::mcComp( x4, doRefl= FALSE, eps1=.Machine$double.xmin))
-str(robustbase:::mcComp(-x4, doRefl= FALSE, eps1=.Machine$double.xmin))
+## ## a much more extreme eps seems the cure:
+## str(robustbase:::mcComp( x4, doRefl= FALSE, eps1=.Machine$double.xmin))
+## str(robustbase:::mcComp(-x4, doRefl= FALSE, eps1=.Machine$double.xmin))
 
 ### Examples "like x3" (non-convergence on 32-bit)
 xClist <- list(## length 5 :
@@ -57,30 +56,30 @@ xClist <- list(## length 5 :
                )
 
 rlis <- lapply(xClist, function(x)
-               try(mc(x, maxit=9, eps1=.Machine$double.xmin), silent=TRUE))
+               try(mc(x, maxit=9), silent=TRUE))
 table(sapply(rlis, class))
-if(R.version$arch == "x86_64") {
+## if(R.version$arch == "x86_64") {
     print(unlist(rlis))
-    rl2 <- lapply(xClist, mc, maxit=9, eps1= 1e-10)
+    rl2 <- lapply(xClist, mc, maxit=9) ##, eps1= 1e-10)
     stopifnot(allEQ(rlis, rl2),
               allEQ(unlist(rlis), sapply(xClist, mcNaive)))
-}
+##}
 
 
 set.seed(47)
 for(n in 3:60) {
     cat(" ")
     x <- round(2 * rnorm(n)) # many ties, often at median -- not converging
-    if(R.version$arch == "x86_64") {
-        ## non-convergence BUG  rarely and only on 32-bit
-        mc1 <- mc(x, eps1 = .Machine$double.xmin)
+    ## if(R.version$arch == "x86_64") {
+        ## non-convergence BUG  rarely and only on 32-bit (solved, MK)
+        mc1 <- mc(x)
         mc2 <- mcNaive(x, method = "simple")
         mc3 <- mcNaive(x, method = "h.use")
         stopifnot(allEQ(mc1, mc3))
         if(mc2 != mc3) {
             cat("d"); if(!isTRUE(allEQ(mc2, mc3))) cat("!!")
         }
-    }
+    ## }
     cat(".")
 };  cat("\n")
 
@@ -94,7 +93,7 @@ quit('no')
 n <- 9
 for(ii in 1:100) {
     x <- round(2 * rnorm(n)) # many ties, often at median -- not converging
-    mc1 <- mc(x, eps1 = .Machine$double.xmin)
+    mc1 <- mc(x)
 }
 ##
 x5 <- c(-3, -3, -2, -1, -1, 0, 0, 1, 2, 2, 3, 4)

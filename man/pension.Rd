@@ -1,6 +1,5 @@
 \name{pension}
 \alias{pension}
-\docType{pension}
 \title{Pension Funds Data}
 \description{
  The total 1981 premium income of pension funds of Dutch firms,

@@ -8,7 +8,7 @@ x <- c(rnorm(50),100, 1e10)
 (r1 <- ltsReg(x ~ 1)) # failed in Valentin's 1.0-3 (pre-version)
 summary(r1)
 (r1. <- ltsReg(y = x))
-i1 <- 14:16; ii <- (1:20)[-i1]
+i1 <- 15:17; ii <- (1:20)[-i1]
 UN <- function(lis) lapply(lis, unname)
 dimnames(r1.$X)[1] <- dimnames(r1$X)[1]
 stopifnot(all.equal(   r1[ii],     r1.[ii],  tol= 1e-15),

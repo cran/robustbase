@@ -15,18 +15,8 @@ function (formula, family, data, weights, subset,
 	stop(gettextf("'%s' is not a valid family (see ?family)",
 		      as.character(call[["family"]])))
 
-    if (!(fami %in% c("binomial", "poisson", "Gamma"))) {
-	if(fami == "gaussian") {
-	    if(weights.on.x != "none")
-		stop("Use lmrob(formula, ...) for the Gaussian case;\n",
-		     " 'weights.on.x' needs to be changed")
-	    return(lmrob(formula, data= data, weights= weights, subset= subset,
-			 na.action= na.action, offset = offset,
-			 control = control, model = model, x = x, y = y,
-			 contrasts = contrasts, ...) )
-	}
-	else
-	    stop(gettextf("Robust GLM fitting not yet implemented for family %s",
+    if (!(fami %in% c("binomial", "poisson", "Gamma", "gaussian"))) {
+        stop(gettextf("Robust GLM fitting not yet implemented for family %s",
 			  fami))
     }
     if(is.null(control)) # -> use e.g., glmrobMqle.control()

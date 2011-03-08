@@ -39,7 +39,7 @@ double mc_C_d(double *z, int n, double *eps, int *iter);
 
 void R_lmrob_S(double *X, double *y, int *n, int *P,
 	       int *nRes, double *scale, double *beta_s,
-	       double *C, double *bb,
+	       double *C, int *iipsi, double *bb,
 	       int *best_r, int *Groups, int *N_group,
 	       int *K_s, int *max_k, double *rel_tol,
 	       int* converged, int *trace_lev);
@@ -48,8 +48,20 @@ void R_lmrob_MM(double *X, double *y, int *n, int *P,
 		double *beta_initial, double *scale,
 		double *beta_m, double *resid,
 		int *max_it,
-		double *rho_c, double *loss, double *rel_tol,
+		double *rho_c, int *ipsi, double *loss, double *rel_tol,
 		int *converged, int *trace_lev);
+
+void R_psifun(double *xx, double *cc, int *iipsi, int *dderiv, int *llength);
+void R_chifun(double *xx, double *cc, int *iipsi, int *dderiv, int *llength);
+void R_wgtfun(double *xx, double *cc, int *iipsi, int *llength);
+
+
+void R_find_D_scale(double *rr, double *kkappa, double *ttau, int *llength, 
+		    double *sscale, double *cc, int *iipsi, int *ttype, double *rel_tol,
+		    int *max_k, int *converged);
+
+void R_calc_fitted(double *XX, double *bbeta, double *RR, int *nn, int *pp, int *nnrep,
+		   int *nnproc, int *nnerr);
 
 /* ------- ./rffastmcd.f ------------ */
 int F77_NAME(rffastmcd)(

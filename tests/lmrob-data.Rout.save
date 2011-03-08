@@ -1,7 +1,8 @@
 
-R version 2.6.1 Patched (2007-12-12 r43668)
-Copyright (C) 2007 The R Foundation for Statistical Computing
+R version 2.13.0 Under development (unstable) (2011-03-07 r54691)
+Copyright (C) 2011 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
+Platform: x86_64-unknown-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -37,7 +38,7 @@ X1           0.71048    0.04938  14.388 2.68e-13 ***
 X2          -0.17770    0.14762  -1.204 0.240397    
 X3          -0.62733    0.15845  -3.959 0.000584 ***
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 Robust residual standard error: 1 
 Convergence in 11 IRWLS iterations
@@ -52,15 +53,17 @@ tuning.chi         bb tuning.psi refine.tol    rel.tol
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd 
-         0          0 
+ trace.lev compute.rd  numpoints 
+         0          0         10 
+          psi        method           cov 
+   "bisquare"          "MM" ".vcov.avar1" 
 seed : int(0) 
 > (A1 <- anova(m0.sali, Y ~ X1 + X3))
 Robust Wald Test Table
 
 Model 1: Y ~ X1 + X2 + X3
 Model 2: Y ~ X1 + X3
-Largest model fitted by lmrob(), i.e. MM
+Largest model fitted by lmrob(), i.e. SM
 
   pseudoDf Test.Stat Df Pr(>chisq)
 1       24                        
@@ -80,7 +83,7 @@ Robust Wald Test Table
 
 Model 1: Y ~ X1 + X2 + X3
 Model 2: Y ~ X1 + X3
-Largest model fitted by lmrob(), i.e. MM
+Largest model fitted by lmrob(), i.e. SM
 
   pseudoDf Test.Stat Df Pr(>chisq)
 1       24                        
@@ -92,7 +95,7 @@ Robust Deviance Table
 
 Model 1: Y ~ X1 + X2 + X3
 Model 2: Y ~ X1 + X3
-Largest model fitted by lmrob(), i.e. MM
+Largest model fitted by lmrob(), i.e. SM
 
   pseudoDf Test.Stat Df Pr(>chisq)
 1       24                        
@@ -104,25 +107,25 @@ Robust Wald Test Table
 
 Model 1: Y ~ X1 + X2 + X3
 Model 2: Y ~ X1 + X2
-Largest model fitted by lmrob(), i.e. MM
+Largest model fitted by lmrob(), i.e. SM
 
   pseudoDf Test.Stat Df Pr(>chisq)    
 1       24                            
 2       25    15.675  1  7.521e-05 ***
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 > (A4 <- anova(m0.sali, m2, test = "Deviance"))
 Robust Deviance Table
 
 Model 1: Y ~ X1 + X2 + X3
 Model 2: Y ~ X1 + X2
-Largest model fitted by lmrob(), i.e. MM
+Largest model fitted by lmrob(), i.e. SM
 
   pseudoDf Test.Stat Df Pr(>chisq)    
 1       24                            
-2       25    19.650  1  9.302e-06 ***
+2       25     19.65  1  9.302e-06 ***
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 > cX3 <- c(Estimate = -0.627327396, `Std. Error` = 0.15844971,
 +          `t value` = -3.9591577, `Pr(>|t|)` = 0.000584156)
 > stopifnot(all.equal(cX3, coef(summary(m0.sali))["X3",], tol = 1e-6))
@@ -149,7 +152,7 @@ sstatus      0.66774    0.03385  19.726 1.30e-11 ***
 teacherSc    1.16778    0.10983  10.632 4.35e-08 ***
 motherLev   -4.13657    0.92084  -4.492 0.000507 ***
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 Robust residual standard error: 1.134 
 Convergence in 11 IRWLS iterations
@@ -164,8 +167,10 @@ tuning.chi         bb tuning.psi refine.tol    rel.tol
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd 
-         0          0 
+ trace.lev compute.rd  numpoints 
+         0          0         10 
+          psi        method           cov 
+   "bisquare"          "MM" ".vcov.avar1" 
 seed : int(0) 
 > stopifnot(c(3,18) == which(m1$w < 0.2))
 > 
@@ -193,7 +198,7 @@ Coefficients:
 (Intercept)  -4.9694     3.4100  -1.457  0.15198   
 log.Te        2.2532     0.7691   2.930  0.00531 **
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 Robust residual standard error: 0.4715 
 Convergence in 15 IRWLS iterations
@@ -208,8 +213,10 @@ tuning.chi         bb tuning.psi refine.tol    rel.tol
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd 
-         0          0 
+ trace.lev compute.rd  numpoints 
+         0          0         10 
+          psi        method           cov 
+   "bisquare"          "MM" ".vcov.avar1" 
 seed : int(0) 
 > stopifnot(c(11,20,30,34) == which(RlmST$w < 0.01))
 > 
@@ -232,7 +239,7 @@ X1           0.08520    0.07316   1.165   0.2481
 X2           0.04099    0.02963   1.383   0.1709  
 X3          -0.05367    0.03199  -1.678   0.0978 .
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 Robust residual standard error: 0.7964 
 Convergence in 9 IRWLS iterations
@@ -248,8 +255,10 @@ tuning.chi         bb tuning.psi refine.tol    rel.tol
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd 
-         0          0 
+ trace.lev compute.rd  numpoints 
+         0          0         10 
+          psi        method           cov 
+   "bisquare"          "MM" ".vcov.avar1" 
 seed : int(0) 
 > stopifnot(1:10 == which(m.hbk$w < 0.01))
 > 
@@ -281,8 +290,10 @@ tuning.chi         bb tuning.psi refine.tol    rel.tol
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd 
-         0          0 
+ trace.lev compute.rd  numpoints 
+         0          0         10 
+          psi        method           cov 
+   "bisquare"          "MM" ".vcov.avar1" 
 seed : int(0) 
 > stopifnot(8  == which(mhrt$w < 0.15),
 +           11 == which(0.61 < mhrt$w & mhrt$w < 0.62),
@@ -306,7 +317,7 @@ Air.Flow      0.93885    0.11743   7.995 3.68e-07 ***
 Water.Temp    0.57955    0.26296   2.204   0.0416 *  
 Acid.Conc.   -0.11292    0.06989  -1.616   0.1246    
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 Robust residual standard error: 1.912 
 Convergence in 17 IRWLS iterations
@@ -321,11 +332,13 @@ tuning.chi         bb tuning.psi refine.tol    rel.tol
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd 
-         0          0 
+ trace.lev compute.rd  numpoints 
+         0          0         10 
+          psi        method           cov 
+   "bisquare"          "MM" ".vcov.avar1" 
 seed : int(0) 
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # "stats"
-Time elapsed:  0.688 0.046 0.956 0 0 
+Time elapsed:  0.35 0.03 0.375 0 0 
 > 
