@@ -1,0 +1,12 @@
+\contentsline {section}{\numberline {1}Introduction}{1}
+\contentsline {section}{\numberline {2}Setting}{1}
+\contentsline {subsection}{\numberline {2.1}Methods}{2}
+\contentsline {subsection}{\numberline {2.2}$\psi $-functions}{2}
+\contentsline {subsection}{\numberline {2.3}Designs}{3}
+\contentsline {subsection}{\numberline {2.4}Error Distributions}{4}
+\contentsline {subsection}{\numberline {2.5}Covariance Matrix Estimators}{4}
+\contentsline {section}{\numberline {3}Simulation}{5}
+\contentsline {section}{\numberline {4}Simulation Results}{7}
+\contentsline {subsection}{\numberline {4.1}Criteria}{7}
+\contentsline {subsection}{\numberline {4.2}Results}{8}
+\contentsline {section}{\numberline {5}Maximum Asymptotic Bias}{20}

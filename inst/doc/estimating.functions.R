@@ -234,7 +234,7 @@ robustness.weights.lmRob <- function(obj) {
 
 robustness.weights.lmrob.S <- function(obj) {
   rstand <- resid(obj)/sigma(obj)
-  robutbase:::lmrob.wgtfun(rstand, obj$control$tuning.chi, obj$control$psi) 
+  robustbase:::lmrob.wgtfun(rstand, obj$control$tuning.chi, obj$control$psi) 
 }
 
 covariance.matrix <- function(x, ...) UseMethod("covariance.matrix")

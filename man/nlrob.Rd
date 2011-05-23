@@ -24,7 +24,7 @@ nlrob(formula, data, start, weights = NULL, na.action = na.fail,
     (For some checks: if \eqn{f(.)} is linear, then we need
     parentheses, e.g., \code{y ~ (a + b * x)}.)
 %% FIXME in code:
-    Do not use as \code{w} as variable or parameter name!
+    Do not use \code{w} as variable or parameter name!
   }
   \item{data}{an optional data frame containing the variables
     in the model.  If not found in \code{data}, the variables are taken
@@ -91,7 +91,7 @@ nlrob(formula, data, start, weights = NULL, na.action = na.fail,
   An object of S3 class \code{"nlrob"}, also inheriting from class
   "nls", (see \code{\link{nls}}).
 
-  There methods (at least) for the generic accessor functions
+  There are methods (at least) for the generic accessor functions
   \code{\link{summary}}, \code{\link{coefficients}},
   \code{fitted.values} and \code{residuals}.
 

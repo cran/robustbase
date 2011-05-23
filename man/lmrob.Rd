@@ -114,8 +114,8 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
   Discussion Papers Series 03.16, K.U. Leuven, CES.
 
   Koller, M. and Stahel, W.A. (2011), Sharpening Wald-type inference in
-  robust regression for small samples, \emph{submitted to Computational
-  Statistics and Data Analysis}.
+  robust regression for small samples, \emph{Computational Statistics &
+  Data Analysis} \bold{55}(8), 2504--2515.
 
   Rousseeuw, P.J. and Yohai, V.J. (1984)
   Robust regression by means of S-estimators,

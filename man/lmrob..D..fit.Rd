@@ -26,7 +26,9 @@ lmrob..D..fit(obj, x=obj$x, control = obj$control)
     \code{FALSE} other.}
 }
 \references{
-  Koller and Stahel, 2010 (tbp).
+  Koller, M. and Stahel, W.A. (2011), Sharpening Wald-type inference in
+  robust regression for small samples, \emph{Computational Statistics &
+  Data Analysis} \bold{55}(8), 2504--2515.
 }
 \seealso{
   \code{\link{lmrob.fit}}, \code{\link{lmrob}}

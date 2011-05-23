@@ -93,7 +93,7 @@ apply(Res, c(2,3), mean)
 1000* apply(Tx, 2, sd)#-> Qn < Sn < mad
 1000* apply(Tx, 2, Qn)#-> Qn > Sn > mad
 
-if(dev.interactive()) {
+if(dev.interactive(orNone=TRUE)) {
     boxplot(Tx, main = sprintf("n=%d  x N(0,1) + %d (1%%) outliers to the right",
                 N,n.o))
     abline(h = 1, lty = 3, lwd = 2, col = "gray")

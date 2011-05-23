@@ -1,8 +1,7 @@
-% -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
 \documentclass[a4paper]{article}
 
 %\VignetteIndexEntry{lmrob_simulation.Rnw}
-%\VignetteDepends{xtable, robustbase, ggplot2}
+%\VignetteDepends{robustbase, xtable, ggplot2, RColorBrewer}
 
 \usepackage{amsmath}
 \usepackage{natbib}
@@ -21,14 +20,14 @@
 \DeclareMathOperator{\Erw}{\mathbf{E}}
 
 
-\SweaveOpts{prefix.string=plot, eps = FALSE, pdf = TRUE, strip.white=TRUE}
+\SweaveOpts{prefix.string=plot, eps = FALSE, pdf = TRUE, strip.white=true}
 \SweaveOpts{width=6, height=4}
 
 \begin{document}
 \setkeys{Gin}{width=\textwidth}
 \setlength{\abovecaptionskip}{-5pt}
 
-<<echo=FALSE,results=HIDE>>=
+<<initial-setup, echo=FALSE, results=hide>>=
 ## set options
 options(width=60)
 
@@ -41,44 +40,46 @@ stopifnot(require(xtable),
 N <- 1000
 
 ## default data set
-dd <- data.frame(X1 = c(0.0707996949791054, 0.0347546309449992,                    
-                   1.30548268152542, 0.866041511462982, 
-                   0.275764343116733, 0.670798705161399, 
-                   -0.549345193993536, -1.00640134962924, 
-                   -1.22061169833477, -0.905619374719898,    
-                   -0.678473241822565, 0.607011706444643, 
-                   0.304237114526011, -2.14562816298790,     
-                   2.34057395639167, 0.310752185537814, 
-                   -0.972658170945796, 0.362012836241727,     
+dd <- data.frame(X1 = c(0.0707996949791054, 0.0347546309449992,
+                   1.30548268152542, 0.866041511462982,
+                   0.275764343116733, 0.670798705161399,
+                   -0.549345193993536, -1.00640134962924,
+                   -1.22061169833477, -0.905619374719898,
+                   -0.678473241822565, 0.607011706444643,
+                   0.304237114526011, -2.14562816298790,
+                   2.34057395639167, 0.310752185537814,
+                   -0.972658170945796, 0.362012836241727,
                    0.925888071796771, -0.595380245695561),
-                 X2 = c(0.119970864158429,                
-                   -0.738808741221796, 5.49659158913364, 
-                   3.52149647048925, 2.02079730735676,        
-                   3.82735326206246, -1.24025420267206, 
-                   -4.37015614526438, -5.00575484838141,      
-                   -3.56682651298729, -2.82581432351811, 
-                   0.0456819251791285, -0.93949674689997,     
-                   -8.08282316242221, 9.76283850058346, 
-                   0.866426786132133, -2.90670860898916,      
-                   2.95555226542630, 4.50904028657548, 
-                   -3.44910596474065), 
-                 X3 = c(1.11332914932289, 
-                   3.55583356836222, 10.4937363250789, 
-                   0.548517298224424, 1.67062103214174,       
+                 X2 = c(0.119970864158429,
+                   -0.738808741221796, 5.49659158913364,
+                   3.52149647048925, 2.02079730735676,
+                   3.82735326206246, -1.24025420267206,
+                   -4.37015614526438, -5.00575484838141,
+                   -3.56682651298729, -2.82581432351811,
+                   0.0456819251791285, -0.93949674689997,
+                   -8.08282316242221, 9.76283850058346,
+                   0.866426786132133, -2.90670860898916,
+                   2.95555226542630, 4.50904028657548,
+                   -3.44910596474065),
+                 X3 = c(1.11332914932289,
+                   3.55583356836222, 10.4937363250789,
+                   0.548517298224424, 1.67062103214174,
                    0.124224367717813, 6.86425894634543,
-                   1.14254475111985, 0.612987848127285,        
-                   0.85062803777296, 0.881141283379239, 
-                   0.650457856125926, 0.641015255931405,     
-                   1.51667982973630, 0.764725309853834, 
-                   1.61169179152476, 0.596312457754167,    
-                   0.262270854360470, 1.24686336241, 
+                   1.14254475111985, 0.612987848127285,
+                   0.85062803777296, 0.881141283379239,
+                   0.650457856125926, 0.641015255931405,
+                   1.51667982973630, 0.764725309853834,
+                   1.61169179152476, 0.596312457754167,
+                   0.262270854360470, 1.24686336241,
                    0.386112727548389))
 
+## get path
+robustDoc <- system.file('doc', package='robustbase')
 ## load functions
-source('simulation.functions.R')
-source('estimating.functions.R')
-source('error.distributions.R')
-source('graphics.functions.R')
+source(file.path(robustDoc, 'simulation.functions.R'))
+source(file.path(robustDoc, 'estimating.functions.R'))
+source(file.path(robustDoc, 'error.distributions.R'))
+source(file.path(robustDoc, 'graphics.functions.R'))
 
 ## set estlist and parameters
 estlist <- .estlist.confint
@@ -144,7 +145,7 @@ legend.mod <- list(`SMD.Wtau` = expression(paste('SMD.W',tau)),
                    `t5` = expression(t[5]),
                    `cskt(Inf,2)` = expression(paste('cskt(',infinity,',2)'))
                    )
-@ 
+@% end{initial-setup}
 
 
 \title{Simulations for Sharpening Wald-type Inference in Robust Regression
@@ -158,7 +159,7 @@ In this vignette, we recreate the simulation study of \citet{KS2011}. This
 vignette is supposed to complement the results presented in the above cited
 reference and render its results reproducible. Another goal is to provide
 simulation functions, that, with small changes, could also be used for other
-simulation studies. 
+simulation studies.
 
 Additionally, in Section~\ref{sec:maximum-asymptotic-bias}, we calculate
 the maximum asymptotic bias curves of the $\psi$-functions used in the
@@ -179,7 +180,7 @@ We compare the methods
   will be denoted as \emph{MMrobust} later on.
 \item MM using S-scale correction by $q_{\rm T}$ and $q_{\rm E}$ as
   proposed by \citet{maronna2009correcting}.
-  
+
   $q_{\rm T}$ and $q_{\rm E}$ are defined as follows.
   \begin{equation*}
     q_{\rm E} = \frac{1}{1 - (1.29 - 6.02/n)p/n},
@@ -189,7 +190,7 @@ We compare the methods
   \end{equation*}
   where
   \begin{equation*}
-    \hat a = \frac{1}{n}\sum_{i=1}^n 
+    \hat a = \frac{1}{n}\sum_{i=1}^n
     \psi\left(\frac{r_i}{\hat\sigma_{\rm S}}\right)^2,
     \hat b = \frac{1}{n}
     \sum_{i=1}^n\psi'\left(\frac{r_i}{\hat\sigma_{\rm S}}\right),
@@ -199,14 +200,14 @@ We compare the methods
   \end{equation*}
   with $\psi = \rho'$, $n$ the number of observations, $p$ the number of
   predictor variables, $\hat\sigma_{\rm S}$ is the S-scale estimate and
-  $r_i$ is the residual of the $i$-th observation. 
-  
+  $r_i$ is the residual of the $i$-th observation.
+
   When using $q_{\rm E}$ it is necessary to adjust the tuning constants of
   $\chi$ to account for the dependence of $\kappa$ on $p$. For $q_{\rm T}$
   no change is required.
-  
+
   This method in implemented as \T{lmrob.mar} in the source file
-  \T{estimating.functions.R}. 
+  \T{estimating.functions.R}.
 \end{itemize}
 
 \subsection{$\psi$-functions}
@@ -225,16 +226,16 @@ descending $\psi$-function.
 ## get list of psi functions
 lst <- lapply(estlist$procedures, function(x) {
   if (is.null(x$args)) return(list(NULL, NULL, NULL))
-  if (!is.null(x$args$weight)) 
-    return(list(x$args$weight[2], 
+  if (!is.null(x$args$weight))
+    return(list(x$args$weight[2],
                 round(f.psi2c.chi(x$args$weight[1]),3),
                 round(f.eff2c.psi(x$args$efficiency, x$args$weight[2]),3)))
-  return(list(x$args$psi, 
+  return(list(x$args$psi,
               round(if (is.null(x$args$tuning.chi))
                     lmrob.control(psi=x$args$psi)$tuning.chi else
                     x$args$tuning.chi,3),
-              round(if (is.null(x$args$tuning.psi)) 
-                    lmrob.control(psi=x$args$psi)$tuning.psi else 
+              round(if (is.null(x$args$tuning.psi))
+                    lmrob.control(psi=x$args$psi)$tuning.psi else
                     x$args$tuning.psi,3)))
 })
 lst <- unique(lst)
@@ -242,14 +243,14 @@ lst <- lst[sapply(lst, function(x) !is.null(x[[1]]))]
 ## convert to table
 tbl <- do.call(rbind, lst)
 tbl[,2:3] <- apply(tbl[,2:3], 1:2, function(x) {
-  gsub('\\$NA\\$', '\\\\texttt{NA}', 
+  gsub('\\$NA\\$', '\\\\texttt{NA}',
        paste('$', unlist(x), collapse=', ', '$', sep='')) })
 tbl[,1] <- paste('\\texttt{', tbl[,1], '}', sep='')
-colnames(tbl) <- paste('\\texttt{', c('psi', 'tuning.chi', 'tuning.psi'), 
+colnames(tbl) <- paste('\\texttt{', c('psi', 'tuning.chi', 'tuning.psi'),
                        '}', sep='')
 print(xtable(tbl), sanitize.text.function=identity,
       include.rownames = FALSE, floating=FALSE)
-@ %def 
+@ %def
 \vspace{15pt}
 \caption{Tuning constants of $\psi$-functions used in the simulation.}
 \label{tab:psi-functions}
@@ -259,7 +260,7 @@ print(xtable(tbl), sanitize.text.function=identity,
 
 \begin{figure}
 \begin{center}
-<<label=fig-psi-functions,fig=TRUE,echo=FALSE>>=
+<<fig-psi-functions,fig=TRUE,echo=FALSE>>=
 f.plot.psi <- function(x, psi) {
   cc <- lmrob.control(psi = psi)$tuning.psi
   data.frame(x=x, value=robustbase:::lmrob.psifun(x, cc, psi), psi = psi)
@@ -272,7 +273,7 @@ tmp <- rbind(f.plot.psi(x, 'optimal'),
 print(ggplot(tmp, aes(x, value, color = psi)) + geom_line() +
       ylab(expression(psi(x))) +
       scale_color_discrete(name = expression(paste(psi, '-function'))))
-@ 
+@
 \end{center}
 \caption{$\psi$-functions used in the simulation.}
 \label{fig:psi.functions}
@@ -290,7 +291,7 @@ the ratio to the number of parameters are $p/n = 1/20, 1/10, 1/5, 1/3,
 1/2$. We round $p$ to the nearest smaller integer if necessary.
 
 The random datasets are generated using the following code.
-<<results=HIDE,keep.source=TRUE>>=
+<<results=hide,keep.source=TRUE>>=
 f.gen <- function(n, p, rep, err) {
   ## get function name and parameters
   lerrfun <- f.errname(err$err)
@@ -316,11 +317,11 @@ An example design is shown in Fig.~\ref{fig:example.design}.
 
 \begin{figure}
 \begin{center}
-<<label=fig-example-design,fig=TRUE,echo=FALSE>>=
+<<fig-example-design,fig=TRUE,echo=FALSE>>=
 print(plotmatrix(rand_25_5) +
       scale_x_continuous(breaks = -3:3) +
       scale_y_continuous(breaks = -3:3))
-@ 
+@
 \end{center}
 \caption{Example random design.}
 \label{fig:example.design}
@@ -335,7 +336,7 @@ We simulate the following error distributions
   \emph{cskt$(\infty,2)$} and \emph{cskt}$(5,2)$, respectively); as
   introduced by \citet{fernandez1998bayesian} using the \T{R} package
   \T{skewt},
-\item contaminated normal, $\Norm{0,1}$ contaminated with $10\%$ 
+\item contaminated normal, $\Norm{0,1}$ contaminated with $10\%$
   $\Norm{0, 10}$ (symmetric, \emph{cnorm}$(0.1,0,3.16)$) or
   $\Norm{4, 1}$ (asymmetric, \emph{cnorm}$(0.1,4,1)$).
 \end{itemize}
@@ -358,14 +359,14 @@ The SMD and SMDM methods of \T{lmrob} use the following defaults.
 \begin{equation*}
   \hat\gamma =
   \frac{\frac{1}{n}\sum_{i=1}^n
-    \psi\left(\frac{r_i}{\tau_i\hat\sigma}\right)^2} 
+    \psi\left(\frac{r_i}{\tau_i\hat\sigma}\right)^2}
   {\frac{1}{n}\sum_{i=1}^n\psi'\left(\frac{r_i}{\tau_i\hat\sigma}\right)}
 \end{equation*}
 where $\tau_i$ is the rescaling factor used for the D-scale estimate (see
-\citet{KS2011}). 
+\citet{KS2011}).
 \begin{equation*}
-  \bld{\widehat V}_{\bld X} = 
-  \frac{1}{\frac{1}{n}\sum_{i=1}^n\wgt_{ii}}\bld X^T\bld W\bld X 
+  \bld{\widehat V}_{\bld X} =
+  \frac{1}{\frac{1}{n}\sum_{i=1}^n\wgt_{ii}}\bld X^T\bld W\bld X
 \end{equation*}
 where $\bld W = \diag\left(\wgt\left(\frac{r_1}{\hat\sigma}\right), \dots,
   \wgt\left(\frac{r_n}{\hat\sigma}\right)\right)$. The function $\wgt(r) =
@@ -374,8 +375,13 @@ where $\bld W = \diag\left(\wgt\left(\frac{r_1}{\hat\sigma}\right), \dots,
 \section{Simulation}
 The main loop of the simulation is fairly simple. (This code is only run if
 there are no aggregate results available.)
-<<results=HIDE,eval=FALSE>>=
-if (!file.exists("aggr_results.Rdata")) {
+<<results=hide>>=
+aggrResultsFile <- file.path(robustDoc, "aggr_results.Rdata")
+## set eval to TRUE for chunks simulation-run and simulation-aggr
+## if you really want to run the simulations again.
+## (better fail with an error than run for weeks)
+<<simulation-run,results=hide,eval=FALSE>>=
+if (!file.exists(aggrResultsFile)) {
   ## load packages required only for simulation
   stopifnot(require(robust),
             require(skewt),
@@ -393,8 +399,9 @@ if (!file.exists("aggr_results.Rdata")) {
       if (is.null(attr(estlist$design, 'gen')))
         f.prediction.points(estlist$design) else
       f.prediction.points(estlist$design, max.pc = 2)
-    
-    filename <- sprintf('r.test.final.%s.Rdata',design)
+
+    filename <- file.path(robustDoc,
+                          sprintf('r.test.final.%s.Rdata',design))
     if (!file.exists(filename)) {
       ## run
       print(system.time(r.test <- f.sim(estlist, silent = TRUE)))
@@ -407,20 +414,20 @@ if (!file.exists("aggr_results.Rdata")) {
     }
   }
 }
-@ 
+@
 
 The variable \T{estlist} is a list containing all the necessary
 settings required to run the simulation as outlined above.  Most of its
 elements are self-explanatory.
 <<>>=
 str(estlist, 1)
-@ 
+@
 
 \T{errs} is a list containing all the error distributions to be
 simulated. The entry for the standard normal looks as follows.
 <<>>=
 estlist$errs[[1]]
-@ 
+@
 \T{err} is translated internally to the corresponding random generation or
 quantile function, e.g., in this case \T{rnorm} or \T{qnorm}. \T{args}
 is a list containing all the required arguments to call the
@@ -440,7 +447,7 @@ procedures are processed by the functions contained in the
 \T{estlist\$output} list.
 <<>>=
 str(estlist$output[1:3], 2)
-@ 
+@
 The results are stored in a 4-dimensional array. The dimensions are:
 repetition number, type of value, procedure id, error id. Using \T{apply}
 it is very easy and fast to generate summary statistics. The raw results
@@ -448,7 +455,7 @@ are stored on the hard disk, because typically it takes much longer to
 execute all the procedures than to calculate the summary statistics. The
 variables saved take up a lot of space quite quickly, so only the necessary
 data is stored. These are $\sigma$, $\bld\beta$ as well as the
-corresponding standard errors. 
+corresponding standard errors.
 
 To speed up the simulation routine \T{f.sim}, the simulations are carried
 out in parallel, as long as this is possible. This is accomplished with the
@@ -465,21 +472,20 @@ recalculated. Using vectorized operations and some specialized \T{C} code,
 this is quite cheap. The summary statistics generated are discussed in the
 next section.
 
-<<results=HIDE,echo=FALSE>>=
-if (!file.exists("aggr_results.Rdata")) { 
-  files <- list.files('./', pattern = 'r.test.final\\.')
-  files <- files[!grepl('400', files)] ## drop 400s for the moment
+<<simulation-aggr,results=hide,echo=FALSE,eval=FALSE>>=
+if (!file.exists(aggrResultsFile)) {
+  files <- list.files(robustDoc, pattern = 'r.test.final\\.')
   res <- foreach(file = files) %dopar% {
     ## get design, load r.test, initialize other stuff
-    design <- substr(file, 14, nchar(file) - 6)
+    design <- substr(basename(file), 14, nchar(basename(file)) - 6)
     cat(design, ' ')
     load(file)
     estlist <- attr(r.test, 'estlist')
-    use.intercept <- 
+    use.intercept <-
       if (!is.null(estlist$use.intercept)) estlist$use.intercept else TRUE
     sel <- dimnames(r.test)[[3]] ## [dimnames(r.test)[[3]] != "estname=lm"]
     n.betas <- paste('beta',1:(NCOL(estlist$design)+use.intercept),sep='_')
-    ## get design                    
+    ## get design
     lX <- if (use.intercept)
       as.matrix(cbind(1, get(design))) else as.matrix(get(design))
     n <- NROW(lX)
@@ -495,7 +501,7 @@ if (!file.exists("aggr_results.Rdata")) {
                    list(Obs = NULL, Data = NULL, Errstr = dimnames(r.test)[[4]]))
     for (i in 1:dim(lerrs)[3]) {
       lerrstr <- f.list2str(estlist$errs[[i]])
-      lerr <- f.errs(estlist, estlist$errs[[i]], 
+      lerr <- f.errs(estlist, estlist$errs[[i]],
                      gen = attr(estlist$design, 'gen'),
                      nobs = n, npar = NCOL(lX))
       lerrs[,,lerrstr] <- lerr
@@ -547,7 +553,7 @@ if (!file.exists("aggr_results.Rdata")) {
     MSEs <- apply(r.test[,n.betas,,,drop=FALSE],3:4,tf.MSE)
     li <- 1 ## so we can reconstruct where we are
     lres <- apply(lresids,3:4,f.aggregate.results <- {
-      function(lresid) {    
+      function(lresid) {
         ## the counter li tells us, where we are
         ## we walk dimensions from left to right
         lcdn <- f.get.current.dimnames(li, dimnames(lresids), 3:4)
@@ -585,12 +591,12 @@ if (!file.exists("aggr_results.Rdata")) {
           ## calculate robustness weights
           lwgts <- robustbase:::lmrob.wgtfun(lresid,lctrl$tuning.psi, lctrl$psi)
           ## function to calculate robustified leverages
-          tfun <- if (is.function(attr(estlist$design, 'gen'))) 
+          tfun <- if (is.function(attr(estlist$design, 'gen')))
             function(i) {
-              if (all(is.na(lwgts[i,]))) lwgts[i,] else 
+              if (all(is.na(lwgts[i,]))) lwgts[i,] else
               robustbase:::lmrob.leverages(lXs[,,i,lcdn[2]],lwgts[i,])
             } else function(i) {
-              if (all(is.na(lwgts[i,]))) lwgts[i,] else 
+              if (all(is.na(lwgts[i,]))) lwgts[i,] else
               robustbase:::lmrob.leverages(lX,lwgts[i,])
             }
           llev <- sapply(1:dim(r.test)[1], tfun)
@@ -615,7 +621,7 @@ if (!file.exists("aggr_results.Rdata")) {
         if (lproc$estname == 'lmrob.mar' && lproc$args$type == 'qE') {
           ## for lmrob_mar, qE variant
           lctrl <- lmrob.control(psi = 'bisquare',
-                                 tuning.chi=uniroot(function(c) 
+                                 tuning.chi=uniroot(function(c)
                                    robustbase:::lmrob.bp('bisquare', c) - (1-p/n)/2,
                                    c(1, 3))$root)
           se <- apply(lerrs[,,lcdn[2]],2,lmrob.mscale,control=lctrl,p=p)
@@ -632,19 +638,19 @@ if (!file.exists("aggr_results.Rdata")) {
         }
 
         ## calculate empirical correct test value (to yield 5% level)
-        t.val_2 <- t.val_1 <- quantile(abs(lr[,'beta_1']/lr[,'se_1']), 0.95, 
+        t.val_2 <- t.val_1 <- quantile(abs(lr[,'beta_1']/lr[,'se_1']), 0.95,
                                        na.rm = TRUE)
-        if (p > 1) t.val_2 <- quantile(abs(lr[,'beta_2']/lr[,'se_2']), 0.95, 
+        if (p > 1) t.val_2 <- quantile(abs(lr[,'beta_2']/lr[,'se_2']), 0.95,
                                        na.rm = TRUE)
 
-        ## return output: summary statistics: 
+        ## return output: summary statistics:
         c(## gamma
-          AdB2.1 = mean(lsp2/lspp^2,trim=trim,na.rm=TRUE)*n, 
+          AdB2.1 = mean(lsp2/lspp^2,trim=trim,na.rm=TRUE)*n,
           K2AdB2.1 = mean(lK^2*lsp2/lspp^2,trim=trim,na.rm=TRUE)*n,
-          AdB2t.1 = mean(lsp2t/lsppt^2,trim=trim,na.rm=TRUE)*n, 
-          sdAdB2.1 = sd.trim(lsp2/lspp^2*n,trim=trim,na.rm=TRUE), 
+          AdB2t.1 = mean(lsp2t/lsppt^2,trim=trim,na.rm=TRUE)*n,
+          sdAdB2.1 = sd.trim(lsp2/lspp^2*n,trim=trim,na.rm=TRUE),
           sdK2AdB2.1 = sd.trim(lK^2*lsp2/lspp^2*n,trim=trim,na.rm=TRUE),
-          sdAdB2t.1 = sd.trim(lsp2t/lsppt^2*n,trim=trim,na.rm=TRUE), 
+          sdAdB2t.1 = sd.trim(lsp2t/lsppt^2*n,trim=trim,na.rm=TRUE),
           ## sigma
           medsigma = median(lr[,'sigma'],na.rm=TRUE),
           madsigma = mad(lr[,'sigma'],na.rm=TRUE),
@@ -663,33 +669,33 @@ if (!file.exists("aggr_results.Rdata")) {
           emplev_1 = mean(abs(lr[,'beta_1']/lr[,'se_1']) > qt(0.975, n - p),
             na.rm = TRUE),
           emplev_2 = if (p>1) {
-            mean(abs(lr[,'beta_2']/lr[,'se_2']) > qt(0.975, n - p), na.rm = TRUE) 
+            mean(abs(lr[,'beta_2']/lr[,'se_2']) > qt(0.975, n - p), na.rm = TRUE)
           } else NA,
           ## t-value: power
           power_1_0.2 = mean(abs(lr[,'beta_1']-0.2)/lr[,'se_1'] > t.val_1,
             na.rm = TRUE),
           power_2_0.2 = if (p>1) {
-            mean(abs(lr[,'beta_2']-0.2)/lr[,'se_2'] > t.val_2, na.rm = TRUE) 
+            mean(abs(lr[,'beta_2']-0.2)/lr[,'se_2'] > t.val_2, na.rm = TRUE)
           } else NA,
-          power_1_0.4 = mean(abs(lr[,'beta_1']-0.4)/lr[,'se_1'] > t.val_1, 
+          power_1_0.4 = mean(abs(lr[,'beta_1']-0.4)/lr[,'se_1'] > t.val_1,
             na.rm = TRUE),
-          power_2_0.4 = if (p>1) { 
-            mean(abs(lr[,'beta_2']-0.4)/lr[,'se_2'] > t.val_2, na.rm = TRUE) 
+          power_2_0.4 = if (p>1) {
+            mean(abs(lr[,'beta_2']-0.4)/lr[,'se_2'] > t.val_2, na.rm = TRUE)
           } else NA,
           power_1_0.6 = mean(abs(lr[,'beta_1']-0.6)/lr[,'se_1'] > t.val_1,
             na.rm = TRUE),
           power_2_0.6 = if (p>1) {
-            mean(abs(lr[,'beta_2']-0.6)/lr[,'se_2'] > t.val_2, na.rm = TRUE) 
+            mean(abs(lr[,'beta_2']-0.6)/lr[,'se_2'] > t.val_2, na.rm = TRUE)
           } else NA,
           power_1_0.8 = mean(abs(lr[,'beta_1']-0.8)/lr[,'se_1'] > t.val_1,
             na.rm = TRUE),
-          power_2_0.8 = if (p>1) { 
-            mean(abs(lr[,'beta_2']-0.8)/lr[,'se_2'] > t.val_2, na.rm = TRUE) 
+          power_2_0.8 = if (p>1) {
+            mean(abs(lr[,'beta_2']-0.8)/lr[,'se_2'] > t.val_2, na.rm = TRUE)
           } else NA,
-          power_1_1 = mean(abs(lr[,'beta_1']-1)/lr[,'se_1'] > t.val_1, 
+          power_1_1 = mean(abs(lr[,'beta_1']-1)/lr[,'se_1'] > t.val_1,
             na.rm = TRUE),
           power_2_1 = if (p>1) {
-            mean(abs(lr[,'beta_2']-1)/lr[,'se_2'] > t.val_2, na.rm = TRUE) 
+            mean(abs(lr[,'beta_2']-1)/lr[,'se_2'] > t.val_2, na.rm = TRUE)
           } else NA,
           ## coverage probability: calculate empirically
           ## the evaluation points are constant, but the designs change
@@ -698,15 +704,15 @@ if (!file.exists("aggr_results.Rdata")) {
           cpr_2 = mean(lr[,'upr_2'] < 0 | lr[,'lwr_2'] > 0, na.rm = TRUE),
           cpr_3 = mean(lr[,'upr_3'] < 0 | lr[,'lwr_3'] > 0, na.rm = TRUE),
           cpr_4 = mean(lr[,'upr_4'] < 0 | lr[,'lwr_4'] > 0, na.rm = TRUE),
-          cpr_5 = if (any(colnames(lr) == 'upr_5')) { 
+          cpr_5 = if (any(colnames(lr) == 'upr_5')) {
             mean(lr[,'upr_5'] < 0 | lr[,'lwr_5'] > 0, na.rm = TRUE) } else NA,
-          cpr_6 = if (any(colnames(lr) == 'upr_6')) { 
+          cpr_6 = if (any(colnames(lr) == 'upr_6')) {
             mean(lr[,'upr_6'] < 0 | lr[,'lwr_6'] > 0, na.rm = TRUE) } else NA,
-          cpr_7 = if (any(colnames(lr) == 'upr_7')) { 
+          cpr_7 = if (any(colnames(lr) == 'upr_7')) {
             mean(lr[,'upr_7'] < 0 | lr[,'lwr_7'] > 0, na.rm = TRUE) } else NA
           )
       }})
-    
+
     ## convert to data.frame
     lres <- f.a2df.2(lres, split = '___NO___')
     ## add additional info
@@ -720,9 +726,15 @@ if (!file.exists("aggr_results.Rdata")) {
     gc()
     ## return lres
     lres
-  } 
-  save(res, trim, file = 'aggr_results.Rdata')
-} else load('aggr_results.Rdata')
+  }
+  save(res, trim, file = aggrResultsFile)
+} else load(aggrResultsFile)
+<<simulation-aggr2,results=hide,echo=FALSE>>=
+load(aggrResultsFile)
+## this will fail if the file is not found (for a reason)
+## set eval to TRUE for chunks simulation-run and simulation-aggr
+## if you really want to run the simulations again.
+## (better fail with an error than run for weeks)
 
 ## combine list elements to data.frame
 test.1 <- do.call('rbind', res)
@@ -787,11 +799,11 @@ test.2 <- droplevels(subset(test.1, Error == 'N(0,1)' & Function != 'lm'))
 test.3 <- droplevels(subset(test.2, Method != 'SMDM'))
 test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 coords <- coord_cartesian(ylim = c(0.5, 1.7))
-@ 
+@
 
 \section{Simulation Results}
 \subsection{Criteria}
-The simulated methods are compared using the following criteria. 
+The simulated methods are compared using the following criteria.
 
 \textbf{Scale estimates.} The criteria for scale estimates are all
 calculated on the log-scale. The bias of the estimators is measured by
@@ -815,8 +827,8 @@ For completeness, the statistics used to compare scale estimates in
 \end{equation}
 where $S(e)$ stands for the S-scale estimate evaluated for the actual
 errors $\bld e$. For the D-scale estimate, the definition is
-analogue. Since there is no design to correct for, we set $\tau_i = 1\ 
-\forall i$.  
+analogue. Since there is no design to correct for, we set $\tau_i = 1\
+\forall i$.
 
 \textbf{Coefficients.}  The efficiency of estimated regression
 coefficients $\bld{\hat\beta}$ is characterized by their mean squared
@@ -879,130 +891,130 @@ the comparison of the methods. The lines connect the median values over the
 values of $n$ for each simulated ratio $p/n$. In many plots the y-axis has
 been truncated. Points in the grey shaded area represent truncated values
 using a different scale.
-                             
+
 \begin{figure}
 \begin{center}
-<<label=fig-meanscale,fig=TRUE,echo=FALSE>>=
-## ## exp(mean(log(sigma))): this looks almost identical to mean(sigma) 
+<<fig-meanscale,fig=TRUE,echo=FALSE>>=
+## ## exp(mean(log(sigma))): this looks almost identical to mean(sigma)
 print(ggplot(test.3, aes(p/n, exp(meanlogsigma.1), color = Est.Scale)) +
-      stat_summary(aes(x=ratio), fun.y=median, geom='line') + 
-      geom_point(aes(shape = factor(n)), alpha = alpha.n) + 
+      stat_summary(aes(x=ratio), fun.y=median, geom='line') +
+      geom_point(aes(shape = factor(n)), alpha = alpha.n) +
       geom_hline(yintercept = 1) +
-      g.scale_y_log10_1() + 
+      g.scale_y_log10_1() +
       facet_wrap(~ Psi) +
-      ylab(expression(paste('geometric ',mean(hat(sigma))))) + 
+      ylab(expression(paste('geometric ',mean(hat(sigma))))) +
       scale_shape_discrete(expression(n)) +
       scale_colour_discrete("Scale Est."), legend.mod = legend.mod)
-@ 
+@
 \end{center}
 \caption{Mean of scale estimates for normal errors. The mean is calculated
   with $\Sexpr{trim*100}\%$ trimming. The lines connect the median values
   for each simulated ratio $p/n$. Results for random designs only. }
 \label{fig:meanscale-1}
-\end{figure}              
-                          
+\end{figure}
+
 \begin{figure}
 \begin{center}
-<<label=fig-sdscale-1,fig=TRUE,echo=FALSE>>=
+<<fig-sdscale-1,fig=TRUE,echo=FALSE>>=
 print(ggplot(test.3, aes(p/n, sdlogsigma.1*sqrt(n), color = Est.Scale)) +
-      stat_summary(aes(x=ratio), fun.y=median, geom='line') + 
+      stat_summary(aes(x=ratio), fun.y=median, geom='line') +
       geom_point(aes(shape = factor(n)), alpha = alpha.n) +
       ylab(expression(sd(log(hat(sigma)))*sqrt(n))) +
       facet_wrap(~ Psi) +
       geom_point(data=test.lm.2, alpha=alpha.n, aes(color = Est.Scale)) +
-      stat_summary(data=test.lm.2, aes(x=ratio, color = Est.Scale), 
-                   fun.y=median, geom='line') + 
+      stat_summary(data=test.lm.2, aes(x=ratio, color = Est.Scale),
+                   fun.y=median, geom='line') +
       scale_shape_discrete(expression(n)) +
       scale_colour_discrete("Scale Est."), legend.mod = legend.mod)
 @
 \end{center}
 \caption{Variability of the scale estimates for normal errors. The standard
-  deviation is calculated with $\Sexpr{trim*100}\%$ trimming. 
+  deviation is calculated with $\Sexpr{trim*100}\%$ trimming.
 }
-\label{fig:sdscale-1} 
+\label{fig:sdscale-1}
 \end{figure}
 
 \begin{figure}
 \begin{center}
-<<label=fig-sdscale-all,fig=TRUE,echo=FALSE>>=
+<<fig-sdscale-all,fig=TRUE,echo=FALSE>>=
 print(ggplot(test.4, aes(p/n, sdlogsigma.1*sqrt(n),
                          color = Est.Scale)) +
-      stat_summary(aes(x=ratio), fun.y=median, geom='line') + 
-      geom_point(aes(shape = Error), alpha = alpha.error) + 
+      stat_summary(aes(x=ratio), fun.y=median, geom='line') +
+      geom_point(aes(shape = Error), alpha = alpha.error) +
       ylab(expression(sd(log(hat(sigma)))*sqrt(n))) +
       facet_wrap(~ Psi) +
       geom_point(data=test.lm, alpha=alpha.n, aes(color = Est.Scale)) +
-      stat_summary(data=test.lm, aes(x=ratio, color = Est.Scale), 
-                   fun.y=median, geom='line') + 
+      stat_summary(data=test.lm, aes(x=ratio, color = Est.Scale),
+                   fun.y=median, geom='line') +
       ylim(with(test.4, range(sdlogsigma.1*sqrt(n)))) +
-      g.scale_shape() + scale_colour_discrete("Scale Est."), 
+      g.scale_shape() + scale_colour_discrete("Scale Est."),
       legend.mod = legend.mod)
 @
 \end{center}
 \caption{Variability of the scale estimates for all simulated error
   distributions.
 }
-\label{fig:sdscale-all} 
+\label{fig:sdscale-all}
 \end{figure}
 
 \begin{figure}
 \begin{center}
-<<label=fig-qscale,fig=TRUE,echo=FALSE>>=
-print(ggplot(droplevels(subset(test.3, Estimator %in% c("SMD", "MMqE"))), 
+<<fig-qscale,fig=TRUE,echo=FALSE>>=
+print(ggplot(droplevels(subset(test.3, Estimator %in% c("SMD", "MMqE"))),
              aes(p/n, q, color = Est.Scale)) +
-      stat_summary(aes(x=ratio), fun.y=median, geom='line') + 
-      geom_point(aes(shape = factor(n)), alpha = alpha.n) + 
+      stat_summary(aes(x=ratio), fun.y=median, geom='line') +
+      geom_point(aes(shape = factor(n)), alpha = alpha.n) +
       geom_hline(yintercept = 1) +
-      g.scale_y_log10_1() + 
+      g.scale_y_log10_1() +
       facet_wrap(~ Psi) +
-      ylab(expression(q)) + 
+      ylab(expression(q)) +
       scale_shape_discrete(expression(n)) +
       scale_colour_discrete("Scale Est."), legend.mod = legend.mod)
-@ 
+@
 \end{center}
 \caption{$q$ statistic for normal errors. $q$ is defined
-  in \eqref{eq:def.q.and.M}. 
+  in \eqref{eq:def.q.and.M}.
 }
 \label{fig:qscale-1}
-\end{figure}     
+\end{figure}
 
 \begin{figure}
 \begin{center}
-<<label=fig-Mscale,fig=TRUE,echo=FALSE>>=
+<<fig-Mscale,fig=TRUE,echo=FALSE>>=
 print(ggplot(droplevels(subset(test.3, Estimator %in% c("SMD", "MMqE"))),
              aes(p/n, M/q, color = Est.Scale)) +
-      stat_summary(aes(x=ratio), fun.y=median, geom='line') + 
-      geom_point(aes(shape = factor(n)), alpha = alpha.n) + 
-      g.scale_y_log10_0.05() + 
+      stat_summary(aes(x=ratio), fun.y=median, geom='line') +
+      geom_point(aes(shape = factor(n)), alpha = alpha.n) +
+      g.scale_y_log10_0.05() +
       facet_wrap(~ Psi) +
-      ylab(expression(M/q)) + 
+      ylab(expression(M/q)) +
       scale_shape_discrete(expression(n)) +
       scale_colour_discrete("Scale Est."), legend.mod = legend.mod)
-@ 
+@
 \end{center}
-\caption{$M/q$ statistic for normal errors. $M$ and $q$ are 
+\caption{$M/q$ statistic for normal errors. $M$ and $q$ are
   defined in \eqref{eq:def.q.and.M}.
 }
 \label{fig:Mscale-1}
-\end{figure}           
+\end{figure}
 
 \begin{figure}
 \begin{center}
-<<label=fig-qscale-all,fig=TRUE,echo=FALSE>>=
-print(ggplot(droplevels(subset(test.1, Estimator %in% c("SMD", "MMqE") & 
+<<fig-qscale-all,fig=TRUE,echo=FALSE>>=
+print(ggplot(droplevels(subset(test.1, Estimator %in% c("SMD", "MMqE") &
                                 Psi == 'bisquare')),
              aes(p/n, q, color = Est.Scale)) +
-      stat_summary(aes(x=ratio), fun.y=median, geom='line') + 
-      geom_point(aes(shape = factor(n)), alpha = alpha.n) + 
+      stat_summary(aes(x=ratio), fun.y=median, geom='line') +
+      geom_point(aes(shape = factor(n)), alpha = alpha.n) +
       geom_hline(yintercept = 1) +
-      g.scale_y_log10_1() + 
+      g.scale_y_log10_1() +
       facet_wrap(~ Error) +
-      ylab(expression(q)) + 
+      ylab(expression(q)) +
       scale_shape_discrete(expression(n)) +
       scale_colour_discrete("Scale Est."), legend.mod = legend.mod)
-@ 
+@
 \end{center}
-\caption{$q$ statistic for \emph{bisquare} $\psi$. 
+\caption{$q$ statistic for \emph{bisquare} $\psi$.
 }
 \label{fig:qscale-all}
 \end{figure}
@@ -1010,84 +1022,84 @@ print(ggplot(droplevels(subset(test.1, Estimator %in% c("SMD", "MMqE") &
 
 \begin{figure}
 \begin{center}
-<<label=fig-Mscale-all,fig=TRUE,echo=FALSE>>=
-print(ggplot(droplevels(subset(test.1, Estimator %in% c("SMD", "MMqE") & 
+<<fig-Mscale-all,fig=TRUE,echo=FALSE>>=
+print(ggplot(droplevels(subset(test.1, Estimator %in% c("SMD", "MMqE") &
                                 Psi == 'bisquare')),
              aes(p/n, M/q, color = Est.Scale)) +
-      stat_summary(aes(x=ratio), fun.y=median, geom='line') + 
-      geom_point(aes(shape = factor(n)), alpha = alpha.n) + 
-      g.scale_y_log10_0.05() + 
+      stat_summary(aes(x=ratio), fun.y=median, geom='line') +
+      geom_point(aes(shape = factor(n)), alpha = alpha.n) +
+      g.scale_y_log10_0.05() +
       facet_wrap(~ Error) +
-      ylab(expression(M/q)) + 
+      ylab(expression(M/q)) +
       scale_shape_discrete(expression(n)) +
       scale_colour_discrete("Scale Est."), legend.mod = legend.mod)
-@ 
+@
 \end{center}
-\caption{$M/q$ statistic for \emph{bisquare} $\psi$. 
+\caption{$M/q$ statistic for \emph{bisquare} $\psi$.
 }
 \label{fig:Mscale-all}
-\end{figure}        
+\end{figure}
 
 \clearpage
 
 \begin{figure}
 \begin{center}
-<<label=fig-efficiency,fig=TRUE,echo=FALSE>>=
+<<fig-efficiency,fig=TRUE,echo=FALSE>>=
 print(ggplot(test.2, aes(p/n, efficiency.1, color = Estimator)) +
       geom_point(aes(shape = factor(n)), alpha = alpha.n) +
-      geom_hline(yintercept = 0.95) + 
-      stat_summary(aes(x=ratio), fun.y=median, geom='line') + 
+      geom_hline(yintercept = 0.95) +
+      stat_summary(aes(x=ratio), fun.y=median, geom='line') +
       facet_wrap(~ Psi) +
       ylab(expression(paste('efficiency of ',hat(beta)))) +
-      g.scale_shape(expression(n)) + 
+      g.scale_shape(expression(n)) +
       scale_colour_discrete(name = "Estimator"), legend.mod = legend.mod)
-@ 
+@
 \end{center}
 \caption{Efficiency for normal errors. The efficiency
   is calculated by comparing to an OLS estimate and averaging with
-  $\Sexpr{trim*100}\%$ trimming. 
+  $\Sexpr{trim*100}\%$ trimming.
 }
 \label{fig:efficiency}
 \end{figure}
 
 \begin{figure}
 \begin{center}
-<<label=fig-efficiency-all,fig=TRUE,echo=FALSE>>=
+<<fig-efficiency-all,fig=TRUE,echo=FALSE>>=
 print(ggplot(droplevels(subset(test.1, Error != 't1')),
              aes(p/n, efficiency.1, color = Estimator)) +
       geom_point(aes(shape = Error), alpha = alpha.error) +
-      geom_hline(yintercept = 0.95) + 
-      stat_summary(aes(x=ratio), fun.y=median, geom='line') + 
+      geom_hline(yintercept = 0.95) +
+      stat_summary(aes(x=ratio), fun.y=median, geom='line') +
       g.scale_shape(value=c(16,17,15,3,7,8,9,1,2,4)[-4]) +
-      facet_wrap(~ Psi) + 
+      facet_wrap(~ Psi) +
       ylab(expression(paste('efficiency of ',hat(beta)))) +
       scale_colour_discrete(name = "Estimator"), legend.mod = legend.mod)
-@ 
+@
 \end{center}
-\caption{Efficiency for all simulated error distributions except $t_1$. 
+\caption{Efficiency for all simulated error distributions except $t_1$.
 }
 \label{fig:efficiency-all}
 \end{figure}
 
 \begin{figure}
 \begin{center}
-<<label=fig-AdB2-1,fig=TRUE,echo=FALSE>>=
+<<fig-AdB2-1,fig=TRUE,echo=FALSE>>=
 print(ggplot(test.2, aes(p/n, AdB2.1/(1-p/n), color = Estimator)) +
-      geom_point(aes(shape=factor(n)), alpha = alpha.n) + 
-      geom_point(aes(p/n, K2AdB2.1/(1-p/n)), alpha = alpha.n) + 
+      geom_point(aes(shape=factor(n)), alpha = alpha.n) +
+      geom_point(aes(p/n, K2AdB2.1/(1-p/n)), alpha = alpha.n) +
       geom_point(aes(p/n, AdB2t.1), alpha = alpha.n) +
-      stat_summary(aes(x=ratio), fun.y=median, geom='line') + 
-      stat_summary(aes(x=ratio, y=K2AdB2.1/(1-p/n)), 
-                   fun.y=median, geom='line', linetype = 2) + 
+      stat_summary(aes(x=ratio), fun.y=median, geom='line') +
+      stat_summary(aes(x=ratio, y=K2AdB2.1/(1-p/n)),
+                   fun.y=median, geom='line', linetype = 2) +
       stat_summary(aes(x=ratio, y=AdB2t.1),
-                   fun.y=median, geom='line', linetype = 3) + 
-      geom_hline(yintercept = 1/0.95) + 
-      g.scale_y_log10_1() + 
+                   fun.y=median, geom='line', linetype = 3) +
+      geom_hline(yintercept = 1/0.95) +
+      g.scale_y_log10_1() +
       scale_shape_discrete(expression(n)) +
       scale_colour_discrete(name = "Estimator")  +
-      ylab(expression(mean(hat(gamma)))) + 
+      ylab(expression(mean(hat(gamma)))) +
       facet_wrap(~ Psi), legend.mod = legend.mod)
-@ 
+@
 \end{center}
 \caption{Comparing the estimates of $\gamma$. The solid line connects the
   uncorrected estimate, dotted the $\tau$ corrected estimate and
@@ -1098,71 +1110,71 @@ print(ggplot(test.2, aes(p/n, AdB2.1/(1-p/n), color = Estimator)) +
 
 \begin{figure}
 \begin{center}
-<<label=fig-sdAdB2-1,fig=TRUE,echo=FALSE>>=
+<<fig-sdAdB2-1,fig=TRUE,echo=FALSE>>=
 print(ggplot(test.2, aes(p/n, sdAdB2.1/(1-p/n), color = Estimator)) +
-      geom_point(aes(shape=factor(n)), alpha = alpha.n) + 
+      geom_point(aes(shape=factor(n)), alpha = alpha.n) +
       geom_point(aes((p/n), sdK2AdB2.1/(1-p/n)), alpha = alpha.n) +
       geom_point(aes((p/n), sdAdB2t.1), alpha = alpha.n) +
-      stat_summary(aes(x=ratio), fun.y=median, geom='line') + 
+      stat_summary(aes(x=ratio), fun.y=median, geom='line') +
       stat_summary(aes(x=ratio, y=sdK2AdB2.1/(1-p/n)),
-                   fun.y=median, geom='line', linetype = 2) + 
+                   fun.y=median, geom='line', linetype = 2) +
       stat_summary(aes(x=ratio, y=sdAdB2t.1),
-                   fun.y=median, geom='line', linetype = 3) + 
+                   fun.y=median, geom='line', linetype = 3) +
       g.scale_y_log10_0.05() +
       scale_shape_discrete(expression(n)) +
       scale_colour_discrete(name = "Estimator")  +
-      ylab(expression(sd(hat(gamma)))) + 
+      ylab(expression(sd(hat(gamma)))) +
       facet_wrap(~ Psi), legend.mod = legend.mod)
-@ 
+@
 \end{center}
 \caption{Comparing the estimates of $\gamma$. The solid line connects the
   uncorrected estimate, dotted the $\tau$ corrected estimate and
-  dashed Huber's small sample correction. 
+  dashed Huber's small sample correction.
 }
 \label{fig:sdAdB2-1}
 \end{figure}
-                             
+
 \begin{figure}
 \begin{center}
-<<label=fig-emp-level,fig=TRUE,echo=FALSE>>=
+<<fig-emp-level,fig=TRUE,echo=FALSE>>=
 print(ggplot(test.2, aes(p/n, f.truncate(emplev_1),
                          color = method.cov)) +
-      g.truncate.lines + g.truncate.areas + 
+      g.truncate.lines + g.truncate.areas +
       geom_point(aes(shape = factor(n)), alpha = alpha.n) +
       scale_shape_discrete(expression(n)) +
-      stat_summary(aes(x=ratio), fun.y=median, geom='line') + 
-      geom_hline(yintercept = 0.05) + 
+      stat_summary(aes(x=ratio), fun.y=median, geom='line') +
+      geom_hline(yintercept = 0.05) +
       g.scale_y_log10_0.05() +
       scale_colour_discrete(name = "Estimator")  +
-      ylab(expression(paste("empirical level (", H[0], ": ", beta[1], "=", 0, ")"))) + 
+      ylab(expression(paste("empirical level (", H[0], ": ", beta[1], "=", 0, ")"))) +
       facet_wrap(~ Psi), legend.mod = legend.mod)
-@ 
+@
 \end{center}
 \caption{Empirical levels of test $H_0: \beta_1 = 0$ for normal errors. The
-  y-values are truncated at $\Sexpr{trunc[1]}$ and $\Sexpr{trunc[2]}$. 
+  y-values are truncated at $\Sexpr{trunc[1]}$ and $\Sexpr{trunc[2]}$.
 }
 \label{fig:emp-level}
 \end{figure}
-    
+
 \begin{figure}
 \begin{center}
-<<label=fig-lqq-level,fig=TRUE,echo=FALSE>>=
+<<fig-lqq-level,fig=TRUE,echo=FALSE>>=
 print(ggplot(droplevels(subset(test.1, Psi == 'lqq' & emplev_1 != 0)),
       aes(p/n, f.truncate(emplev_1), color = method.cov)) +
       g.truncate.line + g.truncate.area +
       geom_point(aes(shape = factor(n)), alpha = alpha.n) +
-      stat_summary(aes(x=ratio), fun.y=median, geom='line') + 
-      geom_hline(yintercept = 0.05) + 
+      stat_summary(aes(x=ratio), fun.y=median, geom='line') +
+      geom_hline(yintercept = 0.05) +
       g.scale_y_log10_0.05() +
-      g.scale_shape(expression(n)) + 
-      scale_colour_discrete(name = "Estimator") + 
-      ylab(expression(paste("empirical level (", H[0], ": ", beta[1], "=", 0, ")"))) + 
+      g.scale_shape(expression(n)) +
+      scale_colour_discrete(name = "Estimator") +
+      ylab(expression(paste("empirical level (", H[0], ": ", beta[1], "=", 0, ")"))) +
       facet_wrap(~ Error), legend.mod = legend.mod
       )
-@ 
+@
 \end{center}
 \caption{Empirical levels of test $H_0: \beta_1 = 0$ for \emph{lqq}
-  $\psi$-function and different error distributions. 
+  $\psi$-function and different error distributions.
 }
 \label{fig:lqq-level}
 \end{figure}
@@ -1170,120 +1182,120 @@ print(ggplot(droplevels(subset(test.1, Psi == 'lqq' & emplev_1 != 0)),
 
 \begin{figure}
 \begin{center}
-<<label=fig-power-1-0_2,fig=TRUE,echo=FALSE>>=
+<<fig-power-1-0_2,fig=TRUE,echo=FALSE>>=
 print(ggplot(subset(test.1, n == 25),
       aes(p/n, power_1_0.2, color = method.cov)) +
       geom_point(aes(shape = Error), alpha = alpha.error) +
-      stat_summary(aes(x=ratio), fun.y=median, geom='line') + 
-      geom_point(data=subset(test.lm, n == 25), alpha = alpha.n) + 
+      stat_summary(aes(x=ratio), fun.y=median, geom='line') +
+      geom_point(data=subset(test.lm, n == 25), alpha = alpha.n) +
       stat_summary(data=subset(test.lm, n == 25), aes(x=ratio),
-                   fun.y=median, geom='line') + 
-      g.scale_shape("Error") + 
-      scale_colour_discrete(name = "Estimator (Cov. Est.)") + 
+                   fun.y=median, geom='line') +
+      g.scale_shape("Error") +
+      scale_colour_discrete(name = "Estimator (Cov. Est.)") +
       ylab(expression(paste("empirical power (", H[0], ": ",
-          beta[1], "=", 0.2, ")"))) + 
+          beta[1], "=", 0.2, ")"))) +
       facet_wrap(~ Psi), legend.mod = legend.mod
       )
-@ 
+@
 \end{center}
 \caption{Empirical power of test $H_0: \beta_1 = 0.2$ for different
-  $\psi$-functions. Results for $n = 25$ and normal errors only. 
+  $\psi$-functions. Results for $n = 25$ and normal errors only.
 }
 \label{fig:power-1-0_2}
 \end{figure}
 
 \begin{figure}
 \begin{center}
-<<label=fig-power-1-0_4,fig=TRUE,echo=FALSE>>=
+<<fig-power-1-0_4,fig=TRUE,echo=FALSE>>=
 print(ggplot(subset(test.1, n == 25),
       aes(p/n, power_1_0.4, color = method.cov)) +
       geom_point(aes(shape = Error), alpha = alpha.error) +
-      stat_summary(aes(x=ratio), fun.y=median, geom='line') + 
-      geom_point(data=subset(test.lm, n == 25), alpha = alpha.n) + 
+      stat_summary(aes(x=ratio), fun.y=median, geom='line') +
+      geom_point(data=subset(test.lm, n == 25), alpha = alpha.n) +
       stat_summary(data=subset(test.lm, n == 25), aes(x=ratio),
-                   fun.y=median, geom='line') + 
-      g.scale_shape("Error") + 
-      scale_colour_discrete(name = "Estimator (Cov. Est.)") + 
+                   fun.y=median, geom='line') +
+      g.scale_shape("Error") +
+      scale_colour_discrete(name = "Estimator (Cov. Est.)") +
       ylab(expression(paste("empirical power (", H[0], ": ",
-          beta[1], "=", 0.4, ")"))) + 
+          beta[1], "=", 0.4, ")"))) +
       facet_wrap(~ Psi), legend.mod = legend.mod
       )
-@ 
+@
 \end{center}
 \caption{Empirical power of test $H_0: \beta_1 = 0.4$ for different
-  $\psi$-functions. Results for $n = 25$ and normal errors only. 
+  $\psi$-functions. Results for $n = 25$ and normal errors only.
 }
 \label{fig:power-1-0_4}
 \end{figure}
 
 \begin{figure}
 \begin{center}
-<<label=fig-power-1-0_6,fig=TRUE,echo=FALSE>>=
+<<fig-power-1-0_6,fig=TRUE,echo=FALSE>>=
 print(ggplot(subset(test.1, n == 25),
       aes(p/n, power_1_0.6, color = method.cov)) +
       geom_point(aes(shape = Error), alpha = alpha.error) +
-      stat_summary(aes(x=ratio), fun.y=median, geom='line') + 
-      g.scale_shape("Error") + 
-      geom_point(data=subset(test.lm, n == 25), alpha = alpha.n) + 
+      stat_summary(aes(x=ratio), fun.y=median, geom='line') +
+      g.scale_shape("Error") +
+      geom_point(data=subset(test.lm, n == 25), alpha = alpha.n) +
       stat_summary(data=subset(test.lm, n == 25), aes(x=ratio),
-                   fun.y=median, geom='line') + 
-      scale_colour_discrete(name = "Estimator (Cov. Est.)") + 
+                   fun.y=median, geom='line') +
+      scale_colour_discrete(name = "Estimator (Cov. Est.)") +
       ylab(expression(paste("empirical power (", H[0], ": ",
-          beta[1], "=", 0.6, ")"))) + 
+          beta[1], "=", 0.6, ")"))) +
       facet_wrap(~ Psi), legend.mod = legend.mod
       )
-@ 
+@
 \end{center}
 \caption{Empirical power of test $H_0: \beta_1 = 0.6$ for different
-  $\psi$-functions. Results for $n = 25$ and normal errors only. 
+  $\psi$-functions. Results for $n = 25$ and normal errors only.
 }
 \label{fig:power-1-0_6}
 \end{figure}
 
 \begin{figure}
 \begin{center}
-<<label=fig-power-1-0_8,fig=TRUE,echo=FALSE>>=
+<<fig-power-1-0_8,fig=TRUE,echo=FALSE>>=
 print(ggplot(subset(test.1, n == 25),
       aes(p/n, power_1_0.8, color = method.cov)) +
       geom_point(aes(shape = Error), alpha = alpha.error) +
-      stat_summary(aes(x=ratio), fun.y=median, geom='line') + 
-      geom_point(data=subset(test.lm, n == 25), alpha = alpha.n) + 
+      stat_summary(aes(x=ratio), fun.y=median, geom='line') +
+      geom_point(data=subset(test.lm, n == 25), alpha = alpha.n) +
       stat_summary(data=subset(test.lm, n == 25), aes(x=ratio),
-                   fun.y=median, geom='line') + 
-      g.scale_shape("Error") + 
-      scale_colour_discrete(name = "Estimator (Cov. Est.)") + 
+                   fun.y=median, geom='line') +
+      g.scale_shape("Error") +
+      scale_colour_discrete(name = "Estimator (Cov. Est.)") +
       ylab(expression(paste("empirical power (", H[0], ": ",
-          beta[1], "=", 0.8, ")"))) + 
+          beta[1], "=", 0.8, ")"))) +
       facet_wrap(~ Psi), legend.mod = legend.mod
       )
-@ 
+@
 \end{center}
 \caption{Empirical power of test $H_0: \beta_1 = 0.8$ for different
-  $\psi$-functions. Results for $n = 25$ and normal errors only. 
+  $\psi$-functions. Results for $n = 25$ and normal errors only.
 }
 \label{fig:power-1-0_8}
 \end{figure}
 
 \begin{figure}
 \begin{center}
-<<label=fig-power-1-1,fig=TRUE,echo=FALSE>>=
+<<fig-power-1-1,fig=TRUE,echo=FALSE>>=
 print(ggplot(subset(test.1, n == 25),
       aes(p/n, power_1_1, color = method.cov)) +
       geom_point(aes(shape = Error), alpha = alpha.error) +
-      stat_summary(aes(x=ratio), fun.y=median, geom='line') + 
-      geom_point(data=subset(test.lm, n == 25), alpha = alpha.n) + 
+      stat_summary(aes(x=ratio), fun.y=median, geom='line') +
+      geom_point(data=subset(test.lm, n == 25), alpha = alpha.n) +
       stat_summary(data=subset(test.lm, n == 25), aes(x=ratio),
-                   fun.y=median, geom='line') + 
-      g.scale_shape("Error") + 
-      scale_colour_discrete(name = "Estimator (Cov. Est.)") + 
+                   fun.y=median, geom='line') +
+      g.scale_shape("Error") +
+      scale_colour_discrete(name = "Estimator (Cov. Est.)") +
       ylab(expression(paste("empirical power (", H[0], ": ",
-          beta[1], "=", 1, ")"))) + 
+          beta[1], "=", 1, ")"))) +
       facet_wrap(~ Psi), legend.mod = legend.mod
       )
-@ 
+@
 \end{center}
 \caption{Empirical power of test $H_0: \beta_1 = 1$ for different
-  $\psi$-functions. Results for $n = 25$ and normal errors only. 
+  $\psi$-functions. Results for $n = 25$ and normal errors only.
 }
 \label{fig:power-1-1}
 \end{figure}
@@ -1292,12 +1304,12 @@ print(ggplot(subset(test.1, n == 25),
 
 \begin{figure}
 \begin{center}
-<<label=fig-pred-points,fig=TRUE,echo=FALSE>>=
+<<fig-pred-points,fig=TRUE,echo=FALSE>>=
 pp <- f.prediction.points(dd)[1:7,]
 tmp <- plotmatrix(pp)$data
 tmp$label <- as.character(1:7)
 print(plotmatrix(dd) + geom_text(data=tmp, color = 2, aes(label=label), size = 2.5))
-@ 
+@
 \end{center}
 \caption{Prediction points for fixed design. The black points are the
   points of the original design. The red digits indicate the numbers and
@@ -1308,7 +1320,7 @@ print(plotmatrix(dd) + geom_text(data=tmp, color = 2, aes(label=label), size = 2
 
 \begin{figure}
 \begin{center}
-<<label=fig-cpr,fig=TRUE,echo=FALSE>>=
+<<fig-cpr,fig=TRUE,echo=FALSE>>=
 n.cprs <- names(test.fixed)[grep('cpr', names(test.fixed))]
 test.5 <- melt(test.fixed[,c('method.cov', 'Error', 'Psi', n.cprs)])
 test.5 <- within(test.5, {
@@ -1319,19 +1331,19 @@ test.5 <- within(test.5, {
 print(ggplot(test.5,
              aes(Point, f.truncate(value), color = method.cov)) +
       geom_point(aes(shape = Error), alpha = alpha.error) +
-      g.truncate.line + g.truncate.area + 
-      stat_summary(fun.y=median, geom='line') + 
+      g.truncate.line + g.truncate.area +
+      stat_summary(fun.y=median, geom='line') +
       geom_hline(yintercept = 0.05) +
       g.scale_y_log10_0.05() +
-      g.scale_shape() + 
-      scale_colour_discrete(name = "Estimator (Cov. Est.)") + 
-      ylab("empirical level of confidence intervals") + 
+      g.scale_shape() +
+      scale_colour_discrete(name = "Estimator (Cov. Est.)") +
+      ylab("empirical level of confidence intervals") +
       facet_wrap(~ Psi), legend.mod = legend.mod
       )
-@ 
+@
 \end{center}
 \caption{Empirical coverage probabilities. Results for fixed design. The
-  y-values are truncated at $\Sexpr{trunc[2]}$. 
+  y-values are truncated at $\Sexpr{trunc[2]}$.
 }
 \label{fig:cpr}
 \end{figure}
@@ -1339,7 +1351,7 @@ print(ggplot(test.5,
 
 \clearpage
 
-\section{Maximum Asymptotic Bias} 
+\section{Maximum Asymptotic Bias}
 \label{sec:maximum-asymptotic-bias}
 
 The slower redescending $\psi$-functions come with higher asymptotic bias
@@ -1347,8 +1359,8 @@ as illustrated in Fig.~\ref{fig:max-asymptotic-bias}. We calculate the
 asymptotic bias as in \citet{berrendero2007maximum}.
 
 
-<<results=HIDE,echo=FALSE>>=
-## Henning (1994) eq 33: 
+<<results=hide,echo=FALSE>>=
+## Henning (1994) eq 33:
 g <- Vectorize(function(s, theta, mu, ...) {
   lctrl <- lmrob.control(...)
   rho <- function(x)
@@ -1364,7 +1376,7 @@ g.2 <- Vectorize(function(s, theta, mu, ...) {
 g.2.MM <- Vectorize(function(s, theta, mu, ...) {
   lctrl <- lmrob.control(...)
   robustbase:::lmrob.E(chi(sqrt(1 + theta^2)/s*r), lctrl, use.integrate = TRUE)})
-## Henning (1994) eq 30, one parameter case 
+## Henning (1994) eq 30, one parameter case
 g.3 <- Vectorize(function(s, theta, mu, ...) {
   lctrl <- lmrob.control(...)
   rho <- function(x)
@@ -1387,7 +1399,7 @@ inv.g1.MM <- function(value, theta, mu, ...) {
   } else {
     ret$root
   }
-}  
+}
 s.min <- function(epsilon, ...) inv.g1(0.5/(1 - epsilon), 0, 0, ...)
 s.max <- function(epsilon, ...) inv.g1((0.5-epsilon)/(1-epsilon), 0, 0, ...)
 
@@ -1396,40 +1408,41 @@ BS <- Vectorize(function(epsilon, ...) {
 
 l <- Vectorize(function(epsilon, ...) {
   sigma_be <- s.max(epsilon, ...)
-  sqrt((sigma_be/inv.g1.MM(g.2.MM(sigma_be,0,0,...) + 
+  sqrt((sigma_be/inv.g1.MM(g.2.MM(sigma_be,0,0,...) +
                            epsilon/(1-epsilon),0,0,...))^2 - 1) })
 u <- Vectorize(function(epsilon, ...) {
   gamma_be <- s.min(epsilon, ...)
   max(l(epsilon, ...),
-      sqrt((gamma_be/inv.g1.MM(g.2.MM(gamma_be,0,0,...) + 
+      sqrt((gamma_be/inv.g1.MM(g.2.MM(gamma_be,0,0,...) +
                                epsilon/(1-epsilon),0,0,...))^2 - 1)) })
 @
-                             
+
 \begin{figure}
 \begin{center}
-<<label=fig-max-asymptotic-bias,fig=TRUE,echo=FALSE>>=
-if (!file.exists('asymptotic.max.bias.Rdata')) {
+<<fig-max-asymptotic-bias,fig=TRUE,echo=FALSE>>=
+asymptMBFile <- file.path(robustDoc, 'asymptotic.max.bias.Rdata')
+if (!file.exists(asymptMBFile)) {
   x <- seq(0, 0.35, length.out = 100)
-  rmb <- rbind(data.frame(l=l(x, psi = 'hampel'), 
+  rmb <- rbind(data.frame(l=l(x, psi = 'hampel'),
                           u=u(x, psi = 'hampel'), psi = 'Hampel'),
-               data.frame(l=l(x, psi = 'lqq'), 
+               data.frame(l=l(x, psi = 'lqq'),
                           u=u(x, psi = 'lqq'), psi = 'lqq'),
-               data.frame(l=l(x, psi = 'bisquare'), 
-                          u=u(x, psi = 'bisquare'), psi = 'bisquare'), 
-               data.frame(l=l(x, psi = 'optimal'), 
+               data.frame(l=l(x, psi = 'bisquare'),
+                          u=u(x, psi = 'bisquare'), psi = 'bisquare'),
+               data.frame(l=l(x, psi = 'optimal'),
                           u=u(x, psi = 'optimal'), psi = 'optimal'))
   rmb$x <- x
-  save(rmb, file='asymptotic.max.bias.Rdata')
-} else load('asymptotic.max.bias.Rdata')
+  save(rmb, file=asymptMBFile)
+} else load(asymptMBFile)
 
-print(ggplot(rmb, aes(x, l, color=psi)) + 
-      geom_line() + geom_line(aes(x, u, color=psi, linetype = 2)) + 
-      coord_cartesian(ylim=c(0,10)) + 
-      scale_y_continuous(breaks = 1:10) + 
-      scale_colour_hue(expression(paste(psi,'-function'))) + 
+print(ggplot(rmb, aes(x, l, color=psi)) +
+      geom_line() + geom_line(aes(x, u, color=psi, linetype = 2)) +
+      coord_cartesian(ylim=c(0,10)) +
+      scale_y_continuous(breaks = 1:10) +
+      scale_colour_hue(expression(paste(psi,'-function'))) +
       xlab(expression(paste("amount of contamination  ", epsilon))) +
       ylab("maximum asymptotic bias bounds"))
-@ 
+@
 \end{center}
 \caption{Maximum asymptotic bias bound for the $\psi$-functions used in the
   simulation. Solid line: lower bound. Dashed line: upper bound.}
