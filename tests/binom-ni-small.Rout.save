@@ -1,6 +1,6 @@
 
-R version 2.12.0 Patched (2010-12-02 r53738)
-Copyright (C) 2010 The R Foundation for Statistical Computing
+R version 2.14.0 RC (2011-10-25 r57433)
+Copyright (C) 2011 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
@@ -112,7 +112,7 @@ x            4.061024  0.6512647  6.235596 4.500620e-10
 > which(rg1.$w.r != 1) ## 7 of them :
 [1] 11 18 23 29 34 36 46
 > str(rg1.["family" != names(rg1.)])
-List of 26
+List of 27
  $ coefficients     : Named num [1:2] -2.38 4.9
   ..- attr(*, "names")= chr [1:2] "(Intercept)" "x"
  $ residuals        : Named num [1:51] -0.528 0.622 -0.582 0.435 -0.981 ...
@@ -188,6 +188,7 @@ List of 26
   ..$ maxit   : num 50
   ..$ tcc     : num 1.34
  $ method           : chr "Mqle"
+ $ prior.weights    : num [1:51] 1 1 1 1 1 1 1 1 1 1 ...
  $ contrasts        : NULL
  $ xlevels          : Named list()
 > 
@@ -222,7 +223,7 @@ In glmrobMqle(X = X, y = Y, weights = weights, start = start, offset = offset,  
 > ## --> warning..
 > rg0. <- glmrob(cbind(k0, n0-k0) ~ x, family = binomial, subset = n0 > 0)
 > 
-> coef(summary(rg0)) # not yet good (cf. 'g0' above!)
+> coef(summary(rg0)) # not yet good (cf. 'g0' above!) -- but the one of rg0. is
              Estimate Std. Error z-value Pr(>|z|)
 (Intercept) -1.852918        NaN     NaN      NaN
 x            3.847520        NaN     NaN      NaN
@@ -352,5 +353,5 @@ test.acc
 +                     rg3.15  [no.comp], tol = 1e-13))
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  0.488 0.054 0.61 0 0 
+Time elapsed:  0.502 0.065 0.628 0 0.009 
 > 

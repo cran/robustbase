@@ -479,7 +479,7 @@ if (!file.exists(aggrResultsFile)) {
     ## get design, load r.test, initialize other stuff
     design <- substr(basename(file), 14, nchar(basename(file)) - 6)
     cat(design, ' ')
-    load(file)
+    load(file.path(robustDoc, file))
     estlist <- attr(r.test, 'estlist')
     use.intercept <-
       if (!is.null(estlist$use.intercept)) estlist$use.intercept else TRUE

@@ -116,7 +116,6 @@ ltsPlot <- function(x,
 	ll <- myqqline(r, lty = 2, ...)
 	ord <- abs(qq$y - ll$int - ll$slope * qq$x)
 	label(qq$x, qq$y, ord, lab, id.n, ...)
-	title(main = "Normal Q-Q plot")
     }
 
     indexplot <- function(r, scale, classic = FALSE, lab, id.n, ...) {

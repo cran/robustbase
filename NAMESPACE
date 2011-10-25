@@ -68,6 +68,7 @@ S3method(anova, glmrob)
 
 S3method(model.matrix, lmrob)
 
+S3method(formula, nlrob)
 S3method(fitted, nlrob)
 S3method(plot, lts)
 S3method(plot, mcd)
@@ -87,6 +88,7 @@ S3method(print, summary.nlrob)
 S3method(print, summary.lts)
 
 S3method(residuals, nlrob)
+S3method(residuals, glmrob)
 
 S3method(summary, glmrob)
 S3method(summary, lmrob)
@@ -98,6 +100,16 @@ S3method(vcov, glmrob)
 S3method(vcov, lmrob)
 ##not there: S3method(print, summary.mcd)
 
+if(getRversion() < "2.13") {
+    export(nobs)
+    S3method(nobs, lm)
+    S3method(nobs, glm)
+    if(getRversion() < "2.12") {
+	export(droplevels)
+	S3method(droplevels, factor)
+	S3method(droplevels, data.frame)
+    }
+}
 
 ## S4 Generics {only those defined in this package}:
 export(

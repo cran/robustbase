@@ -1,6 +1,6 @@
 Package: robustbase
-Version: 0.7-6
-Date: 2011-05-23
+Version: 0.7-8
+Date: 2011-10-25
 Title: Basic Robust Statistics
 Author: Original code by many authors, notably Peter Rousseeuw and
         Christophe Croux, see file 'Copyrights'; Valentin Todorov
@@ -20,11 +20,11 @@ Description: "Essential" Robust Statistics.  The goal is to provide
         multivariate statistics where we strive to cover the book
         "Robust Statistics, Theory and Methods" by Maronna, Martin and
         Yohai; Wiley 2006.
-Depends: R (>= 2.9.0), stats, graphics, methods
+Depends: R (>= 2.11.0), stats, graphics, methods
 Suggests: MASS, lattice, boot, MPV, xtable, ggplot2, RColorBrewer
 LazyLoad: yes
 LazyData: yes
 License: GPL (>= 2)
-Packaged: 2011-05-24 16:35:59 UTC; maechler
+Packaged: 2011-10-26 08:05:59 UTC; maechler
 Repository: CRAN
-Date/Publication: 2011-05-25 07:52:33
+Date/Publication: 2011-10-26 18:00:54

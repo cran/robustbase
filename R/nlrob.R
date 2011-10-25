@@ -13,7 +13,7 @@ nlrob <-
     ## -------------------------------------------------------------------------
 
     ##- some checks
-    mf <- match.call() # << and more as in nls()  [FIXME or drop]
+    mf <- call <- match.call() # << and more as in nls()  ['mf': FIXME or drop]
     formula <- as.formula(formula)
     if (length(formula) != 3)
 	stop("'formula' should be a formula of the type 'y  ~ f(x, alpha)'")
@@ -102,32 +102,34 @@ nlrob <-
 
     ## --- Estimated asymptotic covariance of the robust estimator
    if (!converged && !method.exit) {
-        asCov <- NA
-    } else {
-        AtWAinv <- chol2inv(out$m$Rmat())
-        dimnames(AtWAinv) <- list(names(coef), names(coef))
-        tau <- (mean(psi(resid/Scale, ...)^2) /
-                (mean(psi(resid/Scale, deriv=TRUE, ...))^2))
-        asCov <- AtWAinv * Scale^2 * tau
-    }
+       asCov <- NA
+   } else {
+       AtWAinv <- chol2inv(out$m$Rmat())
+       dimnames(AtWAinv) <- list(names(coef), names(coef))
+       tau <- (mean(psi(resid/Scale, ...)^2) /
+               (mean(psi(resid/Scale, deriv=TRUE, ...))^2))
+       asCov <- AtWAinv * Scale^2 * tau
+   }
 
     ## returned object:
-    out <- list(m = out$m, call = match.call(), formula = oform,
-                new.formula = formula,
-		coefficients = coef, residuals = resid,
-		fitted.values = y - out$residuals,
+    fit <- eval(oform[[3]], c(as.list(data), coef))
+    names(fit) <- rownames(data)
+    out <- list(m = out$m, call = call, formula = oform,
+		new.formula = formula,
+		coefficients = coef, working.residuals =  - as.vector(resid),
+		fitted.values = fit, residuals = y - fit,
 		Scale = Scale, w = w, w.r = psi(resid/Scale, ...),
-                cov=asCov, status = status, iter=iiter,
-                psi = psi, data = dataName,
+		cov=asCov, status = status, iter=iiter,
+		psi = psi, data = dataName,
 		dataClasses = attr(attr(mf, "terms"), "dataClasses"))
     ##MM: Where would this "label" really make sense?
     ##MM: attr(out$fitted.values, "label") <- "Fitted values"
-    ##-	  names(out$residuals) <- rownames(data)
-    ##-	  names(out$fitted.values) <- rownames(data)
     class(out) <- c("nlrob", "nls")
     out
 }
 
+## The 'nls' method is *not* correct
+formula.nlrob <- function(x, ...) x$formula
 
 fitted.nlrob <- function (object, ...)
 {
@@ -147,7 +149,7 @@ predict.nlrob <- function (object, newdata, ...)
 	return(as.vector(fitted(object)))
     if (!is.null(cl <- object$dataClasses))
 	.checkMFClasses(cl, newdata)
-    eval(object$formula[[3]], c(as.list(newdata), coef(object)))
+    eval(formula(object)[[3]], c(as.list(newdata), coef(object)))
 }
 
 
@@ -162,13 +164,29 @@ print.nlrob <- function (x, ...)
 }
 
 
-residuals.nlrob <- function (object, ...)
+residuals.nlrob <- function (object, type = c("response", "working", "pearson"), ...)
 {
-    val <- as.vector(object$residuals)
+    type <- match.arg(type)
+    R <- switch(type,
+                "pearson"=
+            {
+                stop("type 'pearson' is not yet implemented")
+                ## as.vector(object$working.residuals)
+            },
+                "working"=
+            {
+                object$working.residuals
+            },
+                "response"=
+            {
+                object$residuals
+            },
+                stop("invalid 'type'"))# ==> programming error, as we use match.arg()
     if (!is.null(object$na.action))
-	val <- naresid(object$na.action, val)
-    ##MM: attr(val, "label") <- "Residuals"
-    val
+        R <- naresid(object$na.action, R)
+    ## FIXME: add 'names'!
+    ##MM no labels; residuals.glm() does neither: attr(val, "label") <- "Residuals"
+    R
 }
 
 

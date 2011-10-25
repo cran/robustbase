@@ -557,11 +557,16 @@ lmrob.kappa <- function(obj, control = obj$control)
     uniroot(fun.min, c(0.1, 1))$root
 }
 
-lmrob.tau <- function(obj,x=obj$x, control = obj$control,
-                      h = lmrob.leverages(x, obj$weights, wqr = obj$qr), fast = TRUE)
+lmrob.tau <- function(obj,x=obj$x, control = obj$control, h, fast = TRUE)
 {
     if (is.null(control)) stop('control is missing')
-
+    if (missing(h)) {
+        if (is.null(obj$qr))
+            h <- lmrob.leverages(x, obj$weights)
+        else
+            h <- lmrob.leverages(x, obj$weights, wqr = obj$qr)
+    }
+    
     ## speed up: use approximation if possible
     if (fast && !control$method %in% c('S', 'SD')) {
         c.psi <- control$tuning.psi

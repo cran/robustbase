@@ -53,7 +53,7 @@ rg0 <-  glmrob(cbind(k0, n0-k0) ~ x, family = binomial)
 ## --> warning..
 rg0. <- glmrob(cbind(k0, n0-k0) ~ x, family = binomial, subset = n0 > 0)
 
-coef(summary(rg0)) # not yet good (cf. 'g0' above!)
+coef(summary(rg0)) # not yet good (cf. 'g0' above!) -- but the one of rg0. is
 stopifnot(all.equal(coef(rg0), coef(rg0.)))
 
 

@@ -53,7 +53,8 @@
 }
 \author{Andreas Ruckstuhl}
 \seealso{
-  \code{\link{glmrob}()} fit these robust GLM models;
+  \code{\link{glmrob}()} to fit these robust GLM models,
+  \code{\link{residuals.glmrob}()} and other methods;
   \code{\link{predict.lm}()}, the method used for a non-robust fit.
 }
 \examples{

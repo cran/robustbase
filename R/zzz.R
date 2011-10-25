@@ -1,11 +1,22 @@
-.onLoad <- function(libname, pkgname) {
-    require("methods")
-}
+## Here and in NAMESPACE:
+if(getRversion() < "2.13") {
+    nobs <- function (object, ...) UseMethod("nobs")
+    ## also used for mlm fits  *and* lmrob :
+    nobs.lm <- function(object, ...)
+	if(!is.null(w <- object$weights)) sum(w != 0) else NROW(object$residuals)
+    ## for glmrob :
+    nobs.glm <- function(object, ...) sum(!is.na(object$residuals))
 
-if(getRversion() < "2.9") {
-    ## The "real" grepl() function has more arguments and is more powerful
-    ## This is sufficient for a workaround for old R versions:
-    grepl <- function (pattern, x, ...) {
-	seq_along(x) %in% grep(pattern, x, ...)
+    if(getRversion() < "2.12") {
+	droplevels <- function(x, ...) UseMethod("droplevels")
+	droplevels.factor <- function(x, ...) factor(x)
+	droplevels.data.frame <- function(x, except = NULL, ...)
+	{
+	    ix <- vapply(x, is.factor, NA)
+	    if (!is.null(except)) ix[except] <- FALSE
+	    x[ix] <- lapply(x[ix], factor)
+	    x
+	}
+
     }
 }

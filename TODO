@@ -43,12 +43,8 @@ o ltsReg():  has  undocumented '$resid'
 
 --- glmrob --
 
-o Want residuals.glmrob() which allows a 'type = *' specification like
-  the *.glm() methods:
-  residuals(<glmrob>) gives "bad error" -- because of missing  object$df.residual
-
-o glmrob(*, weights.on.x = "robCov")  currently uses  MASS::cov.rob(), i.e.
-  "MVE" and Andreas had a comment that "mcd" is worse.
+o glmrob(*, weights.on.x = "robCov")  currently uses  MASS::cov.rob(),
+  i.e. "MVE" and Andreas had a comment that "mcd" is worse. [ -> R/glmrobMqle.R ]
   But still, I (MM) strongly believe we should use  covMcd() instead.
   HOWEVER: Need something better when 'X' has (binary!) factors!
   "hat" +- works, but needs more work
@@ -83,7 +79,8 @@ o drop1() would be nice
 
 --- nlrob ---
 
-o nlrob() needs tests in ./tests/ -- you can take some from man/nlrob.Rd
+o  residuals( nlrob(), type = "...") should provide types
+   	      "as in the litterature"
 
 ------
 

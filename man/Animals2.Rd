@@ -61,7 +61,7 @@ brain <- Animals[c(1:24, 26:25, 27:28),]
 plotbb(bbdat = brain)
 
 lbrain <- log(brain)
-plot(mahalanobis(lbrain, mean(lbrain), var(lbrain)),
+plot(mahalanobis(lbrain, colMeans(lbrain), var(lbrain)),
      main = "Classical Mahalanobis Distances")
 mcd <- covMcd(lbrain)
 plot(mahalanobis(lbrain,mcd$center,mcd$cov),

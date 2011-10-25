@@ -26,11 +26,11 @@ function (x, which = 1:5,
         on.exit(par(op))
     }
     if (show[1]) {
-	if(is.null(x$MD) && compute.MD) {
+	if(is.null(x[['MD']]) && compute.MD) {
 	    message("recomputing robust Mahalanobis distances")
 	    x$MD <- ## need to recompute
-		robMD(x = if(!is.null(x$x)) x$x else
-		      if(!is.null(x$model)) model.matrix(x, x$model)
+		robMD(x = if(!is.null(x[['x']])) x$x else
+		      if(!is.null(x[['model']])) model.matrix(x, x$model)
 		      else stop("need 'model' or 'x' component for robust Mahalanobis distances"),
 		      intercept = attr(x$terms,"intercept"))
 	    ## try to "cache" them with the object
@@ -42,7 +42,7 @@ function (x, which = 1:5,
 			sQuote(cnx))
 	    }
 	}
-        if(!is.null(x$MD)) {
+        if(!is.null(x[['MD']])) {
             if (p < 0 || p > 1)
                 stop ("Tolerance range must be between 0% to 100%")
             else chi <- sqrt( qchisq(p = 1-p, df = x$rank) )
@@ -65,7 +65,7 @@ function (x, which = 1:5,
             title(sub = sub.caption, ...)
     }
     if (show[3]) {
-        y <- if(!is.null(x$model)) model.response(x$model) else yh + r
+        y <- if(!is.null(x[['model']])) model.response(x$model) else yh + r
         m1 <- min(yh,y)
         m2 <- max(yh,y)
         plot(yh, y, xlab = "Fitted Values", ylab = "Response",

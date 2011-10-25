@@ -15,12 +15,12 @@ nlrob(formula, data, start, weights = NULL, na.action = na.fail,
       trace = FALSE, ...)
 
 \method{fitted}{nlrob}(object, ...)
-\method{residuals}{nlrob}(object, ...)
+\method{residuals}{nlrob}(object, type = , ...)% FIXME: more 'type's + DOCU
 \method{predict}{nlrob}(object, newdata, ...)
 }
 \arguments{
   \item{formula}{a nonlinear \code{\link{formula}} including variables
-    and parameters of the model, such as \code{y ~ f(x, alpha)} (cf. \code{\link{nls}}).
+    and parameters of the model, such as \code{y ~ f(x, theta)} (cf. \code{\link{nls}}).
     (For some checks: if \eqn{f(.)} is linear, then we need
     parentheses, e.g., \code{y ~ (a + b * x)}.)
 %% FIXME in code:
@@ -35,7 +35,8 @@ nlrob(formula, data, start, weights = NULL, na.action = na.fail,
     process (for intrinsic weights, not the weights \code{w} used in the
     iterative (robust) fit). I.e.,
     \code{sum(w * e^2)} is minimized with \code{e} = residuals,
-    \eqn{e_i = y_{i} - f(xreg_{i}, alpha's)}{e[i] = y[i] - f(xreg[i], alpha's)},
+    \eqn{e_i = y_i - f(xreg_i, \theta)}{e[i] = y[i] - f(xreg[i], theta)},
+    where \eqn{f(x,\theta)}{f(x, theta)} is the nonlinear function,
     and \code{w} are the robust weights from \code{resid * weights}.}
   \item{na.action}{a function which indicates what should happen when the data
     contain \code{NA}s.  The default action is for the procedure to
@@ -81,6 +82,10 @@ nlrob(formula, data, start, weights = NULL, na.action = na.fail,
 
   \item{object}{an \R object of class \code{"nlrob"}, typically
     resulting from \code{nlrob(..)}.}
+  \item{type}{a string specifying the \emph{type} of residuals desired.
+    Currently, \code{"response"} and \code{"working"} are supported.
+    %% FIXME: 1. document these (here)  2. write and support more types
+  }
   \item{newdata}{a data frame (or list) with the same names as the
     original \code{data}, see e.g., \code{\link{predict.nls}}.}
 }
@@ -88,15 +93,23 @@ nlrob(formula, data, start, weights = NULL, na.action = na.fail,
 
 % }
 \value{
-  An object of S3 class \code{"nlrob"}, also inheriting from class
-  "nls", (see \code{\link{nls}}).
+  \code{nlrob()} returns an object of S3 class \code{"nlrob"}, also
+  inheriting from class \code{"nls"}, (see \code{\link{nls}}).
+
+  It is a list with components
+  \item{FIXME }{???}
 
   There are methods (at least) for the generic accessor functions
   \code{\link{summary}}, \code{\link{coefficients}},
   \code{fitted.values} and \code{residuals}.
 
-  It is a list with components
-  \item{FIXME }{???}
+  \code{residuals(.)}, by default \code{type = "response"}, returns
+  the residuals \eqn{e_i}, defined above as
+  \eqn{e_i = Y_i - f_(x_i, \theta)}{e[i] = Y[i] - f(x[i],theta)}.
+  These differ from the standardized or weighted residuals which, e.g.,
+  are assumed to be normally distributed, and a version of which is
+  returned in \code{working.residuals} component.
+  %% and another is working.residuals/Scale
 }
 
 \author{
@@ -123,17 +136,17 @@ DNase1 <- DNase[ DNase$Run == 1, ]
 ##--- without conditional linearity ---
 
 ## classical
-fm3DNase1 <- nls( density ~ Asym/(1 + exp(( xmid - log(conc) )/scal ) ),
-                  data = DNase1,
-                  start = list( Asym = 3, xmid = 0, scal = 1 ),
-                  trace = TRUE )
-summary( fm3DNase1 )
+fmNase1 <- nls( density ~ Asym/(1 + exp(( xmid - log(conc) )/scal ) ),
+                data = DNase1,
+                start = list( Asym = 3, xmid = 0, scal = 1 ),
+                trace = TRUE )
+summary( fmNase1 )
 
 ## robust
-Rm3DNase1 <- nlrob(density ~ Asym/(1 + exp(( xmid - log(conc) )/scal ) ),
-                   data = DNase1, trace = TRUE,
-                   start = list( Asym = 3, xmid = 0, scal = 1 ))
-summary( Rm3DNase1 )
+RmN1  <- nlrob( density ~ Asym/(1 + exp(( xmid - log(conc) )/scal ) ),
+                data = DNase1, trace = TRUE,
+                start = list( Asym = 3, xmid = 0, scal = 1 ))
+summary( RmN1 )
 
 ##--- using conditional linearity ---
 
@@ -152,31 +165,33 @@ frm2DNase1 <- nlrob(density ~ 1/(1 + exp(( xmid - log(conc) )/scal ) ),
 summary( frm2DNase1 )
 } # not yet
 
-### -- new examples
-DNase1[10,"density"] <- 2*DNase1[10,"density"]
+### -- new examples -- "moderate outlier":
+DN2 <- DNase1
+DN2[10,"density"] <- 2*DN2[10,"density"]
 
-fm3DNase1 <- nls(density ~  Asym/(1 + exp(( xmid - log(conc) )/scal ) ),
-                       data = DNase1, trace = TRUE,
-                       start = list( Asym = 3, xmid = 0, scal = 1 ))
+fm3DN2 <- nls(density ~  Asym/(1 + exp(( xmid - log(conc) )/scal ) ),
+              data = DN2, trace = TRUE,
+              start = list( Asym = 3, xmid = 0, scal = 1 ))
 
 ## robust
-Rm3DNase1 <- nlrob(density ~  Asym/(1 + exp(( xmid - log(conc) )/scal ) ),
-                   data = DNase1, trace = TRUE,
-                   start = list( Asym = 3, xmid = 0, scal = 1 ))
-Rm3DNase1 ## summary() is not yet there {FIXME}
+Rm3DN2 <- nlrob(density ~  Asym/(1 + exp(( xmid - log(conc) )/scal ) ),
+                data = DN2, trace = TRUE,
+                start = list( Asym = 3, xmid = 0, scal = 1 ))
+Rm3DN2
+summary(Rm3DN2)
 
 ## utility function sfsmisc::lseq() :
 lseq <- function (from, to, length)
   2^seq(log2(from), log2(to), length.out = length)
 ## predict() {and plot}:
-h.x <- lseq(min(DNase1$conc), max(DNase1$conc), length = 100)
+h.x <- lseq(min(DN2$conc), max(DN2$conc), length = 100)
 nDat <- data.frame(conc = h.x)
 
-h.p  <- predict(fm3DNase1, newdata = nDat)# classical
-h.rp <- predict(Rm3DNase1, newdata= nDat)# robust
+h.p  <- predict(fm3DN2, newdata = nDat)# classical
+h.rp <- predict(Rm3DN2, newdata = nDat)# robust
 
-plot(density ~ conc, data=DNase1, log="x",
-     main = deparse(Rm3DNase1$call$formula))
+plot(density ~ conc, data=DN2, log="x",
+     main = format(formula(Rm3DN2)))
 lines(h.x, h.p,  col="blue")
 lines(h.x, h.rp, col="magenta")
 legend("topleft", c("classical nls()", "robust nlrob()"),

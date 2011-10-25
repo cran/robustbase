@@ -117,9 +117,9 @@ anovaGlmrobPair <- function(obj1, obj2, test)
       }
       else {
         quasiDev <- switch(full.mfit$family$family,
-                           poisson = glmrobMqleDiffQuasiDevPois,
-                           binomial =  glmrobMqleDiffQuasiDevB,
-                           Gamma =  glmrobMqleDiffQuasiDevGamma,
+			   poisson  = glmrobMqleDiffQuasiDevPois,
+			   binomial = glmrobMqleDiffQuasiDevB,
+			   Gamma    = glmrobMqleDiffQuasiDevGamma,
                            stop("This family is not implemented"))
 
         ## note that qdev and qdev0 do depend on an incorrectly specified

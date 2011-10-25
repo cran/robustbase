@@ -3,7 +3,7 @@ function (formula, family, data, weights, subset,
 	  na.action, start = NULL, offset, method = "Mqle",
 	  weights.on.x = c("none", "hat", "robCov", "covMcd"), control = NULL,
 	  model = TRUE, x = FALSE, y = TRUE, contrasts = NULL, trace = FALSE,
-          ...)
+	  ...)
 {
     call <- match.call()
     if (is.character(family))
@@ -16,7 +16,7 @@ function (formula, family, data, weights, subset,
 		      as.character(call[["family"]])))
 
     if (!(fami %in% c("binomial", "poisson", "Gamma", "gaussian"))) {
-        stop(gettextf("Robust GLM fitting not yet implemented for family %s",
+	stop(gettextf("Robust GLM fitting not yet implemented for family %s",
 			  fami))
     }
     if(is.null(control)) # -> use e.g., glmrobMqle.control()
@@ -35,10 +35,10 @@ function (formula, family, data, weights, subset,
     mt <- attr(mf, "terms")
     Y <- model.response(mf, "any")# "numeric" or "factor"
     if (length(dim(Y)) == 1) {
-        nm <- rownames(Y)
-        dim(Y) <- NULL
-        if (!is.null(nm))
-            names(Y) <- nm
+	nm <- rownames(Y)
+	dim(Y) <- NULL
+	if (!is.null(nm))
+	    names(Y) <- nm
     }
     X <- if (!is.empty.model(mt))
 	model.matrix(mt, mf, contrasts) else matrix(, NROW(Y), 0)
@@ -65,12 +65,12 @@ function (formula, family, data, weights, subset,
 		   stop("invalid 'start' string"))
     }
     fit <- switch(method,
-		  "cubif" =
+		  "cubif" = ## FIXME: not yet implemented !
 		  glmrobCubif(X = X, y = Y, weights = weights, start = start,
 			      offset = offset, family = family,
 			      weights.on.x = weights.on.x, control = control,
 			      intercept = attr(mt, "intercept") > 0,trace=trace),
-		  "Mqle" =
+		  "Mqle" = ## --> ./glmrobMqle.R
 		  glmrobMqle(X = X, y = Y, weights = weights, start = start,
 			     offset = offset, family = family,
 			     weights.on.x = weights.on.x, control = control,
@@ -86,17 +86,18 @@ function (formula, family, data, weights, subset,
 	fit$model <- mf
     if (x)
 	fit$x <- X
-    if (!y)
-	fit$y <- NULL
+    if (!y) ## fit$y <- NULL
+	warning("setting 'y = FALSE' has no longer any effect")
     fit <- c(fit,
 	     list(call = call, formula = formula, terms = mt, data = data,
 		  offset = offset, control = control, method = method,
+		  prior.weights = if(is.null(weights)) rep.int(1, nrow(X))
+		  else weights,
 		  contrasts = attr(X, "contrasts"),
 		  xlevels = .getXlevels(mt, mf)))
     class(fit) <- c("glmrob", "glm")
     fit
 }
-
 
 
 summary.glmrob <- function(object, correlation=FALSE, symbolic.cor=FALSE, ...)
@@ -214,4 +215,45 @@ print.summary.glmrob <-
 
     cat("\n")
     invisible(x)
+}
+
+## Stems from a copy of residuals.glm() in
+## ~/R/D/r-devel/R/src/library/stats/R/glm.R
+residuals.glmrob <-
+    function(object,
+	     type = c("deviance", "pearson", "working", "response",
+             "partial"),
+	     ...)
+{
+    type <- match.arg(type)
+    y <- object$y
+    r <- object$residuals
+    mu	<- object$fitted.values
+    wts <- object$prior.weights # ok
+    p <- length(object$coefficients)
+    switch(type,
+           deviance=, pearson=, response=
+           if(is.null(y)) {
+               mu.eta <- object$family$mu.eta
+               eta <- object$linear.predictors
+               ## we cannot use 'r <- ...$residuals' __ FIXME __
+               stop("need non-robust working residuals for this model type")
+               y <-  mu + r * mu.eta(eta)
+           })
+    res <- switch(type,
+##		  deviance = if(object$df.residual > 0) {
+		  deviance = if((nobs(object) - p) > 0) {
+		      d.res <- sqrt(pmax((object$family$dev.resids)(y, mu, wts), 0))
+		      ifelse(y > mu, d.res, -d.res)
+		  } else rep.int(0, length(mu)),
+		  pearson = (y-mu)*sqrt(wts)/sqrt(object$family$variance(mu)),
+		  working = r,
+		  response = y - mu,
+		  partial = r
+		  )
+    if(!is.null(object$na.action))
+        res <- naresid(object$na.action, res)
+    if (type == "partial") ## need to avoid doing naresid() twice.
+        res <- res+predict(object, type="terms")
+    res
 }

@@ -21,7 +21,7 @@ lmrob..M..fit(x, y, beta.initial, scale, control, obj)
     by \code{\link{lmrob.control}}.  Currently, only the components
     \code{c("max.it", "rel.tol","trace.lev", "psi", "tuning.psi",
       "method")} are accessed.}
-  \item{obj}{an optional \code{lmrob}-object. If given, this is used to
+  \item{obj}{an optional \code{lmrob}-object.  If specified, this is used to
     set values for the other arguments.}
 }
 \details{
@@ -66,10 +66,37 @@ summarizeRobWeights(m1.wts)
 ##--> outliers 1,3,4,13,21
 which(m0$lts.wt == 0) # 1,3,4,21 but not 13
 
-
 ## Add M-step to SMD-estimate
 m2 <- lmrob(stack.loss ~ ., data = stackloss, method = 'SMD')
 m3 <- lmrob..M..fit(obj = m2)
+
+## Simple function that allows custom initial estimates
+lmrob.custom <- function(x, y, beta.initial, scale, terms) {
+  ## initialize object
+  obj <- list(control = lmrob.control("KS2011"),
+              terms = terms) ## terms is needed for summary()
+  ## M-step
+  obj <- lmrob..M..fit(x, y, beta.initial, scale, obj = obj)
+  ## D-step
+  obj <- lmrob..D..fit(obj, x)
+  ## Add some missing elements
+  obj$cov <- TRUE ## enables calculation of cov matrix
+  obj$p <- obj$qr$rank
+  obj$degree.freedom <- length(y) - obj$p
+  ## M-step
+  obj <- lmrob..M..fit(x, y, obj=obj)
+  obj$control$method <- ".MDM"
+  obj
+}
+
+m4 <- lmrob.custom(X, y, m2$init$init.S$coef,
+                   m2$init$scale,m2$terms)
+stopifnot(all.equal(m4$coef, m3$coef))
+
+## Start from ltsReg:
+m5 <- ltsReg(stack.loss ~ ., data = stackloss)
+m6 <- lmrob.custom(m5$X, m5$Y, coef(m5), m5$scale, m5$terms)
+
 }
 \keyword{robust}
 \keyword{regression}

@@ -103,17 +103,19 @@ glmrob(formula, family, data, weights, subset, na.action,
   \code{glmrob} returns an object of class \code{"glmrob"} and is also
   inheriting from \code{\link{glm}}.
   \cr
-  The function \code{\link{summary}} (i.e., \code{\link{summary.glmrob}}) can
+  The \code{\link{summary}} method, see \code{\link{summary.glmrob}}, can
   be used to obtain or print a summary of the results.
   \cr
   The generic accessor functions \code{\link{coefficients}},
-  \code{effects}, \code{fitted.values} and \code{residuals} can be used to
-  extract various useful features of the value returned by \code{glmrob()}.
+  \code{effects}, \code{fitted.values} and \code{residuals} (see
+  \code{\link{residuals.glmrob}}) can be used to extract various useful
+  features of the value returned by \code{glmrob()}.
 
   An object of class \code{"glmrob"} is a list with at least the
   following components:
   \item{coefficients}{a named vector of coefficients}
-  \item{residuals}{the \emph{Pearson} residuals}
+  \item{residuals}{the \emph{working} residuals, that is the (robustly
+  \dQuote{huberized}) residuals in the final iteration of the IWLS fit.}
   \item{fitted.values}{the fitted mean values, obtained by transforming
     the linear predictors by the inverse of the link function.}
   \item{w.r}{robustness weights for each observations; i.e.,
@@ -141,13 +143,12 @@ glmrob(formula, family, data, weights, subset, na.action,
   \item{xlevels}{(where relevant) a record of the levels of the factors
     used in fitting.}
 
-  If a \code{\link{binomial}} is specified by giving a two-column
-  response ???
-%%   ??? FIXME
-%%   If a \code{\link{binomial}} \code{glm} model is specified by giving a
-%%   two-column response, the weights returned by \code{prior.weights} are
-%%   the total numbers of cases (multipied by the supplied case weights) and
-%%   the component \code{y} of the result is the proportion of successes.
+%% FIXME: This is for glm() -- but *not* (yet ??) for glmrob()
+%% -----  should we change?
+  % If a \code{\link{binomial}} \code{glm} model was specified by giving a
+  % two-column response, the weights returned by \code{prior.weights} are
+  % the total numbers of cases (multipied by the supplied case weights) and
+  % the component \code{y} of the result is the proportion of successes.
 }
 
 \references{
@@ -257,7 +258,7 @@ plot(1/lot1 ~ log(u), data=clotM5.high)
 abline(cl5.high, lty=2, col="red")
 abline(ro5.high, lwd=2, col="blue") ## result is ok (but not "perfect")
 
-%% FIXME: Need work -- option of starting from
+%% FIXME: Need work -- option of *starting* from
 %% -----  see Andreas' ~/R/MM/Pkg-ex/robustbase/glmrob-gamma-ARu.R
 
 % ## a "regular outlier" in the middle :

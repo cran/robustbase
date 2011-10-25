@@ -140,6 +140,8 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
   and for methods,
   \code{\link{predict.lmrob}}, \code{\link{summary.lmrob}},
   \code{\link{print.lmrob}}, and \code{\link{plot.lmrob}}.
+  \code{\link{lmrob..M..fit}} for examples on how to use a custom
+  initial estimate.
 }
 \examples{
 data(coleman)
@@ -158,6 +160,7 @@ vcov(RlmST)
 stopifnot(all.equal(fitted(RlmST),
                     predict(RlmST, newdata = starsCYG),
                     tol = 1e-14))
+
 }
 \keyword{robust}
 \keyword{regression}

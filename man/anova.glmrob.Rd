@@ -110,4 +110,3 @@ anova(Efit3, Efit2, test = "QDapprox")
 \keyword{robust}
 \keyword{models}
 \keyword{regression}
-

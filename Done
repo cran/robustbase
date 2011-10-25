@@ -133,3 +133,4 @@ svn r220 | rkst | 2010-11-05:
 29) summary.nlrob() + print() method summarizing robustness weights is there
 
 
+30) residuals.glmrob() now implemented (and *somewhat* tested)
