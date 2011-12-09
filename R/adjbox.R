@@ -4,10 +4,10 @@
 
 adjbox <- function(x, ...) UseMethod("adjbox")
 
-adjbox.default <- function (x, ..., range = 1.5, width = NULL, varwidth = FALSE,
+adjbox.default <- function (x, ..., range = 1.5, doReflect=FALSE, width = NULL, varwidth = FALSE,
     notch = FALSE, outline = TRUE, names, plot = TRUE, border = par("fg"),
-    col = NULL, log = "", pars = list(boxwex = 0.8, staplewex = 0.5,
-        outwex = 0.5), horizontal = FALSE, add = FALSE, at = NULL)
+    col = NULL, log = "", pars = list(boxwex = 0.8, staplewex = 0.5, outwex = 0.5),
+			    horizontal = FALSE, add = FALSE, at = NULL)
 {
     args <- list(x, ...)
     namedargs <-
@@ -29,18 +29,18 @@ adjbox.default <- function (x, ..., range = 1.5, width = NULL, varwidth = FALSE,
 	names <- attr(groups, "names")
     }
     cls <- sapply(groups, function(x) class(x)[1])
-    cl <- if (all(cls == cls[1]))
-        cls[1]
-    else NULL
+    cl <- if(all(cls == cls[1])) cls[1] # else NULL
     for (i in 1:n)
-        groups[i] <- list(adjboxStats(unclass(groups[[i]]), range)) # do.conf=notch)
+	groups[i] <- list(adjboxStats(unclass(groups[[i]]),
+				      coef=range, doReflect=doReflect)) # do.conf=notch)
     stats <- matrix(0, nrow=5, ncol=n)
-    conf  <- matrix(0, nrow=2, ncol=n)
+    conf <- fence <- matrix(0, nrow=2, ncol=n)
     ng <- out <- group <- numeric(0)
     ct <- 1
     for(i in groups) {
 	stats[,ct] <- i$stats
 	conf [,ct] <- i$conf
+	fence[,ct] <- i$fence
 	ng <- c(ng, i$n)
 	if((lo <- length(i$out))) {
 	    out	  <- c(out,i$out)
@@ -49,8 +49,8 @@ adjbox.default <- function (x, ..., range = 1.5, width = NULL, varwidth = FALSE,
 	ct <- ct+1
     }
     if(length(cl) && cl != "numeric") oldClass(stats) <- cl
-    z <- list(stats = stats, n = ng, conf = conf, out = out, group = group,
-	      names = names)
+    z <- list(stats = stats, n = ng, conf = conf, fence = fence,
+              out = out, group = group, names = names)
     if(plot) {
         if(is.null(pars$boxfill) && is.null(args$boxfill)) pars$boxfill <- col
         do.call("bxp",
@@ -81,33 +81,36 @@ adjbox.formula <- function (formula, data = NULL, ..., subset, na.action = NULL)
 }
 
 
-## modeled after boxplot.stats()   from  R/src/library/grDevices/R/calc.R :
-adjboxStats <-
-  function (x, coef = 1.5, a = -4, b = 3, do.conf = TRUE, do.out = TRUE)
+## modeled after boxplot.stats()   from	 R/src/library/grDevices/R/calc.R :
+adjboxStats <- function(x, coef = 1.5, a = -4, b = 3,
+			do.conf = TRUE, do.out = TRUE, ...)
 {
     if(coef < 0) stop("'coef' must not be negative")
     nna <- !is.na(x)
-    n <- sum(nna)                       # including +/- Inf
+    n <- sum(nna)# including +/- Inf
     stats <- stats::fivenum(x, na.rm = TRUE)
     iqr <- diff(stats[c(2, 4)])
+    fence <- rep(NA_real_, 2)
     if(coef == 0)
-        do.out <- FALSE # no whiskers to be drawn
+	do.out <- FALSE # no whiskers to be drawn
     else { ## coef > 0
-        out <- if (!is.na(iqr)) {
-            medc <- mc(x, na.rm = TRUE)
-            if (medc >= 0) {
-              x < (stats[2] - coef * exp(a * medc) * iqr) |
-              x > (stats[4] + coef * exp(b * medc) * iqr)
-            } else {
-              x < (stats[2] - coef * exp(-b * medc) * iqr) |
-              x > (stats[4] + coef * exp( a * medc) * iqr)
-            }
-        }
-        else !is.finite(x)
-        if (any(out[nna], na.rm = TRUE))
-            stats[c(1, 5)] <- range(x[!out], na.rm = TRUE)
+	out <- if (!is.na(iqr)) {
+	    medc <- mc(x, ..., na.rm = TRUE)
+	    fence <-
+		if (medc >= 0)
+		    c(stats[2] - coef * exp(a * medc) * iqr,
+		      stats[4] + coef * exp(b * medc) * iqr)
+		else
+		    c(stats[2] - coef * exp(-b * medc) * iqr,
+		      stats[4] + coef * exp(-a * medc) * iqr)
+
+	    x < fence[1] | fence[2] < x
+	}
+	else !is.finite(x)
+	if (any(out[nna], na.rm = TRUE))
+	    stats[c(1, 5)] <- range(x[!out], na.rm = TRUE)
     }
     conf <- if (do.conf) stats[3] + c(-1.58, 1.58) * iqr/sqrt(n)
-    list(stats = stats, n = n, conf = conf,
-         out = if (do.out) x[out & nna] else numeric(0))
+    list(stats = stats, n = n, conf = conf, fence = fence,
+	 out = if (do.out) x[out & nna] else numeric(0))
 }

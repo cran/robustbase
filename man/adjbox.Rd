@@ -12,7 +12,8 @@ adjbox(x, \dots)
 
 \method{adjbox}{formula}(formula, data = NULL, \dots, subset, na.action = NULL)
 
-\method{adjbox}{default}(x, \dots, range = 1.5, width = NULL, varwidth = FALSE,
+\method{adjbox}{default}(x, \dots, range = 1.5, doReflect = FALSE,
+        width = NULL, varwidth = FALSE,
         notch = FALSE, outline = TRUE, names, plot = TRUE,
         border = par("fg"), col = NULL, log = "",
         pars = list(boxwex = 0.8, staplewex = 0.5, outwex = 0.5),
@@ -44,10 +45,14 @@ adjbox(x, \dots)
     given by argument \code{pars} (and override those in \code{pars}).
   }
   \item{range}{this determines how far the plot whiskers extend out
-    from the box.  If \code{range} is positive, the whiskers extend
-    to the most extreme data point which is no more than
-    \code{range} times the interquartile range from the box. A value
+    from the box, and is simply passed as argument \code{coef} to
+    \code{\link{adjboxStats}()}.  If \code{range} is positive, the
+    whiskers extend to the most extreme data point which is no more than
+    \code{range} times the interquartile range from the box.  A value
     of zero causes the whiskers to extend to the data extremes.}
+  \item{doReflect}{logical indicating if the MC should also be
+    computed on the \emph{reflected} sample \code{-x}, and be averaged,
+    see \code{\link{mc}}.}
   \item{width}{a vector giving the relative widths of the boxes making
     up the plot.}
   \item{varwidth}{if \code{varwidth} is \code{TRUE}, the boxes are
@@ -109,7 +114,7 @@ adjbox(x, \dots)
 
   \item{stats}{a matrix, each column contains the extreme of the lower
     whisker, the lower hinge, the median, the upper hinge and the extreme of
-    the upper whisker for one group/plot. If all the inputs have the same
+    the upper whisker for one group/plot.  If all the inputs have the same
     class attribute, so will this component.}
   \item{n}{a vector with the number of observations in each group.}
   \item{coef}{a matrix where each column contains the lower and upper

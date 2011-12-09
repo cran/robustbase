@@ -1,9 +1,9 @@
-e12e687aedb5fc3d9e2ad6e2e609a33c *ChangeLog
-572fd95901cdb31e5e70c298d5794efe *DESCRIPTION
+c49db71522f44df09c8de5da265dc4bb *ChangeLog
+7142b6c35489644f613bab559f6c35a4 *DESCRIPTION
 9487c4f100d72d5dd42e7bb1d24ff0aa *Done
 2a1bcaccc571d15f55301b10fc0c7d01 *NAMESPACE
 2885fc9306727eebd92cc1493189483d *R/OGK.R
-35de0fc76e4352352fde6f636b53ae43 *R/adjbox.R
+5de5c0faabe02d013aab83ec2bc32df0 *R/adjbox.R
 590c2be6a46b4c5113c0cc5b1851ba25 *R/adjoutlyingness.R
 76b92696667fcade92101047bf5b6c5b *R/anova-glmrob.R
 53e4c47f995e635492af7f3b3ebf1475 *R/anova.lmrob.R
@@ -80,7 +80,7 @@ eba4ff0f00afa90a6de4faeb8fbeb118 *inst/doc/error.distributions.R
 82cd92c513182bc338a5686c5091ae51 *inst/doc/graphics.functions.R
 e6a122c6df1ed7d21b1271cda30d9887 *inst/doc/lmrob_simulation.Rnw
 66a027ad8a1a99c8b501abe42fbd213d *inst/doc/lmrob_simulation.bib
-7f1c6466c878e794f25d6ba48fdb8e37 *inst/doc/lmrob_simulation.pdf
+f178539b3cd865def1661fc6ea789619 *inst/doc/lmrob_simulation.pdf
 bf494790452cfe526444295005b1f726 *inst/doc/lmrob_simulation.toc
 ec651ddda258143a24b38c86b473e877 *inst/doc/simulation.functions.R
 1b2e8b30fb828ba6f937a29028be160d *inst/ex-funs.R
@@ -94,8 +94,8 @@ a29d61634cbf8831addff6c901033dbb *man/Animals2.Rd
 13793d905c6b9c6eee26b1fa003236b1 *man/SiegelsEx.Rd
 332d8723d30fc25441a2c48841df93ec *man/Sn.Rd
 17a5d046ea51316f0fe924aa6b4e8338 *man/adjOutlyingness.Rd
-fb7edb1b6653d68ff4107b29b509fe2a *man/adjbox.Rd
-8bf4c1f178e2949d2bf2361fc8291cf2 *man/adjboxStats.Rd
+3baa60cf7495d06f634b56e9fc234094 *man/adjbox.Rd
+5620e518764114ddfa3c9bed65944a7a *man/adjboxStats.Rd
 843ee4829fb51d0a5b58df4e129fd0c5 *man/aircraft.Rd
 a1b4dd2f421c32cad3222123b178d782 *man/airmay.Rd
 7286aa8d21cf84fb4cd56fa6b860fbab *man/alcohol.Rd

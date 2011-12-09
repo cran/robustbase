@@ -1,3 +1,15 @@
+2011-12-09  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/adjbox.R (adjboxStats): fix the sign-error thinko for the case mc < 0.
+	* man/adjboxStats.Rd: document; test the reflection invariance now.
+
+2011-12-08  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/adjbox.R (adjbox.default): new 'doReflect' argument; default
+	'TRUE' ensures that 'adjbox(x)' behaves symmetrically in 'x'.
+
+	* DESCRIPTION (Version): 0.8-0, *not* released yet
+
 2011-10-24  Martin Maechler  <maechler@stat.math.ethz.ch>  with	Andreas in train to Fribourg
 
 	* R/glmrob.R (residuals.glmrob): provide a version of
@@ -6,7 +18,7 @@
 
 2011-10-11  Manuel Koller  <koller@stat.math.ethz.ch>
 
-	* DESCRIPTION (Version): 0.7-8
+	* DESCRIPTION (Version): 0.7-8, released to CRAN on 2011-10-26, r270
 
 	* man/lmrob.Rd: See also extended with lmrob..M..fit.
 
