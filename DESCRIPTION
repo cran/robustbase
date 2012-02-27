@@ -1,30 +1,30 @@
 Package: robustbase
-Version: 0.8-0
-Date: 2011-12-09
+Version: 0.8-1-1
+Date: 2012-02-27
 Title: Basic Robust Statistics
-Author: Original code by many authors, notably
-	Peter Rousseeuw and Christophe Croux, see file 'Copyrights';
-	Valentin Todorov <valentin.todorov@chello.at>,
-	Andreas Ruckstuhl <andreas.ruckstuhl@zhaw.ch>,
-	Matias Salibian-Barrera <matias@stat.ubc.ca>,
-	Tobias Verbeke <tobias.verbeke@openanalytics.eu>,
-	Manuel Koller <koller@stat.math.ethz.ch>,
-	Martin Maechler
+Author: Original code by many authors, notably Peter Rousseeuw and
+        Christophe Croux, see file 'Copyrights'; Valentin Todorov
+        <valentin.todorov@chello.at>, Andreas Ruckstuhl
+        <andreas.ruckstuhl@zhaw.ch>, Matias Salibian-Barrera
+        <matias@stat.ubc.ca>, Tobias Verbeke
+        <tobias.verbeke@openanalytics.eu>, Manuel Koller
+        <koller@stat.math.ethz.ch>, Martin Maechler
 Maintainer: Martin Maechler <maechler@stat.math.ethz.ch>
 NOTE: SEVERAL PARTS ARE STILL PRELIMINARY AND MAY BE CHANGED IN THE
         FUTURE. THIS TYPICALLY INCLUDES ARGUMENT NAMES, DEFAULTS FOR
         ARGUMENTS AND RETURN VALUES.
 URL: http://robustbase.r-forge.r-project.org/
 Description: "Essential" Robust Statistics.  The goal is to provide
- tools allowing to analyze data with robust methods.  This includes
- regression methodology including model selections and multivariate
- statistics where we strive to cover the book "Robust Statistics,
- Theory and Methods" by Maronna, Martin and Yohai; Wiley 2006.
-Depends: R (>= 2.11.0), stats, graphics, methods
-Suggests: MASS, lattice, boot, MPV, xtable, ggplot2, RColorBrewer
-LazyLoad: yes
+        tools allowing to analyze data with robust methods.  This
+        includes regression methodology including model selections and
+        multivariate statistics where we strive to cover the book
+        "Robust Statistics, Theory and Methods" by Maronna, Martin and
+        Yohai; Wiley 2006.
+Depends: R (>= 2.12.0), stats, graphics, methods
+Suggests: MASS, lattice, boot, cluster, MPV, xtable, ggplot2,
+        RColorBrewer, grid, reshape2
 LazyData: yes
 License: GPL (>= 2)
-Packaged: 2011-12-09 09:31:05 UTC; maechler
+Packaged: 2012-03-02 21:35:35 UTC; maechler
 Repository: CRAN
-Date/Publication: 2011-12-09 14:57:52
+Date/Publication: 2012-03-03 14:38:09

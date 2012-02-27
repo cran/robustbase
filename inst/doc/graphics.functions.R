@@ -52,8 +52,8 @@ g.scale_shape_defaults2 = c(g.scale_shape_defaults,9,1,2,4)
 g.scale_linetype_defaults = c("solid", "22", "42", "44", "13", "1343", "73",
   "2262", "12223242", "F282", "F4448444", "224282F2", "F1")
 
-g.scale_shape <- function(..., value=g.scale_shape_defaults2)
-  scale_shape_manual(..., value = value)
+g.scale_shape <- function(..., values=g.scale_shape_defaults2)
+    scale_shape_manual(..., values = values) 
 
 g.get_colors <- function(n, h=c(0,360) + 15, l=65, c=100, start=0, direction = 1) {
   rotate <- function(x) (x + start) %% 360 * direction
@@ -344,6 +344,8 @@ makeFootnote <- function(footnoteText=
 ##   }
 ## }
 
+require(grid)
+
 print.ggplot <- function(x, newpage = is.null(vp), vp = NULL, ...,
                          footnote = NULL, footnote.col = 'black', footnote.size = .7,
                          footnote.just = c("right", "bottom"),
@@ -362,17 +364,17 @@ print.ggplot <- function(x, newpage = is.null(vp), vp = NULL, ...,
   ## Author: Manuel Koller, Date: 26 Jan 2010, 09:01
   
   if (missing(footnote) && missing(legend.mod))
-    return(ggplot2::print.ggplot(x, newpage, vp, ...))
+    return(ggplot2:::print.ggplot(x, newpage, vp, ...))
 
   ## this is mostly a copy of ggplot2::print.ggplot
-  set_last_plot(x)
+  ggplot2:::set_last_plot(x)
   if (newpage)
     grid.newpage()
   if (!missing(legend.mod)) {
     grob <- ggplotGrob(x, ...)
     ## edit grob: change legends and strip text
     lls <- getGrob(grob, gPath='(legend.text.text|strip.text.x.text)',
-                   grep=TRUE, global=TRUE)
+                         grep=TRUE, global=TRUE)
     ## walk all legend texts
     for(le in lls) {
       if (!is.expression(le$label) && le$label %in% names(legend.mod)) {

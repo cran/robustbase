@@ -79,6 +79,9 @@ o drop1() would be nice
 
 --- nlrob ---
 
+o  FIXME -- no longer need the "put everything on the right" hack before calling nls()
+   --> cleaner code also when robustness weights become 0.
+
 o  residuals( nlrob(), type = "...") should provide types
    	      "as in the litterature"
 

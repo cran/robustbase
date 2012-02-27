@@ -48,15 +48,11 @@ nlrob <-
     coef <- start
     fit <- eval(formula[[3]], c(as.list(data), start))
     y <- eval(formula[[2]], as.list(data))
+    nobs <- length(y)
     resid <- y - fit
-    w <- rep(1, nrow(data))
+    w <- rep.int(1, nrow(data))
     if (!is.null(weights))
 	w <- w * weights
-    ## The following "put everything on the right in order to use weights"
-    ## is only necessary for R versions <= 2.2.1  (FIXME eventually)
-    oform <- formula
-    formula <- as.formula(substitute(~(LHS-RHS) * w, list(LHS = formula[[2]],
-							  RHS = formula[[3]])))
     ##- robust loop (IWLS)
     converged <- FALSE
     status <- "converged"
@@ -77,14 +73,16 @@ nlrob <-
 	    w <- psi(resid/Scale, ...)
 	    if (!is.null(weights))
 		w <- w * weights
-	    data$w <- sqrt(w)
-	    out <- nls(formula, data = data, start = start, algorithm = algorithm,
-		       trace = trace, na.action = na.action, control = control)
+	    data$..nlrob.w <- w ## use a variable name the user "will not" use
+	    out <- nls(formula, data = data, start = start,
+                       algorithm = algorithm, trace = trace,
+                       weights = ..nlrob.w,
+                       na.action = na.action, control = control)
 
 	    ## same sequence as in start! Ok for test.vec:
 	    coef <- coefficients(out)
 	    start <- coef
-	    resid <- -residuals(out)/sqrt(w) ## == - (y - f(x))*sqrt(w)
+            resid <- residuals(out)
 	    convi <- irls.delta(previous, get(test.vec))
 	}
 	converged <- convi <= acc
@@ -95,37 +93,35 @@ nlrob <-
     if(!converged && !method.exit)
 	warning(status <- paste("failed to converge in", maxit, "steps"))
 
-    if(!is.null(weights)) {
+    if(!is.null(weights)) { ## or just   out$weights  ??
 	tmp <- weights != 0
 	w[tmp] <- w[tmp]/weights[tmp]
     }
 
     ## --- Estimated asymptotic covariance of the robust estimator
-   if (!converged && !method.exit) {
-       asCov <- NA
-   } else {
-       AtWAinv <- chol2inv(out$m$Rmat())
-       dimnames(AtWAinv) <- list(names(coef), names(coef))
-       tau <- (mean(psi(resid/Scale, ...)^2) /
-               (mean(psi(resid/Scale, deriv=TRUE, ...))^2))
-       asCov <- AtWAinv * Scale^2 * tau
-   }
+    if (!converged && !method.exit) {
+	asCov <- NA
+    } else {
+	AtWAinv <- chol2inv(out$m$Rmat())
+	dimnames(AtWAinv) <- list(names(coef), names(coef))
+	tau <- (mean(psi(resid/Scale, ...)^2) /
+		(mean(psi(resid/Scale, deriv=TRUE, ...))^2))
+	asCov <- AtWAinv * Scale^2 * tau
+    }
 
-    ## returned object:
-    fit <- eval(oform[[3]], c(as.list(data), coef))
+    ## returned object:	 ==  out$m$fitted()  [FIXME?]
+    fit <- eval(formula[[3]], c(as.list(data), coef))
     names(fit) <- rownames(data)
-    out <- list(m = out$m, call = call, formula = oform,
-		new.formula = formula,
-		coefficients = coef, working.residuals =  - as.vector(resid),
-		fitted.values = fit, residuals = y - fit,
-		Scale = Scale, w = w, w.r = psi(resid/Scale, ...),
-		cov=asCov, status = status, iter=iiter,
-		psi = psi, data = dataName,
-		dataClasses = attr(attr(mf, "terms"), "dataClasses"))
-    ##MM: Where would this "label" really make sense?
-    ##MM: attr(out$fitted.values, "label") <- "Fitted values"
-    class(out) <- c("nlrob", "nls")
-    out
+    structure(class = c("nlrob", "nls"),
+	      list(m = out$m, call = call, formula = formula,
+		   new.formula = formula, nobs = nobs,
+		   coefficients = coef,
+		   working.residuals = as.vector(resid),
+		   fitted.values = fit, residuals = y - fit,
+		   Scale = Scale, w = w, w.r = psi(resid/Scale, ...),
+		   cov=asCov, status = status, iter=iiter,
+		   psi = psi, data = dataName,
+		   dataClasses = attr(attr(mf, "terms"), "dataClasses")))
 }
 
 ## The 'nls' method is *not* correct
@@ -222,8 +218,11 @@ print.summary.nlrob <-
             symbolic.cor = x$symbolic.cor,
             signif.stars = getOption("show.signif.stars"), ...)
 {
-    cat("\nFormula: ")
-    cat(paste(deparse(x$formula), sep = "\n", collapse = "\n"), "\n", sep = "")
+    cat("\nCall:\n")
+    cat(paste(deparse(x$call), sep = "\n", collapse = "\n"),
+	"\n\n", sep = "")
+    ## cat("\nFormula: ")
+    ## cat(paste(deparse(x$formula), sep = "\n", collapse = "\n"), "\n", sep = "")
     df <- x$df
     rdf <- df[2L]
     cat("\nParameters:\n")

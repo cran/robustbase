@@ -448,7 +448,7 @@ ltsReg.default <-
 
 	if (mcd) { ## compute robust distances {for diagnostics, eg. rdiag()plot}
 	    mcd <- covMcd(X, alpha = alpha, use.correction=use.correction)
-	    if ( -determinant(mcd$cov, log = TRUE)$modulus > 50 * p) {
+	    if ( -determinant(mcd$cov, logarithm = TRUE)$modulus > 50 * p) {
 		ans$RD <- "singularity"
 	    }
 	    else {

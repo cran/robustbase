@@ -1,6 +1,6 @@
 \name{condroz}
 \alias{condroz}
-\encoding{latin1}
+\encoding{utf8}
 \docType{data}
 \title{ Condroz Data }
 \description{
@@ -36,7 +36,7 @@
   Vandewalle, B., Beirlant, J., Hubert, M. (2004). A robust estimator of
   the tail index based on an exponential regression model, in Hubert,
   M., Pison G., Struyf, A. and S. Van Aelst, ed., Theory and
-  Applications of Recent Robust Methods, Birkh‰user, Basel, p. 367-376.
+  Applications of Recent Robust Methods, Birkh√§user, Basel, p. 367-376.
 
 }
 \examples{

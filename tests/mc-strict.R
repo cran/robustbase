@@ -67,6 +67,7 @@ set.seed(6); S.time(a6 <- adjOutlyingness(wood[, 1:5]))# the 'X' space
 ## 32-bit <-> 64-bit different results {tested on Linux only}
 is32 <- .Machine$sizeof.pointer == 4 ## <- should work for Linux/MacOS/Windows
 isMac <- Sys.info()["sysname"] == "Darwin"
+isSun <- Sys.info()["sysname"] == "SunOS"
 Rnk <- function(u) rank(unname(u), ties.method = "first")
 ## for later testing:
 dput(Rnk(a3$adjout),, {})
@@ -74,6 +75,7 @@ dput(Rnk(a4$adjout),, {})
 
 stopifnot(which(!a2$nonOut) == 1:14,
 	  which(!a3$nonOut) == 1:14,
+	  if(isSun) TRUE else
 	  which(!a4$nonOut) == if(is32 && !isMac) c(1, 2, 41, 70) else c(12, 70),
 	  ## 'longley', 'wood' have no outliers in the "adjOut" sense:
 	  ## FIXME: longley is platform dependent too
@@ -103,6 +105,17 @@ stopifnot(which(!a2$nonOut) == 1:14,
       })
 
 
+## check of adjOutlyingness *free* bug
+## reported by Kaveh Vakili <Kaveh.Vakili@wis.kuleuven.be>
+set.seed(-37665251)
+X<-matrix(rnorm(100*5),100,5)
+Z<-matrix(rnorm(100*5,0,1/100),10,5)
+Z<-sweep(Z,2,c(5,rep(0,4)),FUN="+")
+X[91:100,]<-Z
+for (i in 1:10) {
+    ## this would produce an error in the 6th iteration
+    aa <- adjOutlyingness(x=X,ndir=250)
+}
 
 ### Some platform info :
 local({ nms <- names(Si <- Sys.info())

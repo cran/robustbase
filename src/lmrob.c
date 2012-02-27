@@ -598,10 +598,11 @@ double rho_opt(double x, double *c)
     return(1); // rlRHOm2=3.25D0*XK*XK
   else if (ax > 2.) {
     const double R1 = -1.944/2., R2 = 1.728/4., R3 = -0.312/6., R4 = 0.016/8.;
-    return((R1*R_pow(ax,2)+R2*R_pow(ax,4)+R3*R_pow(ax,6)+R4*R_pow(ax,8)+1.792)/3.25);
-	   // rlRHOm2=XK*XK*(R1*AX**2+R2*AX**4+R3*AX**6+R4*AX**8+1.792D0)
+    ax *= ax; // = |x/c| ^ 2
+    return (ax*(R1+ ax*(R2+ ax*(R3+ ax*R4))) +1.792)/3.25;
+    // rlRHOm2=XK*XK*(R1*AX**2+R2*AX**4+R3*AX**6+R4*AX**8+1.792D0)
   }
-  else //      ELSE
+  else
     return(ac*ac/6.5); // rlRHOm2=S2/2.D0
 }
 
@@ -617,15 +618,16 @@ double psi_opt(double x, double *c)
   if (ax > 3.) //    IF (AX .GT. 3.D0) THEN
     return(0); // rlPSIm2=0.D0
   else if (ax > 2.) { //  ELSE IF(AX .GT. 2.D0) THEN
+    double a2 = ac*ac;
     if (ac > 0.) //     IF (AX .GT. 0.D0) THEN
-      return(fmax2(0., (*c)*(R4*R_pow(ac,7)+R3*R_pow(ac,5)+R2*R_pow(ac,3)+R1*ac)));
+      return fmax2(0., (*c)*((((R4*a2 +R3)*a2 +R2)*a2 +R1)*ac));
     // rlPSIm2=DMAX1(0.D0,XK*(R4*AX**7+R3*AX**5+R2*AX**3+R1*AX))
-    else // ELSE
-      return(-fabs((*c)*(R4*R_pow(ac,7)+R3*R_pow(ac,5)+R2*R_pow(ac,3)+R1*ac)));
+    else
+	return -fabs((*c)*((((R4*a2 +R3)*a2 +R2)*a2 +R1)*ac));
     //  rlPSIm2=-DABS(XK*(R4*AX**7+R3*AX**5+R2*AX**3+R1*AX))
-  } // ENDIF
+  }
   else
-    return(x); // rlPSIm2=S
+    return x;
 }
 
 double psip_opt(double x, double *c)
@@ -634,7 +636,7 @@ double psip_opt(double x, double *c)
    * psi'() for Optimal psi Function, thank you robust package
    */
   double ac = x / (*c),
-    ax = fabs(ac);
+      ax = fabs(ac);
   if (ax > 3.)
     return 0;
   else if (ax > 2.) {
@@ -805,7 +807,7 @@ double rho_ggw(double x, double *k)
     int j;
     double c;
     switch((int)k[0]) {
-    default: error("rho_ggw: Case not implemented.");
+    default: error("rho_ggw: Case (%i) not implemented.", (int)k[0]);
     case 1: j = 0; c = 1.694;     break;
     case 2: j = 1; c = 1.2442567; break;
     case 3: j = 2; c = 0.4375470; break;
@@ -814,36 +816,44 @@ double rho_ggw(double x, double *k)
     case 6: j = 5; c = 0.2959132; break;
     }
     x = fabs(x);
-//----- MM : FIXME ------ use Horner or another good polyn.eval scheme! ----
     if (x <= c)
       return(C[j][0]*x*x);
     else if (x <= 3*c)
-      return(C[j][1] + C[j][2]*x + C[j][3]*x*x + C[j][4]*R_pow(x, 3) +
-	     C[j][5]*R_pow(x, 4) + C[j][6]*R_pow(x, 5) + C[j][7]*R_pow(x, 6) +
-	     C[j][8]*R_pow(x, 7) + C[j][9]*R_pow(x, 8));
+      return(C[j][1] +
+	     x*(C[j][2] +
+		x*(C[j][3] +
+		   x*(C[j][4] +
+		      x*(C[j][5] +
+			 x*(C[j][6] +
+			    x*(C[j][7] +
+			       x*(C[j][8] +
+				  x*(C[j][9])))))))));
     else if (x <= end[j])
-      return(C[j][10] + C[j][11]*x + C[j][12]*x*x + C[j][13]*R_pow(x, 3) +
-	     C[j][14]*R_pow(x, 4) + C[j][15]*R_pow(x, 5) +
-	     C[j][16]*R_pow(x, 6) + C[j][17]*R_pow(x, 7) +
-	     C[j][18]*R_pow(x, 8) + C[j][19]*R_pow(x, 9));
+      return(C[j][10] +
+	     x*(C[j][11] +
+		x*(C[j][12] +
+		   x*(C[j][13] +
+		      x*(C[j][14] +
+			 x*(C[j][15] +
+			    x*(C[j][16] +
+			       x*(C[j][17] +
+				  x*(C[j][18]+
+				     x*(C[j][19]))))))))));
     else return(1.);
-  } else {
+  }
+  else {
     // calculate integral
     x = fabs(x);
-    double a = 0.0;
-    double epsabs = R_pow(DOUBLE_EPS, 0.25);
-    double result;
-    double abserr;
+    double a = 0., epsabs = R_pow(DOUBLE_EPS, 0.25), result, abserr;
     int neval, ier, last, limit = 100, lenw = 4 * limit;
-    int *iwork; double *work;
-    iwork = (int *) R_alloc(limit, sizeof(int));
-    work = (double *) R_alloc(lenw, sizeof(double));
+    int   *iwork =    (int *) R_alloc(limit, sizeof(int));
+    double *work = (double *) R_alloc(lenw,  sizeof(double));
     Rdqags(psi_ggw_vec, (void *)k, &a, &x, &epsabs, &epsabs,
 	   &result, &abserr, &neval, &ier,
 	   &limit, &lenw, &last,
 	   iwork, work);
     if (ier >= 1) {
-      error("error while calling Rdqagi: %i", "ier");
+      error("error while calling Rdqags: %i", ier);
     }
     return(result/k[4]);
   }
@@ -2335,7 +2345,7 @@ void R_calc_fitted(double *XX, double *bbeta, double *RR, int *nn, int *pp, int 
 		 int *nnproc, int *nnerr)
 {
   unsigned long A, B, C, D, E;
-  A = (unsigned long)*nnerr; B = (unsigned long)*nnproc; C = (unsigned long)*nnrep; 
+  A = (unsigned long)*nnerr; B = (unsigned long)*nnproc; C = (unsigned long)*nnrep;
   D = (unsigned long)*nn; E = (unsigned long)*pp;
   // calculate fitted values over errstr, procstr and replicates
   for(unsigned long a = 0; a < A; a++) { // errstr
@@ -2346,7 +2356,7 @@ void R_calc_fitted(double *XX, double *bbeta, double *RR, int *nn, int *pp, int 
 	  for(unsigned long d = 0; d < D; d++) { // observations
 	    RR[d + c*D + b*C*D + a*B*C*D] = 0; // initialize result
 	    for(unsigned long e = 0; e < E; e++) { // predictors
-	      RR[d + c*D + b*C*D + a*B*C*D] += bbeta[c + e*C + b*C*E + a*B*E*C] * 
+	      RR[d + c*D + b*C*D + a*B*C*D] += bbeta[c + e*C + b*C*E + a*B*E*C] *
 		XX[d + e*D + c*E*D + a*C*E*D];
 	    }
 	  }

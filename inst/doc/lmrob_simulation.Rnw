@@ -1,7 +1,7 @@
 \documentclass[a4paper]{article}
 
 %\VignetteIndexEntry{lmrob_simulation.Rnw}
-%\VignetteDepends{robustbase, xtable, ggplot2, RColorBrewer}
+%\VignetteDepends{robustbase, xtable, ggplot2, RColorBrewer, grid, reshape2}
 
 \usepackage{amsmath}
 \usepackage{natbib}
@@ -34,7 +34,9 @@ options(width=60)
 ## load required packages
 stopifnot(require(xtable),
           require(robustbase),
-          require(ggplot2))
+          require(ggplot2),
+          require(grid),
+          require(reshape2))
 
 ## Number of Repetitions:
 N <- 1000
@@ -97,7 +99,7 @@ trim <- 0.1
 
 ## set ggplot theme
 theme <- theme_bw(base_size = 10)
-theme$legend.key.size <- unit(1, "lines")
+theme$legend.key.size <- unit(0.9, "lines")
 theme$plot.margin <- unit(c(1/2, 0, 0, 0), "lines")
 theme_set(theme)
 ## set default sizes for lines and points
@@ -1070,7 +1072,7 @@ print(ggplot(droplevels(subset(test.1, Error != 't1')),
       geom_point(aes(shape = Error), alpha = alpha.error) +
       geom_hline(yintercept = 0.95) +
       stat_summary(aes(x=ratio), fun.y=median, geom='line') +
-      g.scale_shape(value=c(16,17,15,3,7,8,9,1,2,4)[-4]) +
+      g.scale_shape(values=c(16,17,15,3,7,8,9,1,2,4)[-4]) +
       facet_wrap(~ Psi) +
       ylab(expression(paste('efficiency of ',hat(beta)))) +
       scale_colour_discrete(name = "Estimator"), legend.mod = legend.mod)
@@ -1436,7 +1438,7 @@ if (!file.exists(asymptMBFile)) {
 } else load(asymptMBFile)
 
 print(ggplot(rmb, aes(x, l, color=psi)) +
-      geom_line() + geom_line(aes(x, u, color=psi, linetype = 2)) +
+      geom_line() + geom_line(aes(x, u, color=psi), linetype = 2) +
       coord_cartesian(ylim=c(0,10)) +
       scale_y_continuous(breaks = 1:10) +
       scale_colour_hue(expression(paste(psi,'-function'))) +

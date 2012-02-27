@@ -1,7 +1,7 @@
 \name{NOxEmissions}
 \alias{NOxEmissions}
 \docType{data}
-\encoding{latin1}
+\encoding{utf8}
 \title{NOx Air Pollution Data}
 \description{
   A typical medium sized environmental data set with hourly measurements
@@ -28,7 +28,7 @@
   measurements.
 }
 \source{
-  René Locher (at ZHAW, Switzerland).
+  RenÃ© Locher (at ZHAW, Switzerland).
 %% E-mail to R-SIG-robust mailing list, on 2006-04-20.
 }
 \seealso{another NOx dataset, \code{\link{ambientNOxCH}}.

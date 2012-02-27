@@ -25,15 +25,19 @@ cG <- c(-.5,1,.95,NA)
 d0 <- numeric()
 IoI <- c(-Inf, 0, Inf)
 ## TODO: Do these checks for a *list* of combinations such as  (cG, "GGW"):
+## ^^^^^
 for(FUN in funs)
     stopifnot(identical(d0, FUN(d0, cG, "GGW")))
 stopifnot(identical(c(0,0,0), psiF(IoI, cG,"GGW")),
 	  identical(c(1,0,1), chiF(IoI, cG,"GGW")),
 	  identical(c(0,1,0), wgtF(IoI, cG,"GGW")))
 
+## FIXME: Check  chiF() <-> psiF(*, deriv = -1)
+
+
 ## Nice plots -- and check derivatives ----
 
-p.psiFun <- function(x, psi, par,
+p.psiFun <- function(x, psi, par, shortMain = FALSE,
                      col = c("black", "red3", "blue3", "dark green"),
                      leg.loc = "right", ...)
 {
@@ -43,19 +47,27 @@ p.psiFun <- function(x, psi, par,
                    "psi'" = psiF(x, par, psi,deriv= 1),
                    wgt    = wgtF(x, par, psi))
     fExprs <- quote(list(rho(x), psi(x), {psi*minute}(x), w(x) == psi(x)/x))
-    matplot(x, m.psi, col=col, lty=1, type="l",
-            main = substitute(FFF ~~ ~~ " with "~~ psi*"-type" == PSI(PPP),
-                              list(FFF = fExprs, PSI = psi,
-                                   PPP = paste(formatC(par), collapse=","))),
+    tit <- if(shortMain)
+	substitute(rho(x) ~ "etc, with" ~ psi*"-type" == PSI(PPP),
+		   list(PSI = psi, PPP = paste(formatC(par), collapse=",")))
+    else
+	substitute(FFF ~~ ~~ " with "~~ psi*"-type" == PSI(PPP),
+		   list(FFF = fExprs, PSI = psi,
+			PPP = paste(formatC(par), collapse=",")))
+    matplot(x, m.psi, col=col, lty=1, type="l", main = tit,
             ylab = quote(f(x)), xlab = quote(x), ...)
     abline(h=0,v=0, lty=3, col="gray30")
     fE <- fExprs; fE[[1]] <- as.name("expression")
-    legend(leg.loc, inset=.02, eval(fE), col=col, lty=1)
+    legend(leg.loc, inset=.02, eval(fE), col=col, lty=1, bty="n")
     invisible(cbind(x=x, m.psi))
 }
+p.psiFun2 <- function(x, psi, par, ...)
+    p.psiFun(x, psi, par, shortMain = TRUE,
+             leg.loc = "bottomright", ylim = c(-3, 5))
 
 mids <- function(x) (x[-1]+x[-length(x)])/2
 chkPsiDeriv <- function(m.psi, tol = 1e-4) {
+    ## m.psi: matrix as from p.psiFun()
     stopifnot(length(tol) > 0, tol >= 0,
               is.numeric(psi <- m.psi[,"psi"]),
               is.numeric(dx  <- diff(x <- m.psi[,"x"])))
@@ -79,6 +91,15 @@ stopifnot(chkPsiDeriv(p.psiFun(x., "Hampel",
 stopifnot(chkPsiDeriv(p.psiFun(x., "biweight", par = 4)))
 stopifnot(chkPsiDeriv(p.psiFun(x., "Welsh", par = 1.5)))
 
+## The same 6, all in one plot:
+op <- par(mfrow=c(3,2), mgp = c(1.5, .6, 0), mar = .1+c(3,3,2,.5))
+p.psiFun2(x., "LQQ", par=c(-.5,1.5,.95,NA))
+p.psiFun2(x., "GGW", par= cG)
+p.psiFun2(x., "optimal", par=2)
+p.psiFun2(x., "Hampel", par = round(c(1.5, 3.5, 8) * 0.9016085, 1))
+p.psiFun2(x., "biweight", par = 4)
+p.psiFun2(x., "Welsh", par = 1.5)
+par(op)
 
 ### (2) Test them as  arguments of  lmrob() or  lmrob.control(): -----
 

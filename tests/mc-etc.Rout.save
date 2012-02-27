@@ -1,6 +1,6 @@
 
-R version 2.12.0 Patched (2010-12-02 r53738)
-Copyright (C) 2010 The R Foundation for Statistical Computing
+R version 2.14.0 (2011-10-31)
+Copyright (C) 2011 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
@@ -47,11 +47,12 @@ Median = 0.847375 (not at the border)
 n =  4:
 ------
 Median = 2.04417 (not at the border)
+  not found [it=0,  (nr,nl) = (4,0)], -> (knew-nl, j) = (3,4)
  --> mc(rlnorm(4)) = 0.000000
 n =  5:
 ------
 Median = 3.25694 (not at the border)
-  not found [it=2,  (nr,nl) = (5,2)], -> (knew-nl, j) = (3,3)
+  not found [it=1,  (nr,nl) = (5,0)], -> (knew-nl, j) = (5,5)
  --> mc(rlnorm(5)) = -0.107345
 n =  6:
 ------
@@ -109,7 +110,7 @@ Median = 0.993696 (not at the border)
 n = 17:
 ------
 Median = 1.06594 (not at the border)
-  not found [it=3,  (nr,nl) = (43,37)], -> (knew-nl, j) = (4,6)
+  not found [it=2,  (nr,nl) = (43,26)], -> (knew-nl, j) = (15,17)
  --> mc(rlnorm(17)) = 0.496123
 n = 18:
 ------
@@ -281,7 +282,7 @@ Median = 0.663719 (not at the border)
 n = 52:
 ------
 Median = 0.863617 (not at the border)
-  not found [it=5,  (nr,nl) = (350,333)], -> (knew-nl, j) = (6,17)
+  not found [it=4,  (nr,nl) = (350,298)], -> (knew-nl, j) = (41,52)
  --> mc(rlnorm(52)) = 0.453604
 n = 53:
 ------
@@ -669,6 +670,6 @@ numeric
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  0.458 0.057 0.581 0 0 
+Time elapsed:  0.437 0.071 0.711 0.001 0.009 
 > 
 > quit('no')

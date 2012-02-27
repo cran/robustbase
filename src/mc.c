@@ -56,7 +56,7 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
     iter  = c(maxit, trace.lev)
 */
     double medc, xmed, xden, trial = -2./* -Wall */;
-    int i,j, h1,h2, nl,nr, knew, trace_lev = iter[1], it = 0;
+    int i,j, h1,h2, nl,nr,neq, knew, trace_lev = iter[1], it = 0;
     Rboolean IsFound = FALSE, converged = TRUE;
 
     double *work   = (double *) R_alloc(n, sizeof(double));
@@ -156,6 +156,7 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
     }
     nl = 0;
     nr = h1*h2;
+    neq = 0;
     knew = nr/2 +1;
 
     if(trace_lev >= 2)
@@ -164,7 +165,16 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 
     it = 0; IsFound = FALSE;
 
-    while (!IsFound && (nr-nl >= n) && it < iter[0]) /* need >= here */
+    /* MK:  'neq' counts the number of observations in the
+     *      inside the tolerance range, i.e., where left > right + 1,
+     *      since we would miss those when just using 'nl-nr'.
+     *      This is to prevent index overflow in work[] later on.
+     *      left might be larger than right + 1 since we are only 
+     *      testing with accuracy eps_trial and therefore there might
+     *      be more than one observation in the `tolerance range`
+     *      between < and <=.
+     */
+    while (!IsFound && (nr-nl+neq > n) && it < iter[0]) 
     {
 	int sum_p, sum_q;
 	it++;
@@ -229,8 +239,10 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 	if (knew <= sum_p) {
 	    if(trace_lev >= 3)
 		Rprintf("; sum_p >= kn\n");
-	    for (i = 1; i <= h2; i++)
+	    for (i = 1, neq = 0; i <= h2; i++) {
 		right[i] = p[i];
+		if (left[i] > right[i]+1) neq += left[i]-right[i]-1;
+	    }
 	    nr = sum_p;
 	}
 	else { /* knew > sum_p */
@@ -241,15 +253,17 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 	    if(IsFound) {
 		medc = trial;
 	    } else { /*	 knew > sum_q */
-		for (i = 1; i <= h2; i++)
+	        for (i = 1; i <= h2; i++) {
 		    left[i] = q[i];
+		    if (left[i] > right[i]+1) neq += left[i]-right[i]-1;
+		}
 		nl = sum_q;
 	    }
 	}
 
     } /* end while loop */
 
-    converged = IsFound || (nr-nl <= n);
+    converged = IsFound || (nr-nl+neq <= n);
     if(!converged) {
 	warning("maximal number of iterations (%d =? %d) reached prematurely\n",
 		 iter[0], it);

@@ -1,3 +1,23 @@
+2012-02-22  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/nlrob.R (print.summary.nlrob): use full call instead of just
+	formula. --> shows non-default psi()
+
+2012-02-19  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/nlrob.R (nlrob): now use nls(...., weights = *, ..), no longer
+	need hack "put everything to the RHS".
+
+2011-12-23  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/nlrob.R (nlrob): for zero weights 'w', the residuals
+	accidentally where NaN.
+
+2011-12-12  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.8-1, released to CRAN on 2011-12-........
+	* src/mc.c (mc_C_d): fixed bug in iteration; see svn log -r 272 & 274
+
 2011-12-09  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* R/adjbox.R (adjboxStats): fix the sign-error thinko for the case mc < 0.
@@ -8,7 +28,7 @@
 	* R/adjbox.R (adjbox.default): new 'doReflect' argument; default
 	'TRUE' ensures that 'adjbox(x)' behaves symmetrically in 'x'.
 
-	* DESCRIPTION (Version): 0.8-0, *not* released yet
+	* DESCRIPTION (Version): 0.8-0, released to CRAN on 2011-12-09
 
 2011-10-24  Martin Maechler  <maechler@stat.math.ethz.ch>  with	Andreas in train to Fribourg
 
@@ -583,7 +603,7 @@
 
 2008-01-05  Martin Maechler  <maechler@stat.math.ethz.ch>
 
-	* man/ambientNOxCH.Rd: new data set from René Locher,
+	* man/ambientNOxCH.Rd: new data set from RenÃ© Locher,
 	* data/ambientNOxCH.rda: showing some lmrob-nonconvergence
 
 2007-12-22  Martin Maechler  <maechler@stat.math.ethz.ch>
@@ -1026,7 +1046,7 @@
 
 2006-04-21  Martin Maechler  <maechler@stat.math.ethz.ch>
 
-    * data/NOxEmissions.Rd: add the large dataset from René Locher
+    * data/NOxEmissions.Rd: add the large dataset from RenÃ© Locher
     * man/NOxEmissions.Rd:
 
 2006-04-21  Martin Maechler  <maechler@stat.math.ethz.ch>

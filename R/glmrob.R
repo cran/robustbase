@@ -201,7 +201,7 @@ print.summary.glmrob <-
 	if (p > 1) {
 	    cat("\nCorrelation of Coefficients:\n")
 	    if (isTRUE(symbolic.cor)) {
-		print(symnum(correl, abbr.col=NULL))
+		print(symnum(correl, abbr.colnames=NULL))
 	    }
 	    else {
 		correl <- format(round(correl, 2), nsmall=2, digits=digits)

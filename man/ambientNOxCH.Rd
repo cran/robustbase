@@ -1,7 +1,7 @@
 \name{ambientNOxCH}
 \alias{ambientNOxCH}
 \docType{data}
-\encoding{latin1}
+\encoding{utf8}
 \title{ Daily Means of NOx (mono-nitrogen oxides) in air}
 \description{
   This dataset contains daily means (from midnight to midnight) of NOx,
@@ -38,7 +38,7 @@
       (677.9, 213.5; 1030; NABEL).}
     \item{\code{se}}{Site is located in Sedel next to town of Lucerne
       35m above and 250m south of motorway A14 from Zug to Lucerne on a
-      low hill with free 360° panorama (665.5, 213.41; 484; inLuft).}
+      low hill with free 360Â° panorama (665.5, 213.41; 484; inLuft).}
     \item{\code{si}}{Site is located at the border of a small industrial
       area in Sisseln, 300 m east of a main road (640.725, 266.25; 305;
       inLuft).}

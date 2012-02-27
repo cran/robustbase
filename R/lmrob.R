@@ -20,8 +20,8 @@ lmrob <-
              control = NULL, ...)
 {
     ## to avoid problems with setting argument
-    ## call lmrob.control here either with or without method arg. 
-    if (missing(control)) 
+    ## call lmrob.control here either with or without method arg.
+    if (missing(control))
         control <- if (missing(method))
             lmrob.control(...) else lmrob.control(method = method, ...)
     ret.x <- x
@@ -34,7 +34,7 @@ lmrob <-
     mf$drop.unused.levels <- TRUE
     mf[[1]] <- as.name("model.frame")
     mf <- eval(mf, parent.frame())
-    
+
     mt <- attr(mf, "terms") # allow model.frame to update it
     y <- model.response(mf, "numeric")
     w <- model.weights(mf)
@@ -47,8 +47,8 @@ lmrob <-
                 "Using method = ", method)
         control$method <- method
     }
-    
-    if (is.empty.model(mt)) {  
+
+    if (is.empty.model(mt)) {
         x <- NULL
         z <- list(coefficients = if (is.matrix(y)) matrix(,0,3) else numeric(0),
                   residuals = y, fitted.values = 0 * y,
@@ -56,7 +56,7 @@ lmrob <-
                   df.residual = NROW(y), converged = TRUE)
         if(!is.null(offset)) z$fitted.values <- offset
     }
-    else {  
+    else {
         x <- model.matrix(mt, mf, contrasts)
         if (!singular.ok)
             warning("only 'singular.ok = TRUE' is currently implemented.")
@@ -64,10 +64,10 @@ lmrob <-
             stop("Weights are not yet implemented for this estimator")
         if(!is.null(offset))
             stop("'offset' not yet implemented for this estimator")
-        
+
         z <- lmrob.fit(x, y, control)
     }
-    
+
     z$na.action <- attr(mf, "na.action")
     z$offset <- offset
     z$contrasts <- attr(x, "contrasts")
@@ -81,7 +81,7 @@ lmrob <-
     if (ret.x)
         z$x <- x
     if (ret.y)
-        z$y <- y 
+        z$y <- y
     z
 }
 
@@ -114,7 +114,7 @@ vcov.lmrob <- function (object, cov=object$control$cov, ...) {
   if (!is.null(object$cov) && identical(cov, object$control$cov))
     return(object$cov)
   else {
-    lf.cov <- if (!is.function(cov)) 
+    lf.cov <- if (!is.function(cov))
       get(cov, mode = "function")
     else cov
     lf.cov(object, ...)
@@ -130,7 +130,7 @@ model.matrix.lmrob <- function (object, ...) {
     stats::model.matrix.lm(object, ...)
 }
 
-if(FALSE) ## now replaced with more sophsticated in ./lmrobPredict.R 
+if(FALSE) ## now replaced with more sophsticated in ./lmrobPredict.R
 ## learned from MASS::rlm() : via "lm" as well
 predict.lmrob <- function (object, newdata = NULL, scale = NULL, ...)
 {
@@ -218,7 +218,7 @@ print.summary.lmrob <-
 		if (p > 1) {
 		    cat("\nCorrelation of Coefficients:\n")
 		    if (is.logical(symbolic.cor) && symbolic.cor) {
-			print(symnum(correl), abbr.col = NULL)
+			print(symnum(correl), abbr.colnames = NULL)
 		    }
 		    else { correl <- format(round(correl, 2), nsmall = 2,
 					    digits = digits)

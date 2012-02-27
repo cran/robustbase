@@ -1,4 +1,5 @@
 require(robustbase)
+## see also ./lmrob-psifns.R <<<<<<<<
 
 ## Demonstrate that  one of  tukeyChi() / tukeyPsi1() is superfluous
 
