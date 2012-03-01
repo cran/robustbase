@@ -25,7 +25,7 @@ predict.glmrob <-
     type <- match.arg(type)
     na.act <- object$na.action
     object$na.action <- NULL # kill this for predict.lm calls
-    object$weights <- object$w.r  # *rob: used for predict.lmrob()
+    object$rweights <- object$w.r  # *rob: used for predict.lmrob()
     if (!se.fit) {
 	## No standard errors
 	if(missing(newdata)) {

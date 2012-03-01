@@ -84,10 +84,11 @@ Rsubsample <- function(x, y, mts=0, tolInverse = 1e-7) {
        rowequ=integer(1),
        colequ=integer(1),
        status=integer(1),
-       sample = FALSE,
+       sample = FALSE, ## set this to TRUE for sampling
        mts = as.integer(mts),
        ss = as.integer(mts == 0),
-       tolinv = as.double(tolInverse))
+       tolinv = as.double(tolInverse),
+       solve = TRUE)
 }
 
 subsample <- function(x, y=rnorm(n), compareMatrix = TRUE,

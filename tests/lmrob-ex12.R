@@ -169,7 +169,7 @@ test <- function(n, ...) {
     X <- data.frame(X)
     X$X1 <- factor(X$X1)
     fail <- suppressWarnings(try(lmrob(y ~ ., X, ...), silent=TRUE))
-    stopifnot(is(fail, "try-error"))
+    stopifnot(is(fail, "lmrob"))
 }
 set.seed(0)
 test(12) ## fast_S()

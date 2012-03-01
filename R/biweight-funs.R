@@ -1,12 +1,16 @@
 #### These Chi() and Psi() functions are currently used by lmrob() functions
 #### FIXME: integrate these with the psi-rho objects --> ./psi-rho-funs.R
 
-## Chi'() is just a scaled version of psi() :
+## Hampel et al (1986):  \chi(x) := \rho(x) / \rho(\infty)
+##                       ======
+## <==> chi() is a scaled version of rho(.) such that
+##  \chi(\infty) = \max_x \chi(x) = 1
+
+## ==> Chi'() is just a scaled version of psi() :
 ## with current scale (new for psi()):
 ##	 i)  Chi'(x, c) == (6/c^2) Psi(x,c)
 ## ==>	 ii) Chi''(x,c) == (6/c^2) Psi'(x,c)
 ## and       Chi (x, c) == (6/c^2) Rho(x,c), where Psi(.) = Rho'(.)
-
 
 tukeyChi <- function(x, cc, deriv = 0)
 {

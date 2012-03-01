@@ -88,7 +88,7 @@ adjboxStats <- function(x, coef = 1.5, a = -4, b = 3,
     if(coef < 0) stop("'coef' must not be negative")
     nna <- !is.na(x)
     n <- sum(nna)# including +/- Inf
-    stats <- stats::fivenum(x, na.rm = TRUE)
+    stats <- fivenum(x, na.rm = TRUE)
     iqr <- diff(stats[c(2, 4)])
     fence <- rep(NA_real_, 2)
     if(coef == 0)

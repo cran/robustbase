@@ -27,6 +27,9 @@
       of class \code{"functionX"}.}
     \item{\code{Dpsi}:}{the derivative of \eqn{\psi},
       \eqn{Dpsi(x) = psi'(x)}; of class \code{"functionX"}.}
+    \item{\code{Dwgt}:}{the derivative of the weight function,
+      of class \code{"functionX"}, is generated automatically if
+      \code{\link{psiFunc}} constructor is used.}
     \item{\code{tDefs}:}{\emph{named} numeric vector of \bold{t}uning
       parameter \bold{Def}ault values.}
     %%% FIXME : Replace these by *methods*
@@ -34,22 +37,22 @@
     \item{\code{Epsi2}:}{Object of class \code{"functionXal"} ~~ }
     \item{\code{EDpsi}:}{Object of class \code{"functionXal"} ~~ }
 
+    \item{\code{name}:}{Name of \eqn{\psi}{psi}-function used for printing.}
     \item{\code{xtras}:}{Potentially further information.}
   }
 }
 \section{Methods}{
-  No methods defined with class \code{"psi_func"} in the signature.
+  Currently, only \code{\link{chgDefaults}()}, \code{\link[=plot-methods]{plot}()}
+  and \code{show()}.
 }
 \author{Martin Maechler}
-% \note{ ~~further notes~~ }
-
-%  ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
   \code{\link{psiFunc}}.
 }
 \examples{
 str(huberPsi, give.attr = FALSE)
+
+plot(hampelPsi)# calling the plot method.
 }
 \keyword{classes}
 \keyword{robust}

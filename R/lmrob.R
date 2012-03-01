@@ -2,9 +2,9 @@
 ### The first part of lmrob()  much cut'n'paste from lm() - on purpose!
 lmrob <-
     function(formula, data, subset, weights, na.action, method = 'MM',
-             model = TRUE, x = !control$compute.rd, y = FALSE,
-             singular.ok = TRUE, contrasts = NULL, offset = NULL,
-             control = NULL, init = NULL, ...)
+	     model = TRUE, x = !control$compute.rd, y = FALSE,
+	     singular.ok = TRUE, contrasts = NULL, offset = NULL,
+	     control = NULL, init = NULL, ...)
 {
     ## to avoid problems with setting argument
     ## call lmrob.control here either with or without method arg.
@@ -12,13 +12,13 @@ lmrob <-
 	control <- if (missing(method))
 	    lmrob.control(...) else lmrob.control(method = method, ...)
     else ## check dots
-        chk.s(...)
+	chk.s(...)
     ret.x <- x
     ret.y <- y
     cl <- match.call()
     mf <- match.call(expand.dots = FALSE)
     m <- match(c("formula", "data", "subset", "weights", "na.action", "offset"),
-               names(mf), 0)
+	       names(mf), 0)
     mf <- mf[c(1, m)]
     mf$drop.unused.levels <- TRUE
     mf[[1]] <- as.name("model.frame")
@@ -26,76 +26,193 @@ lmrob <-
 
     mt <- attr(mf, "terms") # allow model.frame to update it
     y <- model.response(mf, "numeric")
-    w <- model.weights(mf)
-    offset <- model.offset(mf)
+    w <- as.vector(model.weights(mf))
+    if(!is.null(w) && !is.numeric(w))
+	stop("'weights' must be a numeric vector")
+    offset <- as.vector(model.offset(mf))
     if(!is.null(offset) && length(offset) != NROW(y))
-        stop(gettextf("number of offsets is %d, should equal %d (number of observations)",
-                      length(offset), NROW(y)), domain = NA)
+	stop(gettextf("number of offsets is %d, should equal %d (number of observations)",
+		      length(offset), NROW(y)), domain = NA)
     if (!missing(control) && !missing(method) && method != control$method) {
-        warning("Methods argument set by method is different from method in control\n",
-                "Using the former, method = ", method)
-        control$method <- method
+	warning("Methods argument set by method is different from method in control\n",
+		"Using the former, method = ", method)
+	control$method <- method
     }
 
     if (is.empty.model(mt)) {
-        x <- NULL
-        z <- list(coefficients = if (is.matrix(y)) matrix(,0,3) else numeric(0),
-                  residuals = y, fitted.values = 0 * y,
-                  cov = matrix(,0,0), weights = w, rank = 0,
-                  df.residual = NROW(y), converged = TRUE)
-        if(!is.null(offset)) z$fitted.values <- offset
+	x <- NULL
+	singular.fit <- FALSE ## to avoid problems below
+	z <- list(coefficients = if (is.matrix(y)) matrix(,0,3) else numeric(0),
+		  residuals = y, scale = NA, fitted.values = 0 * y,
+		  cov = matrix(,0,0), weights = w, rank = 0,
+		  df.residual = NROW(y), converged = TRUE, iter = 0)
+	if(!is.null(offset)) {
+	    z$fitted.values <- offset
+	    z$residuals <- y - offset
+	    z$offset <- offset
+	}
     }
     else {
-        x <- model.matrix(mt, mf, contrasts)
-        if (!singular.ok)
-            warning("only 'singular.ok = TRUE' is currently implemented.")
-        if (!is.null(w))
-            stop("Weights are not yet implemented for this estimator")
-        if(!is.null(offset))
-            stop("'offset' not yet implemented for this estimator")
-        if (!is.null(init)) {
-            if (is.character(init)) {
-                init <- switch(init,
-                               `M-S` = lmrob.M.S(x, y, control, mf),
-                               S = lmrob.S(x, y, control),
-                               stop('init must be "S", "M-S", function or list'))
-            } else if (is.function(init)) {
-                init <- init(x=x, y=y, control=control, mf=mf)
-            } else if (is.list(init)) {
-                ## MK: set init$weights, init$residuals here ??
-                ##     (needed in lmrob..D..fit)
-                ##     or disallow method = D... ? would need to fix also
-                ##    lmrob.kappa: tuning.psi / tuning.chi choice
-            } else stop("unknown init argument")
-            stopifnot(!is.null(init$coef), !is.null(init$scale))
-            ## modify (default) control$method
-            if (control$method == "MM" || substr(control$method, 1, 1) == "S")
-                control$method <- substring(control$method, 2)
-            ## check for control$cov argument
-            if (class(init)[1] != "lmrob.S" && control$cov == '.vcov.avar1')
-                control$cov <- ".vcov.w"
-        }
-        z <- lmrob.fit(x, y, control, init=init) #-> ./lmrob.MM.R
+	x <- model.matrix(mt, mf, contrasts)
+	contrasts <- attr(x, "contrasts")
+	assign <- attr(x, "assign")
+	p <- ncol(x)
+	if(!is.null(offset))
+	    y <- y - offset
+	if (!is.null(w)) {
+	    ## checks and code copied/modified from lm.wfit
+	    ny <- NCOL(y)
+	    n <- nrow(x)
+	    if (NROW(y) != n | length(w) != n)
+		stop("incompatible dimensions")
+	    if (any(w < 0 | is.na(w)))
+		stop("missing or negative weights not allowed")
+	    zero.weights <- any(w == 0)
+	    if (zero.weights) {
+		save.r <- y
+		save.w <- w
+		save.f <- y
+		ok <- w != 0
+		nok <- !ok
+		w <- w[ok]
+		x0 <- x[!ok, , drop = FALSE]
+		x <- x[ok,  , drop = FALSE]
+		n <- nrow(x)
+		y0 <- if (ny > 1L) y[!ok, , drop = FALSE] else y[!ok]
+		y  <- if (ny > 1L) y[ ok, , drop = FALSE] else y[ok]
+	    }
+	    wts <- sqrt(w)
+	    save.y <- y
+	    x <- wts * x
+	    y <- wts * y
+	}
+	## check for singular fit
+	## from lm.fit:
+	z0 <- .Call(stats:::C_Cdqrls, x, y, tol = control$solve.tol)
+	singular.fit <- z0$rank < p
+	if (z0$rank > 0) {
+	    if (singular.fit) {
+		if (!singular.ok) stop("singular fit encountered")
+		pivot <- z0$pivot
+		p1 <- pivot[seq_len(z0$rank)]
+		p2 <- pivot[(z0$rank+1):p]
+		## to avoid problems in the internal fitting methods,
+		## split into singular and non-singular matrices,
+		## can still re-add singular part later
+		dn <- dimnames(x)
+		x <- x[,p1]
+		attr(x, "assign") <- assign[p1] ## needed for splitFrame to work
+	    }
+	    if (!is.null(init)) {
+		if (is.character(init)) {
+		    init <- switch(init,
+				   `M-S` = lmrob.M.S(x, y, control, mf),
+				   S = lmrob.S(x, y, control),
+				   stop('init must be "S", "M-S", function or list'))
+		} else if (is.function(init)) {
+		    init <- init(x=x, y=y, control=control, mf=mf)
+		} else if (is.list(init)) {
+		    ## MK: set init$weights, init$residuals here ??
+		    ##	   (needed in lmrob..D..fit)
+		    ##	   or disallow method = D... ? would need to fix also
+		    ##	  lmrob.kappa: tuning.psi / tuning.chi choice
+		    if (singular.fit) {
+			## make sure the initial coefficients vector matches
+			## to the reduced x
+			init$coef <- na.omit(init$coef)
+			if (length(init$coef) != ncol(x))
+			    stop("Length of initial coefficients vector does not match rank of singular design matrix x")
+		    }
+		} else stop("unknown init argument")
+		stopifnot(!is.null(init$coef), !is.null(init$scale))
+		## modify (default) control$method
+		if (control$method == "MM" || substr(control$method, 1, 1) == "S")
+		    control$method <- substring(control$method, 2)
+		## check for control$cov argument
+		if (class(init)[1] != "lmrob.S" && control$cov == '.vcov.avar1')
+		    control$cov <- ".vcov.w"
+	    }
+	    z <- lmrob.fit(x, y, control, init=init) #-> ./lmrob.MM.R
+	    if (singular.fit) {
+		coef <- numeric(p)
+		coef[p2] <- NA
+		coef[p1] <- z$coefficients
+		names(coef) <- dn[[2L]]
+		z$coefficients <- coef
+		## Update QR decomposition (z$qr)
+		## pad qr and qraux with zeroes (columns that were pivoted to the right in z0)
+		qr0 <- matrix(0, length(y), p)
+		qr0[,1L:z0$rank] <- z$qr$qr
+		rownames(qr0) <- dn[[1L]]
+		colnames(qr0) <- dn[[2L]][z0$pivot]
+		z$qr$qr <- qr0
+		z$qr$qraux <- c(z$qr$qraux, rep.int(0, p-z0$rank))
+		## set pivot
+		z$qr$pivot <- z0$pivot
+	    }
+	} else { ## rank 0
+	    z <- list(coefficients = if (is.matrix(y)) matrix(NA,p,ncol(y))
+				     else rep.int(as.numeric(NA), p),
+		      residuals = y, scale = NA, fitted.values = 0 * y,
+		      cov = matrix(,0,0), rweights = rep.int(as.numeric(NA), NROW(y)),
+		      weights = w, rank = 0, df.residual = NROW(y),
+		      converged = TRUE, iter = 0)
+	    if (is.matrix(y)) colnames(z$coefficients) <- colnames(x)
+	    else names(z$coefficients) <- colnames(x)
+	    if(!is.null(offset)) z$residuals <- y - offset
+	}
+	if (!is.null(w)) {
+	    z$residuals <- z$residuals/wts
+	    z$fitted.values <- save.y - z$residuals
+	    z$weights <- w
+	    if (zero.weights) {
+		coef[is.na(coef)] <- 0
+		f0 <- x0 %*% coef
+		if (ny > 1) {
+		    save.r[ok, ] <- z$residuals
+		    save.r[nok, ] <- y0 - f0
+		    save.f[ok, ] <- z$fitted.values
+		    save.f[nok, ] <- f0
+		}
+		else {
+		    save.r[ok] <- z$residuals
+		    save.r[nok] <- y0 - f0
+		    save.f[ok] <- z$fitted.values
+		    save.f[nok] <- f0
+		}
+		z$residuals <- save.r
+		z$fitted.values <- save.f
+		z$weights <- save.w
+		rweights <- z$rweights
+		z$rweights <- rep.int(0, length(save.w))
+		z$rweights[ok] <- rweights
+	    }
+	}
     }
+    if(!is.null(offset))
+	z$fitted.values <- z$fitted.values + offset
 
     z$na.action <- attr(mf, "na.action")
     z$offset <- offset
-    z$contrasts <- attr(x, "contrasts")
+    z$contrasts <- contrasts
     z$xlevels <- .getXlevels(mt, mf)
     z$call <- cl
     z$terms <- mt
+    z$assign <- assign
     if(control$compute.rd && !is.null(x))
-        z$MD <- robMD(x, attr(mt, "intercept"))
+	z$MD <- robMD(x, attr(mt, "intercept"))
     if (model)
-        z$model <- mf
+	z$model <- mf
     if (ret.x)
-        z$x <- x
+	z$x <- if (singular.fit || (!is.null(w) && zero.weights))
+	    model.matrix(mt, mf, contrasts) else x
     if (ret.y)
-        z$y <- y
+	z$y <- if (!is.null(w)) model.response(mf, "numeric") else y
+    class(z) <- "lmrob"
     z
 }
 
-##' @title Warn about extraneous arguments in the "..."  (of its caller)
+##' @title Warn about extraneous arguments in the "..."	 (of its caller)
 ##' @return
 ##' @author Martin Maechler, June 2012
 chk.s <- function(...) {
@@ -117,89 +234,77 @@ robMD <- function(x, intercept, ...) {
     }
 }
 
-print.lmrob <- function(x, digits = max(3, getOption("digits") - 3), ...)
-{
-    cat("\nCall:\n", deparse(x$call), "\n\n", sep = "")
-    if(length((cf <- coef(x)))) {
-	if( x$converged )
-	    cat("Coefficients:\n")
-	else
-	    cat("Algorithm did not converge\n\n",
-		"Coefficients of the *initial* S-estimator:\n")
-	print(format(coef(x), digits = digits), print.gap = 2, quote = FALSE)
-    } else cat("No coefficients\n")
-    cat("\n")
-    invisible(x)
+### Method Functions for class lmrob objects ###
+### ---------------------------------------- ###
+
+## Many are just wrapper functions for the respective .lm methods
+
+## ---- sorted *ALPHABETICALLY* ----
+
+alias.lmrob <- function(object, ...) {
+    ## Purpose: provide alias() for lmrob objects
+    ## Cannot use alias.lm directly, since it requires a "clean" object$qr,
+    ## i.e., without the robustness weights
+
+    if (is.null(x <- object[["x"]]))
+	x <- model.matrix(object)
+    weights <- weights(object)
+    if (!is.null(weights) && diff(range(weights)))
+	x <- x * sqrt(weights)
+    object$qr <- qr(x)
+    class(object) <- "lm"
+    alias(object)
 }
 
 
-vcov.lmrob <- function (object, cov=object$control$cov, ...) {
-  if (!is.null(object$cov) && identical(cov, object$control$cov))
-    return(object$cov)
-  else {
-    lf.cov <- if (!is.function(cov))
-      get(cov, mode = "function")
-    else cov
-    lf.cov(object, ...)
-  }
+case.names.lmrob <- function(object, ...) {
+    stats:::case.names.lm(object, ...)
 }
 
+## coef(<lmrob>): no own method ==> using  coef.default(OO) == OO$coefficients
+## -------------
 
-## residuals.default works for "lmrob"  {unless we'd allow re-weighted residuals
+## use confint.lm instead of confint.default
+## mainly to get t instead of normal quantiles
+confint.lmrob <- function(object, ...) {
+    stats:::confint.lm(object, ...)
+}
+
+dummy.coef.lmrob <- function(object, ...) {
+    stats:::dummy.coef.lm(object, ...)
+}
+
+family.lmrob <- function(object, ...) {
+    stats:::family.lm(object, ...)
+}
+
 ## fitted.default works for "lmrob"
 
-## This seems to work - via lm
-model.matrix.lmrob <- function (object, ...) {
-    stats::model.matrix.lm(object, ...)
+kappa.lmrob <- function(z, ...) kappa.lm(z, ...)
+
+## labels.lm uses qr.lm internally, but here
+## this should not make a difference
+## FIXME: rank 0 fits?
+labels.lmrob <- function(object, ...) {
+    stats:::labels.lm(object, ...)
 }
+
+## This seems to work - via lm
+model.matrix.lmrob <- function (object, ...) model.matrix.lm(object, ...)
+
+## identical to stats:::nobs.lm {but that is hidden .. and small to copy}:
+nobs.lmrob <- function(object, ...)
+    if (!is.null(w <- object$weights)) sum(w != 0) else NROW(object$residuals)
+
 
 if(FALSE) ## now replaced with more sophsticated in ./lmrobPredict.R
 ## learned from MASS::rlm() : via "lm" as well
 predict.lmrob <- function (object, newdata = NULL, scale = NULL, ...)
 {
     class(object) <- c(class(object), "lm")
-    object$qr <- qr(sqrt(object$weights) * object$x)
+    object$qr <- qr(sqrt(object$rweights) * object$x)
     predict.lm(object, newdata = newdata, scale = object$s, ...)
 }
-
-
-summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...)
-{
-    if (is.null(object$terms))
-	stop("invalid 'lmrob' object:  no terms component")
-    p <- object$rank
-    df <- object$degree.freedom
-    if (p > 0) {
-	n <- p + df
-	se <- sqrt(diag(object$cov))
-	est <- object$coefficients
-	tval <- est/se
-	ans <- object[c("call", "terms", "residuals", "scale", "weights",
-			"converged", "iter", "control")]
-	ans$df <- df
-	ans$coefficients <-
-	    if( ans$converged )
-		cbind(est, se, tval, 2 * pt(abs(tval), df, lower.tail = FALSE))
-	    else cbind(est, NA, NA, NA)
-	dimnames(ans$coefficients) <-
-	    list(names(est), c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
-
-	ans$cov.unscaled <- object$cov
-	dimnames(ans$cov.unscaled) <- dimnames(ans$coefficients)[c(1,1)]
-	if (correlation) {
-	    ans$correlation <- ans$cov.unscaled / outer(se, se)
-	    ans$symbolic.cor <- symbolic.cor
-	}
-    } else { ## p = 0: "null model"
-	ans <- object
-	ans$coefficients <- matrix(, 0, 4)
-	ans$df <- df
-	ans$cov.unscaled <- object$cov
-    }
-    class(ans) <- "summary.lmrob"
-    ans
-}
-
 
 print.summary.lmrob <-
     function (x, digits = max(3, getOption("digits") - 3),
@@ -211,10 +316,10 @@ print.summary.lmrob <-
 	"\n\n", sep = "")
     resid <- x$residuals
     df <- x$df
-    ##df
-    cat(if (!is.null(x$w) && diff(range(x$w))) "Weighted ",
+    rdf <- df[2L]
+    cat(if (!is.null(x$weights) && diff(range(x$weights))) "Weighted ",
 	"Residuals:\n", sep = "")
-    if (df > 5) {
+    if (rdf > 5L) {
 	nam <- c("Min", "1Q", "Median", "3Q", "Max")
 	if (NCOL(resid) > 1)
 	    rq <- structure(apply(t(resid), 1, quantile),
@@ -223,18 +328,38 @@ print.summary.lmrob <-
 	print(rq, digits = digits, ...)
     }
     else print(resid, digits = digits, ...)
-    if( length(x$coef) ) {
+    ## FIXME: need to catch rdf == 0?
+    if( length(x$aliased) ) {
 	if( !(x$converged) ) {
-	    cat("\nAlgorithm did not converge\n")
-	    cat("\nCoefficients of *initial* S-estimator:\n")
+	    if (x$scale == 0) {
+		cat("\nExact fit detected\n\nCoefficients:\n")
+	    } else {
+		cat("\nAlgorithm did not converge\n")
+		if (x$control$method == "S")
+		    cat("\nCoefficients of the *initial* S-estimator:\n")
+		else
+		    cat(sprintf("\nCoefficients of the %s-estimator:\n",
+				x$control$method))
+	    }
 	    printCoefmat(x$coef, digits = digits, signif.stars = signif.stars,
 			 ...)
 	} else {
-	    cat("\nCoefficients:\n")
-	    printCoefmat(x$coef, digits = digits, signif.stars = signif.stars,
-			 ...)
+	    if (nsingular <- df[3L] - df[1L])
+		cat("\nCoefficients: (", nsingular,
+		    " not defined because of singularities)\n", sep = "")
+	    else cat("\nCoefficients:\n")
+	    coefs <- x$coefficients
+	    if(!is.null(aliased <- x$aliased) && any(aliased)) {
+		cn <- names(aliased)
+		coefs <- matrix(NA, length(aliased), 4, dimnames=list(cn, colnames(coefs)))
+		coefs[!aliased, ] <- x$coefficients
+	    }
+
+	    printCoefmat(coefs, digits = digits, signif.stars = signif.stars,
+			 na.print="NA", ...)
 	    cat("\nRobust residual standard error:",
 		format(signif(x$scale, digits)),"\n")
+	    ## FIXME: use naprint() here to list observations deleted due to missingness?
 	    correl <- x$correlation
 	    if (!is.null(correl)) {
 		p <- NCOL(correl)
@@ -254,52 +379,178 @@ print.summary.lmrob <-
 	}
 	cat("\n")
 
-	summarizeRobWeights(x$weights, digits = digits, ...)
+	rweights <- x$rweights
+	if (!is.null(rweights)) {
+	    if (any(zero.weights <- x$weights == 0))
+		rweights <- rweights[!zero.weights]
+	    summarizeRobWeights(rweights, digits = digits, ...)
+	}
 
     } else cat("\nNo Coefficients\n")
 
     ## modify control list to contain only parameters
     ## that were actually used
     control <- x$control
-    switch(sub("^(S|M-S).*", "\\1", control$method),
-           S = { # remove all M-S specific control pars
-               control$k.m_s <- NULL
-               control$split.type <- NULL
-               # if large_n is not used, remove corresp control pars
-               if (length(residuals) <= control$fast.s.large.n) {
-                   control$groups <- NULL
-                   control$n.group <- NULL
-               }
-           },
-           `M-S` = { # remove all fast S specific control pars
-               control$refine.tol <- NULL
-               control$groups <- NULL
-               control$n.group <- NULL
-               control$best.r.s <- NULL
-               control$k.fast.s <- NULL
-           }, { # else: do not print any parameter used by initial ests. only
-               control$tuning.chi <- NULL
-               control$bb <- NULL
-               control$refine.tol <- NULL
-               control$nResample <- NULL
-               control$groups <- NULL
-               control$n.group <- NULL
-               control$best.r.s <- NULL
-               control$k.fast.s <- NULL
-               control$k.max <- NULL
-               control$k.m_s <- NULL
-               control$split.type <- NULL
-               control$mts <- NULL
-               control$subsampling <- NULL
-           } )
-    if (!grepl("D", control$method)) control$numpoints <- NULL
-    if (x$control$method == 'SM') control$method <- x$control$method <- 'MM'
-    printControl(control, digits = digits)
+    if (!is.null(control)) {
+	switch(sub("^(S|M-S).*", "\\1", control$method),
+	       S = { # remove all M-S specific control pars
+		   control$k.m_s <- NULL
+		   control$split.type <- NULL
+					# if large_n is not used, remove corresp control pars
+		   if (length(residuals) <= control$fast.s.large.n) {
+		       control$groups <- NULL
+		       control$n.group <- NULL
+		   }
+	       },
+	       `M-S` = { # remove all fast S specific control pars
+		   control$refine.tol <- NULL
+		   control$groups <- NULL
+		   control$n.group <- NULL
+		   control$best.r.s <- NULL
+		   control$k.fast.s <- NULL
+	       }, { # else: do not print any parameter used by initial ests. only
+		   control$tuning.chi <- NULL
+		   control$bb <- NULL
+		   control$refine.tol <- NULL
+		   control$nResample <- NULL
+		   control$groups <- NULL
+		   control$n.group <- NULL
+		   control$best.r.s <- NULL
+		   control$k.fast.s <- NULL
+		   control$k.max <- NULL
+		   control$k.m_s <- NULL
+		   control$split.type <- NULL
+		   control$mts <- NULL
+		   control$subsampling <- NULL
+	       } )
+	if (!grepl("D", control$method)) control$numpoints <- NULL
+	if (x$control$method == 'SM') control$method <- x$control$method <- 'MM'
+	printControl(control, digits = digits)
+    }
 
     invisible(x)
 }
 
-## hidden in namespace
+
+print.lmrob <- function(x, digits = max(3, getOption("digits") - 3), ...)
+{
+    cat("\nCall:\n", deparse(x$call), "\n\n", sep = "")
+    if(length((cf <- coef(x)))) {
+	if( x$converged )
+	    cat("Coefficients:\n")
+	else {
+	    if (x$scale == 0) {
+		cat("Exact fit detected\n\nCoefficients:\n")
+	    } else {
+		cat("Algorithm did not converge\n\n")
+		if (x$control$method == "S")
+		    cat("Coefficients of the *initial* S-estimator:\n")
+		else
+		    cat(sprintf("Coefficients of the %s-estimator:\n",
+				x$control$method))
+	    }
+	}
+	print(format(coef(x), digits = digits), print.gap = 2, quote = FALSE)
+    } else cat("No coefficients\n")
+    cat("\n")
+    invisible(x)
+}
+
+
+print.lmrob.S <- print.lmrob
+
+
+## practically identical to  stats:::qr.lm :
+qr.lmrob <- function (x, ...) {
+    if (is.null(r <- x$qr))
+	stop("lmrob object does not have a proper 'qr' component. Rank must be zero")
+    r
+}
+
+residuals.lmrob <- function(object, ...) residuals.lm(object, ...)
+
+summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...)
+{
+    if (is.null(object$terms))
+	stop("invalid 'lmrob' object:  no terms component")
+    p <- object$rank
+    df <- object$df.residual #was $degree.freedom
+    cf.nms <- c("Estimate", "Std. Error", "t value", "Pr(>|t|)")
+    if (p > 0) {
+	n <- p + df
+	p1 <- seq_len(p)
+	se <- sqrt(if(length(object$cov) == 1L) object$cov else diag(object$cov))
+	est <- object$coefficients[object$qr$pivot[p1]]
+	tval <- est/se
+	ans <- object[c("call", "terms", "residuals", "scale", "rweights",
+			"converged", "iter", "control", "weights")]
+	if (!is.null(ans$weights))
+	    ans$residuals <- ans$residuals * sqrt(object$weights)
+	## 'df' vector, modeled after summary.lm() : ans$df <- c(p, rdf, NCOL(Qr$qr))
+	## where  p <- z$rank ; rdf <- z$df.residual ; Qr <- qr.lm(object)
+	ans$df <- c(p, df, NCOL(object$qr$qr))
+	ans$coefficients <-
+	    if( ans$converged)
+		cbind(est, se, tval, 2 * pt(abs(tval), df, lower.tail = FALSE))
+	    else
+		cbind(est, if (object$scale == 0) 0 else NA, NA, NA)
+	dimnames(ans$coefficients) <- list(names(est), cf.nms)
+	ans$aliased <- is.na(coef(object)) # used in print method
+
+	ans$cov.unscaled <- object$cov
+	if(length(object$cov) > 1L)
+	    dimnames(ans$cov.unscaled) <- dimnames(ans$coefficients)[c(1,1)]
+	if (correlation) {
+	    ans$correlation <- ans$cov.unscaled / outer(se, se)
+	    ans$symbolic.cor <- symbolic.cor
+	}
+    } else { ## p = 0: "null model"
+	ans <- object
+	ans$aliased <- is.na(coef(object)) # used in print method
+	ans$df <- c(0L, df, length(ans$aliased))
+	ans$coefficients <- matrix(NA, 0L, 4L)
+	dimnames(ans$coefficients) <- list(NULL, cf.nms)
+	ans$cov.unscaled <- object$cov
+    }
+    class(ans) <- "summary.lmrob"
+    ans
+}
+
+
+variable.names.lmrob <- function(object, ...) {
+    stats:::variable.names.lm(object, ...)
+}
+
+
+vcov.lmrob <- function (object, cov=object$control$cov, ...) {
+  if (!is.null(object$cov) && identical(cov, object$control$cov))
+    return(object$cov)
+  else {
+    lf.cov <- if (!is.function(cov))
+      get(cov, mode = "function")
+    else cov
+    lf.cov(object, ...)
+  }
+}
+
+
+weights.lmrob <- function(object, type = c("prior", "robustness"), ...) {
+    type <- match.arg(type)
+    res <- if (type == "prior") {
+	## Issue warning only if called from toplevel. Otherwise the warning pop
+	## up at quite unexpected places, e.g., case.names().
+	if (is.null(object[["weights"]]) && identical(parent.frame(), .GlobalEnv))
+	    warning("No weights defined for this object. Use type=\"robustness\" argument to get robustness weights.")
+	object[["weights"]]
+    } else object[["rweights"]]
+    if (is.null(object$na.action))
+	res
+    else naresid(object$na.action, res)
+}
+
+
+####  functions hidden in namespace ####
+
 printControl <-
     function(ctrl, digits = getOption("digits"),
 	     str.names = "seed",
@@ -329,6 +580,7 @@ printControl <-
 	}
 }
 
+
 summarizeRobWeights <-
     function(w, digits = getOption("digits"), header = "Robustness weights:",
 	     eps = 0.1 / length(w), eps1 = 1e-3, ...)
@@ -342,12 +594,12 @@ summarizeRobWeights <-
     else {
 	n1 <- sum(w1 <- abs(w - 1) < eps1)
 	n0 <- sum(w0 <- abs(w) < eps)
-        if(any(w0 & w1))
-            warning("weights should not be both close to 0 and close to 1!\n",
-                    "You should use different 'eps' and/or 'eps1'")
+	if(any(w0 & w1))
+	    warning("weights should not be both close to 0 and close to 1!\n",
+		    "You should use different 'eps' and/or 'eps1'")
 	if(n0 > 0 || n1 > 0) {
 	    if(n0 > 0) {
-                formE <- function(e) formatC(e, digits = max(2, digits-3), width=1)
+		formE <- function(e) formatC(e, digits = max(2, digits-3), width=1)
 		i0 <- which(w0)
 		maxw <- max(w[w0])
 		c3 <- paste("with |weight| ",

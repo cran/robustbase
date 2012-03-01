@@ -34,7 +34,7 @@ lmrob.fit(x, y, control, init = NULL)
   A list with components
   \item{fitted.values}{\eqn{X \beta}{X beta}, i.e., \code{X \%*\% coefficients}.}
   \item{residuals}{the raw residuals, \code{y - fitted.values}}
-  \item{weights}{robustness weights derived from the final M-estimator
+  \item{rweights}{robustness weights derived from the final M-estimator
     residuals (even when not converged).}
   \item{rank}{}
   \item{degree.freedom}{\code{n - rank}}% more!

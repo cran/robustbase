@@ -24,9 +24,10 @@
 }
 \author{Martin Maechler}
 \seealso{
-  \code{\link{functionXal-class}} for \emph{functionals} of \code{"functionX"};
-  \code{\link{psiFunc}}, and
-  \code{\link{psi_func-class}} which has several \code{functionX} slots.
+  \code{\link{psiFunc}()}, and class descriptions of
+  \code{\linkS4class{functionXal}} for \emph{functionals} of
+  \code{"functionX"}, and \code{\linkS4class{psi_func}} which has
+  several \code{functionX} slots.
 }
 % \examples{
 

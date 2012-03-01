@@ -34,12 +34,11 @@ function (x, which = 1:5,
 		      else stop("need 'model' or 'x' component for robust Mahalanobis distances"),
 		      intercept = attr(x$terms,"intercept"))
 	    ## try to "cache" them with the object
-	    if(identical(parent.frame(), .GlobalEnv) &&
-	       exists((cnx <- as.character(nx <- match.call()[["x"]])),
-		      .GlobalEnv)) {
-		assign(cnx, x, envir = .GlobalEnv)
-		message("saving the robust distances 'MD' as part of ",
-			sQuote(cnx))
+	    .ge <- .GlobalEnv
+	    if(identical(parent.frame(), .ge) &&
+	       exists((cnx <- as.character(match.call()[["x"]])), .ge)) {
+		assign(cnx, x, envir = .ge)
+		message("saving the robust distances 'MD' as part of ", sQuote(cnx))
 	    }
 	}
         if(!is.null(x[['MD']])) {

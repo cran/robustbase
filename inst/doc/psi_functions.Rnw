@@ -1,0 +1,264 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage[a4paper, text={16cm,25cm}]{geometry}
+
+%\VignetteIndexEntry{Definitions of Psi-Functions Available in Robustbase}
+%\VignetteDepends{robustbase}
+
+\usepackage{amsmath}
+\usepackage{natbib}
+\usepackage[utf8]{inputenc}
+\newcommand{\abs}[1]{\left| #1 \right|}
+
+\SweaveOpts{prefix.string=psi, eps=FALSE, pdf=TRUE, strip.white=true}
+\SweaveOpts{width=6, height=4.1, echo=FALSE, fig=TRUE}
+
+<<init, fig=FALSE>>=
+# set margins for plots and main color to transparent
+options(SweaveHooks=list(fig=function() par(mar=c(3,3,1.4,0.7), 
+                         col.main="#FFFFFF00",
+                         mgp=c(1.5, 0.5, 0)))) 
+require(robustbase)
+source(system.file("xtraR/plot-psiFun.R", package = "robustbase", mustWork=TRUE))
+## x axis for plots
+x. <- seq(-5, 10, length=1501)
+@ 
+
+\begin{document}
+\setkeys{Gin}{width=0.9\textwidth}
+\setlength{\abovecaptionskip}{-5pt}
+
+\title{Definitions of $\psi$-Functions Available in Robustbase}
+\author{Manuel Koller}
+\maketitle
+\tableofcontents
+
+\section*{Preamble}
+Unless otherwise stated, the following definitions of functions are
+given by \citet{MarRMY06}. Their definitions differ sometimes slightly
+from the ones stated here. We prefer to use another way of
+standardizing the functions. To avoid confusion, we first define
+$\psi$- and $\rho$-functions. 
+
+A \emph{$\psi$-function} is defined as a function $\psi$ such that
+\begin{itemize}
+\item $\psi$ is odd,
+\item $\psi(x) > 0$ for $0 < x < \sup\{\tilde x : \psi(\tilde x) > 0\}$.
+\item It's derivative $\psi'$ is $1$ at $0$, i.e., $\psi'(0) = 1$.
+\end{itemize}
+
+A \emph{$\rho$-function} is defined as the following definite integral of a $\psi$-function
+\begin{equation*}
+  \rho(x) = \int_0^x \psi(x) dx\;.
+\end{equation*}
+A $\psi$-function is called \emph{redescending} if $\psi(x) = 0$ for
+some $x > 0$. Corresponding to a redescending $\psi$-function, we
+define a function $\tilde\rho$, that is standardized such that the
+maximum value it attains is one. In formulas $\tilde\rho(x) =
+\rho(x)/\rho(\infty)$. $\tilde\rho$ is a $\rho$-function as defined in
+\citet{MarRMY06}. 
+
+\clearpage
+\section{Bisquare}
+The bisquare family of functions is defined as,
+\begin{equation*}
+  \tilde\rho(x) = \left\{ \begin{array}{cl}
+      1 - [1 - (x/k)^2]^3 & \mbox{ if } |x| \leq k \\
+      1 & \mbox{ if } |x| > k
+    \end{array} \right.\;,
+\end{equation*}
+with derivative $\tilde\rho'(x) = 6\psi(x) / k^2$ where,
+\begin{equation*}
+  \psi(x) = x \left[ 1 - \left(\frac{x}{k}\right)^2\right]^2 I_{\{|x| \leq k\}}\;.
+\end{equation*}
+The constant for $95\%$ efficiency of the regression estimator is
+$4.685$ and the constant for a breakdown point of $0.5$ of the
+S-estimator is $1.548$.
+
+\begin{figure}[h]
+  \centering
+<<bisquare>>=
+p.psiFun(x., "biweight", par = 4.685)
+@ 
+  \caption{Bisquare family functions using tuning parameter $k = 4.685$.}
+\end{figure}
+
+\clearpage
+\section{Hampel}
+Let $C = \frac{1}{2}a^2 + a(b-a) + \frac{1}{2}a(c-b)$. The Hampel family of 
+functions \citep{hamfrrs86} is defined as, 
+\begin{align*}
+  \tilde\rho(x) ={}& \left\{ \begin{array}{ll} 
+        \frac{1}{2} x^2 / C & |x| \leq a \\
+        \left( \frac{1}{2}a^2 + (|x|-a)a\right) / C  & a < |x| \leq b \\
+        \left( \frac{1}{2}a^2 + a(b-a) + \frac{1}{2}a(|x| - b)\left(1 + \frac{c -
+          |x|}{c-b}\right) \right) / C & b < |x| \leq c \\
+        1 & c < |x|
+      \end{array} \right. \;, \\
+    \psi(x) ={}& \left\{ \begin{array}{ll}
+          x & |x| \leq a \\
+          {\rm sgn}(x)a & a < |x| \leq b \\
+          a\frac{c - |x|}{c - b}{\rm sgn}(x) & b < |x| \leq c \\
+          0  & c < |x|
+        \end{array} \right.\;.
+\end{align*}
+
+The Hampel $\psi$ function is chosen to have a slope of $1$ in the center
+and a slope of $1/2$ in the redescending part. That implies the following
+relation between the three parameters $a$, $b$ and $c$,
+\begin{equation*}
+  c = 2a + b\;.
+\end{equation*}
+We use $a = 1.5$, $b = 3.5$ and $c = 8$. These three parameters are then
+multiplied by $k$ to get the desired efficiency / breakdown point.
+
+The constant for $95\%$ efficiency of the regression estimator is $0.901$ and
+the constant for a breakdown point of $0.5$ of the S-estimator is
+$0.212$. 
+
+\begin{figure}[h]
+  \centering
+<<Hampel>>=
+## see also hampelPsi
+p.psiFun(x., "Hampel", par = ## Default, but rounded:
+                             round(c(1.5, 3.5, 8) * 0.9016085, 1))
+@ 
+  \caption{Hampel family of functions using tuning parameters $0.902 \cdot (1.5,
+    3.5, 9)$.}
+\end{figure}
+
+\clearpage
+\section{Huber}
+The family of Huber functions is defined as,
+\begin{align*}
+  \rho(x) = {}& \left\{ \begin{array}{ll}
+      x^2 & \mbox{ if } |x| \leq k \\
+      2k|x| - k^2 & \mbox{ if } |x| > k
+    \end{array} \right. \;,\\
+  \psi(x) = {}& \left\{ \begin{array}{ll}
+      x & \mbox{ if } |x| \leq k \\
+      -k & \mbox{ if } x < -k \\
+      k & \mbox{ if } x > k 
+    \end{array} \right. \;.
+\end{align*}
+The constant for $95\%$ efficiency of the regression estimator is
+$1.345$.
+
+\begin{figure}[h]
+  \centering
+<<Huber>>=
+plot(huberPsi, x., ylim=c(-1.3, 6), leg.loc="topright")
+@ 
+  \caption{Huber family of functions using tuning parameter $k = 1.345$.}
+\end{figure}
+
+\clearpage
+\section{GGW}
+The Generalized Gauss-Weight function, or \emph{ggw} for short, is a
+generalization of the Welsh $\psi$-function. In \citet{ks2011} it is
+defined as,
+\begin{equation*}
+  %% \label{eq:ggw}
+  \psi(x, a, b, c) = \left\{ \begin{array}{ll}
+      x & |x| \leq c \\
+      \exp\left(-\frac{1}{2}\frac{(|x| - c)^b}{a}\right)x & |x| > c,
+    \end{array} \right. \;.
+\end{equation*}
+The constants for $95\%$ efficiency of the regression estimator are
+$a=1.387$, $b=1.5$ and $c=1.063$. The constants for a breakdown point of
+$0.5$ of the S-estimator are $a=0.204$, $b=1.5$ and $c=0.296$.
+
+\begin{figure}[h]
+  \centering
+<<GGW>>=
+p.psiFun(x., "GGW", par = c(-.5,1,.95,NA))
+@ 
+\caption{GGW family of functions using tuning parameters $a=1.387$, $b=1.5$
+  and $c=1.063$.}
+\end{figure}
+
+\clearpage
+\section{LQQ}
+The ``linear quadratic quadratic''$\psi$-function, or \emph{lqq} for short,
+was proposed by \citet{ks2011}. It is defined as,
+\begin{equation*}
+  \psi(x) = \left\{
+    \begin{array}{ll}
+      x & \abs{x} \leq c \\
+      {\rm sign}(x)\left(\abs{x} - \frac{s}{2b}\left(\abs{x} - c\right)^2
+      \right)
+      & c < \abs{x} \leq b + c \\
+      {\rm sign}(x)\left(c+b-\frac{bs}{2} + \frac{s-1}{a}
+        \left(\frac{1}{2}\tilde x^2 - a\tilde x\right)
+      \right) & 
+      b + c < \abs{x} \leq a + b + c \\
+      0 & \mbox{otherwise,}
+    \end{array} \right.
+\end{equation*}
+where $\tilde x = \abs{x} - b - c$ and $a = (bs - 2b - 2c)/(1-s)$. The
+parameter $c$ determines the width of the central identity part. The
+sharpness of the bend is adjusted by $b$ while the maximal rate of descent
+is controlled by $s$ ($s = 1 - \abs{\min_x\psi'(x)}$). The length $a$ of
+the final descent to $0$ is determined by $b$, $c$ and $s$.
+
+The constants for $95\%$ efficiency of the regression estimator are
+$b=1.473$, $c=0.982$ and $s=1.5$. The constants for a breakdown point of
+$0.5$ of the S-estimator are $b=0.402$, $c=0.268$ and $s=1.5$.
+
+\begin{figure}[h]
+  \centering
+<<LQQ>>=
+p.psiFun(x., "LQQ", par = c(-.5,1.5,.95,NA))
+@ 
+\caption{LQQ family of functions using tuning parameters $b=1.473$,
+  $c=0.982$ and $s=1.5$.}
+\end{figure}
+
+\clearpage
+\section{Optimal}
+The optimal $\psi$ function as given by \citet[Section~5.9.1]{MarRMY06},
+\begin{equation*}
+  \psi(x) = {\rm sgn}(x)\left(-\frac{\varphi'(\abs{x}) + c} 
+    {\varphi(\abs{x})}\right)^+\;,
+\end{equation*}
+where $\varphi$ is the standard normal density, $c$ is a constant and $t^+ =
+\max(t, 0)$ denotes the positive part of $t$.
+
+The constant for $95\%$ efficiency of the regression estimator is $1.060$ and
+the constant for a breakdown point of $0.5$ of the S-estimator is
+$0.405$. 
+
+\begin{figure}[h]
+  \centering
+<<optimal>>=
+p.psiFun(x., "optimal", par = 1.06, leg.loc="bottomright")
+@ 
+  \caption{Optimal family of functions using tuning parameter $c = 1.06$.}
+\end{figure}
+
+\clearpage
+\section{Welsh}
+The Welsh $\psi$ function is defined as (REFERENCE MISSING),
+\begin{align*}
+  \tilde\rho(x, k) ={}& 1 - \exp\left(-\frac{1}{2}\left(\frac{x}{k}\right)^2\right) \\
+  \psi(x, k) ={}& k^2\tilde\rho'(x, k) =
+  x\exp\left(-\frac{1}{2}\left(\frac{x}{k}\right)^2\right) \\
+  \psi'(x, k) ={}& \left(1 - \left(\frac{x}{k}\right)^2\right)
+  \exp\left(-\frac{1}{2}\left(\frac{x}{k}\right)^2\right)
+\end{align*}
+
+The constant for $95\%$ efficiency of the regression estimator is $2.11$ and
+the constant for a breakdown point of $0.5$ of the S-estimator is
+$0.577$. 
+
+\begin{figure}[h]
+  \centering
+<<Welsh>>=
+p.psiFun(x., "Welsh", par = 2.11)
+@ 
+  \caption{Welsh family of functions using tuning parameter $k = 2.11$.}
+\end{figure}
+
+\bibliographystyle{chicago}
+\bibliography{lmrob_simulation}
+
+\end{document}

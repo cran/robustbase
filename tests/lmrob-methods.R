@@ -10,8 +10,8 @@ summary(m0 <- lmrob(stack.loss ~ ., data = stackloss, method = "S"))
 set.seed(0)
 m0a <- lmrob.S(m0$x, stack.loss, lmrob.control())
 
-all.equal(m0[c('coefficients', 'scale', 'weights')],
-          m0a[c('coefficients', 'scale', 'weights')])
+all.equal(m0[c('coefficients', 'scale', 'rweights')],
+          m0a[c('coefficients', 'scale', 'rweights')])
 
 ## MM
 set.seed(0)

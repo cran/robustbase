@@ -36,7 +36,7 @@ f.requires.envir <- function(estname)
          f.lmrob.local = TRUE,
          FALSE)
 
-f..paste..list <- function(lst) 
+f..paste..list <- function(lst)
   if (length(lst) == 0) return("") else
   paste(names(lst),lst,sep='=',collapse=', ')
 
@@ -60,7 +60,7 @@ f.list2str <- function(lst, idx)
   ##            idx: only take the elements in idx
   ## ----------------------------------------------------------------------
   ## Author: Manuel Koller, Date:  7 Oct 2009, 10:03
-  if (missing(idx)) f..paste..list(unlist(lst)) else f..paste..list(unlist(lst)[idx])
+  f..paste..list(if(missing(idx)) unlist(lst) else unlist(lst)[idx])
 
 f.as.numeric <- function(val)
 {
@@ -120,7 +120,7 @@ f.str2list <- function(str, splitchar = '\\.')
       ## set either directly
       if (length(lnames) == 1) lrlst[ln] <- f.as.numeric(lv[ln])
       ## or, if it contains a dot, as a sublist
-      else { 
+      else {
         if (is.null(lrlst[[lnames[1]]])) lrlst[[lnames[1]]] <- list()
         lrlst[[lnames[1]]][paste(lnames[-1],collapse='.')] <- f.as.numeric(lv[ln])
       }
@@ -243,9 +243,8 @@ f.M.psi2str <- function(psi)
   ## ----------------------------------------------------------------------
   ## Author: Manuel Koller, Date:  8 Oct 2009, 15:28
 
-  if (is.null(psi)) return(NULL)
-  
-  if (psi == "tukeyPsi1" || psi == "tukeyChi") "bisquare"
+  if (is.null(psi)) psi
+  else if (psi == "tukeyPsi1" || psi == "tukeyChi") "bisquare"
   else if (grepl("Psi1$",psi)) f.chop(psi,4)
   else if (grepl("Chi$",psi)) f.chop(psi,3)
   else psi
@@ -272,12 +271,12 @@ f.args2str <- function(args)
   ## Arguments: args: args element in procedures element of estlist
   ## ----------------------------------------------------------------------
   ## Author: Manuel Koller, Date:  8 Oct 2009, 15:11
-  
+
   lst <- list()
   lst$psi <- if (!is.null(args$weight)) args$weight[2]
   else if (!is.null(args$weight2)) args$weight2
   else args$psi
-  
+
   lst$c.psi <- if (!is.null(args$efficiency))
     round(f.eff2c.psi(args$efficiency, lst$psi),2)
   else f.c.psi2str(args$tuning.psi)
@@ -286,19 +285,19 @@ f.args2str <- function(args)
     lst$D <- if (!is.null(args$D.type)) args$D.type else NULL
     lst$tau <- args$tau
   }
-  
+
   f..paste..list(lst)
 }
 
 f.cov2str <- function(args)
 {
-  ## Purpose: convert cov part in args element in procedures element of 
+  ## Purpose: convert cov part in args element in procedures element of
   ##          estlist to a pretty string
   ## ----------------------------------------------------------------------
   ## Arguments: args: args element in procedures element of estlist
   ## ----------------------------------------------------------------------
   ## Author: Manuel Koller, Date:  8 Oct 2009, 15:39
-  
+
   lst <- list()
 
   if (!is.null(args$cov) && !args$cov %in% c('Default','f.avarwh'))
@@ -312,7 +311,7 @@ f.cov2str <- function(args)
   }
   ## convert logical to numeric
   lst <- lapply(lst, function(x) if (is.logical(x)) as.numeric(x) else x)
-  
+
   f..paste..list(lst)
 }
 
@@ -324,7 +323,7 @@ f.procstr2id <- function(procstrs, fact = TRUE)
   ##            fact: convert to factor or not
   ## ----------------------------------------------------------------------
   ## Author: Manuel Koller, Date:  3 Nov 2009, 08:58
-  
+
   lst0 <- f.str2list(procstrs)
   r <- sapply(lst0, function(x) {
     paste(c(x$estname,
@@ -371,7 +370,7 @@ f.abind <- function(arr1,arr2, along = ndim)
   ldmn1 <- dimnames(arr1)
   ldmn2 <- dimnames(arr2)
   ld1 <- dim(arr1)
-  ld2 <- dim(arr2)  
+  ld2 <- dim(arr2)
   if (length(ld1) != length(ld2))
     stop('f.abind: Dimensions must be identical')
   if (!identical(ldmn1[-ndim],ldmn2[-ndim]))
@@ -433,8 +432,8 @@ f.sim <- function(estlist,
   ##                    - args: arguments that define the call
   ##            silent: silent argument to try
   ## ----------------------------------------------------------------------
-  ## Author: Werner Stahel / Manuel Koller, Date: 21 Aug 2008, 07:55  
- 
+  ## Author: Werner Stahel / Manuel Koller, Date: 21 Aug 2008, 07:55
+
   ## get designs
   ldd <- estlist$design
   use.intercept <- if(is.null(estlist$use.intercept)) TRUE
@@ -443,7 +442,7 @@ f.sim <- function(estlist,
   npar <- NCOL(ldd) + use.intercept
   nrep <- estlist$nrep
   nlerrs <- nobs*nrep
-  ## initialize: 
+  ## initialize:
   lestlist <- estlist
   ## 'evaluate' estlist$procedure list
   lprocs <- c()
@@ -468,12 +467,12 @@ f.sim <- function(estlist,
   ## get entries without psi argument
   lrest <- sapply(lt, is.null)
   if (sum(lrest) > 0) lpsifuns <- c(lpsifuns, '__rest__')
-  
+
   ## Walk error distributions
   res <- foreach(lerrlst = estlist$errs, .combine = .combine) %:%
     foreach(lpsifun = lpsifuns, .combine = .combine.2) %dopar% {
       ## filter for psi functions
-      lidx <- if (lpsifun == '__rest__') lrest else 
+      lidx <- if (lpsifun == '__rest__') lrest else
       unlist(sapply(estlist$procedures,
                     function(x) !is.null(x$args$psi) && x$args$psi == lpsifun))
       cat(f.errs2str(list(lerrlst)), lpsifun, " ")
@@ -481,7 +480,7 @@ f.sim <- function(estlist,
       lerrfun <- f.errname(lerrlst$err)
       lerrpar <- lerrlst$args
       lerrstr <- f.list2str(lerrlst)
-      
+
       ## --- initialize array
       lres <- array(NA, dim=c(nrep, ## data dimension
                           length(lnames), ## output type dimension
@@ -493,7 +492,7 @@ f.sim <- function(estlist,
       set.seed(estlist$seed)
       ## generate errors: seperately for each repetition
       lerrs <- c(sapply(1:nrep, function(x) do.call(lerrfun, c(n = nobs, lerrpar))))
-      
+
       ## if estlist$design has an attribute 'gen'
       ## then this function gen will generate designs
       ## and takes arguments: n, p, rep
@@ -504,7 +503,7 @@ f.sim <- function(estlist,
 
       ## Walk repetitions
       for (lrep in 1:nrep) {
-        if (lrep%%100==0) cat(" ", lrep)
+        if (lrep%%100 == 0) cat(" ", lrep)
         lerr <- lerrs[(1:nobs)+(lrep-1)*nobs]
         if (exists('ldds')) {
           ldd <- ldds[[lrep]]
@@ -513,34 +512,33 @@ f.sim <- function(estlist,
         ## Walk estimator configurations
         for (lproc in estlist$procedures[lidx]) {
           ## call estimating procedure
-          if (is.null(estlist$use.intercept) || estlist$use.intercept)
-            lrr <- try(do.call(f.estname(lproc$estname),
-                               c(list(lerr ~ . , data = ldd),
-                                 lproc$args)),silent=silent)
-          else 
-            lrr <- try(do.call(f.estname(lproc$estname),
-                               c(list(lerr ~ . - 1, data = ldd),
-                                 lproc$args)),silent=silent)
-          if (!silent && class(lrr)[1] == 'try-error') {
+          lrr <- tryCatch(do.call(f.estname(lproc$estname),
+                                  c(if(use.intercept)
+                                    list(lerr ~ .    , data = ldd) else
+                                    list(lerr ~ . - 1, data = ldd), lproc$args)),
+                          error=function(e)e)
+          ERR <- inherits(lrr, 'error')
+          if (ERR && !silent) {
             print(lproc$lprocstr)
             print(lrr)
           }
           if (!silent && !converged(lrr)) {
             print(lproc$lprocstr)
-            browser()
+            browser() ## <<<
           }
-          ## check class: if procedure failed: class == 'try-error'
-          if (class(lrr)[1] == 'try-error') next
+          ## check class: if procedure failed:
+          if (ERR) next
           ## check convergence of estimator
           if (!converged(lrr)) next
           ## process output
           for (lov in estlist$output) {
             llnames <- lov$lnames
-            ret <- try(lres[lrep,llnames,lproc$lprocstr,lerrstr] <- eval(lov$fun),
-                       silent = silent)
-            if (!silent && class(ret)[1] == 'try-error') {
-              cat('error in repetition',lrep,'for:',llnames,'procstr:',lproc$lprocstr,'\n')
-              browser()
+	    ret <- tryCatch(lres[lrep,llnames,lproc$lprocstr,lerrstr] <- eval(lov$fun),
+			    error= function(e)e)
+	    if (!silent && inherits(ret, 'error')) {
+	      cat('Error', dQuote(ret$message), 'in repetition',lrep,
+		  '\n for:',llnames,'procstr:',lproc$lprocstr,'\n')
+              browser() ## <<<
               print(lov$fun)
               print(try(eval(lov$fun)))
             }
@@ -558,9 +556,9 @@ f.sim <- function(estlist,
   cat("\n")
   res
 }
-      
+
 ###########################################################################
-## build estlist 
+## build estlist
 ###########################################################################
 
 f.combine <- function(..., keep.list = FALSE) {
@@ -671,13 +669,13 @@ f.combine <- function(..., keep.list = FALSE) {
                                      start = 'lrr')))
 
 ## use fixInNamespace("lmrob.fit", "robustbase")
-## insert: 
+## insert:
 ## N = {
 ## tmp <- lmrob..M..fit(x = x/init$tau, y = y/init$tau, obj =
 ## init)
 ## tmp$qr <- NULL
 ## tmp
-## }, 
+## },
 
 ## .args.final <- f.combine(psi = c('optimal', 'bisquare', 'ggw', 'lqq'),
 ##                          seed = 0,
@@ -727,10 +725,10 @@ f.combine <- function(..., keep.list = FALSE) {
                        fun = quote(sum(robustness.weights(lrr)))))
 .output.nnz <- list(nnz = list(
                       names = quote("nnz"),
-                      fun = quote(sum(robustness.weights(lrr) < 1e-3))))      
+                      fun = quote(sum(robustness.weights(lrr) < 1e-3))))
 
 ###########################################################################
-## simulation results processing functions 
+## simulation results processing functions
 ###########################################################################
 
 ## use apply to aggregate data
@@ -781,9 +779,9 @@ f.dimnames2df <- function(arr, dm = dimnames(arr),
   ##                       the values in this column are split name_id
   ##                       and put into two columns in the data frame
   ##            procstr.col: index of procedure column
-  ##                         (both: or NULL for not to be converted) 
+  ##                         (both: or NULL for not to be converted)
   ##            errstr.col: index of error string column
-  ##            procstr.id: create procstr id 
+  ##            procstr.id: create procstr id
   ## ----------------------------------------------------------------------
   ## Author: Manuel Koller, Date: 19 Oct 2009, 08:41
 
@@ -848,7 +846,7 @@ f.dimnames2df <- function(arr, dm = dimnames(arr),
     rdf[['Page']] <- as.numeric(factor(ltpf, unique(ltpf)))
   }
   rdf <- as.data.frame(rdf)
-  if (!is.null(value.col)) 
+  if (!is.null(value.col))
     attr(rdf, 'Types') <- unique(ldf[,1])
   rdf
 }
@@ -865,7 +863,7 @@ f.a2df.2 <- function(arr, dm = dimnames(arr), err.on.same.page = FALSE, ...)
   ## ----------------------------------------------------------------------
   ## Author: Manuel Koller, Date: 23 Oct 2009, 12:29
 
-  ## ndim == 2 ?? 
+  ## ndim == 2 ??
   ndim <- length(dim(arr))
   ## if ndim == 4: check if dimnames of dim 1 are NULL
   if (ndim == 4 && is.null(dm[[1]]))
@@ -899,16 +897,16 @@ f.dimnames2pc.df <- function(arr, dm = dimnames(arr),
   ## ----------------------------------------------------------------------
   ## Author: Manuel Koller, Date: 23 Oct 2009, 11:51
 
-  if (missing(npcs) && !is.null(attr(estlist$design.predict, 'npcs'))) 
+  if (missing(npcs) && !is.null(attr(estlist$design.predict, 'npcs')))
     npcs <- attr(estlist$design.predict, 'npcs')
-  
+
   ## convert into data.frame
   rdf <- f.dimnames2df(dm = dm, ...)
   ## calculate number of points per principal component
   npts <- (length(unique(rdf$Type.Id)) - 1) / npcs
   ## add new column pc
   rdf$PC <- 1
-  if (npcs > 1) 
+  if (npcs > 1)
     for (li in 2:npcs) {
       lids <- (1:npts + npts*(li-1) + 1)
       rdf$PC[rdf$Type.Id %in% lids] <- li ## fixme: center is not repeated
@@ -971,10 +969,10 @@ f.calculate <- function(expr,arr,dimname = as.character(expr))
   ## Author: Manuel Koller, Date:  9 Oct 2009, 10:15
 
   if (!is.expression(expr)) expr <- as.expression(expr)
-  
+
   lnams <- dimnames(arr)[[2]]
   lst <- list()
-  for (lnam in lnams) 
+  for (lnam in lnams)
     expr <- gsub(paste(lnam,'\\b',sep=''),
                  paste("arr[,",lnam,",,,drop=FALSE]",sep='"'), expr)
 
@@ -1026,7 +1024,7 @@ f.errs <- function(estlist, err, rep, gen = NULL, nobs, npar)
   nrep <- estlist$nrep
   nlerrs <- nobs*nrep
   npred <- NROW(estlist$design.predict)
-  
+
   ## get function name and parameters
   lerrfun <- f.errname(err$err)
   lerrpar <- err$args
@@ -1048,7 +1046,7 @@ f.errs <- function(estlist, err, rep, gen = NULL, nobs, npar)
   ## generate designs
   if (!is.null(gen) && is.function(gen)) {
     ldds <- gen(nobs, npar, nrep, err)
-  }  
+  }
   ## return errors
   ret <- if (!missing(rep)) lerrs[1:nobs+(rep-1)*nobs] else matrix(lerrs, nobs)
   if (exists('ldds')) attr(ret, 'designs') <- if (!missing(rep)) ldds[[i]] else ldds
@@ -1103,13 +1101,13 @@ f.get.current.dimnames <- function(i,dn,margin)
 
   ## pos <- integer(0)
   lcdn <- character(0)
-  
+
   for (lm in margin) {
     ## get length of current margin
     llen <- length(dn[[lm]])
     ## i modulo llen gives the current position in this dimension
     lpos <- (if (i > 0) i-1 else 0) %% llen + 1
-    ## update pos 
+    ## update pos
     ## pos <- c(pos, lpos)
     ## update lcdn
     lcdn <- c(lcdn, dn[[lm]][lpos])
@@ -1148,7 +1146,7 @@ f.which.min <- function(x, nr = 1) {
   ##            nr: number of indices to return
   ## ----------------------------------------------------------------------
   ## Author: Manuel Koller, Date:  4 May 2010, 12:18
-  match(sort(x)[1:nr], x) 
+  match(sort(x)[1:nr], x)
 }
 
 f.which.max <- function(x, nr = 1) f.which.min(-x, nr)
@@ -1164,7 +1162,7 @@ f.which.max <- function(x, nr = 1) f.which.min(-x, nr)
 ##   ## Author: Manuel Koller, Date:  9 Sep 2010, 13:52
 
 ##   ret <- list()
-  
+
 ##   for (lproc in proclst) {
 ##     if (lproc$estname == 'lm') {
 ##       ## least squares
@@ -1184,7 +1182,7 @@ f.which.max <- function(x, nr = 1) f.which.min(-x, nr)
 ##       } else if (lproc$estname == 'lmrob.mar' ### continue here
 ##       ret <- c(ret, list(list(fun=fun, args=lproc$args[lidx])))
 ##     }
-  
+
 ## })
 
 
@@ -1232,7 +1230,7 @@ f.prediction.points <- function(design, type = c('pc', 'grid'),
            ## for each principal component
            for (id in 1:min(NCOL(rpc$loadings),max.pc)) {
              ## calculate factor to reach each boundary
-             lfct <- (lcr - rob$center) / rpc$loadings[,id] 
+             lfct <- (lcr - rob$center) / rpc$loadings[,id]
              ## calculate distances to boundaries and take the minimal one
              lmin <- which.min(sapply(lfct, function(x) sum((rpc$loadings[,id] * x)^2)))
              ## create sequence of multiplicands
@@ -1248,12 +1246,12 @@ f.prediction.points <- function(design, type = c('pc', 'grid'),
            ## return if 1 dimension, otherwise create all combinations
            rdf <- if (NCOL(design) > 1)
              t(as.data.frame(do.call('f.combine', lval))) else lval
-           
+
          })
   rdf <- as.data.frame(rdf)
   rownames(rdf) <- NULL
   colnames(rdf) <- colnames(design)
-  if (type == 'pc') attr(rdf, 'npcs') <- id    
+  if (type == 'pc') attr(rdf, 'npcs') <- id
   rdf
 }
 
@@ -1330,14 +1328,15 @@ f.gen <- function(n, p, rep, err) {
                          llargs$envir <- NULL ## drop envir argument
                          if (llargs$method %in% c('MM', 'SM')) llargs$method <- 'S'
                          if (grepl('M$', llargs$method))
-                           llargs$method <- f.chop(llargs$method)                           
+                           llargs$method <- f.chop(llargs$method)
                        } else if (lproc$estname == 'lm.robust') {
                          llargs$estim <- 'Initial'
                        }
-                       llrr <- try(do.call(f.estname(lproc$estname),
-                             c(list(lerr ~ 1), llargs)),silent=silent)
+                       llrr <- tryCatch(do.call(f.estname(lproc$estname),
+                                                c(list(lerr ~ 1), llargs)),
+                                        error = function(e)e)
                        ## check class: if procedure failed: class == 'try-error'
-                       if (class(llrr)[1] == 'try-error') NA
+                       if (inherits(llrr, 'error')) NA
                        ## check convergence of estimator
                        else if (lproc$estname != 'lm.robust' && !converged(llrr)) NA
                        else sigma(llrr)

@@ -17,43 +17,59 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > ### tests methods argument of lmrob.control
-> 
+>
 > library(robustbase)
-> 
+>
 > data(stackloss)
-> 
+>
 > ## S
 > set.seed(0)
 > summary(m0 <- lmrob(stack.loss ~ ., data = stackloss, method = "S"))
-               Length Class      Mode   
-coefficients    4     -none-     numeric
-scale           1     -none-     numeric
-k.iter          1     -none-     numeric
-converged       1     -none-     logical
-fitted.values  21     -none-     numeric
-residuals      21     -none-     numeric
-weights        21     -none-     numeric
-control        26     -none-     list   
-qr              4     qr         list   
-rank            1     -none-     numeric
-cov            16     -none-     numeric
-df.residual     1     -none-     numeric
-degree.freedom  1     -none-     numeric
-xlevels         0     -none-     list   
-call            4     -none-     call   
-terms           3     terms      call   
-model           4     data.frame list   
-x              84     -none-     numeric
+
+Call:
+lmrob(formula = stack.loss ~ ., data = stackloss, method = "S")
+
+Residuals:
+     Min       1Q   Median       3Q      Max
+-9.46226 -0.82076  0.02249  0.80806  8.31829
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)
+(Intercept) -36.92542    5.41708  -6.816  3.0e-06 ***
+Air.Flow      0.84957    0.07892  10.765  5.2e-09 ***
+Water.Temp    0.43047    0.19507   2.207   0.0414 *
+Acid.Conc.   -0.07354    0.07216  -1.019   0.3224
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Robust residual standard error: 1.912
+Convergence in IRWLS iterations
+
+Robustness weights:
+ 5 observations c(1,3,4,13,21) are outliers with |weight| = 0 ( < 0.0048);
+ one weight is ~= 1. The remaining 15 ones are summarized as
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+ 0.4126  0.7595  0.8726  0.8270  0.9718  0.9986
+Algorithmic parameters:
+tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001
+     nResample         max.it       best.r.s       k.fast.s          k.max
+           500             50              2              1            200
+   maxit.scale      trace.lev            mts     compute.rd fast.s.large.n
+           200              0           1000              0           2000
+          psi   subsampling        method           cov
+   "bisquare" "nonsingular"           "S"     ".vcov.w"
+seed : int(0)
 Warning message:
 In lf.cov(init, x) :
   :.vcov.w: ignoring cov.resid == final since est != final
 > set.seed(0)
 > m0a <- lmrob.S(m0$x, stack.loss, lmrob.control())
-> 
-> all.equal(m0[c('coefficients', 'scale', 'weights')],
-+           m0a[c('coefficients', 'scale', 'weights')])
+>
+> all.equal(m0[c('coefficients', 'scale', 'rweights')],
++           m0a[c('coefficients', 'scale', 'rweights')])
 [1] TRUE
-> 
+>
 > ## MM
 > set.seed(0)
 > summary(m1 <- lmrob(stack.loss ~ ., data = stackloss, method = "MM"))
@@ -61,229 +77,229 @@ In lf.cov(init, x) :
 Call:
 lmrob(formula = stack.loss ~ ., data = stackloss, method = "MM")
 
-Weighted Residuals:
-      Min        1Q    Median        3Q       Max 
--10.50974  -1.43819  -0.09134   1.02503   7.23113 
+Residuals:
+      Min        1Q    Median        3Q       Max
+-10.50974  -1.43819  -0.09134   1.02503   7.23113
 
 Coefficients:
-             Estimate Std. Error t value Pr(>|t|)    
+             Estimate Std. Error t value Pr(>|t|)
 (Intercept) -41.52462    5.29780  -7.838 4.82e-07 ***
 Air.Flow      0.93885    0.11743   7.995 3.68e-07 ***
-Water.Temp    0.57955    0.26296   2.204   0.0416 *  
-Acid.Conc.   -0.11292    0.06989  -1.616   0.1246    
+Water.Temp    0.57955    0.26296   2.204   0.0416 *
+Acid.Conc.   -0.11292    0.06989  -1.616   0.1246
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Robust residual standard error: 1.912 
+Robust residual standard error: 1.912
 Convergence in 17 IRWLS iterations
 
-Robustness weights: 
- observation 21 is an outlier with |weight| = 0 ( < 0.0048); 
+Robustness weights:
+ observation 21 is an outlier with |weight| = 0 ( < 0.0048);
  2 weights are ~= 1. The remaining 18 ones are summarized as
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.1215  0.8757  0.9428  0.8721  0.9797  0.9978 
-Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
-     nResample         max.it       best.r.s       k.fast.s          k.max 
-           500             50              2              1            200 
-   maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
-           200              0           1000              0           2000 
-          psi   subsampling        method           cov 
-   "bisquare" "nonsingular"          "MM" ".vcov.avar1" 
-seed : int(0) 
-> 
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+ 0.1215  0.8757  0.9428  0.8721  0.9797  0.9978
+Algorithmic parameters:
+tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001
+     nResample         max.it       best.r.s       k.fast.s          k.max
+           500             50              2              1            200
+   maxit.scale      trace.lev            mts     compute.rd fast.s.large.n
+           200              0           1000              0           2000
+          psi   subsampling        method           cov
+   "bisquare" "nonsingular"          "MM" ".vcov.avar1"
+seed : int(0)
+>
 > set.seed(0)
 > m2 <- update(m1, method = "SM")
-> 
+>
 > all.equal(m1[c('coefficients', 'scale', 'cov')],
 +           m2[c('coefficients', 'scale', 'cov')])
 [1] TRUE
-> 
+>
 > set.seed(0)
 > m3 <- update(m0, method = "SM", cov = '.vcov.w')
-> 
+>
 > ## SMD
 > set.seed(0)
 > summary(m4 <- lmrob(stack.loss ~ ., data = stackloss, method = "SMD", psi = 'bisquare'))
 
 Call:
-lmrob(formula = stack.loss ~ ., data = stackloss, method = "SMD", 
+lmrob(formula = stack.loss ~ ., data = stackloss, method = "SMD",
     psi = "bisquare")
 
-Weighted Residuals:
-      Min        1Q    Median        3Q       Max 
--10.50974  -1.43819  -0.09134   1.02503   7.23113 
+Residuals:
+      Min        1Q    Median        3Q       Max
+-10.50974  -1.43819  -0.09134   1.02503   7.23113
 
 Coefficients:
-            Estimate Std. Error t value Pr(>|t|)    
+            Estimate Std. Error t value Pr(>|t|)
 (Intercept) -41.5246     8.8552  -4.689 0.000211 ***
 Air.Flow      0.9388     0.1162   8.078  3.2e-07 ***
-Water.Temp    0.5796     0.3164   1.831 0.084610 .  
-Acid.Conc.   -0.1129     0.1163  -0.971 0.345380    
+Water.Temp    0.5796     0.3164   1.831 0.084610 .
+Acid.Conc.   -0.1129     0.1163  -0.971 0.345380
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Robust residual standard error: 2.651 
+Robust residual standard error: 2.651
 Convergence in 17 IRWLS iterations
 
-Robustness weights: 
- observation 21 is an outlier with |weight| = 0 ( < 0.0048); 
+Robustness weights:
+ observation 21 is an outlier with |weight| = 0 ( < 0.0048);
  2 weights are ~= 1. The remaining 18 ones are summarized as
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.1215  0.8757  0.9428  0.8721  0.9797  0.9978 
-Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
-     nResample         max.it       best.r.s       k.fast.s          k.max 
-           500             50              2              1            200 
-   maxit.scale      trace.lev            mts     compute.rd      numpoints 
-           200              0           1000              0             10 
-fast.s.large.n 
-          2000 
-          psi   subsampling        method           cov 
-   "bisquare" "nonsingular"         "SMD"     ".vcov.w" 
-seed : int(0) 
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+ 0.1215  0.8757  0.9428  0.8721  0.9797  0.9978
+Algorithmic parameters:
+tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001
+     nResample         max.it       best.r.s       k.fast.s          k.max
+           500             50              2              1            200
+   maxit.scale      trace.lev            mts     compute.rd      numpoints
+           200              0           1000              0             10
+fast.s.large.n
+          2000
+          psi   subsampling        method           cov
+   "bisquare" "nonsingular"         "SMD"     ".vcov.w"
+seed : int(0)
 > summary(m4a <- lmrob..D..fit(m3))
 
 Call:
-lmrob(formula = stack.loss ~ ., data = stackloss, method = "SMD", 
+lmrob(formula = stack.loss ~ ., data = stackloss, method = "SMD",
     cov = ".vcov.w")
 
-Weighted Residuals:
-      Min        1Q    Median        3Q       Max 
--10.50974  -1.43819  -0.09134   1.02503   7.23113 
+Residuals:
+      Min        1Q    Median        3Q       Max
+-10.50974  -1.43819  -0.09134   1.02503   7.23113
 
 Coefficients:
-            Estimate Std. Error t value Pr(>|t|)    
+            Estimate Std. Error t value Pr(>|t|)
 (Intercept) -41.5246     8.8552  -4.689 0.000211 ***
 Air.Flow      0.9388     0.1162   8.078  3.2e-07 ***
-Water.Temp    0.5796     0.3164   1.831 0.084610 .  
-Acid.Conc.   -0.1129     0.1163  -0.971 0.345380    
+Water.Temp    0.5796     0.3164   1.831 0.084610 .
+Acid.Conc.   -0.1129     0.1163  -0.971 0.345380
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Robust residual standard error: 2.651 
+Robust residual standard error: 2.651
 Convergence in 17 IRWLS iterations
 
-Robustness weights: 
- observation 21 is an outlier with |weight| = 0 ( < 0.0048); 
+Robustness weights:
+ observation 21 is an outlier with |weight| = 0 ( < 0.0048);
  2 weights are ~= 1. The remaining 18 ones are summarized as
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.1215  0.8757  0.9428  0.8721  0.9797  0.9978 
-Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
-     nResample         max.it       best.r.s       k.fast.s          k.max 
-           500             50              2              1            200 
-   maxit.scale      trace.lev            mts     compute.rd      numpoints 
-           200              0           1000              0             10 
-fast.s.large.n 
-          2000 
-          psi   subsampling        method           cov 
-   "bisquare" "nonsingular"         "SMD"     ".vcov.w" 
-seed : int(0) 
-> 
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+ 0.1215  0.8757  0.9428  0.8721  0.9797  0.9978
+Algorithmic parameters:
+tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001
+     nResample         max.it       best.r.s       k.fast.s          k.max
+           500             50              2              1            200
+   maxit.scale      trace.lev            mts     compute.rd      numpoints
+           200              0           1000              0             10
+fast.s.large.n
+          2000
+          psi   subsampling        method           cov
+   "bisquare" "nonsingular"         "SMD"     ".vcov.w"
+seed : int(0)
+>
 > ## rearrange m4a and update call
 > m4a <- m4a[names(m4)]
 > class(m4a) <- class(m4)
 > m4a$call <- m4$call
-> 
+>
 > all.equal(m4, m4a)
 [1] TRUE
-> 
+>
 > ## SMDM
 > set.seed(0)
 > summary(m5 <- lmrob(stack.loss ~ ., data = stackloss, method = "SMDM", psi = 'bisquare'))
 
 Call:
-lmrob(formula = stack.loss ~ ., data = stackloss, method = "SMDM", 
+lmrob(formula = stack.loss ~ ., data = stackloss, method = "SMDM",
     psi = "bisquare")
 
-Weighted Residuals:
-    Min      1Q  Median      3Q     Max 
--9.6746 -1.7721  0.1346  1.2041  6.6080 
+Residuals:
+    Min      1Q  Median      3Q     Max
+-9.6746 -1.7721  0.1346  1.2041  6.6080
 
 Coefficients:
-            Estimate Std. Error t value Pr(>|t|)    
+            Estimate Std. Error t value Pr(>|t|)
 (Intercept) -41.9398     9.6482  -4.347 0.000438 ***
 Air.Flow      0.8747     0.1215   7.198 1.49e-06 ***
-Water.Temp    0.8099     0.3320   2.439 0.025977 *  
-Acid.Conc.   -0.1188     0.1268  -0.937 0.361693    
+Water.Temp    0.8099     0.3320   2.439 0.025977 *
+Acid.Conc.   -0.1188     0.1268  -0.937 0.361693
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Robust residual standard error: 2.651 
+Robust residual standard error: 2.651
 Convergence in 17 IRWLS iterations
 
-Robustness weights: 
+Robustness weights:
  2 weights are ~= 1. The remaining 19 ones are summarized as
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.1546  0.9139  0.9597  0.8874  0.9866  0.9966 
-Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
-     nResample         max.it       best.r.s       k.fast.s          k.max 
-           500             50              2              1            200 
-   maxit.scale      trace.lev            mts     compute.rd      numpoints 
-           200              0           1000              0             10 
-fast.s.large.n 
-          2000 
-          psi   subsampling        method           cov 
-   "bisquare" "nonsingular"        "SMDM"     ".vcov.w" 
-seed : int(0) 
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+ 0.1546  0.9139  0.9597  0.8874  0.9866  0.9966
+Algorithmic parameters:
+tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001
+     nResample         max.it       best.r.s       k.fast.s          k.max
+           500             50              2              1            200
+   maxit.scale      trace.lev            mts     compute.rd      numpoints
+           200              0           1000              0             10
+fast.s.large.n
+          2000
+          psi   subsampling        method           cov
+   "bisquare" "nonsingular"        "SMDM"     ".vcov.w"
+seed : int(0)
 > summary(m5a <- lmrob..M..fit(obj=m4))
 
 Call:
-lmrob(formula = stack.loss ~ ., data = stackloss, method = "SMDM", 
+lmrob(formula = stack.loss ~ ., data = stackloss, method = "SMDM",
     psi = "bisquare")
 
-Weighted Residuals:
-    Min      1Q  Median      3Q     Max 
--9.6746 -1.7721  0.1346  1.2041  6.6080 
+Residuals:
+    Min      1Q  Median      3Q     Max
+-9.6746 -1.7721  0.1346  1.2041  6.6080
 
 Coefficients:
-            Estimate Std. Error t value Pr(>|t|)    
+            Estimate Std. Error t value Pr(>|t|)
 (Intercept) -41.9398     9.6482  -4.347 0.000438 ***
 Air.Flow      0.8747     0.1215   7.198 1.49e-06 ***
-Water.Temp    0.8099     0.3320   2.439 0.025977 *  
-Acid.Conc.   -0.1188     0.1268  -0.937 0.361693    
+Water.Temp    0.8099     0.3320   2.439 0.025977 *
+Acid.Conc.   -0.1188     0.1268  -0.937 0.361693
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Robust residual standard error: 2.651 
+Robust residual standard error: 2.651
 Convergence in 17 IRWLS iterations
 
-Robustness weights: 
+Robustness weights:
  2 weights are ~= 1. The remaining 19 ones are summarized as
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.1546  0.9139  0.9597  0.8874  0.9866  0.9966 
-Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
-     nResample         max.it       best.r.s       k.fast.s          k.max 
-           500             50              2              1            200 
-   maxit.scale      trace.lev            mts     compute.rd      numpoints 
-           200              0           1000              0             10 
-fast.s.large.n 
-          2000 
-          psi   subsampling        method           cov 
-   "bisquare" "nonsingular"        "SMDM"     ".vcov.w" 
-seed : int(0) 
-> 
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+ 0.1546  0.9139  0.9597  0.8874  0.9866  0.9966
+Algorithmic parameters:
+tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001
+     nResample         max.it       best.r.s       k.fast.s          k.max
+           500             50              2              1            200
+   maxit.scale      trace.lev            mts     compute.rd      numpoints
+           200              0           1000              0             10
+fast.s.large.n
+          2000
+          psi   subsampling        method           cov
+   "bisquare" "nonsingular"        "SMDM"     ".vcov.w"
+seed : int(0)
+>
 > ## rearrange m5a
 > m5a <- m5a[names(m5)]
 > class(m5a) <- class(m5)
-> 
+>
 > all.equal(m5, m5a)
 [1] TRUE
-> 
+>
 > ## Fast S large n strategy (sped up)
 > model <- model.frame(LNOx ~ . ,data = NOxEmissions)
 > control <- lmrob.control(fast.s.large.n = 10, n.group = 341, groups = 2)
 > set.seed(0)
 > try(ret <- lmrob.S(model.matrix(model, NOxEmissions)[1:682,], NOxEmissions$LNOx[1:682], control))
-Error in lmrob.S(model.matrix(model, NOxEmissions)[1:682, ], NOxEmissions$LNOx[1:682],  : 
+Error in lmrob.S(model.matrix(model, NOxEmissions)[1:682, ], NOxEmissions$LNOx[1:682],  :
   Fast S large n strategy failed. Use control parameter 'fast.s.large.n = Inf'.
 In addition: Warning message:
 In lmrob.S(model.matrix(model, NOxEmissions)[1:682, ], NOxEmissions$LNOx[1:682],  :
@@ -291,11 +307,11 @@ In lmrob.S(model.matrix(model, NOxEmissions)[1:682, ], NOxEmissions$LNOx[1:682],
 > ## do what the error says
 > control <- lmrob.control(fast.s.large.n = Inf)
 > try(ret <- lmrob.S(model.matrix(model, NOxEmissions)[1:682,], NOxEmissions$LNOx[1:682], control))
-Error in lmrob.S(model.matrix(model, NOxEmissions)[1:682, ], NOxEmissions$LNOx[1:682],  : 
+Error in lmrob.S(model.matrix(model, NOxEmissions)[1:682, ], NOxEmissions$LNOx[1:682],  :
   dgeequ: column 30 of the design matrix is exactly zero.
 > ## this still fails, but this error is to be expected since only a part
 > ## of the design matrix is given
-> 
+>
 > proc.time()
-   user  system elapsed 
-  0.478   0.037   0.648 
+   user  system elapsed
+  0.478   0.037   0.648

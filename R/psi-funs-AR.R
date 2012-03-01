@@ -7,6 +7,9 @@
 
 ### FIXME: replace by using the objects in  ./psi-rho-funs.R
 ###        and                              ./biweight-funs.R
+###
+###        and in the mean time also        ./lmrob.MM.R --> ../src/lmrob.c
+###        with  psi / rho / chi,  each with 'deriv = 0'
 
 psi.bisquare <- function (u, c=4.685, deriv=0, rho=FALSE)
 {

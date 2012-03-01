@@ -66,7 +66,8 @@ void R_subsample(const double *x, const double *y, int *n, int *m,
 		 double *beta, int *ind_space, int *idc, int *idr,
 		 double *lu, double *v, int *p,
 		 double *_Dr, double *_Dc, int *_rowequ, int *_colequ,
-		 int *status, int *sample, int *mts, int *ss, double *tol_inv);
+		 int *status, int *sample, int *mts, int *ss, double *tol_inv,
+		 int *solve);
 
 void R_psifun(double *xx, const double cc[], int *iipsi, int *dderiv, int *llength);
 void R_chifun(double *xx, const double cc[], int *iipsi, int *dderiv, int *llength);

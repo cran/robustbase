@@ -145,7 +145,7 @@ arrows(C.cf[lrg,1], C.cf[lrg,2],
 points(R.cf, col=2)
 
 ## All robustness weights
-aW <- t(sapply(R, weights))
+aW <- t(sapply(R, weights, type="robustness"))
 colnames(aW) <- names(yearly)
 summary(aW)
 sort(colSums(aW < 0.05, na.rm = TRUE)) # how often "clear outlier":

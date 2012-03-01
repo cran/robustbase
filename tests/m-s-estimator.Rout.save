@@ -23,13 +23,13 @@ Loading required package: robustbase
 > lmrob.conv.cc  <- robustbase::: lmrob.conv.cc
 > lmrob.psi2ipsi <- robustbase::: lmrob.psi2ipsi
 > lmrob.wgtfun   <- robustbase::: lmrob.wgtfun
-> 
+>
 > ## dataset with factors and continuous variables:
 > data(education)
 > education <- within(education, Region <- factor(Region))
 > ## for testing purposes:
 > education2 <- within(education, Group <- factor(rep(1:3, length.out=length(Region))))
-> 
+>
 > ## Test splitFrame (type fii is the only problematic type)
 > testFun <- function(formula, x1.idx) {
 +     obj <- lm(formula, education2)
@@ -55,13 +55,13 @@ Loading required package: robustbase
 > testFun(Y ~ (X1+X2+X3+Region)^3, c(1:19, 21:29))
 > testFun(Y ~ (X1+X2+X3+Region)^4, 1:32)
 > testFun(Y ~ Region:X1:X2 + X1*X2, c(1:1, 4:7))
-> 
-> 
+>
+>
 > control <- lmrob.control()
 > f.lm <- lm(Y ~ Region + X1 + X2 + X3, education)
 > splt <- splitFrame(f.lm$model)
 > y <- education$Y
-> 
+>
 > ## test orthogonalizing
 > x1 <- splt$x1
 > x2 <- splt$x2
@@ -75,14 +75,14 @@ Loading required package: robustbase
 +     x2.tilde[,i] <- tmp$resid
 +     T2[,i] <- tmp$coef
 + }
-> 
+>
 > set.seed(10)
 > mss1 <- m_s_subsample(x1, x2.tilde, y.tilde, control, orth = FALSE)
 > mss1 <- within(mss1, b1 <- drop(t1 + b1 - T2 %*% b2))
 > set.seed(10)
 > mss2 <- m_s_subsample(x1, x2,       y,       control, orth = TRUE)
 > stopifnot(all.equal(mss1, mss2))
-> 
+>
 > res <- vector("list", 100)
 > set.seed(0)
 > time <- system.time(for (i in seq_along(res)) {
@@ -90,35 +90,35 @@ Loading required package: robustbase
 +     res[[i]] <- unlist(within(tmp, b1 <- drop(t1 + b1 - T2 %*% b2)))
 + })
 > cat('Time elapsed in subsampling: ', time,'\n')
-Time elapsed in subsampling:  0.366 0 0.367 0 0 
+Time elapsed in subsampling:  0.366 0 0.367 0 0
 > ## show a summary of the results
 > summary(res1 <- do.call(rbind, res))
-      b11               b12              b13                b14       
- Min.   :-316.24   Min.   :-33.92   Min.   :-35.8704   Min.   :16.43  
- 1st Qu.:-223.37   1st Qu.:-23.66   1st Qu.: -8.9603   1st Qu.:29.92  
- Median :-163.19   Median :-21.37   Median : -7.2929   Median :32.20  
- Mean   :-161.00   Mean   :-22.02   Mean   : -8.1235   Mean   :32.14  
- 3rd Qu.:-103.36   3rd Qu.:-18.42   3rd Qu.: -5.9055   3rd Qu.:35.72  
- Max.   :  61.83   Max.   :-12.03   Max.   :  0.7015   Max.   :42.23  
-      b21                b22               b23             scale      
- Min.   :-0.03808   Min.   :0.01744   Min.   :0.2752   Min.   :29.79  
- 1st Qu.:-0.00397   1st Qu.:0.03927   1st Qu.:0.4956   1st Qu.:30.43  
- Median : 0.02160   Median :0.04716   Median :0.6381   Median :30.91  
- Mean   : 0.02740   Mean   :0.04612   Mean   :0.6224   Mean   :30.95  
- 3rd Qu.: 0.05561   3rd Qu.:0.05224   3rd Qu.:0.7473   3rd Qu.:31.35  
- Max.   : 0.10427   Max.   :0.06938   Max.   :0.9172   Max.   :32.18  
+      b11               b12              b13                b14
+ Min.   :-316.24   Min.   :-33.92   Min.   :-35.8704   Min.   :16.43
+ 1st Qu.:-223.37   1st Qu.:-23.66   1st Qu.: -8.9603   1st Qu.:29.92
+ Median :-163.19   Median :-21.37   Median : -7.2929   Median :32.20
+ Mean   :-161.00   Mean   :-22.02   Mean   : -8.1235   Mean   :32.14
+ 3rd Qu.:-103.36   3rd Qu.:-18.42   3rd Qu.: -5.9055   3rd Qu.:35.72
+ Max.   :  61.83   Max.   :-12.03   Max.   :  0.7015   Max.   :42.23
+      b21                b22               b23             scale
+ Min.   :-0.03808   Min.   :0.01744   Min.   :0.2752   Min.   :29.79
+ 1st Qu.:-0.00397   1st Qu.:0.03927   1st Qu.:0.4956   1st Qu.:30.43
+ Median : 0.02160   Median :0.04716   Median :0.6381   Median :30.91
+ Mean   : 0.02740   Mean   :0.04612   Mean   :0.6224   Mean   :30.95
+ 3rd Qu.: 0.05561   3rd Qu.:0.05224   3rd Qu.:0.7473   3rd Qu.:31.35
+ Max.   : 0.10427   Max.   :0.06938   Max.   :0.9172   Max.   :32.18
 > ## compare with fast S solution
 > fmS <- lmrob(Y ~ Region + X1 + X2 + X3, education, init="S")
 > coef(fmS)
-  (Intercept)       Region2       Region3       Region4            X1 
--135.72592070  -20.64576533   -9.84881705   24.58013150    0.03405590 
-           X2            X3 
-   0.04327562    0.57895740 
+  (Intercept)       Region2       Region3       Region4            X1
+-135.72592070  -20.64576533   -9.84881705   24.58013150    0.03405590
+           X2            X3
+   0.04327562    0.57895740
 > fmS$scale
 [1] 26.40386
-> 
+>
 > ###  Comparing m-s_descent implementations()  {our C and R} : ---------------------
-> 
+>
 > ctrl <- control
 > #ctrl$trace.lev <- 5
 > ctrl$k.max <- 1
@@ -126,7 +126,7 @@ Time elapsed in subsampling:  0.366 0 0.367 0 0
 > mR <- m_s_descent_Ronly(x1, x2, y, ctrl, mss2$b1, mss2$b2, mss2$scale+10)
 > nm <- c("b1","b2", "scale", "res")
 > stopifnot(all.equal(mC[nm], mR[nm], check.attr = FALSE, tol=5e-15))
-> 
+>
 > ## control$k.m_s <- 100
 > res3 <- vector("list", 100)
 > time <- system.time(for (i in seq_along(res3)) {
@@ -134,29 +134,29 @@ Time elapsed in subsampling:  0.366 0 0.367 0 0
 +                                     res[[i]][1:4], res[[i]][5:7], res[[i]][8]))
 + })
 > cat('Time elapsed in descent proc: ', time,'\n')
-Time elapsed in descent proc:  0.084 0 0.083 0 0 
-> 
+Time elapsed in descent proc:  0.084 0 0.083 0 0
+>
 > ## show a summary of the results
 > res4 <- do.call(rbind, res3)
 > summary(res4[,1:8])
-      b11              b12              b13               b14       
- Min.   :-316.3   Min.   :-30.56   Min.   :-36.478   Min.   :16.43  
- 1st Qu.:-222.4   1st Qu.:-23.09   1st Qu.: -8.960   1st Qu.:27.96  
- Median :-160.7   Median :-21.00   Median : -7.868   Median :30.46  
- Mean   :-158.2   Mean   :-20.60   Mean   : -9.045   Mean   :30.83  
- 3rd Qu.:-102.7   3rd Qu.:-17.40   3rd Qu.: -6.842   3rd Qu.:32.75  
- Max.   : 101.1   Max.   :-12.24   Max.   : -4.032   Max.   :42.23  
-      b21                b22               b23             scale      
- Min.   :-0.02141   Min.   :0.01464   Min.   :0.2043   Min.   :29.79  
- 1st Qu.: 0.02048   1st Qu.:0.03873   1st Qu.:0.5007   1st Qu.:30.37  
- Median : 0.04169   Median :0.04271   Median :0.6381   Median :30.57  
- Mean   : 0.03911   Mean   :0.04359   Mean   :0.6270   Mean   :30.70  
- 3rd Qu.: 0.06102   3rd Qu.:0.04798   3rd Qu.:0.7460   3rd Qu.:30.96  
- Max.   : 0.09102   Max.   :0.06367   Max.   :0.9172   Max.   :31.84  
-> 
+      b11              b12              b13               b14
+ Min.   :-316.3   Min.   :-30.56   Min.   :-36.478   Min.   :16.43
+ 1st Qu.:-222.4   1st Qu.:-23.09   1st Qu.: -8.960   1st Qu.:27.96
+ Median :-160.7   Median :-21.00   Median : -7.868   Median :30.46
+ Mean   :-158.2   Mean   :-20.60   Mean   : -9.045   Mean   :30.83
+ 3rd Qu.:-102.7   3rd Qu.:-17.40   3rd Qu.: -6.842   3rd Qu.:32.75
+ Max.   : 101.1   Max.   :-12.24   Max.   : -4.032   Max.   :42.23
+      b21                b22               b23             scale
+ Min.   :-0.02141   Min.   :0.01464   Min.   :0.2043   Min.   :29.79
+ 1st Qu.: 0.02048   1st Qu.:0.03873   1st Qu.:0.5007   1st Qu.:30.37
+ Median : 0.04169   Median :0.04271   Median :0.6381   Median :30.57
+ Mean   : 0.03911   Mean   :0.04359   Mean   :0.6270   Mean   :30.70
+ 3rd Qu.: 0.06102   3rd Qu.:0.04798   3rd Qu.:0.7460   3rd Qu.:30.96
+ Max.   : 0.09102   Max.   :0.06367   Max.   :0.9172   Max.   :31.84
+>
 > plot(res1[, "scale"], res4[,"scale"])
 > abline(0,1, col=adjustcolor("gray", 0.5))
-> 
+>
 > ## Test lmrob.M.S
 > x <- model.matrix(fmS)
 > control$trace.lev <- 3
@@ -169,19 +169,19 @@ Step 18: new candidate with sc = 31.85586
 Step 136: new candidate with sc = 31.74081
 Step 338: new candidate with sc = 31.51188
 Finished M-S subsampling with scale = 31.51188
-b1: -5.445072 7.825257 1.756708 7.656800 
-b2: 0.048442 0.037633 0.591759 
+b1: -5.445072 7.825257 1.756708 7.656800
+b2: 0.048442 0.037633 0.591759
 starting with descent procedure...
 Refinement step 1: better fit, scale: 31.48594
 Refinement step 4: better fit, scale: 31.38752
 Refinement step 5: better fit, scale: 31.34287
 Refinement step 6: better fit, scale: 31.32908
 descent procedure: not converged.
-b1: -113.528805 -14.858187 -9.426368 27.485299 
-b2: 0.066846 0.036134 0.540701 
+b1: -113.528805 -14.858187 -9.426368 27.485299
+b2: 0.066846 0.036134 0.540701
 > resid <- drop(y - x %*% fMS$coef)
 > stopifnot(all.equal(resid, fMS$resid, check.attr=FALSE))
-> 
+>
 > ## Test direct call to lmrob
 > set.seed(13)
 > fiMS <- lmrob(Y ~ Region + X1 + X2 + X3, education, init="M-S")
@@ -189,62 +189,62 @@ b2: 0.066846 0.036134 0.540701
 > writeLines(out2)
 
 Call:
-lmrob(formula = Y ~ Region + X1 + X2 + X3, data = education, 
+lmrob(formula = Y ~ Region + X1 + X2 + X3, data = education,
     init = "M-S")
 
-Weighted Residuals:
-    Min      1Q  Median      3Q     Max 
--62.729 -15.529  -1.572  23.392 174.750 
+Residuals:
+    Min      1Q  Median      3Q     Max
+-62.729 -15.529  -1.572  23.392 174.750
 
 Coefficients:
-              Estimate Std. Error t value Pr(>|t|)   
-(Intercept) -150.07630  143.09300  -1.049  0.30013   
-Region2      -12.76767   16.63758  -0.767  0.44704   
-Region3      -10.63954   15.92865  -0.668  0.50774   
-Region4       21.95445   16.96484   1.294  0.20253   
-X1             0.04146    0.05040   0.823  0.41525   
+              Estimate Std. Error t value Pr(>|t|)
+(Intercept) -150.07630  143.09300  -1.049  0.30013
+Region2      -12.76767   16.63758  -0.767  0.44704
+Region3      -10.63954   15.92865  -0.668  0.50774
+Region4       21.95445   16.96484   1.294  0.20253
+X1             0.04146    0.05040   0.823  0.41525
 X2             0.04337    0.01373   3.159  0.00289 **
-X3             0.61106    0.35153   1.738  0.08932 . 
+X3             0.61106    0.35153   1.738  0.08932 .
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Robust residual standard error: 30.82 
+Robust residual standard error: 30.82
 Convergence in 19 IRWLS iterations
 
-Robustness weights: 
- observation 50 is an outlier with |weight| = 0 ( < 0.002); 
+Robustness weights:
+ observation 50 is an outlier with |weight| = 0 ( < 0.002);
  7 weights are ~= 1. The remaining 42 ones are summarized as
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.2884  0.8904  0.9508  0.8890  0.9867  0.9985 
-Algorithmic parameters: 
-tuning.chi         bb tuning.psi    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
-     nResample         max.it          k.max    maxit.scale          k.m_s 
-           500             50            200            200             20 
-     trace.lev            mts     compute.rd fast.s.large.n 
-             0           1000              0           2000 
-          psi   subsampling        method           cov    split.type 
-   "bisquare" "nonsingular"        "M-SM"     ".vcov.w"           "f" 
-seed : int(0) 
-> 
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+ 0.2884  0.8904  0.9508  0.8890  0.9867  0.9985
+Algorithmic parameters:
+tuning.chi         bb tuning.psi    rel.tol  solve.tol
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001
+     nResample         max.it          k.max    maxit.scale          k.m_s
+           500             50            200            200             20
+     trace.lev            mts     compute.rd fast.s.large.n
+             0           1000              0           2000
+          psi   subsampling        method           cov    split.type
+   "bisquare" "nonsingular"        "M-SM"     ".vcov.w"           "f"
+seed : int(0)
+>
 > set.seed(13)
 > fiM.S <- lmrob(Y ~ Region + X1 + X2 + X3, education, init=lmrob.M.S)
 > out3 <- capture.output(summary(fiM.S))
-> 
+>
 > ## must be the same {apart from the "init=" in the call}:
 > stopifnot(identical(out2[-4], out3[-4]))
-> 
-> 
+>
+>
 > ###  "Skipping design matrix equilibration" warning can arise for reasonable designs -----
 > set.seed(1)
 > x2 <- matrix(rnorm(2*30), 30, 2)
 > data <- data.frame(y = rnorm(30), group = rep(letters[1:3], each=10), x2)
-> 
+>
 > obj <- lmrob(y ~ ., data, init="M-S")
 Warning message:
 In lmrob.M.S(x, y, control, mf) :
   Skipping design matrix equilibration (dgeequ): row 23 is exactly zero.
-> 
+>
 > ## illustration: the zero row is introduced during the orthogonalization of x2 wrt x1
 > ## l1 regression always produces p zero residuals
 > ## by chance, the zero residuals of multiple columns happen to be on the same row
@@ -252,15 +252,15 @@ In lmrob.M.S(x, y, control, mf) :
 > x1 <- sf$x1
 > x2 <- sf$x2
 > control <- obj$control
-> 
+>
 > ## orthogonalize
 > x2.tilde <- x2
-> 
+>
 > for(i in 1:ncol(x2)) {
 +     tmp <- lmrob.lar(x1, x2[,i], control)
 +     x2.tilde[,i] <- tmp$resid
 + }
-> x2.tilde == 0 
+> x2.tilde == 0
       X1    X2
 1  FALSE FALSE
 2   TRUE FALSE
@@ -292,7 +292,7 @@ In lmrob.M.S(x, y, control, mf) :
 28 FALSE FALSE
 29 FALSE FALSE
 30 FALSE FALSE
-> 
+>
 > proc.time()
-   user  system elapsed 
-  0.902   0.033   1.115 
+   user  system elapsed
+  0.902   0.033   1.115

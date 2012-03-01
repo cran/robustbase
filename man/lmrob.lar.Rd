@@ -1,36 +1,28 @@
 \name{lmrob.lar}
 \alias{lmrob.lar}
-\title{
-  Least Absolute Residuals / L1 Regression
-}
+\title{Least Absolute Residuals / L1 Regression}
 \description{
-  This method implements the routine L1 in Barrodale and Roberts (1974),
+  To compute least absolute residuals (LAR) or  \dQuote{L1} regression,
+  \code{lmrob.lar} implements the routine L1 in Barrodale and Roberts (1974),
   which is based on the simplex method of linear programming.  It is a
-  copy of \code{\link[robust]{lmRob.lar}} in the \pkg{robust} package.
+  copy of \code{lmRob.lar} (in early 2012) from the \pkg{robust} package.
 }
 \usage{
 lmrob.lar(x, y, control, mf)
 }
 \arguments{
-  \item{x}{
-    numeric matrix for the predictors
-  }
-  \item{y}{
-    numeric vector for the response
-  }
-  \item{control}{
-    list as returned by \code{\link{lmrob.control}}
-  }
-  \item{mf}{
-    dummy parameter.
-  }
+  \item{x}{numeric matrix for the predictors.}
+  \item{y}{numeric vector for the response.}
+  \item{control}{\code{\link{list}} as returned by
+    \code{\link{lmrob.control}()} .}
+  \item{mf}{dummy parameter.}
 }
 \details{
   This method is used for computing the M-S estimate and typically not
   to be used on its own.
 
   A description of the Fortran subroutines used can be found in Marazzi
-  (1993). In the book, the main method is named \code{RILARS}.
+  (1993).  In the book, the main method is named \code{RILARS}.
 }
 \value{
   A list that includes the following components:

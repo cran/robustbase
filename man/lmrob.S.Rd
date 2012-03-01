@@ -39,7 +39,7 @@ lmrob.S(x, y, control, trace.lev = control$trace.lev, mf = NULL)
   \item{fitted.values}{numeric vector (length \eqn{n}) of the fitted
     values.}
   \item{residuals}{numeric vector (length \eqn{n}) of the residuals.}
-  \item{weights}{numeric vector (length \eqn{n}) of the robustness weights.}
+  \item{rweights}{numeric vector (length \eqn{n}) of the robustness weights.}
   \item{k.iter}{(maximal) number of refinement iterations used.}
   \item{converged}{logical indicating if \bold{all} refinement
     iterations had converged.}

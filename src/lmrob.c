@@ -119,10 +119,10 @@ double psi_ggw(double x, const double c[]);
 double psip_ggw(double x, const double c[]);
 double wgt_ggw(double x, const double c[]);
 
-double rho_lin(double x, const double c[]);
-double psi_lin(double x, const double c[]);
-double psip_lin(double x, const double c[]);
-double wgt_lin(double x, const double c[]);
+double rho_lqq(double x, const double c[]);
+double psi_lqq(double x, const double c[]);
+double psip_lqq(double x, const double c[]);
+double wgt_lqq(double x, const double c[]);
 
 double sum_rho_sc(const double r[], double scale, int n, int p,
 		  const double c[], int ipsi);
@@ -159,7 +159,7 @@ int subsample(const double x[], const double y[], int n, int m,
 	      double *beta, int *ind_space, int *idc, int *idr,
 	      double *lu, double *v, int *p,
 	      double *Dr, double *Dc, int rowequ, int colequ,
-	      int sample, int mts, int ss, double tol_inv);
+	      int sample, int mts, int ss, double tol_inv, int solve);
 
 int fast_s_with_memory(double *X, double *y,
 		       int *nn, int *pp, int *nRes, int *max_it_scale,
@@ -394,7 +394,7 @@ void R_lmrob_M_S(double *X1, double *X2, double *y, double *res,
 
     /* STEP 2: Subsample */
     if (*subsample > 0) {
-	m_s_subsample(X1, y_work, n, p1, p2, *nRes, *max_it_scale, 
+	m_s_subsample(X1, y_work, n, p1, p2, *nRes, *max_it_scale,
 		      *rel_tol, *inv_tol, bb,
 		      rho_c, *ipsi, scale, *trace_lev,
 		      b1, b2, t1, t2, y_tilde, res, x1, x2,
@@ -422,7 +422,7 @@ void R_lmrob_M_S(double *X1, double *X2, double *y, double *res,
 
     /* STEP 4: Descent procedure */
     if (*descent > 0) {
-	m_s_descent(X1, X2, y, n, p1, p2, *K_m_s, *max_k, *max_it_scale, 
+	m_s_descent(X1, X2, y, n, p1, p2, *K_m_s, *max_k, *max_it_scale,
 		    *rel_tol, bb, rho_c, *ipsi, scale, *trace_lev,
 		    b1, b2, t1, t2, y_tilde, res, y_work, x1, x2,
 		    &NIT, &K, &KODE, &SIGMA, &BET0, SC1, SC2, SC3, SC4,
@@ -460,7 +460,8 @@ void R_subsample(const double x[], const double y[], int *n, int *m,
 		 double *beta, int *ind_space, int *idc, int *idr,
 		 double *lu, double *v, int *p,
 		 double *_Dr, double *_Dc, int *_rowequ, int *_colequ,
-		 int *status, int *sample, int *mts, int *ss, double *tol_inv)
+		 int *status, int *sample, int *mts, int *ss, double *tol_inv,
+		 int *solve)
 {
     int info;
 
@@ -470,7 +471,8 @@ void R_subsample(const double x[], const double y[], int *n, int *m,
     SETUP_EQUILIBRATION(*n, *m, x, 0);
 
     *status = subsample(Xe, y, *n, *m, beta, ind_space, idc, idr, lu, v, p,
-			Dr, Dc, rowequ, colequ, *sample, *mts, *ss, *tol_inv);
+			Dr, Dc, rowequ, colequ, *sample, *mts, *ss, *tol_inv,
+			*solve);
 
     COPY(Dr, _Dr, *n);
     COPY(Dc, _Dc, *m);
@@ -572,7 +574,8 @@ double rho(double x, const double c[], int ipsi)
     case 3: return(rho_opt(x, c)); // Optimal
     case 4: return(rho_hmpl(x, c)); // Hampel
     case 5: return(rho_ggw(x, c)); // GGW
-    case 6: return(rho_lin(x, c)); // lin psip
+    case 6: return(rho_lqq(x, c)); // LQQ := Linear-Quadratic-Quadratic
+	// was LGW := "lin psip" := piecewise linear psi'()
     }
 }
 
@@ -589,7 +592,7 @@ double psi(double x, const double c[], int ipsi)
     case 3: return(psi_opt(x, c)); // Optimal
     case 4: return(psi_hmpl(x, c)); // Hampel
     case 5: return(psi_ggw(x, c)); // GGW
-    case 6: return(psi_lin(x, c)); // LGW := "lin psip" := piecewise linear psi'()
+    case 6: return(psi_lqq(x, c)); // LQQ (piecewise linear psi')
     }
 }
 
@@ -606,7 +609,7 @@ double psip(double x, const double c[], int ipsi)
     case 3: return(psip_opt(x, c)); // Optimal
     case 4: return(psip_hmpl(x, c)); // Hampel
     case 5: return(psip_ggw(x, c)); // GGW
-    case 6: return(psip_lin(x, c)); // LGW = lin psip
+    case 6: return(psip_lqq(x, c)); // LQQ (piecewise linear psi')
     }
 }
 
@@ -623,7 +626,7 @@ double wgt(double x, const double c[], int ipsi)
     case 3: return(wgt_opt(x, c)); // Optimal
     case 4: return(wgt_hmpl(x, c)); // Hampel
     case 5: return(wgt_ggw(x, c)); // GGW
-    case 6: return(wgt_lin(x, c)); // LGW = lin psip
+    case 6: return(wgt_lqq(x, c)); // LQQ (piecewise linear psi')
     }
 }
 
@@ -1075,9 +1078,16 @@ double wgt_ggw(double x, const double k[])
 #undef SET_ABC_GGW
 
 
-// LGW := "lin psip" := piecewise linear psi'() ---------------------------
+// LQQ := Linear-Quadratic-Quadratic ("lqq") --------------------------------
+// ---    was LGW := "lin psip" := piecewise linear psi'() ------------------
 
-double psip_lin (double x, const double k[])
+// k[0:2] == (b, c, s) :
+// k[0]= b = bend adjustment
+// k[1]= c = cutoff of central linear part
+// k[2]= s = slope of descending
+
+// "lin psip" := piecewise linear psi'() :
+double psip_lqq (double x, const double k[])
 {
     double ax = fabs(x);
     if (ax <= k[1])
@@ -1098,7 +1108,7 @@ double psip_lin (double x, const double k[])
     }
 }
 
-double psi_lin (double x, const double k[])
+double psi_lqq (double x, const double k[])
 {
     double ax = fabs(x);
     if (ax <= k[1])
@@ -1121,7 +1131,7 @@ double psi_lin (double x, const double k[])
     }
 }
 
-double rho_lin (double x, const double k[])
+double rho_lqq (double x, const double k[])
 {
     double ax = fabs(x), k01 = k[0] + k[1];
     if (ax <= k[1])
@@ -1150,7 +1160,7 @@ double rho_lin (double x, const double k[])
     }
 }
 
-double wgt_lin (double x, const double k[])
+double wgt_lqq (double x, const double k[])
 {
     double ax = fabs(x);
     if (ax <= k[1])
@@ -1598,7 +1608,7 @@ int fast_s_with_memory(double *X, double *y,
 	R_CheckUserInterrupt();
 	/* find a candidate */
 	sing = subsample(Xe, y, n, p, beta_cand, ind_space, idc, idr, lu, v, pivot,
-			 Dr, Dc, rowequ, colequ, 1, mts, ss, inv_tol);
+			 Dr, Dc, rowequ, colequ, 1, mts, ss, inv_tol, 1);
 	if (sing) {
 	    for (k=0; k< *best_r; k++) best_scales[i] = -1.;
 	    goto cleanup_and_return;
@@ -1709,7 +1719,7 @@ void fast_s(double *X, double *y,
 	R_CheckUserInterrupt();
 	/* find a candidate */
 	sing = subsample(Xe, y, n, p, beta_cand, ind_space, idc, idr, lu, v, pivot,
-			 Dr, Dc, rowequ, colequ, 1, mts, ss, inv_tol);
+			 Dr, Dc, rowequ, colequ, 1, mts, ss, inv_tol, 1);
 	if (sing) {
 	    *sscale = -1.;
 	    goto cleanup_and_return;
@@ -1926,7 +1936,7 @@ void m_s_subsample(double *X1, double *y, int n, int p1, int p2,
 	R_CheckUserInterrupt();
 	/* STEP 1: Draw a subsample of size p2 from (X2, y) */
 	sing = subsample(Xe, y, n, p2, t2, ind_space, idc, idr, lu, v, pivot,
-			 Dr, Dc, rowequ, colequ, 1, mts, ss, inv_tol);
+			 Dr, Dc, rowequ, colequ, 1, mts, ss, inv_tol, 1);
 	if (sing) {
 	    *sscale = -1.;
 	    goto cleanup_and_return;
@@ -2096,7 +2106,7 @@ int subsample(const double x[], const double y[], int n, int m,
 	      double *beta, int *ind_space, int *idc, int *idr,
 	      double *lu, double *v, int *pivot,
 	      double *Dr, double *Dc, int rowequ, int colequ,
-	      int sample, int mts, int ss, double tol_inv)
+	      int sample, int mts, int ss, double tol_inv, int solve)
 {
     /* x:         design matrix (n x m)
        y:         response vector
@@ -2123,6 +2133,9 @@ int subsample(const double x[], const double y[], int n, int m,
        ss:        type of subsampling to be used:
                   0: simple subsampling
                   1: nonsingular subsampling
+       tol_inv:   tolerance for declaring a matrix singular
+       solve:     solve the least squares problem on the subsample?
+                  (0: no, 1: yes)
 
        return condition:
              0: success
@@ -2217,18 +2230,22 @@ Start:
     /* Rprintf("pivot:"); disp_veci(pivot, m-1); */
     /* Rprintf("idc:"); disp_veci(idc, m); */
 
-    /* STEP 3: Solve for candidate parameters */
-    for(k=0;k<m;k++) beta[k] = y[idc[k]];
-    /* scale y ( = beta ) */
-    if (rowequ) for(k=0;k<m;k++) beta[k] *= Dr[idc[k]];
-    /* solve U\tr L\tr \beta = y[subsample] */
-    F77_CALL(dtrsv)("U", "T", "N", &m, lu, &m, beta, &one);
-    F77_CALL(dtrsv)("L", "T", "U", &m, lu, &m, beta, &one);
-    /* scale the solution */
-    if (colequ) for(k=0;k<m;k++) beta[k] *= Dc[idr[k]];
-    /* undo pivoting */
-    for(k=m-2;k>=0;k--) {
+    /* STEP 3: Solve for candidate parameters if requested */
+    if (solve == 0) {
+      for(k=0;k<m;k++) beta[k] = NA_REAL;
+    } else {
+      for(k=0;k<m;k++) beta[k] = y[idc[k]];
+      /* scale y ( = beta ) */
+      if (rowequ) for(k=0;k<m;k++) beta[k] *= Dr[idc[k]];
+      /* solve U\tr L\tr \beta = y[subsample] */
+      F77_CALL(dtrsv)("U", "T", "N", &m, lu, &m, beta, &one);
+      F77_CALL(dtrsv)("L", "T", "U", &m, lu, &m, beta, &one);
+      /* scale the solution */
+      if (colequ) for(k=0;k<m;k++) beta[k] *= Dc[idr[k]];
+      /* undo pivoting */
+      for(k=m-2;k>=0;k--) {
     	tmpd = beta[k]; beta[k] = beta[pivot[k]]; beta[pivot[k]] = tmpd;
+      }
     }
 
     return(0);

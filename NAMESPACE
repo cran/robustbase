@@ -1,15 +1,23 @@
 
-useDynLib(robustbase, .registration=TRUE)# -> R >= 2.3.0
+useDynLib(robustbase, .registration=TRUE)
 
 importFrom("graphics", plot)# < more ?
-importFrom("stats", anova, coef, cov, family, fitted,
-	   logLik, model.frame, predict, residuals, terms, vcov)
+importFrom("stats", alias, anova, case.names, coef, confint, cov,
+           dummy.coef, family, fitted, fivenum, logLik, nobs,
+           model.frame, predict, residuals, terms, vcov,
+           variable.names, weights,
+           ## would like to import even more *.lm methods, as we wrap them,
+           ## but we cannot import non-exported methods
+           residuals.lm, model.matrix.lm
+           )
 ## ^^^^ MASS has a bit more; take it as example
 
-##no longer: importFrom("MASS", psi.bisquare, psi.hampel, psi.huber)
+importFrom("utils", globalVariables)
 
+##no longer: importFrom("MASS", psi.bisquare, psi.hampel, psi.huber)
 ## MASS has many rlm S3 methods; should we use some of them - for rnls() ?!
 ## we also currently use MASS::cov.rob(); but probably only temporarily
+
 
 ## Functions defined in this package
 export(Sn, Qn, Qn.old,
@@ -29,9 +37,8 @@ export(Sn, Qn, Qn.old,
 
        huberM,
        covOGK, covGK, hard.rejection, scaleTau2,
-       psiFunc, huberPsi,
+       psiFunc, huberPsi, hampelPsi,
 ## Not yet:
-##     hampelPsi,
 ##     tukeyPsi, # = biweight / bisquare
        tukeyChi, tukeyPsi1, # <- used by lmrob.*()
 
@@ -67,7 +74,18 @@ S3method(adjbox, formula)
 S3method(anova, lmrob)
 S3method(anova, glmrob)
 
+S3method(alias, lmrob)
+S3method(case.names, lmrob)
+S3method(confint, lmrob)
+S3method(dummy.coef, lmrob)
+S3method(family, lmrob)
+S3method(kappa, lmrob)
+S3method(labels, lmrob)
 S3method(model.matrix, lmrob)
+S3method(nobs, lmrob)
+S3method(residuals, lmrob)
+S3method(variable.names, lmrob)
+S3method(weights, lmrob)
 
 S3method(formula, nlrob)
 S3method(fitted, nlrob)
@@ -83,11 +101,14 @@ S3method(print, lts)
 S3method(print, mcd)
 S3method(print, nlrob)
 S3method(print, lmrob)
+S3method(print, lmrob.S)
 S3method(print, summary.glmrob)
 S3method(print, summary.lmrob)
 S3method(print, summary.nlrob)
 S3method(print, summary.lts)
 
+S3method(qr, lmrob)
+## lmrob uses residuals.default
 S3method(residuals, nlrob)
 S3method(residuals, glmrob)
 
@@ -124,6 +145,7 @@ exportClasses(
               )
 
 exportMethods(
-              chgDefaults
+              chgDefaults,
+              plot
               )
 

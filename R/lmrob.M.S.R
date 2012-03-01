@@ -144,6 +144,6 @@ lmrob.M.S <- function(x, y, control, mf, split) {
     ## set method argument in control
     control$method <- 'M-S'
     list(coefficients = cf, scale = z$scale, residuals = z$res,
-         weights = lmrob.wgtfun(z$res / z$scale, control$tuning.chi, control$psi),
+         rweights = lmrob.rweights(z$res, z$scale, control$tuning.chi, control$psi),
          control = control)
 }

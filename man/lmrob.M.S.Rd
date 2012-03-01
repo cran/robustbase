@@ -48,7 +48,7 @@ lmrob.M.S(x, y, control, mf, split)
     coefficient estimates.}
   \item{scale}{the M-S-scale residual estimate}
   \item{residuals}{numeric vector (legnth \eqn{n}) of the residuals.}
-  \item{weights}{numeric vector (length \eqn{n}) of the robustness weights.}
+  \item{rweights}{numeric vector (length \eqn{n}) of the robustness weights.}
   \item{control}{the same list as the \code{control} argument.}
   \item{converged}{Convergence status (always \code{TRUE}), needed for
     \code{\link{lmrob.fit}}.}

@@ -1,3 +1,35 @@
+2013-03-01  Manuel Koller   <mkoller@ispm.unibe.ch>
+
+	* R/lmrob.R (lmrob): Adding weights and offset arguments.
+
+2013-02-26  Manuel Koller   <mkoller@ispm.unibe.ch>
+
+	* R/lmrob.R (class lmrob): Objects of class lmrob now store
+	the robustness weights in $rweights (used to be in $weights).
+
+	* R/lmrob.R (weights.lmrob): specialized weights() function for
+	lmrob objects. Returns prior weights by default. Robustness weights
+	are available via the "type" argument.
+
+2013-02-14  Manuel Koller   <mkoller@ispm.unibe.ch>
+
+	* R/lmrob.R (lmrob): setting class "lmrob" also for unconverged
+	initial estimates.
+
+	* R/lmrob.R (print.summary.lmrob, print.lmrob, print.lmrob.S): improved
+	handling of unconverged estimates and exact fits.
+
+2013-02-07  Manuel Koller   <mkoller@ispm.unibe.ch>
+
+	* R/lmrob.R (lmrob): compatibility to lm:
+	'assign': labels of terms used for fitting.
+
+	* R/lmrob.R (summary.lmrob): compatibility to summary.lm for:
+	'df': degrees of freedom, a 3-vector (p, n-p, p*), the last being
+	the number of non-aliased coefficients (used to be just (n-p)).
+	'aliased': named logical vector showing if the original
+	coefficients are aliased (was not returned before).
+
 2012-05-14  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* R/lmrob.MM.R (.vcov.avar1): fix typo in "posdefify"

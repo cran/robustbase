@@ -10,11 +10,12 @@
   Summary method for \R object of class \code{"lmrob"} and
   \code{\link{print}} method for the summary object.
 
-  Further, methods \code{\link{fitted}()}, \code{\link{residuals}()} or
-  \code{\link{weights}()} work (via the default methods), and
+  Further, methods \code{\link{fitted}()}, \code{\link{residuals}()}
+  work (via the default methods), and
   \code{\link{predict}()} (see \code{\link{predict.lmrob}},
-  \code{\link{vcov}()}, \code{\link{model.matrix}()} have explicitly
-  defined \code{lmrob} methods.
+  \code{\link{vcov}()}, \code{\link{weights}()} (see
+  \code{\link{weights.lmrob}}), \code{\link{model.matrix}()}, etc. have
+  explicitly defined \code{lmrob} methods.
 }
 \usage{
 \method{summary}{lmrob}(object, correlation = FALSE,
@@ -45,7 +46,7 @@
   \item{\dots}{potentially more arguments passed to methods.}
 }
 \seealso{\code{\link{lmrob}}, \code{\link{predict.lmrob}},
-  \code{\link{summary.lm}},
+  \code{\link{weights.lmrob}}, \code{\link{summary.lm}},
   \code{\link{print}}, \code{\link{summary}}.
 }
 \examples{
@@ -57,7 +58,7 @@ sa                   # dispatches to call print.summary.lmrob(....)
 cov2cor(vcov(mod1))
 
 cbind(fit = fitted(mod1), resid = residuals(mod1),
-      wgts= weights(mod1),
+      wgts= weights(mod1, type="robustness"),
       predict(mod1, interval="prediction"))
 
 data(heart)

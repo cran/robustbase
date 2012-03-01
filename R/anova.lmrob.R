@@ -82,6 +82,7 @@ anovaLmrobPair <- function(FMfit, reduced.model, initCoef, test)
 {
     ## 'FM': full model;  'RM' : reduced model
     X <- model.matrix(FMfit, data = FMfit$model)
+    FMod <- FMfit$qr$pivot[1:FMfit$rank]
     asgn <- attr(X, "assign")
     FMt <- terms(FMfit)
     RMt <- terms(reduced.model)
@@ -91,10 +92,11 @@ anovaLmrobPair <- function(FMfit, reduced.model, initCoef, test)
     if(attr(RMt, "intercept") == 1) RMnumtl <- c(0, RMnumtl)
     if(any(is.na(match(RMnumtl, unique(asgn)))))
 	stop("Models are not nested!")
-    RMod <- seq(along = asgn)[!is.na(match(asgn, RMnumtl))]
-    if (length(asgn) == length(RMod))
+    RMod0 <- seq(along = asgn)[!is.na(match(asgn, RMnumtl))]
+    RMod <- intersect(RMod0, FMod)
+    if (length(FMod) == length(RMod))
 	stop("Models are not strictly nested")
-    H0ind <- setdiff(seq(along = asgn), RMod)
+    H0ind <- which(!FMod %in% RMod)
     H0coef <- coef(FMfit)[H0ind]
     df <- length(H0coef)
     pp <- FMfit$rank
@@ -118,12 +120,17 @@ anovaLmrobPair <- function(FMfit, reduced.model, initCoef, test)
 		if(sum(abs(psiRes) < 1e-08) > 0.6*nrow(X))
 		    stop("Please fit the nested models by lmrob")
 		FMfit$coef[RMod]
-	    } else initCoef
+	    } else {
+                idx <- !is.na(initCoef)
+                if (any(idx != RMod0 %in% RMod))
+                    stop("NA coefs in full and reduced model do not match")
+                initCoef[idx]
+            }
 
 	RMfit <- lmrob..M..fit(x = X[,RMod], y = y,
 			       beta.initial = iC, scale = s0,
 			       control = FMfit$control)
-	FMres <- as.vector(y - X %*% FMfit$coef)
+	FMres <- as.vector(y - X[,FMod] %*% FMfit$coef[FMod])
 	RMres <- RMfit$resid ## as.vector(y - X[,RMod] %*% RMfit$coef)
 	FM_sRho <- sum(psi(FMres/s0, deriv = -1))
 	RM_sRho <- sum(psi(RMres/s0, deriv = -1))

@@ -1,8 +1,9 @@
-\documentclass[a4paper]{article}
+\documentclass[11pt, a4paper]{article}
+\usepackage[a4paper, text={16cm,25cm}]{geometry}
 
-%% To regenerate the vignette's plots, replace 
+%% To regenerate the vignette's plots, replace
 %%  "eval=FALSE," with "eval=TRUE,"
-%% everywhere (without quotes, don't forget the ",")
+%% everywhere (without quotes but *WITH* the ",")
 
 %\VignetteIndexEntry{Simulations for Robust Regression Inference in Small Samples}
 %\VignetteDepends{robustbase, xtable, ggplot2, RColorBrewer, grid, reshape2}
@@ -404,11 +405,11 @@ where $\bld W = \diag\left(\wgt\left(\frac{r_1}{\hat\sigma}\right), \dots,
 \section{Simulation}
 The main loop of the simulation is fairly simple. (This code is only run if
 there are no aggregate results available.)
+%% set eval to TRUE for chunks simulation-run and simulation-aggr
+%% if you really want to run the simulations again.
+%% (better fail with an error than run for weeks)
 <<results=hide>>=
 aggrResultsFile <- file.path(robustDoc, "aggr_results.Rdata")
-## set eval to TRUE for chunks simulation-run and simulation-aggr
-## if you really want to run the simulations again.
-## (better fail with an error than run for weeks)
 <<simulation-run,results=hide,eval=FALSE>>=
 if (!file.exists(aggrResultsFile)) {
   ## load packages required only for simulation
@@ -954,7 +955,7 @@ print(ggplot(test.3, aes(p/n, sdlogsigma.1*sqrt(n), color = Est.Scale)) +
       stat_summary(data=test.lm.2, aes(x=ratio, color = Est.Scale),
                    fun.y=median, geom='line') +
       scale_shape_discrete(expression(n)) +
-      scale_colour_discrete("Scale Est.", labels=lab(test.3$Est.Scale, 
+      scale_colour_discrete("Scale Est.", labels=lab(test.3$Est.Scale,
                                           test.lm.2$Est.Scale)))
 @
 \includegraphics{plot-fig-sdscale-1}
@@ -978,8 +979,8 @@ print(ggplot(test.4, aes(p/n, sdlogsigma.1*sqrt(n),
       stat_summary(data=test.lm, aes(x=ratio, color = Est.Scale),
                    fun.y=median, geom='line') +
       ylim(with(test.4, range(sdlogsigma.1*sqrt(n)))) +
-      g.scale_shape(labels=lab(test.4$Error)) + 
-      scale_colour_discrete("Scale Est.", labels=lab(test.4$Est.Scale, 
+      g.scale_shape(labels=lab(test.4$Error)) +
+      scale_colour_discrete("Scale Est.", labels=lab(test.4$Est.Scale,
                                           test.lm$Est.Scale)))
 @
 \includegraphics{plot-fig-sdscale-all}
@@ -1079,7 +1080,7 @@ print(ggplot(tmp <- droplevels(subset(test.1, Estimator %in% c("SMD", "MMqE") &
 \label{fig:Mscale-all}
 \end{figure}
 
-\clearpage
+\clearpage% not nice, but needed against  LaTeX Error: Too many unprocessed floats.
 
 \begin{figure}
 \begin{center}
@@ -1115,7 +1116,7 @@ print(ggplot(tmp <- droplevels(subset(test.1, Error != 't1')),
                     labels=lab(tmp$Error)) +
       facet_wrap(~ Psi) +
       ylab(expression(paste('efficiency of ',hat(beta)))) +
-      scale_colour_discrete(name = "Estimator", 
+      scale_colour_discrete(name = "Estimator",
                             labels = lab(tmp$Estimator)))
 @
 \includegraphics{plot-fig-efficiency-all}
@@ -1364,7 +1365,7 @@ print(ggplot(tmp <- subset(test.1, n == 25),
 \label{fig:power-1-1}
 \end{figure}
 
-\clearpage
+%\clearpage
 
 \begin{figure}
 \begin{center}
@@ -1458,10 +1459,10 @@ inv.g1 <- function(value, theta, mu, ...) {
 }
 inv.g1.MM <- function(value, theta, mu, ...) {
   g <- if (mu == 0) g.2.MM else g.3.MM
-  ret <- try(uniroot(function(s) g(s, theta, mu, ...) - value, c(0.01, 100)),
-             silent = TRUE)
-  if (class(ret)[1] == 'try-error') {
-    warning('inv.g1.MM: ', value, ' ', theta, ' ', mu)
+  ret <- tryCatch(uniroot(function(s) g(s, theta, mu, ...) - value, c(0.01, 100)),
+                  error = function(e)e)
+  if (inherits(ret, 'error')) {
+    warning('inv.g1.MM: ', value, ' ', theta, ' ', mu,' -> Error: ', ret$message)
     NA
   } else {
     ret$root

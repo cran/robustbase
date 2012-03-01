@@ -84,7 +84,8 @@ static R_NativePrimitiveArgType R_subsample_t[] = {
     REALSXP, INTSXP, INTSXP, INTSXP,
     REALSXP, REALSXP, INTSXP,
     REALSXP, REALSXP, INTSXP, INTSXP,
-    INTSXP, LGLSXP, INTSXP, INTSXP, REALSXP
+    INTSXP, LGLSXP, INTSXP, INTSXP, REALSXP,
+    LGLSXP
 };
 
 static const R_CMethodDef CEntries[]  = {

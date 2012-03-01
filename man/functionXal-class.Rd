@@ -4,7 +4,7 @@
 \title{Class "functionXal" of Functionals (of Psi-like functions)}
 \description{
   The class \code{"functionXal"} is a class of functionals (typically
-  integrals) typically of \code{\link{functionX-class}} functions.
+  integrals) typically of \code{\linkS4class{functionX}} functions.
 
   Since the \code{functionX} functions typically also depend on tuning
   parameters, objects of this class (\code{"functionXal"}) are functions
@@ -24,9 +24,10 @@
 %   No methods defined with class "functionXal" in the signature.
 % }
 \seealso{
-  \code{\link{functionX-class}};
-  \code{\link{psiFunc}}, and
-  \code{\link{psi_func-class}} which has several \code{functionXal} slots.
+  \code{\link{psiFunc}()} and the class definitions of
+  \code{\linkS4class{functionX}} and
+  \code{\linkS4class{psi_func}} which has several \code{functionXal}
+  slots.
 }
 % \examples{
 % ##---- Should be DIRECTLY executable !! ----

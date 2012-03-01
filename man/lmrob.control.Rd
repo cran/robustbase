@@ -1,13 +1,13 @@
 \name{lmrob.control}
+\title{Tuning Parameters for lmrob() and Auxiliaries}
 \encoding{utf8}
 \alias{lmrob.control}
 \alias{lmrob.control.sfs}
-\title{ Tuning parameters for lmrob }
 \description{
   Tuning parameters for \code{\link{lmrob}}, the MM-type regression
-  estimator and the associated S-, M- and D-estimators. Using
-  \code{setting="KS2011"} sets the defaults as suggested by Koller and Stahel
-  (2011).
+  estimator and the associated S-, M- and D-estimators.  Using
+  \code{setting="KS2011"} sets the defaults as suggested by
+  Koller and Stahel (2011).
 }
 \usage{
 lmrob.control(setting, seed = NULL, nResample = 500,
@@ -27,27 +27,28 @@ lmrob.control(setting, seed = NULL, nResample = 500,
   \item{setting}{a string specifying alternative default values.  Leave
     empty for the defaults or use \code{"KS2011"} for the defaults
     suggested by Koller and Stahel (2011).  See \emph{Details}.}
-  \item{seed}{an integer vector, the seed to be used for random
+  \item{seed}{\code{NULL} or an integer vector compatible with
+    \code{\link{.Random.seed}}: the seed to be used for random
     re-sampling used in obtaining candidates for the initial
-    S-estimator; see \code{\link{.Random.seed}}.  The current value of
-    \code{.Random.seed} will be preserved if \code{seed} is set;
-    otherwise (by default), \code{.Random.seed} will be modified as
-    usual from calls to \code{\link{runif}()}.
+    S-estimator.  The current value of \code{.Random.seed} will be
+    preserved if \code{seed} is set, i.e. non-\code{NULL};
+    otherwise, as by default, \code{.Random.seed} will be used and
+    modified as usual from calls to \code{\link{runif}()} etc.
   }
   \item{nResample}{number of re-sampling candidates to be
     used to find the initial S-estimator.  Currently defaults to 500
     which works well in most situations (see references).}
-  \item{tuning.chi}{tuning constant vector for the S-estimator.
-    Sensible defaults are set according to \code{psi} to yield a 50\%
-    breakdown estimator. See \emph{Details}.}
+  \item{tuning.chi}{tuning constant vector for the S-estimator.  If
+    \code{NULL}, as by default, sensible defaults are set (depending on
+    \code{psi}) to yield a 50\% breakdown estimator.  See \emph{Details}.}
   \item{bb}{expected value under the normal model of the
     \dQuote{chi} (rather \eqn{\rho (rho)}{rho}) function with tuning
     constant equal to \code{tuning.chi}.  This is used to compute the
     S-estimator.}
-  \item{tuning.psi}{tuning constant vector for the redescending M-estimator.
-    Depending on the value of \code{psi} this constant is set to yield
-    an estimator with asymptotic efficiency of 95\% for normal errors.
-    See \emph{Details}.}
+  \item{tuning.psi}{tuning constant vector for the redescending
+    M-estimator.  If \code{NULL}, as by default, this is set (depending
+    on \code{psi}) to yield an estimator with asymptotic efficiency of
+    95\% for normal errors.  See \emph{Details}.}
   \item{max.it}{integer specifying the maximum number of IRWLS iterations.}
   \item{groups}{(for the fast-S algorithm): Number of
     random subsets to use when the data set is large.}
@@ -104,7 +105,13 @@ lmrob.control(setting, seed = NULL, nResample = 500,
   \item{fast.s.large.n}{minimum number of observations required to
     switch from ordinary \dQuote{fast S} algorithm to an efficient
     \dQuote{large n} strategy.}
-  \item{...}{further arguments to be added to \code{control}.}
+  \item{...}{further arguments to be added as \code{\link{list}}
+    components to the result.}
+}
+\value{
+  a named \code{\link{list}} with over twenty components, corresponding
+  to the arguments, where \code{tuning.psi} and \code{tuning.chi} are
+  typically computed, see above.
 }
 \details{The option \code{setting="KS2011"} alters the default
   arguments.  They are changed to \code{method = 'SMDM', psi = 'lqq',
@@ -137,8 +144,8 @@ lmrob.control(setting, seed = NULL, nResample = 500,
   would be
   \tabular{rll}{
     \code{psi} \tab \code{tuning.chi} \tab \code{tuning.psi} \cr
-    \code{hampel} \tab \code{c(2, 4, 8)*0.1981319} \tab
-    \code{c(2, 4, 8)*0.690794}
+    \code{hampel} \tab \code{c(2, 4, 8) * 0.1981319} \tab
+    \code{c(2, 4, 8) * 0.690794}
   }
 
   Alternative coefficients for an efficiency of \eqn{85\%} at the normal
@@ -147,12 +154,13 @@ lmrob.control(setting, seed = NULL, nResample = 500,
     \code{psi} \tab \code{tuning.psi} \cr
     \code{bisquare} \tab \code{3.443689} \cr
     \code{welsh} \tab \code{1.456} \cr
-    \code{ggw} \tab \code{c(-0.5, 1.5, 0.85, NA)} \cr
+    \code{ggw}, \code{lqq} \tab \code{c(-0.5, 1.5, 0.85, NA)} \cr
     \code{optimal} \tab \code{0.8684} \cr
-    \code{hampel} (-1/3) \tab \code{c(1.5, 3.5, 8)*0.5704545} \cr
-    \code{hampel} (-1/2) \tab \code{c(2, 4, 8)*0.4769578}
+    \code{hampel} (-1/3) \tab \code{c(1.5, 3.5, 8)* 0.5704545} \cr
+    \code{hampel} (-1/2) \tab \code{c( 2,  4,  8) * 0.4769578}
   }
-}\references{
+}
+\references{
   Koller, M. and Stahel, W.A. (2011), Sharpening Wald-type inference in
   robust regression for small samples, \emph{Computational Statistics &
   Data Analysis} \bold{55}(8), 2504--2515.
@@ -169,4 +177,3 @@ str(ctrl <- lmrob.control("KS2011", max.it = 1000))
 }
 \keyword{robust}
 \keyword{regression}
-

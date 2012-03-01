@@ -8,7 +8,7 @@ f.predict <- function (object, newdata = NULL, scale = sigma(object),
                        level = 0.95, type = c('response'),
                        terms = NULL, na.action = na.pass,
                        pred.var = res.var/weights, weights = 1,
-                       cov = covariance.matrix(object), ...) 
+                       cov = covariance.matrix(object), ...)
 {
   ## Purpose: replace predict.lmrob from robustbase package
   ## ----------------------------------------------------------------------
@@ -29,27 +29,27 @@ f.predict <- function (object, newdata = NULL, scale = sigma(object),
   }
   else {
     Terms <- delete.response(tt)
-    m <- model.frame(Terms, newdata, na.action = na.action, 
+    m <- model.frame(Terms, newdata, na.action = na.action,
                      xlev = object$xlevels)
-    if (!is.null(cl <- attr(Terms, "dataClasses"))) 
+    if (!is.null(cl <- attr(Terms, "dataClasses")))
       .checkMFClasses(cl, m)
     X <- model.matrix(Terms, m, contrasts.arg = object$contrasts)
     offset <- rep(0, nrow(X))
-    if (!is.null(off.num <- attr(tt, "offset"))) 
+    if (!is.null(off.num <- attr(tt, "offset")))
       for (i in off.num) offset <- offset +
         eval(attr(tt, "variables")[[i + 1]], newdata)
-    if (!is.null(object$call$offset)) 
+    if (!is.null(object$call$offset))
       offset <- offset + eval(object$call$offset, newdata)
     mmDone <- FALSE
   }
   n <- length(object$residuals)
   p <- object$rank
-  if (p < ncol(X) && !(missing(newdata) || is.null(newdata))) 
+  if (p < ncol(X) && !(missing(newdata) || is.null(newdata)))
     warning("prediction from a rank-deficient fit may be misleading")
   beta <- coef(object)
   ## ignoring piv here
   predictor <- drop(X %*% beta)
-  if (!is.null(offset)) 
+  if (!is.null(offset))
     predictor <- predictor + offset
   interval <- match.arg(interval)
   type <- match.arg(type)
@@ -66,22 +66,22 @@ f.predict <- function (object, newdata = NULL, scale = sigma(object),
   }
   if (interval != "none") {
     tfrac <- qt((1 - level)/2, df)
-    hwid <- tfrac * switch(interval, confidence = sqrt(ip), 
+    hwid <- tfrac * switch(interval, confidence = sqrt(ip),
                            prediction = sqrt(ip + pred.var))
     if (type != "terms") {
-      predictor <- cbind(predictor, predictor + hwid %o% 
+      predictor <- cbind(predictor, predictor + hwid %o%
                          c(1, -1))
       colnames(predictor) <- c("fit", "lwr", "upr")
     }
   }
-  if (se.fit || interval != "none") 
+  if (se.fit || interval != "none")
     se <- sqrt(ip)
   if (missing(newdata) && !is.null(na.act <- object$na.action)) {
     predictor <- napredict(na.act, predictor)
-    if (se.fit) 
+    if (se.fit)
       se <- napredict(na.act, se)
   }
-  if (se.fit) 
+  if (se.fit)
     list(fit = predictor, se.fit = se, df = df, residual.scale = sqrt(res.var))
   else predictor
 }
@@ -118,7 +118,7 @@ f.lmRob <- function(...)
   ## update defaults:
   if (is.null(args$mxr)) args$mxr <- 2000
   if (is.null(args$mxf)) args$mxf <- 500
-  if (is.null(args$mxs)) args$mxs <- 2000  
+  if (is.null(args$mxs)) args$mxs <- 2000
   ## get all arguments except the arguments of lmRob:
   uw <- c('formula', 'data', 'weights', 'subset', 'na.action', 'model',
           'x', 'y', 'contrasts', 'nrep', 'genetic.control')
@@ -147,7 +147,7 @@ f.lmRob.S <- function(... , robust.control = lmRob.control()) {
 
   robust.control$initial.alg = 'random'
   robust.control$estim = 'Initial'
-  
+
   z <- lmRob(..., control = robust.control)
   class(z) <- 'lmrob.S'
   z
@@ -162,11 +162,11 @@ f.eff2c.psi <- function(eff, weight='bisquare') {
   ##            weight: type of weight (weight argument in lmRob.control)
   ## ----------------------------------------------------------------------
   ## Author: Manuel Koller, Date:  8 Oct 2009, 15:36
-  
+
   if(is.null(eff)) return(NULL)
 
   lw = casefold(weight)
-  
+
   if (lw == 'bisquare') {
     if (eff == 0.95)      4.685061
     else if (eff == 0.9)  3.882646
@@ -185,7 +185,7 @@ f.eff2c.psi <- function(eff, weight='bisquare') {
 f.psi2c.chi <- function(weight) {
   ## Purpose: return lmRob defaults for c.chi
   ## ----------------------------------------------------------------------
-  ## Arguments: weight: type of weight 
+  ## Arguments: weight: type of weight
   ## ----------------------------------------------------------------------
   ## Author: Manuel Koller, Date: 28 Jan 2010, 10:05
 
@@ -234,7 +234,7 @@ robustness.weights.lmRob <- function(obj) {
 
 robustness.weights.lmrob.S <- function(obj) {
   rstand <- resid(obj)/sigma(obj)
-  robustbase:::lmrob.wgtfun(rstand, obj$control$tuning.chi, obj$control$psi) 
+  robustbase:::lmrob.wgtfun(rstand, obj$control$tuning.chi, obj$control$psi)
 }
 
 covariance.matrix <- function(x, ...) UseMethod("covariance.matrix")
@@ -280,7 +280,7 @@ converged <- function(x, ...) UseMethod("converged")
   ## Author: Manuel Koller, Date:  6 Oct 2009, 13:42
 
 converged.default <- function(obj) is.list(obj) && !is.null(obj$converged) && obj$converged
-converged.lm <- function(obj) 
+converged.lm <- function(obj)
   if (is.null(obj$converged)) TRUE else obj$converged
 converged.lmRob <- function(obj) is.list(obj) && !is.null(obj$est) && obj$est == 'final'
 
@@ -320,10 +320,10 @@ lmrob.u <- function(formula, data, subset, weights, na.action, ..., start)
         if (args$method != oldargs$method && rest.ok) {
           ## method is different, but the rest is the same
           oldsteps <- strsplit(oldargs$method, "")[[1]]
-          steps <- strsplit(args$method, "")[[1]]
+          steps    <- strsplit(args   $method, "")[[1]]
           ## reduce start to largest common initial estimator
           while(length(oldsteps) > length(steps) ||
-                any(oldsteps != steps[1:length(oldsteps)])) {
+                any(oldsteps != steps[seq_along(oldsteps)])) {
             elems <- c('na.action', 'offset', 'contrasts',
                        'xlevels', 'terms', 'model', 'x', 'y',
                        'degree.freedom', 'df.residual', 'call')
@@ -332,17 +332,17 @@ lmrob.u <- function(formula, data, subset, weights, na.action, ..., start)
             oldsteps <- oldsteps[-length(oldsteps)]
           }
           ret$call$method <- args$method
-          steps <- steps[-(1:length(oldsteps))]
+          steps <- steps[- seq_along(oldsteps)]
           if (length(steps) > 0) {
             ret$cov <- NULL
             for (step in steps) {
               ret <- switch(step, D = lmrob..D..fit(ret),
-                            M = lmrob..M..fit(obj = ret), 
+                            M = lmrob..M..fit(obj = ret),
                             N = {
                               y <- model.response(ret$model)
                               ## taus are standardized because otherwise
                               ## the resulting efficiency is lower
-                              tau <- ret$tau / mean(ret$tau) 
+                              tau <- ret$tau / mean(ret$tau)
                               tmp <- lmrob..M..fit(x = ret$x/tau, y = y/tau,
                                                    obj = ret)
                               tmp$residuals <- y - ret$x %*% ret$coef
@@ -359,7 +359,7 @@ lmrob.u <- function(formula, data, subset, weights, na.action, ..., start)
             if (is.null(ret$qr))  ret$qr <- qr(ret$x * sqrt(ret$weights))
             ret$rank <- ret$qr$rank
           }
-        }     
+        }
         ## update covariance matrix
         if (rest.ok) {
           if (is.null(args$cov))
@@ -367,7 +367,7 @@ lmrob.u <- function(formula, data, subset, weights, na.action, ..., start)
           ret$cov <- vcov(ret, args$cov)
           ret$control$cov <- args$cov
           ret$call$cov <- args$cov
-          
+
           return(ret)
         }
       }
@@ -497,10 +497,10 @@ lmrob.mscale <- function(e, control, p = 0L) {
   ret <- .C("R_lmrob_S",
             x = as.double(e), ## this is ignored
             y = as.double(e),
-            n = as.integer(length(e)), 
+            n = as.integer(length(e)),
             p = as.integer(p), ## divide the sum by n - p
             nResample = 0L, ## find scale only
-            scale = as.double(mad(e)), 
+            scale = as.double(mad(e)),
             coef = double(1),
             as.double(control$tuning.chi),
             as.integer(robustbase:::lmrob.psi2ipsi(control$psi)),
@@ -566,6 +566,6 @@ sd.trim <- function(x, trim=0, na.rm=FALSE, ...)
   corr <- if (trim > 0 && trim < 0.5) {
     sqrt((1-2*trim-sqrt(2/pi)*qnorm(1-trim)*exp(-1*qnorm(1-trim)^2/2))/(1-2*trim))
   } else 1
-  
+
   sd(x)/corr
 }
