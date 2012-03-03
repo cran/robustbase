@@ -153,8 +153,7 @@ lmrob.fit <- function(x, y, control, init=NULL) {
     init
 }
 
-if(getRversion() > "2.15.0" || as.numeric(R.Version()$`svn rev`) > 59233)
-    globalVariables("r", add=TRUE) ## below and in other lmrob.E() expressions
+globalVariables("r", add=TRUE) ## below and in other lmrob.E() expressions
 
 .vcov.w <- function(obj, x=obj$x, scale=obj$scale, cov.hubercorr=ctrl$cov.hubercorr,
              cov.dfcorr=ctrl$cov.dfcorr, cov.resid=ctrl$cov.resid,
@@ -622,8 +621,7 @@ lmrob..D..fit <- function(obj, x=obj$x, control = obj$control)
     obj
 }
 
-if(getRversion() > "2.15.0" || as.numeric(R.Version()$`svn rev`) > 59233)
-    globalVariables(c("psi", "wgt", "r"), add=TRUE) ## <- lmrob.E( <expr> )
+globalVariables(c("psi", "wgt", "r"), add=TRUE) ## <- lmrob.E( <expr> )
 
 lmrob.kappa <- function(obj, control = obj$control)
 {

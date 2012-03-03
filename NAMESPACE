@@ -122,17 +122,6 @@ S3method(vcov, glmrob)
 S3method(vcov, lmrob)
 ##not there: S3method(print, summary.mcd)
 
-if(getRversion() < "2.13") {
-    export(nobs)
-    S3method(nobs, lm)
-    S3method(nobs, glm)
-    if(getRversion() < "2.12") {
-	export(droplevels)
-	S3method(droplevels, factor)
-	S3method(droplevels, data.frame)
-    }
-}
-
 ## S4 Generics {only those defined in this package}:
 export(
        chgDefaults
