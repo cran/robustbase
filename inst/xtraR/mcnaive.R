@@ -14,7 +14,10 @@ mcNaive <- function (x, method = c("h.use", "simple"),
     x <- x - m
     n1 <- length(xL <- x[x <= 0]) # both contain all (if any) median values
     n2 <- length(xR <- x[x >= 0])
-    n.n <- n1*n2
+    n.n <- as.double(n1)*n2
+    if(n.n > 1e8)# 1e8 < .Machine$integer.max
+        stop("\"simple\" method not sensible here: would need too much memory: n.n=",
+             n.n)
     Mmedian <- {
         if ((low || high) &&  n.n %% 2 == 0) {
             if (low && high)

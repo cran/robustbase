@@ -7,6 +7,9 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include <inttypes.h>
+// -> int64_t
+
 #include <R.h>
 /*	  --- includes <R_ext/Boolean.h> which has TRUE/FALSE
  * also <R_ext/Utils.h>	 which has the sort routines and
@@ -53,38 +56,26 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 {
 /* NOTE:
     eps	  = c(eps1, eps2)
-    iter  = c(maxit, trace.lev)
+    iter := c(maxit, trace.lev)  as input
+          = c(it, converged)     as output
 */
-    double medc, xmed, xden, trial = -2./* -Wall */;
-    int i,j, h1,h2, nl,nr,neq, knew, trace_lev = iter[1], it = 0;
-    Rboolean IsFound = FALSE, converged = TRUE;
-
-    double *work   = (double *) R_alloc(n, sizeof(double));
-    int	   *weight = (int *)	R_alloc(n, sizeof(int));
-
-    /* work arrays for whimed_i() : will be allocated below : */
-    double *acand, *a_srt;
-    int *iw_cand;
-
-    /* work arrays for the algorithm, allocated below : */
-    int *left, *right, *p, *q;
-
-/* NOTE: array[0] is empty --- so 1-indexing is used (MM: danger!) */
-    double *x  = (double *) R_alloc(n+1, sizeof(double));
-    double *x2; /* just a pointer instead of  Calloc((n+1),double); */
+    int trace_lev = iter[1], it = 0;
+    Rboolean converged = TRUE;
+    double medc; // "the" result
 
     if (n < 3) {
 	medc = 0.; goto Finish;
     }
     /* copy data before sort()ing in place, also reflecting it */
+    /* NOTE: x[0] is empty --- so 1-indexing is used (MM: danger!) */
+    double *x  = (double *) R_alloc(n+1, sizeof(double));
     x[0] = 0;
-    for (i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
 	x[i+1] = -z[i];
-
-    /* xmed := median( x[1:n] ) = - median( z[0:(n-1)] )  : */
 
     R_rsort(&x[1], n); /* full sort */
 
+    double xmed; // := median( x[1:n] ) = - median( z[0:(n-1)] ):
     if (n%2) { /* n even */
 	xmed = x[(n/2)+1];
     }
@@ -103,13 +94,14 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
     if(trace_lev)
 	Rprintf("Median = %g (not at the border)\n", -xmed);
 
+    int i,j;
     /* center x[] wrt median --> such that then  median( x[1:n] ) == 0 */
     for (i = 1; i <= n; i++)
 	x[i] -= xmed;
 
     /* Now scale to inside [-0.5, 0.5] and flip sign such that afterwards
     *  x[1] >= x[2] >= ... >= x[n] */
-    xden = -2 * fmax2(-x[1], x[n]);
+    double xden = -2 * fmax2(-x[1], x[n]);
     for (i = 1; i <= n; i++)
 	x[i] /= xden;
     xmed /= xden;
@@ -124,7 +116,7 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
     if(trace_lev >= 3)
 	Rprintf("   x1[] := {x | x_j > eps}         has %d entries\n", j-1);
     i = 1;
-    x2 = x+j-1; /* pointer -- corresponding to  x2[i] = x[j]; */
+    double *x2 = x+j-1; /* pointer -- corresponding to  x2[i] = x[j]; */
     while (x[j] > -eps[0] * (eps[0] + fabs(xmed)) && j <= n) { /* test relative to xmed */
 	/* x1[j] = x[j]; */
         /* x2[i] = x[j]; */
@@ -135,46 +127,47 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
     if(trace_lev >= 2)
         Rprintf("'median-x' {x | -eps < x_i <= eps} has %d (= 'k') entries\n",
 		i-1);
-    h1 = j-1; /* == size of x1[] == the sum of those two sizes above */
+    int h1 = j-1, /* == size of x1[] == the sum of those two sizes above */
     /* conceptually,  x2[] := {x | x_j <= eps}   (which includes the median 0) */
-    h2 = i + (n-j); /* == size of x2[] == maximal size of whimed() arrays */
+	h2 = i + (n-j);// == size of x2[] == maximal size of whimed() arrays
 
     /* work arrays for whimed_i() :  allocate *once* only !! */
-    acand  = (double *) R_alloc(h2, sizeof(double));
-    a_srt  = (double *) R_alloc(h2, sizeof(double));
-    iw_cand= (int *)	R_alloc(h2, sizeof(int));
+    double *acand  = (double *) R_alloc(h2, sizeof(double)),
+	   *a_srt  = (double *) R_alloc(h2, sizeof(double));
+    int    *iw_cand= (int *)	R_alloc(h2, sizeof(int)),
     /* work arrays for the fast-median-of-table algorithm:
      *  currently still with  1-indexing */
-    left  = (int *) R_alloc((h2+1), sizeof(int));
-    right = (int *) R_alloc((h2+1), sizeof(int));
-    p     = (int *) R_alloc((h2+1), sizeof(int));
-    q     = (int *) R_alloc((h2+1), sizeof(int));
+	*left  = (int *) R_alloc((h2+1), sizeof(int)),
+	*right = (int *) R_alloc((h2+1), sizeof(int)),
+	*p     = (int *) R_alloc((h2+1), sizeof(int)),
+	*q     = (int *) R_alloc((h2+1), sizeof(int));
 
     for (i = 1; i <= h2; i++) {
 	left [i] = 1;
 	right[i] = h1;
     }
-    nl = 0;
-    nr = h1*h2;
-    neq = 0;
-    knew = nr/2 +1;
-
+    int64_t nr = ((int64_t) h1) * ((int64_t) h2), // <-- careful to *NOT* overflow
+	knew = nr/2 +1;
     if(trace_lev >= 2)
-	Rprintf(" (h1,h2,  nr=nr-nl, knew) = (%d,%d,  %d, %d)\n",
-		h1,h2, nr, knew);
+	Rprintf(" (h1,h2, nr, knew) = (%d,%d, %.0f, %.0f)\n",
+		h1,h2, (double)nr, (double)knew);
 
-    it = 0; IsFound = FALSE;
-
+    double trial = -2./* -Wall */;
+    double *work   = (double *) R_alloc(n, sizeof(double));
+    int	   *weight = (int *)	R_alloc(n, sizeof(int));
+    Rboolean IsFound = FALSE;
+    int nl = 0,
+	neq = 0;
     /* MK:  'neq' counts the number of observations in the
      *      inside the tolerance range, i.e., where left > right + 1,
      *      since we would miss those when just using 'nl-nr'.
      *      This is to prevent index overflow in work[] later on.
-     *      left might be larger than right + 1 since we are only 
+     *      left might be larger than right + 1 since we are only
      *      testing with accuracy eps_trial and therefore there might
      *      be more than one observation in the `tolerance range`
      *      between < and <=.
      */
-    while (!IsFound && (nr-nl+neq > n) && it < iter[0]) 
+    while (!IsFound && (nr-nl+neq > n) && it < iter[0])
     {
 	int sum_p, sum_q;
 	it++;
@@ -275,8 +268,7 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 	j = 0;
 	for (i = 1; i <= h2; i++) {
 	    if (left[i] <= right[i]) {
-		int k;
-		for (k = left[i]; k <= right[i]; k++) {
+		for (int k = left[i]; k <= right[i]; k++) {
 		    work[j] = -h_kern(x[k],x2[i],k,i,h1+1,eps[1]);
 		    j++;
 		}

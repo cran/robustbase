@@ -13,8 +13,9 @@ c.time <- function(...) cat('Time elapsed: ', ..., '\n')
 S.time <- function(expr) c.time(system.time(expr))
 DO <- function(...) S.time(stopifnot(...))
 
-DO(0 == sapply(1:100, function(n) mc(seq_len(n))))
-DO(0 == sapply(1:100, function(n) mc(seq_len(n), doRefl=FALSE)))
+n.set <- c(1:99, 1e5L+ 0:1) # large n gave integer overflow in earlier versions
+DO(0 == sapply(n.set, function(n) mc(seq_len(n))))
+DO(0 == sapply(n.set, function(n) mc(seq_len(n), doRefl=FALSE)))
 
 DO(0 == sapply(1:100, function(n) mcNaive(seq_len(n), "simple")))
 DO(0 == sapply(1:100, function(n) mcNaive(seq_len(n), "h.use" )))
