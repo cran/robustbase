@@ -1,6 +1,6 @@
 
-R version 2.13.0 Under development (unstable) (2011-03-07 r54691)
-Copyright (C) 2011 The R Foundation for Statistical Computing
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
@@ -53,10 +53,10 @@ tuning.chi         bb tuning.psi refine.tol    rel.tol
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd  numpoints 
-         0          0         10 
-          psi        method           cov 
-   "bisquare"          "MM" ".vcov.avar1" 
+ trace.lev        mts compute.rd 
+         0       1000          0 
+          psi   subsampling        method           cov 
+   "bisquare" "constrained"          "MM" ".vcov.avar1" 
 seed : int(0) 
 > (A1 <- anova(m0.sali, Y ~ X1 + X3))
 Robust Wald Test Table
@@ -167,10 +167,10 @@ tuning.chi         bb tuning.psi refine.tol    rel.tol
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd  numpoints 
-         0          0         10 
-          psi        method           cov 
-   "bisquare"          "MM" ".vcov.avar1" 
+ trace.lev        mts compute.rd 
+         0       1000          0 
+          psi   subsampling        method           cov 
+   "bisquare" "constrained"          "MM" ".vcov.avar1" 
 seed : int(0) 
 > stopifnot(c(3,18) == which(m1$w < 0.2))
 > 
@@ -213,10 +213,10 @@ tuning.chi         bb tuning.psi refine.tol    rel.tol
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd  numpoints 
-         0          0         10 
-          psi        method           cov 
-   "bisquare"          "MM" ".vcov.avar1" 
+ trace.lev        mts compute.rd 
+         0       1000          0 
+          psi   subsampling        method           cov 
+   "bisquare" "constrained"          "MM" ".vcov.avar1" 
 seed : int(0) 
 > stopifnot(c(11,20,30,34) == which(RlmST$w < 0.01))
 > 
@@ -230,18 +230,18 @@ lmrob(formula = Y ~ ., data = hbk)
 
 Weighted Residuals:
      Min       1Q   Median       3Q      Max 
--0.92731 -0.38663  0.05321  0.71800 10.80005 
+-0.92734 -0.38644  0.05322  0.71808 10.80013 
 
 Coefficients:
             Estimate Std. Error t value Pr(>|t|)  
-(Intercept) -0.18943    0.11665  -1.624   0.1088  
-X1           0.08520    0.07316   1.165   0.2481  
-X2           0.04099    0.02963   1.383   0.1709  
-X3          -0.05367    0.03199  -1.678   0.0978 .
+(Intercept) -0.18962    0.11674  -1.624   0.1088  
+X1           0.08527    0.07329   1.164   0.2485  
+X2           0.04101    0.02956   1.387   0.1697  
+X3          -0.05371    0.03195  -1.681   0.0971 .
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
-Robust residual standard error: 0.7964 
+Robust residual standard error: 0.7892 
 Convergence in 9 IRWLS iterations
 
 Robustness weights: 
@@ -249,16 +249,16 @@ Robustness weights:
 	 are outliers with |weight| = 0 ( < 0.0013); 
  7 weights are ~= 1. The remaining 58 ones are summarized as
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.8549  0.9281  0.9630  0.9540  0.9868  0.9987 
+ 0.8522  0.9268  0.9624  0.9532  0.9865  0.9986 
 Algorithmic parameters: 
 tuning.chi         bb tuning.psi refine.tol    rel.tol 
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd  numpoints 
-         0          0         10 
-          psi        method           cov 
-   "bisquare"          "MM" ".vcov.avar1" 
+ trace.lev        mts compute.rd 
+         0       1000          0 
+          psi   subsampling        method           cov 
+   "bisquare" "constrained"          "MM" ".vcov.avar1" 
 seed : int(0) 
 > stopifnot(1:10 == which(m.hbk$w < 0.01))
 > 
@@ -270,30 +270,30 @@ lmrob(formula = clength ~ ., data = heart)
 
 Weighted Residuals:
      Min       1Q   Median       3Q      Max 
--9.87865 -1.75398 -0.08874  0.81797  5.63933 
+-9.88238 -1.75544 -0.09021  0.81805  5.63795 
 
 Coefficients:
             Estimate Std. Error t value Pr(>|t|)
-(Intercept)  30.2921    62.7390   0.483    0.641
-height       -0.1368     2.1287  -0.064    0.950
-weight        0.3135     0.7360   0.426    0.680
+(Intercept)  30.3033    62.6170   0.484    0.640
+height       -0.1372     2.1246  -0.065    0.950
+weight        0.3136     0.7346   0.427    0.679
 
-Robust residual standard error: 2.591 
+Robust residual standard error: 2.59 
 Convergence in 36 IRWLS iterations
 
 Robustness weights: 
  3 weights are ~= 1. The remaining 9 ones are
      2      3      4      5      6      7      8      9     11 
-0.9887 0.9301 0.9608 0.9082 0.9262 0.9963 0.1140 0.9666 0.6149 
+0.9887 0.9299 0.9608 0.9082 0.9262 0.9963 0.1134 0.9665 0.6149 
 Algorithmic parameters: 
 tuning.chi         bb tuning.psi refine.tol    rel.tol 
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd  numpoints 
-         0          0         10 
-          psi        method           cov 
-   "bisquare"          "MM" ".vcov.avar1" 
+ trace.lev        mts compute.rd 
+         0       1000          0 
+          psi   subsampling        method           cov 
+   "bisquare" "constrained"          "MM" ".vcov.avar1" 
 seed : int(0) 
 > stopifnot(8  == which(mhrt$w < 0.15),
 +           11 == which(0.61 < mhrt$w & mhrt$w < 0.62),
@@ -332,13 +332,16 @@ tuning.chi         bb tuning.psi refine.tol    rel.tol
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd  numpoints 
-         0          0         10 
-          psi        method           cov 
-   "bisquare"          "MM" ".vcov.avar1" 
+ trace.lev        mts compute.rd 
+         0       1000          0 
+          psi   subsampling        method           cov 
+   "bisquare" "constrained"          "MM" ".vcov.avar1" 
 seed : int(0) 
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # "stats"
-Time elapsed:  0.35 0.03 0.375 0 0 
+Time elapsed:  0.33 0.035 0.518 0 0.001 
 > 
+> proc.time()
+   user  system elapsed 
+  0.330   0.036   0.518 

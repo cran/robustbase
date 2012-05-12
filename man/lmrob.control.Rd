@@ -1,4 +1,5 @@
 \name{lmrob.control}
+\encoding{utf8}
 \alias{lmrob.control}
 \alias{lmrob.control.sfs}
 \title{ Tuning parameters for lmrob }
@@ -12,16 +13,18 @@
 lmrob.control(setting, seed = NULL, nResample = 500,
               tuning.chi = NULL, bb = 0.5, tuning.psi = NULL,
               max.it = 50, groups = 5, n.group = 400,
-              k.fast.s = 1, best.r.s = 2, k.max = 200,
+              k.fast.s = 1, best.r.s = 2, k.max = 200, k.m_s = 20,
               refine.tol = 1e-7, rel.tol = 1e-7, trace.lev = 0,
+              mts = 1000, subsampling = c("constrained", "simple"),
               compute.rd = FALSE, method = 'MM',
               psi = c('bisquare', 'lqq', 'welsh', 'optimal', 'hampel',
-              'ggw'), numpoints = 10, cov = '.vcov.avar1', ...)
+              'ggw'), numpoints = 10, cov = '.vcov.avar1',
+              split.type = c("f", "fi", "fii"), ...)
 }
 \arguments{
-  \item{setting}{a string specifying alternative default values. Leave
-    empty for the defaults or use \code{KS2011} for the defaults
-    suggested by Koller and Stahel (2011). See \emph{Details}.}
+  \item{setting}{a string specifying alternative default values.  Leave
+    empty for the defaults or use \code{"KS2011"} for the defaults
+    suggested by Koller and Stahel (2011).  See \emph{Details}.}
   \item{seed}{an integer vector, the seed to be used for random
     re-sampling used in obtaining candidates for the initial
     S-estimator; see \code{\link{.Random.seed}}.  The current value of
@@ -34,12 +37,12 @@ lmrob.control(setting, seed = NULL, nResample = 500,
     which works well in most situations (see references).}
   \item{tuning.chi}{tuning constant vector for the S-estimator.
     Sensible defaults are set according to \code{psi} to yield a 50\%
-    breakdown estimator. See \emph{Details}.} 
+    breakdown estimator. See \emph{Details}.}
   \item{bb}{expected value under the normal model of the
     \dQuote{chi} (rather \eqn{\rho (rho)}{rho}) function with tuning
     constant equal to \code{tuning.chi}.  This is used to compute the
     S-estimator.}
-  \item{tuning.psi}{tuning constant vector for the re-descending M-estimator.
+  \item{tuning.psi}{tuning constant vector for the redescending M-estimator.
     Depending on the value of \code{psi} this constant is set to yield
     an estimator with asymptotic efficiency of 95\% for normal errors.
     See \emph{Details}.}
@@ -51,10 +54,12 @@ lmrob.control(setting, seed = NULL, nResample = 500,
   \item{k.fast.s}{(for the fast-S algorithm): Number of
     local improvement steps (\dQuote{\emph{I-steps}}) for each
     re-sampling candidate.}
+  \item{k.m_s}{(for the M-S algorithm): specifies after how many
+    unsucessful refinement steps the algorithm stops.}
   \item{best.r.s}{(for the fast-S algorithm): Number of
     of best candidates to be iterated further (i.e.,
     \dQuote{\emph{\bold{r}efined}}); is denoted \eqn{t} in
-    Salibian-Barrera \& Yohai(2006).}
+    Salibian-Barrera & Yohai(2006).}
   \item{k.max}{(for the fast-S algorithm): maximal number of
     refinement steps for the \dQuote{fully} iterated best candidates.}
   \item{refine.tol}{(for the fast-S algorithm): relative convergence
@@ -64,7 +69,11 @@ lmrob.control(setting, seed = NULL, nResample = 500,
   \item{trace.lev}{integer indicating if the progress of the MM-algorithm
     should be traced (increasingly); default \code{trace.lev = 0} does
     no tracing.}
-  %% NOTE that lmrob.S() has its "own"  'trace.lev' !
+  \item{mts}{maximum number of samples to try in subsampling
+    algorithm.}
+  \item{subsampling}{type of subsampling to be used, \code{simple} for simple
+    subsampling (default prior to version 0.9), \code{constrained} for
+    constrained subsampling. See \code{\link{lmrob.S}}.}
   \item{compute.rd}{logical indicating if robust distances (based on
     the MCD robust covariance estimator \code{\link{covMcd}}) are to be
     computed for the robust diagnostic plots.  This may take some
@@ -76,17 +85,19 @@ lmrob.control(setting, seed = NULL, nResample = 500,
     is interpreted as \code{SM}. See \emph{Details} of
     \code{\link{lmrob}} for a description of the possible values.}
   \item{psi}{string specifying the type \eqn{\psi}-function
-    used. See \emph{Details} of \code{\link{lmrob}}. Defaults to
-    \code{bisquare} for S and MM-estimates, otherwise \code{lqq}.}
+    used.  See \emph{Details} of \code{\link{lmrob}}.  Defaults to
+    \code{"bisquare"} for S and MM-estimates, otherwise \code{"lqq"}.}
   \item{numpoints}{Number of points used in Gauss quadrature.}
   \item{cov}{Function or string with function name to be used to
     calculate covariance matrix estimate. See \emph{Details} of
     \code{\link{lmrob}}.}
+  \item{split.type}{Determines how categorical and continuous variables
+    are split. See \code{\link{splitFrame}}.}
   \item{...}{Further arguments are added to the control list.}
 }
 \details{The option \code{setting="KS2011"} alters the default
-  arguments. They are changed to \code{method = 'SMDM', psi = 'lqq',
-    max.it = 500, k.max = 2000, cov = '.vcov.w'}. The defaults of all
+  arguments.  They are changed to \code{method = 'SMDM', psi = 'lqq',
+    max.it = 500, k.max = 2000, cov = '.vcov.w'}.  The defaults of all
   the remaining arguments are not changed.
 
   By default, \code{tuning.chi} and \code{tuning.psi} are set to
@@ -141,6 +152,9 @@ lmrob.control(setting, seed = NULL, nResample = 500,
 \examples{
 ## Show the default settings:
 str(lmrob.control())
+
+## Use  Koller & Stahel(2011)'s recommendation but a larger  'max.it':
+str(ctrl <- lmrob.control("KS2011", max.it = 1000))
 }
 \keyword{robust}
 \keyword{regression}

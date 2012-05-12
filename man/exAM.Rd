@@ -20,7 +20,7 @@
   The use of slices in the LMS and the method of density slices:
   Foundation and comparison.\cr
   In Yadolah Dodge and Joe Whittaker, editors, \emph{COMPSTAT:
-  Proc.\ 10th Symp.\ Computat.\ Statist., Neuchatel}, \bold{1}, 441--445;
+  Proc. 10th Symp. Computat. Statist., Neuchatel}, \bold{1}, 441--445;
   Physica-Verlag.
 }
 % \references{

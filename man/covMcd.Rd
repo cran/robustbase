@@ -65,7 +65,7 @@ covMcd(x, cor = FALSE, alpha = 1/2, nsamp = 500, nmini = 300, seed = NULL,
   Both rescaling factors (consistency and finite sample) are returned
   also in the vector \code{raw.cnp2} of length 2.  Based on these raw
   MCD estimates, a reweighting step is performed which increases the
-  finite-sample eficiency considerably - see Pison et al.~(2002).  The
+  finite-sample eficiency considerably - see Pison et al. (2002).  The
   rescaling factors for the reweighted estimates are returned in the
   vector \code{cnp2} of length 2.  Details for the computation of the
   finite sample correction factors can be found in Pison et al. (2002).

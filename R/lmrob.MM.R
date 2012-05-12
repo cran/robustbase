@@ -2,16 +2,18 @@ lmrob.control <- function  (setting, seed = NULL, nResample = 500,
                             tuning.chi = NULL,  bb = 0.5,
                             tuning.psi = NULL, max.it = 50,
                             groups = 5, n.group = 400, k.fast.s = 1, best.r.s = 2,
-                            k.max = 200, refine.tol = 1e-07, rel.tol = 1e-07,
-                            trace.lev = 0, compute.rd = FALSE,
-                            method = 'MM',
+                            k.max = 200, k.m_s = 20, refine.tol = 1e-07, rel.tol = 1e-07,
+                            trace.lev = 0, mts = 1000,
+                            subsampling = c("constrained", "simple"),
+                            compute.rd = FALSE, method = 'MM',
                             psi = c('bisquare', 'lqq', 'welsh', 'optimal', 'hampel',
                               'ggw'),
-                            numpoints = 10, cov = '.vcov.avar1', ...)
+                            numpoints = 10, cov = '.vcov.avar1',
+                            split.type = c("f", "fi", "fii"),
+                            ...)
 {
     if (!missing(setting)) {
         if (setting == 'KS2011') {
-            ## FIXME? Warn if settings are overridden?
             if (missing(method)) method <- 'SMDM'
             if (missing(psi)) psi <- 'lqq'
             if (missing(max.it)) max.it <- 500
@@ -25,7 +27,8 @@ lmrob.control <- function  (setting, seed = NULL, nResample = 500,
         psi <- if (missing(psi) && grepl('D', method)) 'lqq' else match.arg(psi)
         if (missing(cov) && !method %in% c('SM', 'MM')) cov <- '.vcov.w'
     }
-
+    subsampling <- match.arg(subsampling)
+    
     if (missing(tuning.chi) || is.null(tuning.chi))
         tuning.chi <- switch(psi,
                              'bisquare' = 1.54764,
@@ -53,35 +56,53 @@ lmrob.control <- function  (setting, seed = NULL, nResample = 500,
            tuning.chi = tuning.chi, bb = bb, tuning.psi = tuning.psi,
            max.it = max.it, groups = groups, n.group = n.group,
            best.r.s = best.r.s, k.fast.s = k.fast.s,
-           k.max = k.max, refine.tol = refine.tol, rel.tol = rel.tol,
-           trace.lev = trace.lev, compute.rd = compute.rd,
-           method = method, numpoints = numpoints, cov = cov),
+           k.max = k.max, k.m_s = k.m_s, refine.tol = refine.tol,
+           rel.tol = rel.tol, trace.lev = trace.lev, mts = mts,
+           subsampling = subsampling,
+           compute.rd = compute.rd, method = method, numpoints = numpoints,
+           cov = cov, split.type = match.arg(split.type)),
       list(...))
 }
 
 lmrob.fit.MM <- function(x, y, control) ## deprecated
 {
+    .Deprecated("lmrob.fit(*, control) with control$method = 'SM'")
     control$method <- 'SM'
     lmrob.fit(x, y, control)
 }## lmrob.MM.fit()
 
-lmrob.fit <- function(x, y, control) {
+lmrob.fit <- function(x, y, control, init=NULL) {
     if(!is.matrix(x)) x <- as.matrix(x)
     ## old notation: MM -> SM
     if (control$method == "MM") control$method <- "SM"
-    ## --- initial S estimator
-    if (substr(control$method,1,1) != 'S') {
-      warning("Initial estimator '", substr(control$method,1,1), "' not supported",
-              " using S-estimator instead")
-      substr(control$method,1,1) <- 'S'
+    if (is.null(init)) {
+        ## --- initial S estimator
+        if (substr(control$method,1,1) != 'S') {
+            warning("Initial estimator '", substr(control$method,1,1), "' not supported",
+                    " using S-estimator instead")
+            substr(control$method,1,1) <- 'S'
+        }
+        init <- lmrob.S(x,y,control=control)
+        est <- 'S'
+    } else {
+        if (is.null(init$converged)) init$converged <- TRUE
+        if (is.null(init$control)) {
+            init$control <- control
+            init$control$method <- ''
+        }
+        est <- init$control$method
     }
-    init <- lmrob.S(x,y,control=control)
     stopifnot(is.numeric(init$coef), length(init$coef) == ncol(x),
-	      is.numeric(init$scale), init$scale >= 0)
-    est <- 'S'
+              is.numeric(init$scale), init$scale >= 0)
+    if (est != 'S' && control$cov == '.vcov.avar1') {
+        warning("Can only use .vcov.avar1 for S as initial estimator",
+                " using .vcov.w instead")
+        control$cov <- ".vcov.w"
+    }
     if (init$converged) {
         ## --- loop through the other estimators
-        for (step in strsplit(control$method,'')[[1]][-1]) {
+        method <- sub(est, '', control$method)
+        for (step in strsplit(method,'')[[1]]) {
             ## now we have either M or D steps
             est <- paste(est, step, sep = '')
             init <- switch(step,
@@ -89,12 +110,12 @@ lmrob.fit <- function(x, y, control) {
                            D = lmrob..D..fit(init, x),
                            ## M-Step
                            M = lmrob..M..fit(x = x, y = y, obj=init),
-                           stop('only M, D or T steps supported'))
+                           stop('only M and D are steps supported'))
             ## break if an estimator did not converge
             if (!init$converged) {
                 warning(step, "-step did NOT converge. Returning unconverged ", est,
                         "-estimate.")
-                break;
+                break
             }
         }
     }
@@ -107,6 +128,7 @@ lmrob.fit <- function(x, y, control) {
         init$cov <- NA
         init$df <- init$degree.freedom <- NA
     } else {
+        control$method <- est
         init$control <- control
         init$cov <-
             if (is.null(control$cov) || control$cov == "none") NA
@@ -122,8 +144,10 @@ lmrob.fit <- function(x, y, control) {
     init
 }
 
-.vcov.w <-
-    function(obj, x=obj$x, scale=obj$scale, cov.hubercorr=ctrl$cov.hubercorr,
+if(getRversion() > "2.15.0" || as.numeric(R.Version()$`svn rev`) > 59233)
+    utils::globalVariables("r", add=TRUE) ## below and in other lmrob.E() expressions
+
+.vcov.w <- function(obj, x=obj$x, scale=obj$scale, cov.hubercorr=ctrl$cov.hubercorr,
              cov.dfcorr=ctrl$cov.dfcorr, cov.resid=ctrl$cov.resid,
              cov.corrfact=ctrl$cov.corrfact,
              cov.xwx=ctrl$cov.xwx)
@@ -215,7 +239,7 @@ lmrob.fit <- function(x, y, control) {
             else if (!is.null(obj$init$tau)) obj$init$tau
             else stop(':.vcov.w: tau not found') }
         else rep(1,n)
-        rstand <- rstand / tau
+       rstand <- rstand / tau
         r.psi <- lmrob.psifun(rstand, c.psi, psi)
         r.psipr <- lmrob.psifun(rstand, c.psi, psi, deriv = 1)
         if (any(is.na(r.psipr))) warning(":.vcov.w: Caution. Some psiprime are NA")
@@ -262,18 +286,17 @@ lmrob.fit <- function(x, y, control) {
     cv
 }
 
-.vcov.avar1 <- function(obj, x=obj$x) { ## was .vcov.MM
-    ## this works only for MM (SM) estimates
-    if (!is.null(obj$control$method) && !obj$control$method %in% c('SM', 'MM'))
-        stop('.vcov.avar1: this function supports only MM estimates')
+.vcov.avar1 <- function(obj, x=obj$x, posdef.meth = c("posdefify","orig"))
+{ ## was .vcov.MM
+    stopifnot(is.list(ctrl <- obj$control))
+    ## works only for MM & SM estimates:
+    if (!is.null(ctrl$method) && !ctrl$method %in% c('SM', 'MM'))
+        stop('.vcov.avar1() supports only SM or MM estimates')
     ## set psi and chi constants
-    psi <- chi <- obj$control$psi
-    if (is.null(psi)) stop('.vcov.avar1: parameter psi is not defined')
-    c.chi <- obj$control$tuning.chi
-    c.psi <- if (obj$control$method %in% c('S', 'SD'))
-        obj$control$tuning.chi else obj$control$tuning.psi
-    if (!is.numeric(c.psi)) stop('.vcov.avar1: parameter tuning.psi is not numeric')
-    if (!is.numeric(c.chi)) stop('.vcov.avar1: parameter tuning.chi is not numeric')
+    psi <- chi <- ctrl$psi
+    if (is.null(psi)) stop('parameter psi is not defined')
+    stopifnot(is.numeric(c.chi <- ctrl$tuning.chi),
+	      is.numeric(c.psi <- ctrl$tuning.psi))
 
     ## need (r0, r, scale, x, c.psi,c.chi, bb)
     r0 <- obj$init$resid
@@ -310,25 +333,45 @@ lmrob.fit <- function(x, y, control) {
     ret <- (u1 - u2 - u3 + u4)/n
 
     ## this might not be a positive definite matrix
-    ## check eigenvalues
-    ev <- eigen(ret)
-## Martin: FIXME -- the following, using solve(), is clearly less efficient than
-##         sfsmisc::posdefify()  and we should also consider  Matrix::nearPD()
-    if (any(ev$values < 0)) { ## there's a problem
-        ## remove negative eigenvalue:
-        ## transform covariance matrix into eigenbasis
-        levinv <- solve(ev$vectors)
-        cov.eb <- levinv %*% ret %*% ev$vectors
-        ## set vectors corresponding to negative ev to zero
-        cov.eb[,ev$values < 0] <- 0
-        ## cov.eb[cov.eb < 1e-16] <- 0
-        ## and transform back
-        ret <- ev$vectors %*% cov.eb %*% levinv
+    ## check eigenvalues (symmetric: ensure non-complex)
+    ev <- eigen(ret, symmetric = TRUE)
+    if (any(neg.ev <- ev$values < 0)) { ## there's a problem
+	posdef.meth <- match.arg(posdef.meth)
+	if(ctrl$trace.lev)
+	    message("fixing ", sum(neg.ev),
+		    " negative eigen([",p,"])values")
+	Q <- ev$vectors
+	switch(posdef.meth,
+	       "orig" = {
+		   ## remove negative eigenvalue:
+		   ## transform covariance matrix into eigenbasis
+		   levinv <- solve(Q)
+		   cov.eb <- levinv %*% ret %*% Q
+		   ## set vectors corresponding to negative ev to zero
+		   cov.eb[, neg.ev] <- 0
+		   ## cov.eb[cov.eb < 1e-16] <- 0
+		   ## and transform back
+		   ret <- Q %*% cov.eb %*% levinv
+	       },
+	       "posdefify" = {
+		   ## Instead of using	require("sfsmisc") and
+		   ## ret <- posdefify(ret, "someEVadd",eigen.m = ev,eps.ev = 0)
+		   lam <- ev$values
+		   lam[neg.ev] <- 0
+		   o.diag <- diag(ret)# original one - for rescaling
+		   ret <- Q %*% (lam * t(Q)) ## == Q %*% diag(lam) %*% t(Q)
+		   ## rescale to the original diagonal values
+		   ## D <- sqrt(o.diag/diag(ret))
+		   ## where they are >= 0 :
+		   D <- sqrt(pmax(0, o.diag)/diag(ret))
+		   ret[] <- D * ret * rep(D, each = n) ## == diag(D) %*% m %*% diag(D)
+	       },
+	       stop("invalid 'posdef.meth': ", posdef.meth))
     }
     attr(ret,"weights") <- w / r.s
     attr(ret,"eigen") <- ev
     ret
-}
+}## end{.vcov.avar1}
 
 lmrob..M..fit <- function (x=obj$x, y=obj$y, beta.initial=obj$coef,
                            scale=obj$scale, control=obj$control, obj)
@@ -359,7 +402,9 @@ lmrob..M..fit <- function (x=obj$x, y=obj$y, beta.initial=obj$coef,
               loss = double(1),
               rel.tol = as.double(control$rel.tol),
               converged = logical(1),
-              trace.lev = as.integer(control$trace.lev)
+              trace.lev = as.integer(control$trace.lev),
+              mts = as.integer(control$mts),
+              ss = .convSs(control$subsampling)
               )[c("coefficients",  "scale", "residuals", "loss", "converged", "iter")]
     ## FIXME?: Should rather warn *here* in case of non-convergence
     names(ret$coefficients) <- colnames(x)
@@ -394,8 +439,7 @@ lmrob..M..fit <- function (x=obj$x, y=obj$y, beta.initial=obj$coef,
         ret$qr <- qr(x * sqrt(ret$weights))
         ret$rank <- ret$qr$rank
         ## if there is a covariance matrix estimate available in obj
-        ## update it, if possible, else replace it by the default
-        ## .vcov.w
+        ## update it, if possible, else replace it by the default .vcov.w
         if (!is.null(obj$cov)) {
             if (!control$method %in% c('SM', 'MM') &&
                 ret$control$cov == '.vcov.avar1') ret$control$cov <- '.vcov.w'
@@ -410,7 +454,7 @@ lmrob..M..fit <- function (x=obj$x, y=obj$y, beta.initial=obj$coef,
 }
 
 
-lmrob.S <- function (x, y, control, trace.lev = 0)
+lmrob.S <- function (x, y, control, trace.lev = control$trace.lev, mf = NULL)
 {
     if (!is.matrix(x)) x <- as.matrix(x)
     n <- nrow(x)
@@ -458,7 +502,9 @@ lmrob.S <- function (x, y, control, trace.lev = 0)
             k.iter = as.integer(control$k.max),
             refine.tol = as.double(control$refine.tol),
             converged = logical(1),
-            trace.lev = as.integer(trace.lev)
+            trace.lev = as.integer(trace.lev),
+            mts = as.integer(control$mts),
+            ss = .convSs(control$subsampling)
             )[c("coefficients", "scale", "k.iter", "converged")]
     scale <- b$scale
     if (scale < 0)
@@ -472,7 +518,7 @@ lmrob.S <- function (x, y, control, trace.lev = 0)
     ## robustness weights
     b$weights <- lmrob.wgtfun(b$residuals / b$scale, control$tuning.chi, control$psi)
     ## set method argument in control
-    control$method = 'S'
+    control$method <- 'S'
     b$control <- control
     b
 }
@@ -548,6 +594,9 @@ lmrob..D..fit <- function(obj, x=obj$x, control = obj$control)
     obj
 }
 
+if(getRversion() > "2.15.0" || as.numeric(R.Version()$`svn rev`) > 59233)
+    utils::globalVariables(c("psi", "wgt", "r"), add=TRUE) ## <- lmrob.E( <expr> )
+
 lmrob.kappa <- function(obj, control = obj$control)
 {
     if (is.null(control)) stop('control is missing')
@@ -566,7 +615,7 @@ lmrob.tau <- function(obj,x=obj$x, control = obj$control, h, fast = TRUE)
         else
             h <- lmrob.leverages(x, obj$weights, wqr = obj$qr)
     }
-    
+
     ## speed up: use approximation if possible
     if (fast && !control$method %in% c('S', 'SD')) {
         c.psi <- control$tuning.psi
@@ -701,9 +750,7 @@ lmrob.leverages <- function(x, w = rep(1, NROW(x)), ...)
 lmrob.psi2ipsi <- function(psi)
 {
     switch(casefold(psi),
-           'tukey' =,
-           'biweight' = ,
-           'bisquare' = 1L,
+           'tukey' = , 'biweight' = , 'bisquare' = 1L,
            'welsh' = 2L,
            'optimal' = 3L,
            'hampel' = 4L,
@@ -967,3 +1014,10 @@ ghq <- function(n = 1, modify = TRUE) {
     x <- vd$values[n..1] # = rev(..)
     list(nodes=x, weights= if (modify) w*exp(x^2) else w)
 }
+
+.convSs <- function(ss)
+    switch(ss,
+           simple=0L,
+           constrained=1L,
+           stop("unknown setting for parameter ss"))
+           

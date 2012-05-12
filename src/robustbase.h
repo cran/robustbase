@@ -42,14 +42,27 @@ void R_lmrob_S(double *X, double *y, int *n, int *P,
 	       double *C, int *iipsi, double *bb,
 	       int *best_r, int *Groups, int *N_group,
 	       int *K_s, int *max_k, double *rel_tol,
-	       int* converged, int *trace_lev);
+	       int* converged, int *trace_lev, int *mts, int *ss);
+
+void R_lmrob_M_S(double *X1, double *X2, double *y, double *res,
+		 int *n, int *p1, int *p2, int *nRes, 
+		 double *scale, double *b1, double *b2,
+		 double *rho_c, int *ipsi, double *bb,
+		 int *K_m_s, int *max_k, double *rel_tol,
+		 int *converged, int *trace_lev,
+		 int *orthogonalize, int *subsample, 
+		 int *descent, int *mts, int *ss);
 
 void R_lmrob_MM(double *X, double *y, int *n, int *P,
 		double *beta_initial, double *scale,
 		double *beta_m, double *resid,
 		int *max_it,
 		double *rho_c, int *ipsi, double *loss, double *rel_tol,
-		int *converged, int *trace_lev);
+		int *converged, int *trace_lev, int *mts, int *ss);
+
+void R_subsample(const double *x, const double *y, int *n, int *m, 
+		 double *beta, int *ind_space, int *idc, int *idr, 
+		 double *lu, double *v, int *p, int *status, int *sample, int *mts, int *ss);
 
 void R_psifun(double *xx, double *cc, int *iipsi, int *dderiv, int *llength);
 void R_chifun(double *xx, double *cc, int *iipsi, int *dderiv, int *llength);
@@ -91,3 +104,10 @@ int F77_NAME(rfltsreg)(
     double *h__, double *hvec, double *c__,
     double *cstock, double *mstock, double *c1stock, double *m1stock,
     double *dath, double *sd, double *means, double *bmeans);
+
+/* ------- ./rllarsbi.f -------------- */
+void  F77_NAME(rllarsbi)(
+    double *X, double *Y, int *N, int *NP, int *MDX, int *MDT, 
+    double *TOL, int *NIT, int *K, int *KODE, double *SIGMA, double *THETA, 
+    double *RS, double *SC1, double *SC2, double *SC3, double *SC4, 
+    double *BET0);

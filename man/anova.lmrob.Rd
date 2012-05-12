@@ -12,7 +12,7 @@
   \item{object, \dots}{objects of class \code{"lmrob"}, typically
     the result of a call to \code{\link{lmrob}}. \code{\dots} arguments
     may also be symbolic descriptions of the reduced models
-    (cf.\ argument \code{formula} in \code{\link{lm}}).
+    (cf. argument \code{formula} in \code{\link{lm}}).
   }
   \item{test}{a character string specifying the test statistic to be used.
     Can be one of \code{"Wald"} or \code{"Deviance"},

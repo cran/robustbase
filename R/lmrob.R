@@ -1,23 +1,10 @@
-### FIXME:
-### ----- MM wants to change
-
-### 3) allow the 'control' entries to enter via "..." as well -- Done
-
-### 4) lmrob() should really behave like lm() {in R; not S !}
-###		--> 'subset' etc			      -- Done
-
-### 5) There are still quite a few things hard-coded in ../src/lmrob.c
-###    E.g., 'nResample' is used, but MAX_NO_RESAMPLES = 500 cannot be changed.
-
-### 6) Use ' method = "MM" ' and a general scheme for "plugin" of other estimators!!
-
 
 ### The first part of lmrob()  much cut'n'paste from lm() - on purpose!
 lmrob <-
     function(formula, data, subset, weights, na.action, method = 'MM',
              model = TRUE, x = !control$compute.rd, y = FALSE,
              singular.ok = TRUE, contrasts = NULL, offset = NULL,
-             control = NULL, ...)
+             control = NULL, init = NULL, ...)
 {
     ## to avoid problems with setting argument
     ## call lmrob.control here either with or without method arg.
@@ -44,7 +31,7 @@ lmrob <-
                       length(offset), NROW(y)), domain = NA)
     if (!missing(control) && !missing(method) && method != control$method) {
         warning("Methods argument set by method is different from method in control\n",
-                "Using method = ", method)
+                "Using the former, method = ", method)
         control$method <- method
     }
 
@@ -64,8 +51,29 @@ lmrob <-
             stop("Weights are not yet implemented for this estimator")
         if(!is.null(offset))
             stop("'offset' not yet implemented for this estimator")
-
-        z <- lmrob.fit(x, y, control)
+        if (!is.null(init)) {
+            if (is.character(init)) {
+                init <- switch(init,
+                               `M-S` = lmrob.M.S(x, y, control, mf),
+                               S = lmrob.S(x, y, control),
+                               stop('init must be "S", "M-S", function or list'))
+            } else if (is.function(init)) {
+                init <- init(x=x, y=y, control=control, mf=mf)
+            } else if (is.list(init)) {
+                ## MK: set init$weights, init$residuals here ??
+                ##     (needed in lmrob..D..fit)
+                ##     or disallow method = D... ? would need to fix also
+                ##    lmrob.kappa: tuning.psi / tuning.chi choice
+            } else stop("unknown init argument")
+            stopifnot(!is.null(init$coef), !is.null(init$scale))
+            ## modify (default) control$method
+            if (control$method == "MM" || substr(control$method, 1, 1) == "S")
+                control$method <- substring(control$method, 2)
+            ## check for control$cov argument
+            if (class(init)[1] != "lmrob.S" && control$cov == '.vcov.avar1')
+                control$cov <- ".vcov.w"
+        }
+        z <- lmrob.fit(x, y, control, init=init) #-> ./lmrob.MM.R
     }
 
     z$na.action <- attr(mf, "na.action")
@@ -85,7 +93,8 @@ lmrob <-
     z
 }
 
-## internal function, used in lmrob() and maybe plot.lmrob()
+##' Robust Mahalanobis Distances
+##' internal function, used in lmrob() and maybe plot.lmrob()
 robMD <- function(x, intercept, ...) {
     if(intercept == 1) x <- x[, -1, drop=FALSE]
     if(ncol(x) >= 1) {
@@ -235,8 +244,38 @@ print.summary.lmrob <-
 
     } else cat("\nNo Coefficients\n")
 
-    if (x$control$method == 'SM') x$control$method <- 'MM'
-    printControl(x$control, digits = digits)
+    ## modify control list to contain only parameters
+    ## that were actually used
+    control <- x$control
+    switch(sub("^(S|M-S).*", "\\1", control$method),
+           S = { # remove all M-S specific control pars
+               control$k.m_s <- NULL
+               control$split.type <- NULL
+           },
+           `M-S` = { # remove all fast S specific control pars
+               control$refine.tol <- NULL
+               control$groups <- NULL
+               control$n.group <- NULL
+               control$best.r.s <- NULL
+               control$k.fast.s <- NULL
+           }, { # else: do not print any parameter used by initial ests. only
+               control$tuning.chi <- NULL
+               control$bb <- NULL
+               control$refine.tol <- NULL
+               control$nResample <- NULL
+               control$groups <- NULL
+               control$n.group <- NULL
+               control$best.r.s <- NULL
+               control$k.fast.s <- NULL
+               control$k.max <- NULL
+               control$k.m_s <- NULL
+               control$split.type <- NULL
+               control$mts <- NULL
+               control$subsampling <- NULL
+           } )
+    if (!grepl("D", control$method)) control$numpoints <- NULL
+    if (x$control$method == 'SM') control$method <- x$control$method <- 'MM'
+    printControl(control, digits = digits)
 
     invisible(x)
 }
@@ -330,4 +369,3 @@ summarizeRobWeights <-
 	print(summary(w, digits = digits), digits = digits, ...)
     }
 }
-

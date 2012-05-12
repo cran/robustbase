@@ -1,0 +1,385 @@
+
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-unknown-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ## Test implementation of M-S estimator
+> require(robustbase)
+Loading required package: robustbase
+> lmrob.conv.cc  <- robustbase::: lmrob.conv.cc
+> lmrob.psi2ipsi <- robustbase::: lmrob.psi2ipsi
+> lmrob.wgtfun   <- robustbase::: lmrob.wgtfun
+> 
+> ## dataset with factors and continuous variables:
+> data(education)
+> education <- within(education, Region <- factor(Region))
+> ## for testing purposes:
+> education2 <- within(education, Group <- factor(rep(1:3, length.out=length(Region))))
+> 
+> ## Test splitFrame (type fii is the only problematic type)
+> testFun <- function(formula, x1.idx) {
++     obj <- lm(formula, education2)
++     mf <- obj$model
++     ret <- splitFrame(mf, type="fii")
++     if (missing(x1.idx)) {
++         print(ret$x1.idx)
++         return(which(unname(ret$x1.idx)))
++     }
++     stopifnot(identical(x1.idx, which(unname(ret$x1.idx))))
++ }
+> testFun(Y ~ 1, integer(0))
+> testFun(Y ~ X1*X2*X3, integer(0))
+> testFun(Y ~ Region + X1 + X2 + X3, 1:4)
+> testFun(Y ~ 0 + Region + X1 + X2 + X3, 1:4)
+> testFun(Y ~ Region*X1 + X2 + X3, c(1:5, 8:10))
+> testFun(Y ~ Region*X1 + X2 + X3 + Region*Group, c(1:5, 8:18))
+> testFun(Y ~ Region*X1 + X2 + X3 + Region*Group*X2, c(1:6, 8:29))
+> testFun(Y ~ Region*X1 + X2 + Region*Group*X2, 1:28)
+> testFun(Y ~ Region*X1 + X2 + Region:Group:X2, 1:21)
+> testFun(Y ~ Region*X1 + X2*X3 + Region:Group:X2, c(1:6, 8:10, 12:23))
+> testFun(Y ~ (X1+X2+X3+Region)^2, c(1:7,10:12,14:19))
+> testFun(Y ~ (X1+X2+X3+Region)^3, c(1:19, 21:29))
+> testFun(Y ~ (X1+X2+X3+Region)^4, 1:32)
+> testFun(Y ~ Region:X1:X2 + X1*X2, c(1:1, 4:7))
+> 
+> ## Test subsampling algorithm
+> m_s_subsample <- function(x1, x2, y, control, orthogonalize=TRUE) {
++     x1 <- as.matrix(x1)
++     x2 <- as.matrix(x2)
++     y <- y
++     storage.mode(x1) <- "double"
++     storage.mode(x2) <- "double"
++     storage.mode(y) <- "double"
++ 
++     z <- .C(robustbase:::R_lmrob_M_S,
++             X1=x1,
++             X2=x2,
++             y=y,
++             res=double(length(y)),
++             n=length(y),
++             p1=ncol(x1),
++             p2=ncol(x2),
++             nResample=as.integer(control$nResample),
++             scale=double(1),
++             b1=double(ncol(x1)),
++             b2=double(ncol(x2)),
++             tuning_chi=as.double(control$tuning.chi),
++             ipsi=as.integer(lmrob.psi2ipsi(control$psi)),
++             bb=as.double(control$bb),
++             K_m_s=as.integer(control$k.m_s),
++             max_k=as.integer(control$k.max),
++             rel_tol=as.double(control$rel.tol),
++             converged=logical(1),
++             trace_lev=as.integer(control$trace.lev),
++             orthogonalize=as.logical(orthogonalize),
++             subsample=TRUE,
++             descent=FALSE,
++             mts = 0L,
++             ss = 1L)
++     z[c("b1", "b2", "scale")]
++ }
+> 
+> control <- lmrob.control()
+> f.lm <- lm(Y ~ Region + X1 + X2 + X3, education)
+> splt <- splitFrame(f.lm$model)
+> y <- education$Y
+> 
+> ## test orthogonalizing
+> x1 <- splt$x1
+> x2 <- splt$x2
+> tmp <- lmrob.lar(x1, y, control)
+> y.tilde <- tmp$resid
+> t1 <- tmp$coef
+> x2.tilde <- x2
+> T2 <- matrix(0, nrow=ncol(x1), ncol=ncol(x2))
+> for (i in 1:ncol(x2)) {
++     tmp <- lmrob.lar(x1, x2[,i], control)
++     x2.tilde[,i] <- tmp$resid
++     T2[,i] <- tmp$coef
++ }
+> set.seed(10)
+> res1 <- m_s_subsample(x1, x2.tilde, y.tilde, control, FALSE)
+> res1 <- within(res1, b1 <- drop(t1 + b1 - T2 %*% b2))
+> set.seed(10)
+> res2 <- m_s_subsample(x1, x2, y, control, TRUE)
+> stopifnot(all.equal(res1, res2))
+> 
+> res <- vector("list", 100)
+> set.seed(0)
+> time <- system.time(for (i in 1:100) {
++     tmp <- m_s_subsample(x1, x2.tilde, y.tilde, control, FALSE)
++     res[[i]] <- unlist(within(tmp, b1 <- drop(t1 + b1 - T2 %*% b2)))
++ })
+> cat('Time elapsed in subsampling: ', time,'\n')
+Time elapsed in subsampling:  0.406 0 0.419 0 0 
+> ## show a summary of the results
+> summary(res1 <- do.call(rbind, res))
+      b11               b12              b13                b14       
+ Min.   :-316.24   Min.   :-33.92   Min.   :-35.8704   Min.   :16.43  
+ 1st Qu.:-225.08   1st Qu.:-23.56   1st Qu.: -8.9603   1st Qu.:29.92  
+ Median :-165.13   Median :-21.67   Median : -7.1102   Median :32.20  
+ Mean   :-162.74   Mean   :-22.07   Mean   : -8.1134   Mean   :32.12  
+ 3rd Qu.:-103.36   3rd Qu.:-18.47   3rd Qu.: -5.9652   3rd Qu.:35.72  
+ Max.   :  61.83   Max.   :-12.03   Max.   :  0.7015   Max.   :42.23  
+      b21                b22               b23             scale      
+ Min.   :-0.03808   Min.   :0.02111   Min.   :0.2555   Min.   :29.79  
+ 1st Qu.:-0.00397   1st Qu.:0.03927   1st Qu.:0.4956   1st Qu.:30.42  
+ Median : 0.02142   Median :0.04717   Median :0.6404   Median :30.91  
+ Mean   : 0.02678   Mean   :0.04621   Mean   :0.6275   Mean   :30.94  
+ 3rd Qu.: 0.05561   3rd Qu.:0.05211   3rd Qu.:0.7506   3rd Qu.:31.36  
+ Max.   : 0.10427   Max.   :0.06938   Max.   :0.9172   Max.   :32.18  
+> ## compare with fast S solution
+> fmS <- lmrob(Y ~ Region + X1 + X2 + X3, education, init="S")
+> coef(fmS)
+  (Intercept)       Region2       Region3       Region4            X1 
+-135.72592070  -20.64576533   -9.84881705   24.58013150    0.03405590 
+           X2            X3 
+   0.04327562    0.57895740 
+> fmS$scale
+[1] 26.40386
+> 
+> ## Test descent algorithm
+> m_s_descent <- function(x1, x2, y, control, b1, b2, scale) {
++     x1 <- as.matrix(x1)
++     x2 <- as.matrix(x2)
++     y <- y
++     storage.mode(x1) <- "double"
++     storage.mode(x2) <- "double"
++     storage.mode(y) <- "double"
++ 
++     z <- .C(robustbase:::R_lmrob_M_S,
++             X1=x1,
++             X2=x2,
++             y=y,
++             res=double(length(y)),
++             n=length(y),
++             p1=ncol(x1),
++             p2=ncol(x2),
++             nResample=as.integer(control$nResample),
++             scale=as.double(scale),
++             b1=as.double(b1),
++             b2=as.double(b2),
++             tuning_chi=as.double(control$tuning.chi),
++             ipsi=as.integer(lmrob.psi2ipsi(control$psi)),
++             bb=as.double(control$bb),
++             K_m_s=as.integer(control$k.m_s),
++             max_k=as.integer(control$k.max),
++             rel_tol=as.double(control$rel.tol),
++             converged=logical(1),
++             trace_lev=as.integer(control$trace.lev),
++             orthogonalize=FALSE,
++             subsample=FALSE,
++             descent=TRUE,
++             mts = 0L,
++             ss = 1L)
++     z[c("b1", "b2", "scale", "res")]
++ }
+> 
+> find_scale <- function(r, s0, n, p, control) {
++     c.chi <- lmrob.conv.cc(control$psi, control$tuning.chi)
++ 
++     b <- .C(robustbase:::R_lmrob_S,
++             x = double(1),
++             y = as.double(r),
++             n = as.integer(n),
++             p = as.integer(p),
++             nResample = 0L,
++             scale = as.double(s0),
++             coefficients = double(p),
++             as.double(c.chi),
++             as.integer(lmrob.psi2ipsi(control$psi)),
++             as.double(control$bb),
++             best_r = 0L,
++             groups = 0L,
++             n.group = 0L,
++             k.fast.s = 0L,
++             k.iter = 0L,
++             refine.tol = as.double(control$refine.tol),
++             converged = logical(1),
++             trace.lev = 0L,
++             mts = 0L,
++             ss = 1L
++             )[c("coefficients", "scale", "k.iter", "converged")]
++     b$scale
++ }
+> 
+> ## what should it be:
+> m_s_descent_Ronly<- function(x1, x2, y, control, b1, b2, scale) {
++     n <- length(y)
++     p1 <- ncol(x1)
++     p2 <- ncol(x2)
++     p <- p1+p2
++     t2 <- b2
++     t1 <- b1
++     rs <- drop(y - x1 %*% b1 - x2 %*% b2)
++     sc <- scale
++     ## do refinement steps
++     ## do maximally control$k.max iterations
++     ## stop if converged
++     ## stop after k.fast.m_s step of no improvement
++     if (control$trace.lev > 4) cat("scale:", scale, "\n")
++     if (control$trace.lev > 4) cat("res:", rs, "\n")
++     nnoimprovement <- nref <- 0; conv <- FALSE
++     while((nref <- nref + 1) <= control$k.max && !conv &&
++           nnoimprovement < control$k.m_s) {
++         ## STEP 1: UPDATE B2
++         y.tilde <- y - x1 %*% t1
++         w <- lmrob.wgtfun(rs / sc, control$tuning.chi, control$psi)
++         if (control$trace.lev > 4) cat("w:", w, "\n")
++         z2 <- lm.wfit(x2, y.tilde, w)
++         t2 <- z2$coef
++         if (control$trace.lev > 4) cat("t2:", t2, "\n")
++         rs <- y - x2 %*% t2
++         ## STEP 2: OBTAIN M-ESTIMATE OF B1
++         z1 <- lmrob.lar(x1, rs, control)
++         t1 <- z1$coef
++         if (control$trace.lev > 4) cat("t1:", t1, "\n")
++         rs <- z1$resid
++         ## STEP 3: COMPUTE THE SCALE ESTIMATE
++         sc <- find_scale(rs, sc, n, p, control)
++         if (control$trace.lev > 4) cat("sc:", sc, "\n")
++         ## STEP 4: CHECK FOR CONVERGENCE
++         #...
++         ## STEP 5: UPDATE BEST FIT
++         if (sc < scale) {
++             scale <- sc
++             b1 <- t1
++             b2 <- t2
++             nnoimprovement <- 0
++         } else nnoimprovement <- nnoimprovement + 1
++     }
++     ## STEP 6: FINISH
++     if (nref == control$k.max)
++         warning("M-S estimate: maximum number of refinement steps reached.")
++ 
++     list(b1=b1, b2=b2, scale=scale, res=rs)
++ }
+> 
+> control2 <- control
+> #control2$trace.lev <- 5
+> control2$k.max <- 1
+> stopifnot(all.equal(m_s_descent      (x1, x2, y, control2, res2$b1, res2$b2, res2$scale+10),
++ 		    m_s_descent_Ronly(x1, x2, y, control2, res2$b1, res2$b2, res2$scale+10),
++ 		    check.attr = FALSE))
+> 
+> ## control$k.m_s <- 100
+> res3 <- vector("list", 100)
+> time <- system.time(for (i in 1:100) {
++     res3[[i]] <- unlist(m_s_descent(x1, x2, y, control,
++                                     res[[i]][1:4], res[[i]][5:7], res[[i]][8]))
++ })
+> cat('Time elapsed in descent proc: ', time,'\n')
+Time elapsed in descent proc:  0.091 0 0.094 0 0 
+> 
+> ## show a summary of the results
+> res4 <- do.call(rbind, res3)
+> summary(res4[,1:8])
+      b11              b12              b13               b14       
+ Min.   :-316.3   Min.   :-30.56   Min.   :-36.501   Min.   :16.43  
+ 1st Qu.:-224.2   1st Qu.:-23.09   1st Qu.: -8.956   1st Qu.:28.05  
+ Median :-160.7   Median :-20.72   Median : -7.693   Median :31.21  
+ Mean   :-159.9   Mean   :-20.52   Mean   : -8.873   Mean   :31.03  
+ 3rd Qu.:-102.7   3rd Qu.:-17.40   3rd Qu.: -6.819   3rd Qu.:33.04  
+ Max.   : 101.7   Max.   :-12.06   Max.   : -4.032   Max.   :42.23  
+      b21                b22               b23             scale      
+ Min.   :-0.02141   Min.   :0.01459   Min.   :0.2034   Min.   :29.79  
+ 1st Qu.: 0.02071   1st Qu.:0.03924   1st Qu.:0.5007   1st Qu.:30.37  
+ Median : 0.03911   Median :0.04493   Median :0.6381   Median :30.57  
+ Mean   : 0.03852   Mean   :0.04372   Mean   :0.6310   Mean   :30.70  
+ 3rd Qu.: 0.06021   3rd Qu.:0.04811   3rd Qu.:0.7508   3rd Qu.:30.96  
+ Max.   : 0.09102   Max.   :0.06367   Max.   :0.9172   Max.   :31.84  
+> 
+> plot(res1[, "scale"], res4[,"scale"])
+> abline(0,1, col=adjustcolor("gray", 0.5))
+> 
+> ## Test lmrob.M.S
+> x <- model.matrix(fmS)
+> control$trace.lev <- 3
+> set.seed(1003)
+> fMS <- lmrob.M.S(x, y, control, fmS$model)
+starting with subsampling procedure...
+Step 0: new candidate with sc = 43.22688
+Step 1: new candidate with sc = 33.12505
+Step 18: new candidate with sc = 31.85586
+Step 136: new candidate with sc = 31.74081
+Step 338: new candidate with sc = 31.51188
+Finished M-S subsampling with scale = 31.51188
+b1: -5.445072 7.825257 1.756708 7.656800 
+b2: 0.048442 0.037633 0.591759 
+starting with descent procedure...
+Refinement step 1: better fit, scale: 31.48594
+Refinement step 4: better fit, scale: 31.38752
+Refinement step 5: better fit, scale: 31.34287
+Refinement step 6: better fit, scale: 31.32908
+descent procedure: not converged.
+b1: -113.528805 -14.858187 -9.426368 27.485299 
+b2: 0.066846 0.036134 0.540701 
+> resid <- drop(y - x %*% fMS$coef)
+> stopifnot(all.equal(resid, fMS$resid, check.attr=FALSE))
+> 
+> ## Test direct call to lmrob
+> set.seed(13)
+> fiMS <- lmrob(Y ~ Region + X1 + X2 + X3, education, init="M-S")
+> out2 <- capture.output(summary(fiMS))
+> writeLines(out2)
+
+Call:
+lmrob(formula = Y ~ Region + X1 + X2 + X3, data = education, 
+    init = "M-S")
+
+Weighted Residuals:
+    Min      1Q  Median      3Q     Max 
+-62.729 -15.529  -1.572  23.392 174.750 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)   
+(Intercept) -150.07630  143.09300  -1.049  0.30013   
+Region2      -12.76767   16.63758  -0.767  0.44704   
+Region3      -10.63954   15.92865  -0.668  0.50774   
+Region4       21.95445   16.96484   1.294  0.20253   
+X1             0.04146    0.05040   0.823  0.41525   
+X2             0.04337    0.01373   3.159  0.00289 **
+X3             0.61106    0.35153   1.738  0.08932 . 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+
+Robust residual standard error: 30.82 
+Convergence in 19 IRWLS iterations
+
+Robustness weights: 
+ observation 50 is an outlier with |weight| = 0 ( < 0.002); 
+ 7 weights are ~= 1. The remaining 42 ones are summarized as
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.2884  0.8904  0.9508  0.8890  0.9867  0.9985 
+Algorithmic parameters: 
+tuning.chi         bb tuning.psi    rel.tol 
+ 1.5476400  0.5000000  4.6850610  0.0000001 
+ nResample     max.it      k.max      k.m_s  trace.lev        mts compute.rd 
+       500         50        200         20          0       1000          0 
+          psi   subsampling        method           cov    split.type 
+   "bisquare" "constrained"        "M-SM"     ".vcov.w"           "f" 
+seed : int(0) 
+> 
+> set.seed(13)
+> fiM.S <- lmrob(Y ~ Region + X1 + X2 + X3, education, init=lmrob.M.S)
+> out3 <- capture.output(summary(fiM.S))
+> 
+> ## must be the same {apart from the "init=" in the call}:
+> stopifnot(identical(out2[-4], out3[-4]))
+> 
+> proc.time()
+   user  system elapsed 
+  0.986   0.046   1.195 

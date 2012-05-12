@@ -7,30 +7,32 @@
   used as starting value, and an M-estimator with fixed scale and
   redescending psi-function is used from there. Optionally a D-step
   (Design Adaptive Scale estimate) as well as a second M-step is
-  calculated. 
+  calculated.
 }
 \usage{
-lmrob.fit(x, y, control)
+lmrob.fit(x, y, control, init = NULL)
 }
 \arguments{
   \item{x}{design matrix (\eqn{n \times p}{n x p}) typically including a
     column of \code{1}s for the intercept.}
   \item{y}{numeric response vector (of length \eqn{n}).}
-  \item{control}{A list of control parameters as returned
+  \item{control}{a list of control parameters as returned
     by \code{\link{lmrob.control}}, used for both the initial S-estimate
     and the subsequent M- and D-estimates.}
+  \item{init}{optional \code{\link{list}} of initial estimates.  See
+    \emph{Details}.}
 }
 \details{This function is the basic fitting function for MM-type estimation,
   called by \code{\link{lmrob}} and typically not to be used on its own.
 
-  It calls \code{\link{lmrob.S}(..)} and uses it as initial estimator.
-  Note that by default the inference used (covariance matrix) depends
-  crucially on the S-estimator used, and hence it is currently no longer
-  possible to specify the S-estimator at this level.
+  If given, \code{init} must be a list of initial estimates containing
+  at least the initial coefficients and scale as \code{coefficients} and
+  \code{scale}.  Otherwise it calls \code{\link{lmrob.S}(..)} and uses it
+  as initial estimator.
 }
 \value{
   A list with components
-  \item{fitted.values}{\eqn{X \beta}{X beta}, i.e. \code{X \%*\% coefficients}.}
+  \item{fitted.values}{\eqn{X \beta}{X beta}, i.e., \code{X \%*\% coefficients}.}
   \item{residuals}{the raw residuals, \code{y - fitted.values}}
   \item{weights}{robustness weights derived from the final M-estimator
     residuals (even when not converged).}
@@ -57,4 +59,3 @@ lmrob.fit(x, y, control)
 }
 \keyword{robust}
 \keyword{regression}
-

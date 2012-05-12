@@ -1,6 +1,6 @@
 \documentclass[a4paper]{article}
 
-%\VignetteIndexEntry{lmrob_simulation.Rnw}
+%\VignetteIndexEntry{Simulations for Robust Regression Inference in Small Samples}
 %\VignetteDepends{robustbase, xtable, ggplot2, RColorBrewer, grid, reshape2}
 
 \usepackage{amsmath}
@@ -195,12 +195,13 @@ We compare the methods
     \hat a = \frac{1}{n}\sum_{i=1}^n
     \psi\left(\frac{r_i}{\hat\sigma_{\rm S}}\right)^2,
     \hat b = \frac{1}{n}
-    \sum_{i=1}^n\psi'\left(\frac{r_i}{\hat\sigma_{\rm S}}\right),
+    \sum_{i=1}^n\psi'\left(\frac{r_i}{\hat\sigma_{\rm S}}\right),%'
     \hat c = \frac{1}{n}\sum_{i=1}^n
     \psi\left(\frac{r_i}{\hat\sigma_{\rm S}}\right)
     \frac{r_i}{\hat\sigma_{\rm S}},
   \end{equation*}
-  with $\psi = \rho'$, $n$ the number of observations, $p$ the number of
+  with $\psi = \rho'$,%'
+  $n$ the number of observations, $p$ the number of
   predictor variables, $\hat\sigma_{\rm S}$ is the S-scale estimate and
   $r_i$ is the residual of the $i$-th observation.
 
@@ -208,7 +209,7 @@ We compare the methods
   $\chi$ to account for the dependence of $\kappa$ on $p$. For $q_{\rm T}$
   no change is required.
 
-  This method in implemented as \T{lmrob.mar} in the source file
+  This method is implemented as \T{lmrob.mar()} in the source file
   \T{estimating.functions.R}.
 \end{itemize}
 

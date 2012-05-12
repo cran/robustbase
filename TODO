@@ -1,6 +1,26 @@
 TO DO
 ------
 
+o  New  lmrob() "M-S" etc features:
+
+   - Function names with "." (which are exported) are frowned upon
+     e.g.  lmrob.split()
+
+   - checking .vcov.avar1() and its "posdefify" options ??
+
+   - lmrob.mar()  [should get a different name and] be part of robustbase;
+     e.g. via lmrob( ... control ..) or directly.
+
+o  inst/doc/lmrob_simulation.Rnw :
+
+  - use hyperlinks {e.g. using jss docu.class!}
+
+  - consider making parts available in (new) ./demo/lmrob...R
+
+  -  tau_i (p.5)  is not clear for  Joe Average.
+
+..........................................
+
 o  Generalizing  'wgt.himedian':  We'd want a C API on which R builds.
 
    There are pure R implementations:

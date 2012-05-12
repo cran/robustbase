@@ -100,9 +100,9 @@ dput(signif(100 * (sd <- unname(coef(sm4)[, "Std. Error"])), 7))
 ## both for 32 and 64 bit
 
 stopifnot(
-	  all.equal(cf, c(0.03148659, 0.9980933, 1.016364, 1.03243), tol= 7e-7)
+	  all.equal(cf, c(-0.05108914, 1.00597115, 1.00320052, 0.98332632), tol= 7e-7)
 	  , # ... e-7	 needed on 64b
-	  all.equal(100*sd,c(2.194914,0.2737579, 2.371728, 2.206261),tol= 7e-7)
+	  all.equal(100*sd,c(2.2138147, 0.2864678, 2.2023182, 2.1808862),tol= 7e-7)
 	  ) # 1.334 e-7	 needed on 64b
 
 cat('Time elapsed: ', proc.time(),'\n') # "stats"
@@ -149,5 +149,19 @@ fit.dd <- predict(res2, new.d)
 lines(dd, fit.dd, col=2, type="o")
 predict(res2, new.d, se=TRUE)$se.fit
 matlines(dd, predict(res2, new.d, interval="confidence")[, 2:3], col=3)
+
+## Check handling of X of not full rank
+test <- function(n, ...) {
+    X <- matrix(c(rep(1:3, length.out = n), rnorm(2*n)), n, 4)
+    y <- rnorm(n)
+    X[,4] <- X[,2] + X[,3]
+    X <- data.frame(X)
+    X$X1 <- factor(X$X1)
+    fail <- suppressWarnings(try(lmrob(y ~ ., X, ...), silent=TRUE))
+    stopifnot(is(fail, "try-error"))
+}
+set.seed(0)
+test(12) ## fast_S()
+test(2500) ## fast_S_large_n()
 
 cat('Time elapsed: ', proc.time(),'\n') # "stats"

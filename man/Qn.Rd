@@ -19,7 +19,7 @@ s_Qn(x, mu.too = FALSE, \dots)
   \item{x}{numeric vector of observations.}
   \item{constant}{number by which the result is multiplied; the default
     achieves consistency for normally distributed data.  Note that until
-    Nov.~2010, \dQuote{thanks} to a typo in the very first papers, a slightly
+    Nov. 2010, \dQuote{thanks} to a typo in the very first papers, a slightly
     wrong default constant, 2.2219, was used instead of the correct one
     which is equal to \code{1 / (sqrt(2) * qnorm(5/8))}.
 
@@ -61,7 +61,7 @@ s_Qn(x, mu.too = FALSE, \dots)
 
   Christophe Croux and Peter J. Rousseeuw (1992)
   Time-Efficient Algorithms for Two Highly Robust Estimators of Scale,
-  \emph{Computational Statistics, Vol.\ 1}, ed. Dodge and Whittaker,
+  \emph{Computational Statistics, Vol. 1}, ed. Dodge and Whittaker,
   Physica-Verlag Heidelberg, 411--428;\cr
   also available from
   \url{http://win-www.uia.ac.be/u/statis/abstract/Timeff92.htm}.

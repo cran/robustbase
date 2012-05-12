@@ -66,10 +66,12 @@ function (formula, family, data, weights, subset,
     }
     fit <- switch(method,
 		  "cubif" = ## FIXME: not yet implemented !
-		  glmrobCubif(X = X, y = Y, weights = weights, start = start,
-			      offset = offset, family = family,
-			      weights.on.x = weights.on.x, control = control,
-			      intercept = attr(mt, "intercept") > 0,trace=trace),
+		  stop("glmrobCubif() has not yet been implemented")
+		  ## glmrobCubif(X = X, y = Y, weights = weights, start = start,
+		  ##		 offset = offset, family = family,
+		  ##		 weights.on.x = weights.on.x, control = control,
+		  ##		 intercept = attr(mt, "intercept") > 0,trace=trace)
+		  ,
 		  "Mqle" = ## --> ./glmrobMqle.R
 		  glmrobMqle(X = X, y = Y, weights = weights, start = start,
 			     offset = offset, family = family,

@@ -1,6 +1,6 @@
 
-R version 2.14.1 Patched (2011-12-23 r57970)
-Copyright (C) 2011 The R Foundation for Statistical Computing
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
@@ -136,7 +136,7 @@ Weighted Residuals:
 
 Coefficients:
               Estimate Std. Error t value Pr(>|t|)    
-(Intercept)  6.8785691  6.5583559   1.049 0.308138    
+(Intercept)  6.8785690  6.5583559   1.049 0.308138    
 X1          -3.2192206  1.0951675  -2.939 0.008764 ** 
 X2           1.5876658  0.7471954   2.125 0.047707 *  
 X3           0.0018266  0.0004310   4.238 0.000495 ***
@@ -157,10 +157,10 @@ tuning.chi         bb tuning.psi refine.tol    rel.tol
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd  numpoints 
-         0          0         10 
-       psi     method        cov 
-"bisquare"     "SMDM"  ".vcov.w" 
+ trace.lev        mts compute.rd  numpoints 
+         0       1000          0         10 
+          psi   subsampling        method           cov 
+   "bisquare" "constrained"        "SMDM"     ".vcov.w" 
 seed : int(0) 
 > 
 > set.seed(2)
@@ -194,10 +194,10 @@ tuning.chi         bb tuning.psi refine.tol    rel.tol
  0.4047000  0.5000000  1.0601580  0.0000001  0.0000001 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd  numpoints 
-         0          0         10 
-      psi    method       cov 
-"optimal"    "SMDM" ".vcov.w" 
+ trace.lev        mts compute.rd  numpoints 
+         0       1000          0         10 
+          psi   subsampling        method           cov 
+    "optimal" "constrained"        "SMDM"     ".vcov.w" 
 seed : int(0) 
 > 
 > set.seed(3)
@@ -235,10 +235,10 @@ tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol
     1.5e+00     9.5e-01          NA     1.0e-07     1.0e-07 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd  numpoints 
-         0          0         10 
-      psi    method       cov 
-    "ggw"    "SMDM" ".vcov.w" 
+ trace.lev        mts compute.rd  numpoints 
+         0       1000          0         10 
+          psi   subsampling        method           cov 
+        "ggw" "constrained"        "SMDM"     ".vcov.w" 
 seed : int(0) 
 > 
 > set.seed(4)
@@ -274,10 +274,10 @@ tuning.chi         bb tuning.psi refine.tol    rel.tol
  0.5773502  0.5000000  2.1100000  0.0000001  0.0000001 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd  numpoints 
-         0          0         10 
-      psi    method       cov 
-  "welsh"    "SMDM" ".vcov.w" 
+ trace.lev        mts compute.rd  numpoints 
+         0       1000          0         10 
+          psi   subsampling        method           cov 
+      "welsh" "constrained"        "SMDM"     ".vcov.w" 
 seed : int(0) 
 > 
 > set.seed(5)
@@ -318,10 +318,10 @@ tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol
     1.5e+00     8.5e-01          NA     1.0e-07     1.0e-07 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd  numpoints 
-         0          0         10 
-      psi    method       cov 
-    "ggw"    "SMDM" ".vcov.w" 
+ trace.lev        mts compute.rd  numpoints 
+         0       1000          0         10 
+          psi   subsampling        method           cov 
+        "ggw" "constrained"        "SMDM"     ".vcov.w" 
 seed : int(0) 
 > 
 > set.seed(6)
@@ -339,7 +339,7 @@ Weighted Residuals:
 
 Coefficients:
               Estimate Std. Error t value Pr(>|t|)    
-(Intercept)  6.7557664  6.1364255   1.101 0.285433    
+(Intercept)  6.7557666  6.1364255   1.101 0.285433    
 X1          -3.1767976  1.0271470  -3.093 0.006277 ** 
 X2           1.5756461  0.7101703   2.219 0.039604 *  
 X3           0.0018004  0.0004032   4.465 0.000299 ***
@@ -361,10 +361,10 @@ tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol
     1.0e+00     9.5e-01          NA     1.0e-07     1.0e-07 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd  numpoints 
-         0          0         10 
-      psi    method       cov 
-    "ggw"    "SMDM" ".vcov.w" 
+ trace.lev        mts compute.rd  numpoints 
+         0       1000          0         10 
+          psi   subsampling        method           cov 
+        "ggw" "constrained"        "SMDM"     ".vcov.w" 
 seed : int(0) 
 > 
 > set.seed(7)
@@ -402,10 +402,10 @@ tuning.psi3  refine.tol     rel.tol
   7.2128680   0.0000001   0.0000001 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd  numpoints 
-         0          0         10 
-      psi    method       cov 
- "hampel"    "SMDM" ".vcov.w" 
+ trace.lev        mts compute.rd  numpoints 
+         0       1000          0         10 
+          psi   subsampling        method           cov 
+     "hampel" "constrained"        "SMDM"     ".vcov.w" 
 seed : int(0) 
 > 
 > set.seed(8)
@@ -420,43 +420,28 @@ attr(,"constants")
 attr(,"constants")
 [1] 0.00000000 0.24044569 1.40000000 0.09081713 0.27558437
 > summary(mp7 <-lmrob(Y ~ ., data = aircraft, control = ctrl))
-
-Call:
-lmrob(formula = Y ~ ., data = aircraft, control = ctrl)
-
-Weighted Residuals:
-    Min      1Q  Median      3Q     Max 
--9.8866 -2.3922 -0.2697  3.4834 40.8709 
-
-Coefficients:
-              Estimate Std. Error t value Pr(>|t|)   
-(Intercept)  4.5387452 11.9653315   0.379  0.70888   
-X1          -3.2901515  0.9367618  -3.512  0.00249 **
-X2           1.8046426  0.8338085   2.164  0.04413 * 
-X3           0.0021491  0.0011857   1.812  0.08664 . 
-X4          -0.0010722  0.0007117  -1.507  0.14928   
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
-
-Robust residual standard error: 6.112 
-Convergence in 29 IRWLS iterations
-
-Robustness weights: 
- 10 weights are ~= 1. The remaining 13 ones are summarized as
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-0.03809 0.80160 0.89680 0.81710 0.96670 0.99400 
-Algorithmic parameters: 
-tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1 
-   -3.0e-01     1.4e+00          NA     5.0e-01     5.0e-01    -3.0e-01 
-tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol 
-    1.4e+00     9.5e-01          NA     1.0e-07     1.0e-07 
- nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
-       500         50          5        400          2          1        200 
- trace.lev compute.rd  numpoints 
-         0          0         10 
-          psi        method           cov 
-        "ggw"          "MM" ".vcov.avar1" 
-seed : int(0) 
+               Length Class      Mode   
+coefficients     5    -none-     numeric
+scale            1    -none-     numeric
+k.iter           1    -none-     numeric
+converged        1    -none-     logical
+fitted.values   23    -none-     numeric
+residuals       23    -none-     numeric
+weights         23    -none-     numeric
+control         23    -none-     list   
+qr               4    qr         list   
+rank             1    -none-     numeric
+cov              1    -none-     logical
+degree.freedom   1    -none-     logical
+df               1    -none-     logical
+xlevels          0    -none-     list   
+call             4    -none-     call   
+terms            3    terms      call   
+model            5    data.frame list   
+x              115    -none-     numeric
+Warning message:
+In lmrob.S(x, y, control = control) :
+  S refinements did not converge (to tol=1e-07) in 200 iterations
 > 
 > set.seed(9)
 > summary(mp8 <- update(mp0, psi = 'lqq'))
@@ -493,10 +478,10 @@ tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol
     1.5e+00     9.5e-01          NA     1.0e-07     1.0e-07 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd  numpoints 
-         0          0         10 
-      psi    method       cov 
-    "lqq"    "SMDM" ".vcov.w" 
+ trace.lev        mts compute.rd  numpoints 
+         0       1000          0         10 
+          psi   subsampling        method           cov 
+        "lqq" "constrained"        "SMDM"     ".vcov.w" 
 seed : int(0) 
 > 
 > set.seed(10)
@@ -521,9 +506,9 @@ Weighted Residuals:
 
 Coefficients:
               Estimate Std. Error t value Pr(>|t|)   
-(Intercept)  3.4885360 12.9467678   0.269  0.79065   
-X1          -3.2959306  0.9474382  -3.479  0.00268 **
-X2           1.8969102  0.9908608   1.914  0.07160 . 
+(Intercept)  3.4885376 12.9467703   0.269  0.79065   
+X1          -3.2959306  0.9474381  -3.479  0.00268 **
+X2           1.8969101  0.9908611   1.914  0.07160 . 
 X3           0.0022811  0.0014320   1.593  0.12860   
 X4          -0.0011575  0.0008954  -1.293  0.21246   
 ---
@@ -543,13 +528,16 @@ tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol
     1.4e+00     9.5e-01          NA     1.0e-07     1.0e-07 
  nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
        500         50          5        400          2          1        200 
- trace.lev compute.rd  numpoints 
-         0          0         10 
-          psi        method           cov 
-        "lqq"          "MM" ".vcov.avar1" 
+ trace.lev        mts compute.rd 
+         0       1000          0 
+          psi   subsampling        method           cov 
+        "lqq" "constrained"          "MM" ".vcov.avar1" 
 seed : int(0) 
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  7.405 0.142 7.704 0 0.009 
+Time elapsed:  5.906 0.1 6.217 0 0 
 > 
+> proc.time()
+   user  system elapsed 
+  5.906   0.100   6.217 

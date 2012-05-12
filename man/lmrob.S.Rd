@@ -6,7 +6,7 @@
   using the \dQuote{fast S} algorithm.% of Matias Salibian & Victor Yohai ...
 }
 \usage{
-lmrob.S(x, y, control, trace.lev = 0)
+lmrob.S(x, y, control, trace.lev = control$trace.lev, mf = NULL)
 }
 \arguments{
   \item{x}{ design matrix }
@@ -15,11 +15,21 @@ lmrob.S(x, y, control, trace.lev = 0)
   \item{trace.lev}{integer indicating if the progress of the algorithm
     should be traced (increasingly); default \code{trace.lev = 0} does
     no tracing.}
+  \item{mf}{ dummy parameter.}
 }
 \details{
   This function is used by \code{\link{lmrob.fit}} and not
   intended to be used on its own (because an S-estimator has too low
   efficiency \sQuote{on its own}).
+
+  By default, the subsampling algorithm uses a customized LU
+  decomposition which ensures a non singular subsample (if this is at
+  all possible). This makes the Fast-S algorithm also feasible for
+  categorical and mixed continuous-categorical data.
+
+  One can revert to the old (unconstrained) subsampling scheme by
+  setting the parameter \code{subsampling} in \code{control} to
+  \code{simple}.
 }
 \value{
   A list with components
@@ -29,7 +39,7 @@ lmrob.S(x, y, control, trace.lev = 0)
   %   coefficient estimates.}
   \item{fitted.values}{numeric vector (length \eqn{n}) of the fitted
     values.}
-  \item{residuals}{numberic vector (legnth \eqn{n}) of the residuals.}
+  \item{residuals}{numeric vector (length \eqn{n}) of the residuals.}
   \item{weights}{numeric vector (length \eqn{n}) of the robustness weights.}
   \item{k.iter}{(maximal) number of refinement iterations used.}
   \item{converged}{logical indicating if \bold{all} refinement

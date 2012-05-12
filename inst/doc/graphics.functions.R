@@ -10,15 +10,13 @@
 g.scale_y_log10_0.05 <- function(breaks =  c(0.00001, 0.0001, 0.001, 0.01,
                                    0.02, 0.03, 0.05, 0.07, 0.1, 0.14,
                                    0.2, 0.4, 0.8),
-                                 minor_breaks = seq(0,1,by = 0.01),
-                                 labels = breaks, ...)
+                                 minor_breaks = seq(0,1,by = 0.01), ...)
   ## Purpose: add nice breaks and labels 
   ## ----------------------------------------------------------------------
   ## Arguments: just like scale_y_log10
   ## ----------------------------------------------------------------------
   ## Author: Manuel Koller, Date: 11 Nov 2009, 11:52
-  scale_y_log10(breaks = breaks, minor_breaks = minor_breaks,
-                labels = labels, ...)
+  scale_y_log10(breaks = breaks, minor_breaks = minor_breaks, ...)
 
 ## the same for lattice:
 g.scale_y_log10_0.05_lattice <- list(at = log10(c(seq(0.1, 0.01, by = -0.01), 0.001,
@@ -27,25 +25,23 @@ g.scale_y_log10_0.05_lattice <- list(at = log10(c(seq(0.1, 0.01, by = -0.01), 0.
                                        "", 0.01, 0.001, 0.0001, 0.00001))
 
 g.scale_y_log10_1 <- function(breaks = c(seq(0,1,by=0.1), seq(1.2, 3.5,by=0.2)),
-                              minor_breaks = seq(0,10,by = 0.1),
-                              labels = breaks, ...)
+                              minor_breaks = seq(0,10,by = 0.1), ...)
   ## Purpose: add nice breaks and labels 
   ## ----------------------------------------------------------------------
   ## Arguments: just like scale_y_log10
   ## ----------------------------------------------------------------------
   ## Author: Manuel Koller, Date: 11 Nov 2009, 11:52
-  scale_y_log10(breaks = breaks, minor_breaks = minor_breaks, labels = labels, ...)
+  scale_y_log10(breaks = breaks, minor_breaks = minor_breaks, ...)
 
 g.scale_y_log10_1_l <- function(breaks = c(seq(0,.4,by=0.1), seq(0.6,1.4,by=0.2),
                                   seq(1.6, 3.4, by = 0.4)),
-                                minor_breaks = seq(0,10,by = 0.1),
-                                labels = breaks, ...)
+                                minor_breaks = seq(0,10,by = 0.1), ...)
   ## Purpose: add nice breaks and labels 
   ## ----------------------------------------------------------------------
   ## Arguments: just like scale_y_log10
   ## ----------------------------------------------------------------------
   ## Author: Manuel Koller, Date: 11 Nov 2009, 11:52
-  scale_y_log10(breaks = breaks, minor_breaks = minor_breaks, labels = labels, ...)
+  scale_y_log10(breaks = breaks, minor_breaks = minor_breaks, ...)
 
 g.scale_shape_defaults = c(16, 17, 15, 3, 7, 8)
 g.scale_shape_defaults2 = c(g.scale_shape_defaults,9,1,2,4)
@@ -351,87 +347,81 @@ print.ggplot <- function(x, newpage = is.null(vp), vp = NULL, ...,
                          footnote.just = c("right", "bottom"),
                          legend.mod = NULL)
 {
-  ## Purpose: print ggplot and add footnote
-  ## ----------------------------------------------------------------------
-  ## Arguments: x, newpage, vp, ...: see ?print.ggplot
-  ##            footnote: text to be added as footnote
-  ##            footnote.col: color of footnote
-  ##                    .size: size of footnote text (cex)
-  ##                    .just: justification of footnote
-  ##            legend.mod: named list on what legend entries to replace
-  ##                        by value
-  ## ----------------------------------------------------------------------
-  ## Author: Manuel Koller, Date: 26 Jan 2010, 09:01
-  
-  if (missing(footnote) && missing(legend.mod))
-    return(ggplot2:::print.ggplot(x, newpage, vp, ...))
+    ## Purpose: print ggplot and add footnote
+    ## ----------------------------------------------------------------------
+    ## Arguments: x, newpage, vp, ...: see ?print.ggplot
+    ##            footnote: text to be added as footnote
+    ##            footnote.col: color of footnote
+    ##                    .size: size of footnote text (cex)
+    ##                    .just: justification of footnote
+    ##            legend.mod: named list on what legend entries to replace
+    ##                        by value
+    ## ----------------------------------------------------------------------
+    ## Author: Manuel Koller, Date: 26 Jan 2010, 09:01
+    
+    if (missing(footnote) && missing(legend.mod))
+        return(ggplot2:::print.ggplot(x, newpage, vp, ...))
 
-  ## this is mostly a copy of ggplot2::print.ggplot
-  ggplot2:::set_last_plot(x)
-  if (newpage)
-    grid.newpage()
-  if (!missing(legend.mod)) {
+    ## this is mostly a copy of ggplot2::print.ggplot
+    ggplot2:::set_last_plot(x)
+    if (newpage)
+        grid.newpage()
     grob <- ggplotGrob(x, ...)
-    ## edit grob: change legends and strip text
-    lls <- getGrob(grob, gPath='(legend.text.text|strip.text.x.text)',
-                         grep=TRUE, global=TRUE)
-    ## walk all legend texts
-    for(le in lls) {
-      if (!is.expression(le$label) && le$label %in% names(legend.mod)) {
-        grob <- editGrob(grob, gPath=le$name, label = legend.mod[[le$label]])
-      }
+    if (!missing(legend.mod)) {
+        ## edit grob: change legends and strip text
+        lls <- getGrob(grob, gPath='(xlab-|ylab-|title-|label-|legend.text.text|strip.text.x.text|strip.text.y.text)',
+                       grep=TRUE, global=TRUE)
+        ## walk all legend texts
+        for(le in lls) {
+            if (!is.null(le$label) && !is.expression(le$label) &&
+                length(le$label) > 0 && le$label %in% names(legend.mod)) {
+                grob <- editGrob(grob, gPath=le$name, label = legend.mod[[le$label]])
+            }
+        }
+        ## also: remove alpha in legend key points
+        lls <- getGrob(grob, gPath='key.points', grep=TRUE, global=TRUE)
+        for (le in lls) {
+            if (is.character(le$gp$col) && grepl('^\\#', le$gp$col)) {
+                lgp <- le$gp
+                lgp$col <- substr(lgp$col, 1, 7)
+                grob <- editGrob(grob, gPath=le$name, gp=lgp)
+            }
+        }
+        ## also: change spacing of legends
+        grob$children$legends$framevp$layout$heights <-
+            grob$children$legends$framevp$layout$heights * .91
     }
-    ## walk axis labels
-    lls <- getGrob(grob, gPath='axis.text...text', grep=TRUE, global=TRUE)
-    for(le in lls) {
-      if (any(lidx <- ((llab <- le$label) %in% names(legend.mod)))) {
-        llab[lidx] <- do.call(c, legend.mod[llab[lidx]])
-        grob <- editGrob(grob, gPath=le$name, label = llab)
-      }
+    if (missing(footnote))
+        grid.draw(grob)
+    else {
+        if (is.null(vp)) {
+            ## add footnote to grob
+            grob$children$footnote <- grid.text(label=footnote,
+                                                x = unit(1, "npc") - unit(2, "mm"),
+                                                y = unit(2, "mm"), just = footnote.just,
+                                                gp=gpar(cex = footnote.size,
+                                                col = footnote.col), draw = FALSE)
+            llen <- length(grob$childrenOrder)
+            grob$childrenOrder[llen+1] <- 'footnote'
+            grid.draw(grob)
+        } else {
+            if (is.character(vp)) 
+                seekViewport(vp)
+            else pushViewport(vp)
+            grid.draw(grob)
+            upViewport()
+            ## add footnote to plot (from makeFootnote)
+            pushViewport(viewport())
+            grid.text(label=footnote,
+                      x = unit(1, "npc") - unit(2, "mm"),
+                      y = unit(2, "mm"), just = footnote.just,
+                      gp=gpar(cex = footnote.size,
+                      col = footnote.col))
+            popViewport() 
+        }
     }
-    ## also: remove alpha in legend key points
-    lls <- getGrob(grob, gPath='key.points', grep=TRUE, global=TRUE)
-    for (le in lls) {
-      if (is.character(le$gp$col) && grepl('^\\#', le$gp$col)) {
-        lgp <- le$gp
-        lgp$col <- substr(lgp$col, 1, 7)
-        grob <- editGrob(grob, gPath=le$name, gp=lgp)
-      }
-    }
-    ## also: change spacing of legends
-    grob$children$legends$framevp$layout$heights <-
-      grob$children$legends$framevp$layout$heights * .91
-  }
-  if (missing(footnote))
-    grid.draw(grob)
-  else {
-    if (is.null(vp)) {
-      ## add footnote to grob
-      grob$children$footnote <- grid.text(label=footnote,
-                                          x = unit(1, "npc") - unit(2, "mm"),
-                                          y = unit(2, "mm"), just = footnote.just,
-                                          gp=gpar(cex = footnote.size,
-                                            col = footnote.col), draw = FALSE)
-      llen <- length(grob$childrenOrder)
-      grob$childrenOrder[llen+1] <- 'footnote'
-      grid.draw(grob)
-    } else {
-      if (is.character(vp)) 
-        seekViewport(vp)
-      else pushViewport(vp)
-      grid.draw(grob)
-      upViewport()
-      ## add footnote to plot (from makeFootnote)
-      pushViewport(viewport())
-      grid.text(label=footnote,
-                x = unit(1, "npc") - unit(2, "mm"),
-                y = unit(2, "mm"), just = footnote.just,
-                gp=gpar(cex = footnote.size,
-                  col = footnote.col))
-      popViewport() 
-    }
-  }
 }
+
 
 ## guide_legends_box <- function (scales, layers, default_mapping, horizontal = FALSE, 
 ##     theme) 

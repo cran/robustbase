@@ -37,7 +37,7 @@
   \eqn{p = 4} fiber characteristics.
 }
 \source{
-  Rousseeuw, P.~J., Van Aelst, S., Van Driessen, K., and Agulló, J. (2004)
+  Rousseeuw, P. J., Van Aelst, S., Van Driessen, K., and Agulló, J. (2004)
   Robust multivariate regression;
   \emph{Technometrics} \bold{46}, 293--305.
 

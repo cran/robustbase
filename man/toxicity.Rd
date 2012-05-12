@@ -1,4 +1,5 @@
 \name{toxicity}
+\encoding{utf8}
 \alias{toxicity}
 \docType{data}
 \title{Toxicity of Carboxylic Acids Data}
@@ -32,7 +33,7 @@
   \url{http://www.wiley.com/legacy/wileychi/robust_statistics}
 }
 \references{
-  Maguna, F.P., N\'u\~nez, M.B., Okulik, N.B. and Castro, E.A. (2003)
+  Maguna, F.P., Núñez, M.B., Okulik, N.B. and Castro, E.A. (2003)
   Improved QSAR analysis of the toxicity of aliphatic carboxylic acids;
   \emph{Russian Journal of General Chemistry} \bold{73}, 1792--1798.
 }

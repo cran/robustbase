@@ -1,4 +1,5 @@
 \name{kootenay}
+\encoding{utf8}
 \alias{kootenay}
 \docType{data}
 \title{(Modified) Waterflow Measurements of Kootenay River in Libby and Newgate}
@@ -34,8 +35,8 @@
   \emph{Robust Statistics: The Approach Based on Influence Functions};
   Wiley, N.Y.
 
-  Rousseeuw, P.~J. and Leroy, A.~M. (1987)
-  \emph{Robust Regression \& Outlier Detection}, Wiley, N.~Y.
+  Rousseeuw, P. J. and Leroy, A. M. (1987)
+  \emph{Robust Regression & Outlier Detection}, Wiley, N. Y.
 }
 \examples{
 data(kootenay)

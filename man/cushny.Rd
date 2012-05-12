@@ -1,4 +1,5 @@
 \name{cushny}
+\encoding{utf8}
 \alias{cushny}
 \docType{data}
 \title{Cushny and Peebles Prolongation of Sleep Data}
@@ -31,7 +32,7 @@
 
   Fisher, R.A. (1925)
   \emph{Statistical Methods for Research Workers};
-  Oliver \& Boyd, Edinburgh.
+  Oliver & Boyd, Edinburgh.
 
   Anderson, T.W. (1958)
   \emph{An Introduction to Multivariate Statistical Analysis};

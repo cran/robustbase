@@ -1,3 +1,19 @@
+2012-03-05  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/lmrob.MM.R (.vcov.avar1): "posdefify" FIXME (negative eigen values)
+
+2012-02-27  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.8-1-1, released to CRAN on 2012-03-02
+
+2012-02-24  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	* R/lmrob.R (lmrob): added init argument: string, function or list.
+	* R/lmrob.MM.R (lmrob.fit): added init argument.
+
+	* man/lmrob.Rd: Added documentation about init argument.
+	* man/lmrob.fit.Rd: see above.
+
 2012-02-22  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* R/nlrob.R (print.summary.nlrob): use full call instead of just
@@ -15,7 +31,7 @@
 
 2011-12-12  Manuel Koller  <koller@stat.math.ethz.ch>
 
-	* DESCRIPTION (Version): 0.8-1, released to CRAN on 2011-12-........
+	* DESCRIPTION (Version): 0.8-1
 	* src/mc.c (mc_C_d): fixed bug in iteration; see svn log -r 272 & 274
 
 2011-12-09  Martin Maechler  <maechler@stat.math.ethz.ch>

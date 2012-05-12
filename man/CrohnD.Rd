@@ -1,4 +1,5 @@
 \name{CrohnD}
+\encoding{utf8}
 \alias{CrohnD}
 \docType{data}
 \title{Crohn's Disease Adverse Events Data}
@@ -22,7 +23,7 @@
     \item{\code{age}}{in years, a numeric vector}
     \item{\code{weight}}{in kilograms, a numeric vector}
     \item{\code{treat}}{how CD was treated: a factor with levels
-      \code{0}, \code{1} and \code{2}, meaning placebo, drug~1 and drug~2.}
+      \code{0}, \code{1} and \code{2}, meaning placebo, drug 1 and drug 2.}
   }
 }
 % \details{
@@ -33,7 +34,7 @@
   data collecting agency.
 }
 \references{
-  Serigne N. L\^o and Elvezio Ronchetti (2006).
+  Serigne N. Lô and Elvezio Ronchetti (2006).
   Robust Second Order Accurate Inference for Generalized Linear Models.
   Technical report, University of Geneva, Switzerland.
 }

@@ -1,4 +1,5 @@
 \name{wagnerGrowth}
+\encoding{utf8}
 \Rdversion{1.1}
 \alias{wagnerGrowth}
 \docType{data}
@@ -34,14 +35,14 @@
 
 % }
 \source{
-  Hubert, M. and Rousseeuw, P.~J.  (1997).
+  Hubert, M. and Rousseeuw, P. J.  (1997).
   Robust regression with both continuous and binary regressors,
   \emph{Journal of Statistical Planning and Inference} \bold{57}, 153--163.
 }
 \references{
   Wagner J. (1994).
-  Regionale Besch\"aftigungsdynamik und h\"oherwertige
-  Produktionsdienste: Ergebnisse f\"ur den Grossraum Hannover (1979-1992).
+  Regionale Beschäftigungsdynamik und höherwertige
+  Produktionsdienste: Ergebnisse für den Grossraum Hannover (1979-1992).
   \emph{Raumforschung und Raumordnung} \bold{52}, 146--150.
 }
 \examples{

@@ -1,6 +1,9 @@
 #### Mallows quasi-likelihood estimator of E. Cantoni and E. Ronchetti (2001)
 #### based originally on Eva Cantoni's S-plus code "robGLM"
 
+if(getRversion() > "2.15.0" || as.numeric(R.Version()$`svn rev`) > 59233)
+    utils::globalVariables(c("residP", "residPS", "dmu.deta"), add=TRUE)
+
 glmrobMqle <-
     function(X, y, weights = NULL, start = NULL, offset = NULL,
 	     family, weights.on.x = "none",
@@ -120,6 +123,7 @@ glmrobMqle <-
            stop(gettextf("family '%s' not yet implemented", family$family))
 	   )
 
+    sV <- NULL # FIXME workaround for codetools
 
     comp.V.resid <- expression({
 	Vmu <- variance(mu)

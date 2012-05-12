@@ -74,6 +74,7 @@ nlrob <-
 	    if (!is.null(weights))
 		w <- w * weights
 	    data$..nlrob.w <- w ## use a variable name the user "will not" use
+	    ..nlrob.w <- NULL # FIXME workaround for codetools
 	    out <- nls(formula, data = data, start = start,
                        algorithm = algorithm, trace = trace,
                        weights = ..nlrob.w,

@@ -34,7 +34,7 @@ static R_NativePrimitiveArgType R_lmrob_S_t[] = {
     /* rrhoc */ REALSXP, INTSXP, REALSXP,
     /* best_r */ INTSXP, INTSXP, INTSXP,
     /* K_s */ INTSXP, INTSXP, REALSXP,
-    /* converged */ LGLSXP, INTSXP
+    /* converged */ LGLSXP, INTSXP, INTSXP, INTSXP
 };
 
 static R_NativePrimitiveArgType R_lmrob_MM_t[] = {
@@ -42,7 +42,7 @@ static R_NativePrimitiveArgType R_lmrob_MM_t[] = {
     /* beta_initial */ REALSXP, REALSXP,
     /* beta_m */ REALSXP, REALSXP,
     /* max_it */ INTSXP, REALSXP, INTSXP,
-    /* loss */ REALSXP, REALSXP, LGLSXP, INTSXP
+    /* loss */ REALSXP, REALSXP, LGLSXP, INTSXP, INTSXP, INTSXP
 };
 
 static R_NativePrimitiveArgType R_psifun_t[] = {
@@ -68,6 +68,22 @@ static R_NativePrimitiveArgType R_calc_fitted_t[] = {
     INTSXP, INTSXP
 };
 
+static R_NativePrimitiveArgType R_lmrob_M_S_t[] = {
+    REALSXP, REALSXP, REALSXP, REALSXP, 
+    INTSXP, INTSXP, INTSXP, INTSXP, 
+    REALSXP, REALSXP, REALSXP, 
+    REALSXP, INTSXP, REALSXP, 
+    INTSXP, INTSXP, REALSXP, 
+    LGLSXP, INTSXP, 
+    LGLSXP, LGLSXP, LGLSXP, INTSXP, INTSXP
+};
+
+static R_NativePrimitiveArgType R_subsample_t[] = {
+    REALSXP, REALSXP, INTSXP, INTSXP, 
+    REALSXP, INTSXP, INTSXP, INTSXP, 
+    REALSXP, REALSXP, INTSXP, INTSXP, LGLSXP, INTSXP, INTSXP
+};
+
 static const R_CMethodDef CEntries[]  = {
     CDEF(Qn0),
     CDEF(Sn0),
@@ -81,6 +97,8 @@ static const R_CMethodDef CEntries[]  = {
     CDEF(R_wgtfun),
     CDEF(R_find_D_scale),
     CDEF(R_calc_fitted),
+    CDEF(R_lmrob_M_S),
+    CDEF(R_subsample),
     {NULL, NULL, 0}
 };
 
@@ -92,6 +110,7 @@ static const R_CMethodDef CEntries[]  = {
 static R_FortranMethodDef FortEntries[] = {
     {"rffastmcd", (DL_FUNC) &F77_SUB(rffastmcd), 48},/* ./rffastmcd.f */
     {"rfltsreg",  (DL_FUNC) &F77_SUB(rfltsreg), 42}, /* ./rfltsreg.f */
+    {"rllarsbi",  (DL_FUNC) &F77_SUB(rllarsbi), 18}, /* ./rllarsbi.f */
     {NULL, NULL, 0}
 };
 

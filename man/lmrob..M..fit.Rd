@@ -71,6 +71,7 @@ m2 <- lmrob(stack.loss ~ ., data = stackloss, method = 'SMD')
 m3 <- lmrob..M..fit(obj = m2)
 
 ## Simple function that allows custom initial estimates
+## (Deprecated use init argument to lmrob() instead.)
 lmrob.custom <- function(x, y, beta.initial, scale, terms) {
   ## initialize object
   obj <- list(control = lmrob.control("KS2011"),
