@@ -28,7 +28,7 @@ lmrob.control <- function  (setting, seed = NULL, nResample = 500,
         if (missing(cov) && !method %in% c('SM', 'MM')) cov <- '.vcov.w'
     }
     subsampling <- match.arg(subsampling)
-    
+
     if (missing(tuning.chi) || is.null(tuning.chi))
         tuning.chi <- switch(psi,
                              'bisquare' = 1.54764,
@@ -364,7 +364,7 @@ if(getRversion() > "2.15.0" || as.numeric(R.Version()$`svn rev`) > 59233)
 		   ## D <- sqrt(o.diag/diag(ret))
 		   ## where they are >= 0 :
 		   D <- sqrt(pmax(0, o.diag)/diag(ret))
-		   ret[] <- D * ret * rep(D, each = n) ## == diag(D) %*% m %*% diag(D)
+		   ret[] <- D * ret * rep(D, each = p) ## == diag(D) %*% m %*% diag(D)
 	       },
 	       stop("invalid 'posdef.meth': ", posdef.meth))
     }
@@ -1020,4 +1020,3 @@ ghq <- function(n = 1, modify = TRUE) {
            simple=0L,
            constrained=1L,
            stop("unknown setting for parameter ss"))
-           

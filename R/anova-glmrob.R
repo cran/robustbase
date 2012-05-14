@@ -139,7 +139,7 @@ anovaGlmrobPair <- function(obj1, obj2, test)
       Mplus <- matrix(0, ncol = pp, nrow = pp)
       Mplus[mod0, mod0] <- matM11inv
 
-      d.ev <- Re(eigen(matQ %*% (solve(matM)-Mplus))$values)
+      d.ev <- Re(eigen(matQ %*% (solve(matM)-Mplus), only.values=TRUE)$values)
       d.ev <- d.ev[1:df] ## just the q (=df) lagest eigenvalues are needed
 
       if(any(d.ev < 0)) warning("some eigenvalues are negative")

@@ -164,4 +164,10 @@ set.seed(0)
 test(12) ## fast_S()
 test(2500) ## fast_S_large_n()
 
+## Check a case, where cov() matrix needs "posdefify":
+
+coleman16 <- coleman[ -c(2, 7, 16, 19),]
+(m16 <- lmrob(Y ~ ., data = coleman16, tuning.psi = 3.44, trace.lev = TRUE))
+## failed in 0.9_0
+
 cat('Time elapsed: ', proc.time(),'\n') # "stats"
