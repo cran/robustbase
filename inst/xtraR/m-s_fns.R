@@ -16,6 +16,7 @@ m_s_subsample <- function(x1, x2, y, control, orthogonalize=TRUE) {
             p1=ncol(x1),
             p2=ncol(x2),
             nResample=as.integer(control$nResample),
+            max_it_scale=as.integer(control$maxit.scale),
             scale=double(1),
             b1=double(ncol(x1)),
             b2=double(ncol(x2)),
@@ -54,6 +55,7 @@ m_s_descent <- function(x1, x2, y, control, b1, b2, scale) {
             p1=ncol(x1),
             p2=ncol(x2),
             nResample=as.integer(control$nResample),
+            max_it_scale=as.integer(control$maxit.scale),
             scale=as.double(scale),
             b1=as.double(b1),
             b2=as.double(b2),
@@ -100,7 +102,8 @@ find_scale <- function(r, s0, n, p, control) {
             converged = logical(1),
             trace.lev = 0L,
             mts = 0L,
-            ss = 1L
+            ss = 1L,
+            fast.s.large.n = as.integer(n+1)
             )[c("coefficients", "scale", "k.iter", "converged")]
     b$scale
 }

@@ -2,7 +2,7 @@
 \encoding{utf8}
 \alias{kootenay}
 \docType{data}
-\title{(Modified) Waterflow Measurements of Kootenay River in Libby and Newgate}
+\title{Waterflow Measurements of Kootenay River in Libby and Newgate}
 \description{
   The original data set is the waterflow in January of the Kootenay
   river, measured at two locations, namely, Libby (Montana) and Newgate
@@ -22,8 +22,9 @@
   }
 }
 \details{
-  Other modified versions of the data sets are also used in different
-  places, see the examples below.
+  The original (unmodified) version of the data is easily obtainable
+  as \code{kootenay0} from the examples; other modified versions of the
+  data sets are also used in different places, see the examples below.
 }
 \source{
   Original Data, p.58f of

@@ -8,12 +8,13 @@ lmrob.control <- function  (setting, seed = NULL, nResample = 500,
                             solve.tol = 1e-7,
                             ## had  ^^^^^^^^  TOL_INVERSE 1e-7 in ../src/lmrob.c
                             trace.lev = 0, mts = 1000,
-                            subsampling = c("constrained", "simple"),
+                            subsampling = c("nonsingular", "simple"),
                             compute.rd = FALSE, method = 'MM',
                             psi = c('bisquare', 'lqq', 'welsh', 'optimal', 'hampel',
                               'ggw'),
 			    numpoints = 10, cov = NULL,
                             split.type = c("f", "fi", "fii"),
+                            fast.s.large.n = 2000,
                             ...)
 {
     if (!missing(setting)) {
@@ -65,7 +66,8 @@ lmrob.control <- function  (setting, seed = NULL, nResample = 500,
            rel.tol=rel.tol, solve.tol=solve.tol, trace.lev=trace.lev, mts=mts,
            subsampling=subsampling,
            compute.rd=compute.rd, method=method, numpoints=numpoints,
-           cov=cov, split.type = match.arg(split.type)),
+           cov=cov, split.type = match.arg(split.type),
+           fast.s.large.n=fast.s.large.n),
       list(...))
 }
 
@@ -473,13 +475,15 @@ lmrob.S <- function (x, y, control, trace.lev = control$trace.lev, mf = NULL)
     nResample <- as.integer(control$nResample)
     groups <- as.integer(control$groups)
     nGr <- as.integer(control$n.group)
-    if (nGr <= p)
-        stop("'control$n.group' must be larger than 'p'")
-    large_n <- (n > 2000)
-    if (large_n & nGr * groups > n)
-        stop("'groups * n.group' must be smaller than 'n' for 'large_n' algorithm")
-    if (nGr <= p + 10) ## FIXME (be smarter ..)
-        warning("'control$n.group' is not much larger than 'p', probably too small")
+    large_n <- (n > control$fast.s.large.n)
+    if (large_n) {
+        if (nGr <= p)
+            stop("'control$n.group' must be larger than 'p' for 'large_n' algorithm")
+        if (nGr * groups > n)
+            stop("'groups * n.group' must be smaller than 'n' for 'large_n' algorithm")
+        if (nGr <= p + 10) ## FIXME (be smarter ..)
+            warning("'control$n.group' is not much larger than 'p', probably too small")
+    }
     if (length(seed <- control$seed) > 0) {
         if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
             seed.keep <- get(".Random.seed", envir = .GlobalEnv,
@@ -517,7 +521,9 @@ lmrob.S <- function (x, y, control, trace.lev = control$trace.lev, mf = NULL)
             converged = logical(1),
             trace.lev = as.integer(trace.lev),
             mts = as.integer(control$mts),
-            ss = .convSs(control$subsampling)
+            ss = .convSs(control$subsampling),
+            fast.s.large.n = as.integer(if (large_n) control$fast.s.large.n else n+1)
+            ## avoids the use of NAOK = TRUE for control$fast.s.large.n == Inf
             )[c("coefficients", "scale", "k.iter", "converged")]
     scale <- b$scale
     if (scale < 0)
@@ -620,15 +626,15 @@ lmrob.kappa <- function(obj, control = obj$control)
     uniroot(fun.min, c(0.1, 1))$root
 }
 
-lmrob.tau <- function(obj,x=obj$x, control = obj$control, h, fast = TRUE)
+## "FIXME" How can we \hat{tau} for a simple *M* estimate here ??
+lmrob.tau <- function(obj, x=obj$x, control = obj$control, h, fast = TRUE)
 {
-    if (is.null(control)) stop('control is missing')
-    if (missing(h)) {
-        if (is.null(obj$qr))
-            h <- lmrob.leverages(x, obj$weights)
-        else
-            h <- lmrob.leverages(x, obj$weights, wqr = obj$qr)
-    }
+    if(is.null(control)) stop("'control' is missing")
+    if(missing(h))
+	h <- if (is.null(obj$qr))
+	    lmrob.leverages(x, obj$weights)
+	else
+	    lmrob.leverages(x, obj$weights, wqr = obj$qr)
 
     ## speed up: use approximation if possible
     if (fast && !control$method %in% c('S', 'SD')) {
@@ -1032,5 +1038,5 @@ ghq <- function(n = 1, modify = TRUE) {
 .convSs <- function(ss)
     switch(ss,
            simple=0L,
-           constrained=1L,
+           nonsingular=1L,
            stop("unknown setting for parameter ss"))

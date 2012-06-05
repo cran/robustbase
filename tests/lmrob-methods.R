@@ -48,3 +48,14 @@ m5a <- m5a[names(m5)]
 class(m5a) <- class(m5)
 
 all.equal(m5, m5a)
+
+## Fast S large n strategy (sped up)
+model <- model.frame(LNOx ~ . ,data = NOxEmissions)
+control <- lmrob.control(fast.s.large.n = 10, n.group = 341, groups = 2)
+set.seed(0)
+try(ret <- lmrob.S(model.matrix(model, NOxEmissions)[1:682,], NOxEmissions$LNOx[1:682], control))
+## do what the error says
+control <- lmrob.control(fast.s.large.n = Inf)
+try(ret <- lmrob.S(model.matrix(model, NOxEmissions)[1:682,], NOxEmissions$LNOx[1:682], control))
+## this still fails, but this error is to be expected since only a part
+## of the design matrix is given

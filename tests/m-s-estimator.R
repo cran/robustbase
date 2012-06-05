@@ -123,3 +123,28 @@ out3 <- capture.output(summary(fiM.S))
 
 ## must be the same {apart from the "init=" in the call}:
 stopifnot(identical(out2[-4], out3[-4]))
+
+
+###  "Skipping design matrix equilibration" warning can arise for reasonable designs -----
+set.seed(1)
+x2 <- matrix(rnorm(2*30), 30, 2)
+data <- data.frame(y = rnorm(30), group = rep(letters[1:3], each=10), x2)
+
+obj <- lmrob(y ~ ., data, init="M-S")
+
+## illustration: the zero row is introduced during the orthogonalization of x2 wrt x1
+## l1 regression always produces p zero residuals
+## by chance, the zero residuals of multiple columns happen to be on the same row
+sf <- splitFrame(obj$model)
+x1 <- sf$x1
+x2 <- sf$x2
+control <- obj$control
+
+## orthogonalize
+x2.tilde <- x2
+
+for(i in 1:ncol(x2)) {
+    tmp <- lmrob.lar(x1, x2[,i], control)
+    x2.tilde[,i] <- tmp$resid
+}
+x2.tilde == 0 

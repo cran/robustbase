@@ -44,10 +44,10 @@ void R_lmrob_S(double *X, double *y, int *n, int *P,
 	       int *K_s, int *max_k, int *max_it_scale,
 	       double *rel_tol, double *inv_tol,
                //     ^^^^^^^^^ = refine.tol in R
-	       int* converged, int *trace_lev, int *mts, int *ss);
+	       int* converged, int *trace_lev, int *mts, int *ss, int *cutoff);
 
 void R_lmrob_M_S(double *X1, double *X2, double *y, double *res,
-		 int *n, int *p1, int *p2, int *nRes,
+		 int *n, int *p1, int *p2, int *nRes, int *max_it_scale,
 		 double *scale, double *b1, double *b2,
 		 double *rho_c, int *ipsi, double *bb,
 		 int *K_m_s, int *max_k, double *rel_tol, double *inv_tol,

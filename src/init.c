@@ -35,7 +35,7 @@ static R_NativePrimitiveArgType R_lmrob_S_t[] = {
     /* best_r */ INTSXP, INTSXP, INTSXP,
     /* K_s */ INTSXP, INTSXP, INTSXP,
     /* rel_tol*/ REALSXP, REALSXP,
-    /* converged */ LGLSXP, INTSXP, INTSXP, INTSXP
+    /* converged */ LGLSXP, INTSXP, INTSXP, INTSXP, INTSXP
 };
 
 static R_NativePrimitiveArgType R_lmrob_MM_t[] = {
@@ -71,7 +71,7 @@ static R_NativePrimitiveArgType R_calc_fitted_t[] = {
 
 static R_NativePrimitiveArgType R_lmrob_M_S_t[] = {
     REALSXP, REALSXP, REALSXP, REALSXP,
-    INTSXP, INTSXP, INTSXP, INTSXP,
+    INTSXP, INTSXP, INTSXP, INTSXP, INTSXP,
     REALSXP, REALSXP, REALSXP,
     REALSXP, INTSXP, REALSXP,
     INTSXP, INTSXP, REALSXP, REALSXP,

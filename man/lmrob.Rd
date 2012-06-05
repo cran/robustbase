@@ -101,7 +101,7 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
       estimator an S-estimator (Rousseeuw and Yohai, 1984) which is
       computed using the Fast-S algorithm of Salibian-Barrera and Yohai
       (2006), calling \code{\link{lmrob.S}()}.  That function, since
-      March 2012, uses \emph{constrained} subsampling which makes the
+      March 2012, uses \emph{nonsingular} subsampling which makes the
       Fast-S algorithm feasible for categorical data as well.
     }
     \item{Method \code{method}:}{

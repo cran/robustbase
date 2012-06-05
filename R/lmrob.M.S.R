@@ -116,6 +116,7 @@ lmrob.M.S <- function(x, y, control, mf, split) {
             p1=ncol(x1),
             p2=ncol(x2),
             nResample=as.integer(control$nResample),
+            max_it_scale=as.integer(control$maxit.scale),
             scale=double(1),
             b1=double(ncol(x1)),
             b2=double(ncol(x2)),

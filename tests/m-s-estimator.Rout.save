@@ -1,5 +1,5 @@
 
-R version 2.15.0 Patched (2012-06-04 r59517) -- "Easter Beagle"
+R version 2.15.1 (2012-06-22) -- "Roasted Marshmallows"
 Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-unknown-linux-gnu (64-bit)
@@ -90,7 +90,7 @@ Loading required package: robustbase
 +     res[[i]] <- unlist(within(tmp, b1 <- drop(t1 + b1 - T2 %*% b2)))
 + })
 > cat('Time elapsed in subsampling: ', time,'\n')
-Time elapsed in subsampling:  0.564 0 0.567 0 0 
+Time elapsed in subsampling:  0.366 0 0.367 0 0 
 > ## show a summary of the results
 > summary(res1 <- do.call(rbind, res))
       b11               b12              b13                b14       
@@ -134,7 +134,7 @@ Time elapsed in subsampling:  0.564 0 0.567 0 0
 +                                     res[[i]][1:4], res[[i]][5:7], res[[i]][8]))
 + })
 > cat('Time elapsed in descent proc: ', time,'\n')
-Time elapsed in descent proc:  0.108 0 0.109 0 0 
+Time elapsed in descent proc:  0.084 0 0.083 0 0 
 > 
 > ## show a summary of the results
 > res4 <- do.call(rbind, res3)
@@ -219,12 +219,12 @@ Robustness weights:
 Algorithmic parameters: 
 tuning.chi         bb tuning.psi    rel.tol  solve.tol 
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
-  nResample      max.it       k.max maxit.scale       k.m_s   trace.lev 
-        500          50         200         200          20           0 
-        mts  compute.rd 
-       1000           0 
+     nResample         max.it          k.max    maxit.scale          k.m_s 
+           500             50            200            200             20 
+     trace.lev            mts     compute.rd fast.s.large.n 
+             0           1000              0           2000 
           psi   subsampling        method           cov    split.type 
-   "bisquare" "constrained"        "M-SM"     ".vcov.w"           "f" 
+   "bisquare" "nonsingular"        "M-SM"     ".vcov.w"           "f" 
 seed : int(0) 
 > 
 > set.seed(13)
@@ -234,6 +234,65 @@ seed : int(0)
 > ## must be the same {apart from the "init=" in the call}:
 > stopifnot(identical(out2[-4], out3[-4]))
 > 
+> 
+> ###  "Skipping design matrix equilibration" warning can arise for reasonable designs -----
+> set.seed(1)
+> x2 <- matrix(rnorm(2*30), 30, 2)
+> data <- data.frame(y = rnorm(30), group = rep(letters[1:3], each=10), x2)
+> 
+> obj <- lmrob(y ~ ., data, init="M-S")
+Warning message:
+In lmrob.M.S(x, y, control, mf) :
+  Skipping design matrix equilibration (dgeequ): row 23 is exactly zero.
+> 
+> ## illustration: the zero row is introduced during the orthogonalization of x2 wrt x1
+> ## l1 regression always produces p zero residuals
+> ## by chance, the zero residuals of multiple columns happen to be on the same row
+> sf <- splitFrame(obj$model)
+> x1 <- sf$x1
+> x2 <- sf$x2
+> control <- obj$control
+> 
+> ## orthogonalize
+> x2.tilde <- x2
+> 
+> for(i in 1:ncol(x2)) {
++     tmp <- lmrob.lar(x1, x2[,i], control)
++     x2.tilde[,i] <- tmp$resid
++ }
+> x2.tilde == 0 
+      X1    X2
+1  FALSE FALSE
+2   TRUE FALSE
+3  FALSE FALSE
+4  FALSE  TRUE
+5  FALSE FALSE
+6  FALSE FALSE
+7  FALSE FALSE
+8  FALSE FALSE
+9  FALSE FALSE
+10 FALSE FALSE
+11 FALSE FALSE
+12  TRUE FALSE
+13 FALSE FALSE
+14 FALSE FALSE
+15 FALSE FALSE
+16 FALSE FALSE
+17 FALSE  TRUE
+18 FALSE FALSE
+19 FALSE FALSE
+20 FALSE FALSE
+21 FALSE FALSE
+22 FALSE FALSE
+23  TRUE  TRUE
+24 FALSE FALSE
+25 FALSE FALSE
+26 FALSE FALSE
+27 FALSE FALSE
+28 FALSE FALSE
+29 FALSE FALSE
+30 FALSE FALSE
+> 
 > proc.time()
    user  system elapsed 
-  1.299   0.059   1.503 
+  0.902   0.033   1.115 

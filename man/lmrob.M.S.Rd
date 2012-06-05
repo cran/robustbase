@@ -37,6 +37,10 @@ lmrob.M.S(x, y, control, mf, split)
   convergence and thus true convergence is almost never reached. This
   is, however, not a problem if the estimate is only used as initial
   estimate part of an MM or SMDM estimate.
+
+  The algorithm sometimes produces the warning message \dQuote{Skipping
+    design matrix equilibration (dgeequ): row ?? is exactly zero.}. This
+    is just an artifact of the algorithm and can be ignored safely.
 }
 \value{
   A list with components

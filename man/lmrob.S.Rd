@@ -27,9 +27,8 @@ lmrob.S(x, y, control, trace.lev = control$trace.lev, mf = NULL)
   all possible). This makes the Fast-S algorithm also feasible for
   categorical and mixed continuous-categorical data.
 
-  One can revert to the old (unconstrained) subsampling scheme by
-  setting the parameter \code{subsampling} in \code{control} to
-  \code{simple}.
+  One can revert to the old subsampling scheme by setting the parameter
+  \code{subsampling} in \code{control} to \code{simple}.
 }
 \value{
   A list with components

@@ -1,5 +1,5 @@
 
-R version 2.15.0 Patched (2012-06-04 r59517) -- "Easter Beagle"
+R version 2.15.1 (2012-06-22) -- "Roasted Marshmallows"
 Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-unknown-linux-gnu (64-bit)
@@ -155,12 +155,14 @@ Robustness weights:
 Algorithmic parameters: 
 tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
-  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
-        500          50           5         400           2           1 
-      k.max maxit.scale   trace.lev         mts  compute.rd   numpoints 
-        200         200           0        1000           0          10 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
           psi   subsampling        method           cov 
-   "bisquare" "constrained"        "SMDM"     ".vcov.w" 
+   "bisquare" "nonsingular"        "SMDM"     ".vcov.w" 
 seed : int(0) 
 > 
 > set.seed(2)
@@ -192,12 +194,14 @@ Robustness weights:
 Algorithmic parameters: 
 tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
  0.4047000  0.5000000  1.0601580  0.0000001  0.0000001  0.0000001 
-  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
-        500          50           5         400           2           1 
-      k.max maxit.scale   trace.lev         mts  compute.rd   numpoints 
-        200         200           0        1000           0          10 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
           psi   subsampling        method           cov 
-    "optimal" "constrained"        "SMDM"     ".vcov.w" 
+    "optimal" "nonsingular"        "SMDM"     ".vcov.w" 
 seed : int(0) 
 > 
 > set.seed(3)
@@ -233,12 +237,14 @@ tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1
    -5.0e-01     1.5e+00          NA     5.0e-01     5.0e-01    -5.0e-01 
 tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol 
     1.5e+00     9.5e-01          NA     1.0e-07     1.0e-07     1.0e-07 
-  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
-        500          50           5         400           2           1 
-      k.max maxit.scale   trace.lev         mts  compute.rd   numpoints 
-        200         200           0        1000           0          10 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
           psi   subsampling        method           cov 
-        "ggw" "constrained"        "SMDM"     ".vcov.w" 
+        "ggw" "nonsingular"        "SMDM"     ".vcov.w" 
 seed : int(0) 
 > 
 > set.seed(4)
@@ -272,12 +278,14 @@ Robustness weights:
 Algorithmic parameters: 
 tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
  0.5773502  0.5000000  2.1100000  0.0000001  0.0000001  0.0000001 
-  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
-        500          50           5         400           2           1 
-      k.max maxit.scale   trace.lev         mts  compute.rd   numpoints 
-        200         200           0        1000           0          10 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
           psi   subsampling        method           cov 
-      "welsh" "constrained"        "SMDM"     ".vcov.w" 
+      "welsh" "nonsingular"        "SMDM"     ".vcov.w" 
 seed : int(0) 
 > 
 > set.seed(5)
@@ -316,12 +324,14 @@ tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1
    -5.0e-01     1.5e+00          NA     5.0e-01     5.0e-01    -5.0e-01 
 tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol 
     1.5e+00     8.5e-01          NA     1.0e-07     1.0e-07     1.0e-07 
-  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
-        500          50           5         400           2           1 
-      k.max maxit.scale   trace.lev         mts  compute.rd   numpoints 
-        200         200           0        1000           0          10 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
           psi   subsampling        method           cov 
-        "ggw" "constrained"        "SMDM"     ".vcov.w" 
+        "ggw" "nonsingular"        "SMDM"     ".vcov.w" 
 seed : int(0) 
 > 
 > set.seed(6)
@@ -359,12 +369,14 @@ tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1
    -5.0e-01     1.0e+00          NA     5.0e-01     5.0e-01    -5.0e-01 
 tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol 
     1.0e+00     9.5e-01          NA     1.0e-07     1.0e-07     1.0e-07 
-  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
-        500          50           5         400           2           1 
-      k.max maxit.scale   trace.lev         mts  compute.rd   numpoints 
-        200         200           0        1000           0          10 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
           psi   subsampling        method           cov 
-        "ggw" "constrained"        "SMDM"     ".vcov.w" 
+        "ggw" "nonsingular"        "SMDM"     ".vcov.w" 
 seed : int(0) 
 > 
 > set.seed(7)
@@ -400,12 +412,14 @@ tuning.chi1 tuning.chi2 tuning.chi3          bb tuning.psi1 tuning.psi2
   0.3178745   0.7417071   1.6953304   0.5000000   1.3524128   3.1556298 
 tuning.psi3  refine.tol     rel.tol   solve.tol 
   7.2128680   0.0000001   0.0000001   0.0000001 
-  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
-        500          50           5         400           2           1 
-      k.max maxit.scale   trace.lev         mts  compute.rd   numpoints 
-        200         200           0        1000           0          10 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
           psi   subsampling        method           cov 
-     "hampel" "constrained"        "SMDM"     ".vcov.w" 
+     "hampel" "nonsingular"        "SMDM"     ".vcov.w" 
 seed : int(0) 
 > 
 > set.seed(8)
@@ -428,7 +442,7 @@ converged        1    -none-     logical
 fitted.values   23    -none-     numeric
 residuals       23    -none-     numeric
 weights         23    -none-     numeric
-control         25    -none-     list   
+control         26    -none-     list   
 qr               4    qr         list   
 rank             1    -none-     numeric
 cov              1    -none-     logical
@@ -476,12 +490,14 @@ tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1
    -5.0e-01     1.5e+00          NA     5.0e-01     5.0e-01    -5.0e-01 
 tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol 
     1.5e+00     9.5e-01          NA     1.0e-07     1.0e-07     1.0e-07 
-  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
-        500          50           5         400           2           1 
-      k.max maxit.scale   trace.lev         mts  compute.rd   numpoints 
-        200         200           0        1000           0          10 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
           psi   subsampling        method           cov 
-        "lqq" "constrained"        "SMDM"     ".vcov.w" 
+        "lqq" "nonsingular"        "SMDM"     ".vcov.w" 
 seed : int(0) 
 > 
 > set.seed(10)
@@ -526,18 +542,18 @@ tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1
    -3.0e-01     1.4e+00          NA     5.0e-01     5.0e-01    -3.0e-01 
 tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol 
     1.4e+00     9.5e-01          NA     1.0e-07     1.0e-07     1.0e-07 
-  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
-        500          50           5         400           2           1 
-      k.max maxit.scale   trace.lev         mts  compute.rd 
-        200         200           0        1000           0 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
+           200              0           1000              0           2000 
           psi   subsampling        method           cov 
-        "lqq" "constrained"          "MM" ".vcov.avar1" 
+        "lqq" "nonsingular"          "MM" ".vcov.avar1" 
 seed : int(0) 
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  7.242 0.14 7.511 0 0.006 
+Time elapsed:  5.395 0.08 5.647 0 0.001 
 > 
 > proc.time()
    user  system elapsed 
-  7.242   0.146   7.511 
+  5.395   0.081   5.647 

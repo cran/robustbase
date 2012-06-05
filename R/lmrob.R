@@ -265,6 +265,11 @@ print.summary.lmrob <-
            S = { # remove all M-S specific control pars
                control$k.m_s <- NULL
                control$split.type <- NULL
+               # if large_n is not used, remove corresp control pars
+               if (length(residuals) <= control$fast.s.large.n) {
+                   control$groups <- NULL
+                   control$n.group <- NULL
+               }
            },
            `M-S` = { # remove all fast S specific control pars
                control$refine.tol <- NULL

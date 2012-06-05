@@ -1,5 +1,5 @@
 
-R version 2.15.0 Patched (2012-06-04 r59517) -- "Easter Beagle"
+R version 2.15.1 (2012-06-22) -- "Roasted Marshmallows"
 Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-unknown-linux-gnu (64-bit)
@@ -33,7 +33,7 @@ converged       1     -none-     logical
 fitted.values  21     -none-     numeric
 residuals      21     -none-     numeric
 weights        21     -none-     numeric
-control        25     -none-     list   
+control        26     -none-     list   
 qr              4     qr         list   
 rank            1     -none-     numeric
 cov            16     -none-     numeric
@@ -85,12 +85,12 @@ Robustness weights:
 Algorithmic parameters: 
 tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
-  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
-        500          50           5         400           2           1 
-      k.max maxit.scale   trace.lev         mts  compute.rd 
-        200         200           0        1000           0 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
+           200              0           1000              0           2000 
           psi   subsampling        method           cov 
-   "bisquare" "constrained"          "MM" ".vcov.avar1" 
+   "bisquare" "nonsingular"          "MM" ".vcov.avar1" 
 seed : int(0) 
 > 
 > set.seed(0)
@@ -135,12 +135,14 @@ Robustness weights:
 Algorithmic parameters: 
 tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
-  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
-        500          50           5         400           2           1 
-      k.max maxit.scale   trace.lev         mts  compute.rd   numpoints 
-        200         200           0        1000           0          10 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
           psi   subsampling        method           cov 
-   "bisquare" "constrained"         "SMD"     ".vcov.w" 
+   "bisquare" "nonsingular"         "SMD"     ".vcov.w" 
 seed : int(0) 
 > summary(m4a <- lmrob..D..fit(m3))
 
@@ -172,12 +174,14 @@ Robustness weights:
 Algorithmic parameters: 
 tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
-  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
-        500          50           5         400           2           1 
-      k.max maxit.scale   trace.lev         mts  compute.rd   numpoints 
-        200         200           0        1000           0          10 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
           psi   subsampling        method           cov 
-   "bisquare" "constrained"         "SMD"     ".vcov.w" 
+   "bisquare" "nonsingular"         "SMD"     ".vcov.w" 
 seed : int(0) 
 > 
 > ## rearrange m4a and update call
@@ -219,12 +223,14 @@ Robustness weights:
 Algorithmic parameters: 
 tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
-  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
-        500          50           5         400           2           1 
-      k.max maxit.scale   trace.lev         mts  compute.rd   numpoints 
-        200         200           0        1000           0          10 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
           psi   subsampling        method           cov 
-   "bisquare" "constrained"        "SMDM"     ".vcov.w" 
+   "bisquare" "nonsingular"        "SMDM"     ".vcov.w" 
 seed : int(0) 
 > summary(m5a <- lmrob..M..fit(obj=m4))
 
@@ -255,12 +261,14 @@ Robustness weights:
 Algorithmic parameters: 
 tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
-  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
-        500          50           5         400           2           1 
-      k.max maxit.scale   trace.lev         mts  compute.rd   numpoints 
-        200         200           0        1000           0          10 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
           psi   subsampling        method           cov 
-   "bisquare" "constrained"        "SMDM"     ".vcov.w" 
+   "bisquare" "nonsingular"        "SMDM"     ".vcov.w" 
 seed : int(0) 
 > 
 > ## rearrange m5a
@@ -270,6 +278,24 @@ seed : int(0)
 > all.equal(m5, m5a)
 [1] TRUE
 > 
+> ## Fast S large n strategy (sped up)
+> model <- model.frame(LNOx ~ . ,data = NOxEmissions)
+> control <- lmrob.control(fast.s.large.n = 10, n.group = 341, groups = 2)
+> set.seed(0)
+> try(ret <- lmrob.S(model.matrix(model, NOxEmissions)[1:682,], NOxEmissions$LNOx[1:682], control))
+Error in lmrob.S(model.matrix(model, NOxEmissions)[1:682, ], NOxEmissions$LNOx[1:682],  : 
+  Fast S large n strategy failed. Use control parameter 'fast.s.large.n = Inf'.
+In addition: Warning message:
+In lmrob.S(model.matrix(model, NOxEmissions)[1:682, ], NOxEmissions$LNOx[1:682],  :
+  'control$n.group' is not much larger than 'p', probably too small
+> ## do what the error says
+> control <- lmrob.control(fast.s.large.n = Inf)
+> try(ret <- lmrob.S(model.matrix(model, NOxEmissions)[1:682,], NOxEmissions$LNOx[1:682], control))
+Error in lmrob.S(model.matrix(model, NOxEmissions)[1:682, ], NOxEmissions$LNOx[1:682],  : 
+  dgeequ: column 30 of the design matrix is exactly zero.
+> ## this still fails, but this error is to be expected since only a part
+> ## of the design matrix is given
+> 
 > proc.time()
    user  system elapsed 
-  0.441   0.053   0.554 
+  0.478   0.037   0.648 
