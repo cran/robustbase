@@ -1,7 +1,7 @@
 
 library(robustbase)
 ## testing functions:
-source(system.file("ex-funs.R", package = "robustbase"))
+source(system.file("xtraR/ex-funs.R", package = "robustbase"))
 
 x  <- c(0.26, 0.161, 1.33, -0.925, 0.199, -1.476, 0.489)
 iw <- c(5, 4, 4, 1, 5, 1, 5)

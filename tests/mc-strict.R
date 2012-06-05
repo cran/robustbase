@@ -5,7 +5,7 @@
 ### hence, can also produce non-reproducible output such as timing
 
 library(robustbase)
-source(system.file("mcnaive.R", package = "robustbase"))# mcNaive()
+source(system.file("xtraR/mcnaive.R", package = "robustbase"))# mcNaive()
 
 allEQ <- function(x,y) all.equal(x,y, tol = 1e-12)
 ##

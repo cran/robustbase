@@ -1,6 +1,6 @@
 
-R version 2.13.0 Under development (unstable) (2011-03-07 r54691)
-Copyright (C) 2011 The R Foundation for Statistical Computing
+R version 2.15.0 Patched (2012-05-24 r59442) -- "Easter Beagle"
+Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
@@ -18,7 +18,7 @@ Type 'q()' to quit R.
 
 > library(robustbase)
 > 
-> source(system.file("test_MCD.R", package = "robustbase"))#-> doMCDdata
+> source(system.file("xtraR/test_MCD.R", package = "robustbase"))#-> doMCDdata
 > ##          ../inst/test_MCD.R
 > 
 > ## -- now do it:
@@ -903,7 +903,7 @@ Error in solve.default(cov, ...) :
   system is computationally singular: reciprocal condition number = 4.85293e-11
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  1.34 0.02 1.36 0 0 
+Time elapsed:  1.487 0.08 1.71 0 0.007 
 > 
 > ## "large" examples using different algo branches {seg.fault in version 0.4-4}:
 > set.seed(1)
@@ -944,7 +944,7 @@ Robust Estimate of Covariance:
 [3,]      7.31   238  9862.80
 > 
 > cat('Time elapsed: ', proc.time(),'\n')
-Time elapsed:  1.46 0.02 1.476 0 0 
+Time elapsed:  1.6 0.081 1.825 0 0.007 
 > 
 > 
 > ## Now, some small sample cases:
@@ -1104,13 +1104,16 @@ In covMcd(X, use.correction = FALSE) :
 +           all.equal(c(mcc$cov / cc$raw.cov), rep(0.7528695976179, p*p)))
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  1.5 0.02 1.525 0 0 
+Time elapsed:  1.679 0.082 1.905 0 0.007 
 > 
 > ## nsamp = "exact" -- here for p=7
 > coleman.x <- data.matrix(coleman[, 1:6])
 > cat('Time : ', system.time(CcX <- covMcd(coleman.x, nsamp="exact")),
 +     "\n")# ~ 3 sec. on a fast 2003 machine (Intel Xeon 2400 MHz)
-Time :  0.81 0 0.824 0 0 
+Time :  1.007 0.001 1.011 0 0 
 > stopifnot(all.equal(CcX$best,
 +                     c(2, 5:9, 11,13, 14:16, 19:20), tol=0))
 > 
+> proc.time()
+   user  system elapsed 
+  2.721   0.090   2.952 

@@ -6,7 +6,7 @@
 ### Here, we produce output which is *compared* with ./mc-etc.Rout.save
 
 library(robustbase)
-source(system.file("mcnaive.R", package = "robustbase"))# mcNaive()
+source(system.file("xtraR/mcnaive.R", package = "robustbase"))# mcNaive()
 
 ## This is somewhat interesting {diff the output !}
 ## particularly since *most* give  the  'not found' diagnostic

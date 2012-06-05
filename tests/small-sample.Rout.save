@@ -1,6 +1,6 @@
 
-R version 2.13.0 Under development (unstable) (2011-03-07 r54691)
-Copyright (C) 2011 The R Foundation for Statistical Computing
+R version 2.15.0 Patched (2012-05-24 r59442) -- "Easter Beagle"
+Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
@@ -18,7 +18,7 @@ Type 'q()' to quit R.
 
 > library(robustbase)
 > ## testing functions:
-> source(system.file("ex-funs.R", package = "robustbase"))
+> source(system.file("xtraR/ex-funs.R", package = "robustbase"))
 > 
 > set.seed(152)
 > 
@@ -167,6 +167,9 @@ Mean and its. std.err;  Quartiles of Sn(x_1 .. x_n) and Qn(...):
 0.4860477 0.0023965 0.4492734 0.4853898 0.5220596 
 > 
 > rbind("Time (CPU) used:" = summary(cpu))
-                 Min. 1st Qu. Median   Mean 3rd Qu. Max.
-Time (CPU) used: 0.28    0.34   0.39 0.4792    0.45 1.45
+                  Min. 1st Qu. Median   Mean 3rd Qu.  Max.
+Time (CPU) used: 0.199   0.242  0.287 0.3583   0.334 1.181
 > 
+> proc.time()
+   user  system elapsed 
+  5.376   0.058   5.551 

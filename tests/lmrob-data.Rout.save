@@ -1,5 +1,5 @@
 
-R version 2.15.0 (2012-03-30)
+R version 2.15.0 Patched (2012-06-04 r59517) -- "Easter Beagle"
 Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-unknown-linux-gnu (64-bit)
@@ -49,12 +49,12 @@ Robustness weights:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.5335  0.8269  0.9760  0.9112  0.9952  0.9989 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
- nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
-       500         50          5        400          2          1        200 
- trace.lev        mts compute.rd 
-         0       1000          0 
+tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
+        500          50           5         400           2           1 
+      k.max maxit.scale   trace.lev         mts  compute.rd 
+        200         200           0        1000           0 
           psi   subsampling        method           cov 
    "bisquare" "constrained"          "MM" ".vcov.avar1" 
 seed : int(0) 
@@ -163,12 +163,12 @@ Robustness weights:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.1491  0.9412  0.9847  0.9279  0.9947  0.9982 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
- nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
-       500         50          5        400          2          1        200 
- trace.lev        mts compute.rd 
-         0       1000          0 
+tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
+        500          50           5         400           2           1 
+      k.max maxit.scale   trace.lev         mts  compute.rd 
+        200         200           0        1000           0 
           psi   subsampling        method           cov 
    "bisquare" "constrained"          "MM" ".vcov.avar1" 
 seed : int(0) 
@@ -209,12 +209,12 @@ Robustness weights:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.6533  0.9171  0.9593  0.9318  0.9848  0.9986 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
- nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
-       500         50          5        400          2          1        200 
- trace.lev        mts compute.rd 
-         0       1000          0 
+tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
+        500          50           5         400           2           1 
+      k.max maxit.scale   trace.lev         mts  compute.rd 
+        200         200           0        1000           0 
           psi   subsampling        method           cov 
    "bisquare" "constrained"          "MM" ".vcov.avar1" 
 seed : int(0) 
@@ -251,12 +251,12 @@ Robustness weights:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.8522  0.9268  0.9624  0.9532  0.9865  0.9986 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
- nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
-       500         50          5        400          2          1        200 
- trace.lev        mts compute.rd 
-         0       1000          0 
+tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
+        500          50           5         400           2           1 
+      k.max maxit.scale   trace.lev         mts  compute.rd 
+        200         200           0        1000           0 
           psi   subsampling        method           cov 
    "bisquare" "constrained"          "MM" ".vcov.avar1" 
 seed : int(0) 
@@ -286,15 +286,18 @@ Robustness weights:
      2      3      4      5      6      7      8      9     11 
 0.9887 0.9299 0.9608 0.9082 0.9262 0.9963 0.1134 0.9665 0.6149 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
- nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
-       500         50          5        400          2          1        200 
- trace.lev        mts compute.rd 
-         0       1000          0 
+tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
+        500          50           5         400           2           1 
+      k.max maxit.scale   trace.lev         mts  compute.rd 
+        200         200           0        1000           0 
           psi   subsampling        method           cov 
    "bisquare" "constrained"          "MM" ".vcov.avar1" 
 seed : int(0) 
+Warning message:
+In lmrob.S(x, y, control = control) :
+  find_scale() did not converge in 'maxit.scale' (= 200) iterations
 > stopifnot(8  == which(mhrt$w < 0.15),
 +           11 == which(0.61 < mhrt$w & mhrt$w < 0.62),
 +           c(1:7,9:10,12) == which(mhrt$w > 0.90))
@@ -328,20 +331,20 @@ Robustness weights:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.1215  0.8757  0.9428  0.8721  0.9797  0.9978 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001 
- nResample     max.it     groups    n.group   best.r.s   k.fast.s      k.max 
-       500         50          5        400          2          1        200 
- trace.lev        mts compute.rd 
-         0       1000          0 
+tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+  nResample      max.it      groups     n.group    best.r.s    k.fast.s 
+        500          50           5         400           2           1 
+      k.max maxit.scale   trace.lev         mts  compute.rd 
+        200         200           0        1000           0 
           psi   subsampling        method           cov 
    "bisquare" "constrained"          "MM" ".vcov.avar1" 
 seed : int(0) 
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # "stats"
-Time elapsed:  0.33 0.035 0.518 0 0.001 
+Time elapsed:  0.43 0.049 0.549 0 0.007 
 > 
 > proc.time()
    user  system elapsed 
-  0.330   0.036   0.518 
+  0.430   0.056   0.550 

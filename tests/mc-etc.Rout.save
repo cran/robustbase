@@ -1,6 +1,6 @@
 
-R version 2.14.0 (2011-10-31)
-Copyright (C) 2011 The R Foundation for Statistical Computing
+R version 2.15.0 Patched (2012-05-24 r59442) -- "Easter Beagle"
+Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
@@ -24,7 +24,7 @@ Type 'q()' to quit R.
 > ### Here, we produce output which is *compared* with ./mc-etc.Rout.save
 > 
 > library(robustbase)
-> source(system.file("mcnaive.R", package = "robustbase"))# mcNaive()
+> source(system.file("xtraR/mcnaive.R", package = "robustbase"))# mcNaive()
 > 
 > ## This is somewhat interesting {diff the output !}
 > ## particularly since *most* give  the  'not found' diagnostic
@@ -670,6 +670,9 @@ numeric
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  0.437 0.071 0.711 0.001 0.009 
+Time elapsed:  0.372 0.052 0.485 0 0.006 
 > 
 > quit('no')
+> proc.time()
+   user  system elapsed 
+  0.372   0.058   0.485 

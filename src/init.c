@@ -33,7 +33,8 @@ static R_NativePrimitiveArgType R_lmrob_S_t[] = {
     REALSXP, REALSXP, INTSXP, INTSXP, INTSXP, REALSXP, REALSXP,
     /* rrhoc */ REALSXP, INTSXP, REALSXP,
     /* best_r */ INTSXP, INTSXP, INTSXP,
-    /* K_s */ INTSXP, INTSXP, REALSXP,
+    /* K_s */ INTSXP, INTSXP, INTSXP,
+    /* rel_tol*/ REALSXP, REALSXP,
     /* converged */ LGLSXP, INTSXP, INTSXP, INTSXP
 };
 
@@ -60,28 +61,30 @@ static R_NativePrimitiveArgType R_wgtfun_t[] = {
 static R_NativePrimitiveArgType R_find_D_scale_t[] = {
     REALSXP, REALSXP, REALSXP, INTSXP, REALSXP,
     /* c */ REALSXP, INTSXP, INTSXP, REALSXP,
-    /* max_k */ INTSXP, INTSXP
+    /* max_k */ INTSXP, LGLSXP
 };
 
 static R_NativePrimitiveArgType R_calc_fitted_t[] = {
-    REALSXP, REALSXP, REALSXP, INTSXP, INTSXP, INTSXP, 
+    REALSXP, REALSXP, REALSXP, INTSXP, INTSXP, INTSXP,
     INTSXP, INTSXP
 };
 
 static R_NativePrimitiveArgType R_lmrob_M_S_t[] = {
-    REALSXP, REALSXP, REALSXP, REALSXP, 
-    INTSXP, INTSXP, INTSXP, INTSXP, 
-    REALSXP, REALSXP, REALSXP, 
-    REALSXP, INTSXP, REALSXP, 
-    INTSXP, INTSXP, REALSXP, 
-    LGLSXP, INTSXP, 
+    REALSXP, REALSXP, REALSXP, REALSXP,
+    INTSXP, INTSXP, INTSXP, INTSXP,
+    REALSXP, REALSXP, REALSXP,
+    REALSXP, INTSXP, REALSXP,
+    INTSXP, INTSXP, REALSXP, REALSXP,
+    LGLSXP, INTSXP,
     LGLSXP, LGLSXP, LGLSXP, INTSXP, INTSXP
 };
 
 static R_NativePrimitiveArgType R_subsample_t[] = {
-    REALSXP, REALSXP, INTSXP, INTSXP, 
-    REALSXP, INTSXP, INTSXP, INTSXP, 
-    REALSXP, REALSXP, INTSXP, INTSXP, LGLSXP, INTSXP, INTSXP
+    REALSXP, REALSXP, INTSXP, INTSXP,
+    REALSXP, INTSXP, INTSXP, INTSXP,
+    REALSXP, REALSXP, INTSXP,
+    REALSXP, REALSXP, INTSXP, INTSXP,
+    INTSXP, LGLSXP, INTSXP, INTSXP, REALSXP
 };
 
 static const R_CMethodDef CEntries[]  = {

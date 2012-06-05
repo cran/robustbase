@@ -1,6 +1,9 @@
 \name{lmrob}
 \encoding{utf8}
 \alias{lmrob}
+% "Link to here", even those are not exported:
+\alias{.vcov.avar1}
+\alias{.vcov.w}
 \title{MM-type Estimators for Linear Regression}
 \description{
   Computes fast MM-type estimators for linear (regression) models.
@@ -103,8 +106,8 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
     }
     \item{Method \code{method}:}{
       The following chain of estimates is customizable via the
-      \code{method} argument of \code{\link{lmrob.control}}.  There are
-      currently two types of estimates available,
+      \code{method} argument. % of \code{\link{lmrob.control}}.
+      There are currently two types of estimates available,
       \describe{
 	\item{\code{"M"}:}{corresponds to the standard M-regression
 	  estimate.}

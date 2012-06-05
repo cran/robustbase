@@ -41,16 +41,18 @@ void R_lmrob_S(double *X, double *y, int *n, int *P,
 	       int *nRes, double *scale, double *beta_s,
 	       double *C, int *iipsi, double *bb,
 	       int *best_r, int *Groups, int *N_group,
-	       int *K_s, int *max_k, double *rel_tol,
+	       int *K_s, int *max_k, int *max_it_scale,
+	       double *rel_tol, double *inv_tol,
+               //     ^^^^^^^^^ = refine.tol in R
 	       int* converged, int *trace_lev, int *mts, int *ss);
 
 void R_lmrob_M_S(double *X1, double *X2, double *y, double *res,
-		 int *n, int *p1, int *p2, int *nRes, 
+		 int *n, int *p1, int *p2, int *nRes,
 		 double *scale, double *b1, double *b2,
 		 double *rho_c, int *ipsi, double *bb,
-		 int *K_m_s, int *max_k, double *rel_tol,
+		 int *K_m_s, int *max_k, double *rel_tol, double *inv_tol,
 		 int *converged, int *trace_lev,
-		 int *orthogonalize, int *subsample, 
+		 int *orthogonalize, int *subsample,
 		 int *descent, int *mts, int *ss);
 
 void R_lmrob_MM(double *X, double *y, int *n, int *P,
@@ -60,16 +62,18 @@ void R_lmrob_MM(double *X, double *y, int *n, int *P,
 		double *rho_c, int *ipsi, double *loss, double *rel_tol,
 		int *converged, int *trace_lev, int *mts, int *ss);
 
-void R_subsample(const double *x, const double *y, int *n, int *m, 
-		 double *beta, int *ind_space, int *idc, int *idr, 
-		 double *lu, double *v, int *p, int *status, int *sample, int *mts, int *ss);
+void R_subsample(const double *x, const double *y, int *n, int *m,
+		 double *beta, int *ind_space, int *idc, int *idr,
+		 double *lu, double *v, int *p,
+		 double *_Dr, double *_Dc, int *_rowequ, int *_colequ,
+		 int *status, int *sample, int *mts, int *ss, double *tol_inv);
 
-void R_psifun(double *xx, double *cc, int *iipsi, int *dderiv, int *llength);
-void R_chifun(double *xx, double *cc, int *iipsi, int *dderiv, int *llength);
-void R_wgtfun(double *xx, double *cc, int *iipsi, int *llength);
+void R_psifun(double *xx, const double cc[], int *iipsi, int *dderiv, int *llength);
+void R_chifun(double *xx, const double cc[], int *iipsi, int *dderiv, int *llength);
+void R_wgtfun(double *xx, const double cc[], int *iipsi, int *llength);
 
 
-void R_find_D_scale(double *rr, double *kkappa, double *ttau, int *llength, 
+void R_find_D_scale(double *rr, double *kkappa, double *ttau, int *llength,
 		    double *sscale, double *cc, int *iipsi, int *ttype, double *rel_tol,
 		    int *max_k, int *converged);
 
@@ -107,7 +111,7 @@ int F77_NAME(rfltsreg)(
 
 /* ------- ./rllarsbi.f -------------- */
 void  F77_NAME(rllarsbi)(
-    double *X, double *Y, int *N, int *NP, int *MDX, int *MDT, 
-    double *TOL, int *NIT, int *K, int *KODE, double *SIGMA, double *THETA, 
-    double *RS, double *SC1, double *SC2, double *SC3, double *SC4, 
+    double *X, double *Y, int *N, int *NP, int *MDX, int *MDT,
+    double *TOL, int *NIT, int *K, int *KODE, double *SIGMA, double *THETA,
+    double *RS, double *SC1, double *SC2, double *SC3, double *SC4,
     double *BET0);

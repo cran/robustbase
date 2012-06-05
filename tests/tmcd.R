@@ -1,6 +1,6 @@
 library(robustbase)
 
-source(system.file("test_MCD.R", package = "robustbase"))#-> doMCDdata
+source(system.file("xtraR/test_MCD.R", package = "robustbase"))#-> doMCDdata
 ##          ../inst/test_MCD.R
 
 ## -- now do it:

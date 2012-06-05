@@ -1,6 +1,6 @@
 
-R version 2.13.0 Under development (unstable) (2011-03-07 r54691)
-Copyright (C) 2011 The R Foundation for Statistical Computing
+R version 2.15.0 Patched (2012-05-24 r59442) -- "Easter Beagle"
+Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
@@ -19,7 +19,7 @@ Type 'q()' to quit R.
 > library(robustbase)
 > ## library(MASS)## MASS::lqs
 > 
-> source(system.file("test_LTS.R", package = "robustbase"))
+> source(system.file("xtraR/test_LTS.R", package = "robustbase"))
 > ##          ../inst/test_LTS.R
 > 
 > y20 <- c(2:4, 8, 12, 22, 28, 29, 33, 34, 38, 40, 41, 47:48, 50:51, 54, 56, 59)
@@ -531,5 +531,8 @@ Scale estimate 19.3
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  0.45 0.02 0.469 0 0 
+Time elapsed:  0.51 0.05 0.632 0 0.005 
 > 
+> proc.time()
+   user  system elapsed 
+  0.510   0.055   0.632 

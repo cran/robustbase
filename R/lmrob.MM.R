@@ -1,14 +1,18 @@
 lmrob.control <- function  (setting, seed = NULL, nResample = 500,
-                            tuning.chi = NULL,  bb = 0.5,
+                            tuning.chi = NULL, bb = 0.5,
                             tuning.psi = NULL, max.it = 50,
                             groups = 5, n.group = 400, k.fast.s = 1, best.r.s = 2,
-                            k.max = 200, k.m_s = 20, refine.tol = 1e-07, rel.tol = 1e-07,
+                            k.max = 200, maxit.scale = 200, k.m_s = 20,
+                            ##           ^^^^^^^^^^^ had MAX_ITER_FIND_SCALE 200 in ../src/lmrob.c
+                            refine.tol = 1e-7, rel.tol = 1e-7,
+                            solve.tol = 1e-7,
+                            ## had  ^^^^^^^^  TOL_INVERSE 1e-7 in ../src/lmrob.c
                             trace.lev = 0, mts = 1000,
                             subsampling = c("constrained", "simple"),
                             compute.rd = FALSE, method = 'MM',
                             psi = c('bisquare', 'lqq', 'welsh', 'optimal', 'hampel',
                               'ggw'),
-                            numpoints = 10, cov = '.vcov.avar1',
+			    numpoints = 10, cov = NULL,
                             split.type = c("f", "fi", "fii"),
                             ...)
 {
@@ -18,14 +22,15 @@ lmrob.control <- function  (setting, seed = NULL, nResample = 500,
             if (missing(psi)) psi <- 'lqq'
             if (missing(max.it)) max.it <- 500
             if (missing(k.max)) k.max <- 2000
-            if (missing(cov)) cov <- '.vcov.w'
+            if (missing(cov) || is.null(cov)) cov <- '.vcov.w'
         } else {
             warning("Unknown setting '", setting, "'. Using defaults.")
             psi <- match.arg(psi)
         }
     } else {
         psi <- if (missing(psi) && grepl('D', method)) 'lqq' else match.arg(psi)
-        if (missing(cov) && !method %in% c('SM', 'MM')) cov <- '.vcov.w'
+	if (missing(cov) || is.null(cov))
+	    cov <- if(method %in% c('SM', 'MM')) ".vcov.avar1" else ".vcov.w"
     }
     subsampling <- match.arg(subsampling)
 
@@ -52,15 +57,15 @@ lmrob.control <- function  (setting, seed = NULL, nResample = 500,
         tuning.chi <- lmrob.const(tuning.chi, psi)
     }
 
-    c(list(seed = as.integer(seed), nResample = nResample, psi = psi,
-           tuning.chi = tuning.chi, bb = bb, tuning.psi = tuning.psi,
-           max.it = max.it, groups = groups, n.group = n.group,
-           best.r.s = best.r.s, k.fast.s = k.fast.s,
-           k.max = k.max, k.m_s = k.m_s, refine.tol = refine.tol,
-           rel.tol = rel.tol, trace.lev = trace.lev, mts = mts,
-           subsampling = subsampling,
-           compute.rd = compute.rd, method = method, numpoints = numpoints,
-           cov = cov, split.type = match.arg(split.type)),
+    c(list(seed = as.integer(seed), nResample=nResample, psi=psi,
+           tuning.chi=tuning.chi, bb=bb, tuning.psi=tuning.psi,
+           max.it=max.it, groups=groups, n.group=n.group,
+           best.r.s=best.r.s, k.fast.s=k.fast.s,
+           k.max=k.max, maxit.scale=maxit.scale, k.m_s=k.m_s, refine.tol=refine.tol,
+           rel.tol=rel.tol, solve.tol=solve.tol, trace.lev=trace.lev, mts=mts,
+           subsampling=subsampling,
+           compute.rd=compute.rd, method=method, numpoints=numpoints,
+           cov=cov, split.type = match.arg(split.type)),
       list(...))
 }
 
@@ -314,17 +319,23 @@ if(getRversion() > "2.15.0" || as.numeric(R.Version()$`svn rev`) > 59233)
     w  <- lmrob.psifun(r.s, cc = c.psi, psi = psi, deriv = 1)
     w0 <- lmrob.chifun(r0.s, cc = c.chi, psi = chi, deriv = 1)
     ## FIXME for multivariate y :
-    A <- solve(crossprod(x, x * w)) * (n * scale)
-    a <- A %*% (crossprod(x, w * r.s) / (n * mean(w0 * r0.s)))
+    x.wx <- crossprod(x, x * w)
+    if(inherits(A <- tryCatch(solve(x.wx) * scale,
+			      error=function(e)e), "error")) {
+	warning("X'WX is almost singular. Consider rather using cov = \".vcov.w\"")
+	A <- tryCatch(solve(x.wx, tol = 0) * scale, error=function(e)e)
+	if(inherits(A, "error"))
+	    stop("X'WX is singular. Rather use cov = \".vcov.w\"")
+    }
+    a <- A %*% (crossprod(x, w * r.s) / mean(w0 * r0.s))
     w <- lmrob.psifun( r.s, cc = c.psi, psi = psi)
 
     ## 3) now the standard part  (w, x, r0.s,  n, A,a, c.chi, bb)
     w0 <- lmrob.chifun(r0.s, cc = c.chi, psi = chi)
     Xww <- crossprod(x, w*w0)
-    u1 <- crossprod(x, x * w^2) / n
-    u1 <- A %*% u1 %*% A
-    u2 <- a %*% crossprod(Xww, A) / n
-    u3 <- A %*% tcrossprod(Xww, a) / n
+    u1 <- A %*% crossprod(x, x * w^2) %*% (n * A)
+    u2 <- a %*% crossprod(Xww, A)
+    u3 <- A %*% tcrossprod(Xww, a)
     u4 <- mean(w0^2 - bb^2) * tcrossprod(a)
 
     ## list(cov = matrix((u1 - u2 - u3 + u4)/n, p, p),
@@ -440,14 +451,14 @@ lmrob..M..fit <- function (x=obj$x, y=obj$y, beta.initial=obj$coef,
         ret$rank <- ret$qr$rank
         ## if there is a covariance matrix estimate available in obj
         ## update it, if possible, else replace it by the default .vcov.w
-        if (!is.null(obj$cov)) {
-            if (!control$method %in% c('SM', 'MM') &&
-                ret$control$cov == '.vcov.avar1') ret$control$cov <- '.vcov.w'
-
-            lf.cov <- if (!is.function(ret$control$cov))
-                get(ret$control$cov, mode='function') else ret$control$cov
-            ret$cov <- lf.cov(ret, x)
-        }
+	if (!is.null(obj$cov)) {
+	    if (!control$method %in% c('SM', 'MM') &&
+		ret$control$cov == '.vcov.avar1')
+		ret$control$cov <- '.vcov.w'
+	    lf.cov <- if (!is.function(ret$control$cov))
+		get(ret$control$cov, mode='function') else ret$control$cov
+	    ret$cov <- lf.cov(ret, x)
+	}
     }
     class(ret) <- "lmrob"
     ret
@@ -500,7 +511,9 @@ lmrob.S <- function (x, y, control, trace.lev = control$trace.lev, mf = NULL)
             n.group = nGr,
             k.fast.s = as.integer(control$k.fast.s),
             k.iter = as.integer(control$k.max),
+            maxit.scale = as.integer(control$maxit.scale),
             refine.tol = as.double(control$refine.tol),
+            inv.tol = as.double(control$solve.tol),
             converged = logical(1),
             trace.lev = as.integer(trace.lev),
             mts = as.integer(control$mts),
@@ -565,7 +578,7 @@ lmrob..D..fit <- function(obj, x=obj$x, control = obj$control)
               type = 3L, ## dt1 as only remaining option
               rel.tol = as.double(control$rel.tol),
               k.max = as.integer(control$k.max),
-              converged = integer(1))
+              converged = logical(1))[c("converged", "scale")]
     obj$scale <- if(ret$converged) ret$scale else NA
     obj$converged <- ret$converged
 
@@ -584,7 +597,8 @@ lmrob..D..fit <- function(obj, x=obj$x, control = obj$control)
     ## update it, if possible, else replace it by the default
     ## .vcov.w
     if (!is.null(obj$cov)) {
-        if (control$cov == '.vcov.avar1') control$cov <- '.vcov.w'
+        if (control$cov == '.vcov.avar1')
+            control$cov <- '.vcov.w'
 
         lf.cov <- if (!is.function(control$cov))
             get(control$cov, mode='function') else control$cov

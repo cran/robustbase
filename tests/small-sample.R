@@ -1,6 +1,6 @@
 library(robustbase)
 ## testing functions:
-source(system.file("ex-funs.R", package = "robustbase"))
+source(system.file("xtraR/ex-funs.R", package = "robustbase"))
 
 set.seed(152)
 

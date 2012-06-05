@@ -13,12 +13,14 @@
 lmrob.control(setting, seed = NULL, nResample = 500,
               tuning.chi = NULL, bb = 0.5, tuning.psi = NULL,
               max.it = 50, groups = 5, n.group = 400,
-              k.fast.s = 1, best.r.s = 2, k.max = 200, k.m_s = 20,
-              refine.tol = 1e-7, rel.tol = 1e-7, trace.lev = 0,
+              k.fast.s = 1, best.r.s = 2,
+              k.max = 200, maxit.scale = 200, k.m_s = 20,
+              refine.tol = 1e-7, rel.tol = 1e-7, solve.tol = 1e-7,
+              trace.lev = 0,
               mts = 1000, subsampling = c("constrained", "simple"),
               compute.rd = FALSE, method = 'MM',
-              psi = c('bisquare', 'lqq', 'welsh', 'optimal', 'hampel',
-              'ggw'), numpoints = 10, cov = '.vcov.avar1',
+              psi = c('bisquare', 'lqq', 'welsh', 'optimal', 'hampel', 'ggw'),
+              numpoints = 10, cov = NULL,
               split.type = c("f", "fi", "fii"), ...)
 }
 \arguments{
@@ -62,10 +64,15 @@ lmrob.control(setting, seed = NULL, nResample = 500,
     Salibian-Barrera & Yohai(2006).}
   \item{k.max}{(for the fast-S algorithm): maximal number of
     refinement steps for the \dQuote{fully} iterated best candidates.}
+  \item{maxit.scale}{integer specifying the maximum number of C level
+    \code{find_scale()} iterations.}
   \item{refine.tol}{(for the fast-S algorithm): relative convergence
     tolerance for the fully iterated best candidates.}
   \item{rel.tol}{(for the RWLS iterations of the MM algorithm): relative
     convergence tolerance for the parameter vector.}
+  \item{solve.tol}{(for the S algorithm): relative
+    tolerance for inversion.  Hence, this corresponds to
+    \code{\link{solve.default}()}'s \code{tol}.}
   \item{trace.lev}{integer indicating if the progress of the MM-algorithm
     should be traced (increasingly); default \code{trace.lev = 0} does
     no tracing.}
@@ -87,13 +94,14 @@ lmrob.control(setting, seed = NULL, nResample = 500,
   \item{psi}{string specifying the type \eqn{\psi}-function
     used.  See \emph{Details} of \code{\link{lmrob}}.  Defaults to
     \code{"bisquare"} for S and MM-estimates, otherwise \code{"lqq"}.}
-  \item{numpoints}{Number of points used in Gauss quadrature.}
-  \item{cov}{Function or string with function name to be used to
-    calculate covariance matrix estimate. See \emph{Details} of
-    \code{\link{lmrob}}.}
-  \item{split.type}{Determines how categorical and continuous variables
+  \item{numpoints}{number of points used in Gauss quadrature.}
+  \item{cov}{function or string with function name to be used to
+    calculate covariance matrix estimate.  The default is
+    \code{if(method \%in\% c('SM', 'MM')) ".vcov.avar1" else ".vcov.w"}.
+    See \emph{Details} of \code{\link{lmrob}}.}
+  \item{split.type}{determines how categorical and continuous variables
     are split. See \code{\link{splitFrame}}.}
-  \item{...}{Further arguments are added to the control list.}
+  \item{...}{further arguments to be added to \code{control}.}
 }
 \details{The option \code{setting="KS2011"} alters the default
   arguments.  They are changed to \code{method = 'SMDM', psi = 'lqq',

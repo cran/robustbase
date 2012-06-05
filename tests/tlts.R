@@ -1,7 +1,7 @@
 library(robustbase)
 ## library(MASS)## MASS::lqs
 
-source(system.file("test_LTS.R", package = "robustbase"))
+source(system.file("xtraR/test_LTS.R", package = "robustbase"))
 ##          ../inst/test_LTS.R
 
 y20 <- c(2:4, 8, 12, 22, 28, 29, 33, 34, 38, 40, 41, 47:48, 50:51, 54, 56, 59)

@@ -9,8 +9,10 @@ lmrob <-
     ## to avoid problems with setting argument
     ## call lmrob.control here either with or without method arg.
     if (missing(control))
-        control <- if (missing(method))
-            lmrob.control(...) else lmrob.control(method = method, ...)
+	control <- if (missing(method))
+	    lmrob.control(...) else lmrob.control(method = method, ...)
+    else ## check dots
+        chk.s(...)
     ret.x <- x
     ret.y <- y
     cl <- match.call()
@@ -92,6 +94,18 @@ lmrob <-
         z$y <- y
     z
 }
+
+##' @title Warn about extraneous arguments in the "..."  (of its caller)
+##' @return
+##' @author Martin Maechler, June 2012
+chk.s <- function(...) {
+    if(length(list(...)))
+	warning("arguments  ",
+		sub(")$", '', sub("^list\\(", '', deparse(list(...), control=c()))),
+		"  are disregarded in\n ", deparse(sys.call(-1), control=c()),
+		call. = FALSE)
+}
+
 
 ##' Robust Mahalanobis Distances
 ##' internal function, used in lmrob() and maybe plot.lmrob()

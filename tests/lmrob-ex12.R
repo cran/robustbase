@@ -1,5 +1,8 @@
 
 library(robustbase)
+source(system.file("test-tools-1.R", package="Matrix", mustWork=TRUE))
+##-> assertError(), etc
+
 set.seed(1) # since now .Random.seed is used by default!
 
 ## EX 1
@@ -26,6 +29,10 @@ dput(signif(unname(coef(mC)), 7))
 ## 32b(0.2-0):	 "exactly" same !
 ## Full precision:
 dput(unname(coef(mC)))
+## 2012-06-04:
+## 32-bit:c(30.5023184450149, -1.66614687548007, 0.0842538074792178, 0.667736590070332, 1.16777744029117, -4.13656885405815)
+## 64-bit:c(30.5023184450148, -1.66614687548008, 0.0842538074792178, 0.667736590070332, 1.16777744029117, -4.13656885405814)
+##
 ## 32-bit:c(30.5023183940104, -1.66614687550933, 0.0842538074635567, 0.667736589938547, 1.16777744089398, -4.13656884777543)
 ## 64-bit:c(30.5023184150851, -1.66614687537736, 0.0842538074722959, 0.667736589980183, 1.16777744061092, -4.1365688503035)
 
@@ -90,11 +97,15 @@ system.time( m4 <- lmrob(y~x, data = a2, seed = rs, compute.rd = FALSE))
 stopifnot(nrs == .Random.seed, identical(coef(m3), coef(m4)))
 
 dput(signif(cf <- unname(coef(m3)), 7))
+## 2012-06-04:c(-0.05108914, 1.005971, 1.003201, 0.9833263) - 32 AND 64 bit
+##
 ## 0.2-0: c(0.007446546, 1.000712, 1.027921, 0.9896527)
 ## 0.2-1: c(0.03148659, 0.9980933, 1.016364, 1.03243)
 ## both for 32 and 64 bit
 
 dput(signif(100 * (sd <- unname(coef(sm4)[, "Std. Error"])), 7))
+## 2012-06-04:c(2.213815, 0.2864678, 2.202318, 2.180886) - 32 AND 64 bit
+##
 ## 0.2-0: c(2.219388, 0.274644,  2.196982, 2.26253)
 ## 0.2-1: c(2.194914, 0.2737579, 2.371728, 2.206261)
 ## both for 32 and 64 bit
@@ -163,11 +174,16 @@ test <- function(n, ...) {
 set.seed(0)
 test(12) ## fast_S()
 test(2500) ## fast_S_large_n()
+test(200, trace.lev = TRUE)
 
 ## Check a case, where cov() matrix needs "posdefify":
 
 coleman16 <- coleman[ -c(2, 7, 16, 19),]
 (m16 <- lmrob(Y ~ ., data = coleman16, tuning.psi = 3.44, trace.lev = TRUE))
 ## failed in 0.9_0
+
+assertWarning(
+ lmrob(Y ~ ., data = coleman, setting = "KS2011", control = lmrob.control())
+)
 
 cat('Time elapsed: ', proc.time(),'\n') # "stats"
