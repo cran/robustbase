@@ -359,7 +359,8 @@ print.ggplot <- function(x, newpage = is.null(vp), vp = NULL, ...,
     ## ----------------------------------------------------------------------
     ## Author: Manuel Koller, Date: 26 Jan 2010, 09:01
     
-    if (missing(footnote) && missing(legend.mod))
+    if ((missing(footnote) && missing(legend.mod)) ||
+        packageVersion("ggplot2") > "0.9.1")
         return(ggplot2:::print.ggplot(x, newpage, vp, ...))
 
     ## this is mostly a copy of ggplot2::print.ggplot
@@ -531,3 +532,21 @@ cs <- function(x, y, ..., if.col)
   rename_aes(aes)
 }
 
+## replace levels by legend.mod
+lab <- function(..., lm=legend.mod) {
+    factors <- list(...)
+    lev <- unlist(lapply(factors, levels))
+    if (length(factors) > 1)
+        lev <- sort(lev)
+    ret <- as.list(lev)
+    idx <- lev %in% names(lm)
+    ret[idx] <- lm[lev[idx]]
+    ret
+}
+
+## my labeller
+mylabel <- function(name, value, lm) {
+    str(name)
+    str(value)
+    if (value %in% names(lm)) lm[[value]] else value
+}

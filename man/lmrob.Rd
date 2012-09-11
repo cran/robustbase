@@ -102,7 +102,8 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
       computed using the Fast-S algorithm of Salibian-Barrera and Yohai
       (2006), calling \code{\link{lmrob.S}()}.  That function, since
       March 2012, uses \emph{nonsingular} subsampling which makes the
-      Fast-S algorithm feasible for categorical data as well.
+      Fast-S algorithm feasible for categorical data as well, see Koller
+      (2012). 
     }
     \item{Method \code{method}:}{
       The following chain of estimates is customizable via the
@@ -151,6 +152,9 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
   Croux, C., Dhaene, G. and Hoorelbeke, D. (2003)
   \emph{Robust standard errors for robust estimators},
   Discussion Papers Series 03.16, K.U. Leuven, CES.
+
+  Koller, M. (2012), Nonsingular subsampling for S-estimators with
+  categorical predictors, \emph{ArXiv e-prints}, arXiv:1208.5595v1.
 
   Koller, M. and Stahel, W.A. (2011), Sharpening Wald-type inference in
   robust regression for small samples, \emph{Computational Statistics &
