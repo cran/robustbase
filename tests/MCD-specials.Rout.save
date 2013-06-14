@@ -1,7 +1,6 @@
 
-R version 2.13.0 Under development (unstable) (2011-03-07 r54691)
-Copyright (C) 2011 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
+R version 3.0.0 Patched (2013-04-25 r62670) -- "Masked Marvel"
+Copyright (C) 2013 The R Foundation for Statistical Computing
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -139,7 +138,6 @@ x  223.9
 > 
 > ### 1b) p = 1, constant scale
 > (rc <- covMcd(rep(1,12)))
-Initial scale 0 because more than 'h' (=7) observations are identical.
 Minimum Covariance Determinant (MCD) estimator.
 Call:
 covMcd(x = rep(1, 12))
@@ -153,6 +151,9 @@ rep(1, 12)
 Robust Estimate of Covariance:
             rep(1, 12)
 rep(1, 12)           0
+Warning message:
+In covMcd(rep(1, 12)) :
+  Initial scale 0 because more than 'h' (=7) observations are identical.
 > str(rc)
 List of 15
  $ method     : chr "Univariate location and scale estimation."
@@ -278,11 +279,6 @@ rep(1, 12)           0
 [11,]    2    4    6    8
 [12,]    2    4    6    8
 > (rC  <- covMcd(X))
-The covariance matrix of the data is singular.
-There are 12 observations (in the entire dataset of 12 obs.) lying on
-the hyperplane with equation a_1*(x_i1 - m_1) + ... + a_p*(x_ip - m_p)
-= 0 with (m_1,...,m_p) the mean of these observations and coefficients
-a_i from the vector a <- c(1, 0, 0, 0)
 Minimum Covariance Determinant (MCD) estimator.
 Call:
 covMcd(x = X)
@@ -302,6 +298,9 @@ Robust Estimate of Covariance:
 [2,]     0     0     0     0
 [3,]     0     0     0     0
 [4,]     0     0     0     0
+Warning message:
+In covMcd(X) :
+  The covariance matrix of the data is singular.There are 12 observations (in the entire dataset of 12 obs.) lying onthe hyperplane with equation a_1*(x_i1 - m_1) + ... + a_p*(x_ip - m_p)= 0 with (m_1,...,m_p) the mean of these observations and coefficientsa_i from the vector a <- c(1, 0, 0, 0)
 > summary(rC)
 Minimum Covariance Determinant (MCD) estimator.
 Call:
@@ -363,5 +362,8 @@ Robust Estimate of Covariance:
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  0.27 0.02 0.294 0 0 
+Time elapsed:  0.424 0.024 0.442 0 0 
 > 
+> proc.time()
+   user  system elapsed 
+  0.424   0.024   0.442 

@@ -1,5 +1,8 @@
+## Called from ./lmrob_simulation.Rnw
+##              ~~~~~~~~~~~~~~~~~~~~~
+
 ###########################################################################
-## simulation helper functions
+## 1. simulation helper functions
 ###########################################################################
 
 f.estname <- function(est = 'lmrob')
@@ -235,7 +238,7 @@ f.chop <- function(str,l=1)
   ## Author: Manuel Koller, Date:  8 Oct 2009, 15:19
   substr(str,1,nchar(str)-l)
 
-f.M.psi2str <- function(psi)
+fMpsi2str <- function(psi)
 {
   ## Purpose: make pretty M.psi and D.chi, etc.
   ## ----------------------------------------------------------------------
@@ -410,7 +413,7 @@ f.rename.level <- function(factor, from, to) {
 
 
 ###########################################################################
-## main simulation functions
+## 2. main simulation functions
 ###########################################################################
 
 f.sim <- function(estlist,

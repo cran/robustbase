@@ -1,10 +1,10 @@
+\title{MM-type Estimators for Linear Regression}
 \name{lmrob}
 \encoding{utf8}
 \alias{lmrob}
 % "Link to here", even those are not exported:
 \alias{.vcov.avar1}
 \alias{.vcov.w}
-\title{MM-type Estimators for Linear Regression}
 \description{
   Computes fast MM-type estimators for linear (regression) models.
 }
@@ -28,9 +28,8 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
     to be used in the fitting process.}
 
   \item{weights}{an optional vector of weights to be used in the fitting
-    process (additional to the robustness weights computed in the
-    fitting process).
-    }
+    process (in addition to the robustness weights computed in the
+    fitting process).}
   \item{na.action}{a function which indicates what should happen
     when the data contain \code{NA}s.  The default is set by
     the \code{na.action} setting of \code{\link{options}}, and is
@@ -39,7 +38,8 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
     \code{NULL}, no action.  Value \code{\link{na.exclude}} can be useful.}
 
   \item{method}{string specifying the estimator-chain. \code{MM}
-    is interpreted as \code{SM}. See \emph{Details}.}
+    is interpreted as \code{SM}.  See \emph{Details}, notably the
+    currently recommended \code{setting = "KS2011"}.}
 
   \item{model, x, y}{logicals.  If \code{TRUE} the corresponding
     components of the fit (the model frame, the model matrix, the
@@ -60,14 +60,14 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
     the function \code{\link{lmrob.control}(.)} and see its help page.}
 
   \item{init}{an optional argument to specify or supply the initial
-  estimate. See \emph{Details}.}
+    estimate. See \emph{Details}.}
 
-  \item{\dots}{can be used to specify control parameters directly
-    instead of via \code{control}.}
+  \item{\dots}{additional arguments can be used to specify control
+    parameters directly instead of (but not in addition to!) via \code{control}.}
 }
 \details{
   \describe{
-    \item{Overview}{
+    \item{Overview:}{
       This function computes an MM-type regression estimator as
       described in Yohai (1987) and Koller and Stahel (2011).  By
       default it uses a bi-square redescending score function, and it
@@ -77,20 +77,20 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
 
       The argument \code{setting} of \code{\link{lmrob.control}} is provided
       to set alternative defaults as suggested in Koller and Stahel (2011)
-      (use \code{setting='KS2011'}).  For details, see
+      (use \code{setting="KS2011"}).  For details, see
       \code{\link{lmrob.control}}.
     }
     \item{Initial Estimator \code{init}:}{
       The initial estimator may be specified using the argument
-      \code{init}. This argument can either be a string, a function or a
-      list.  A \emph{string} can be used to specify built in internal
+      \code{init}.  This can either be a string, a function or a list.
+      A \emph{string} can be used to specify built in internal
       estimators (currently \code{S} and \code{M-S}, see \emph{See also}
-      below).  A \emph{function} taking arguments \code{x, y, control,
-      mf} (where \code{mf} stands for \code{model.frame}) and returning
-      a list containing at least the initial coefficients as
-      \code{coefficients} and the initial scale estimate
-      \code{scale}. Or a \emph{list} giving the initial coefficients and
-      scale as \code{coefficients} and \code{scale}. See also \emph{Examples}.
+      below).  A \code{\link{function}} taking arguments \code{x, y,
+      control, mf} (where \code{mf} stands for \code{model.frame}) and
+      returning a list containing at least the initial coefficients as
+      \code{coefficients} and the initial scale estimate \code{scale}.
+      Or a \emph{list} giving the initial coefficients and scale as
+      \code{coefficients} and \code{scale}.  See also \emph{Examples}.
 
       Note that if the init argument supplied is a function or list, the
       method argument must \emph{not} contain the initial estimator, e.g.,
@@ -102,7 +102,13 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
       (2006), calling \code{\link{lmrob.S}()}.  That function, since
       March 2012, uses \emph{nonsingular} subsampling which makes the
       Fast-S algorithm feasible for categorical data as well, see Koller
-      (2012).
+      (2012).  Note that convergence problems may still show up as
+      warnings, e.g., \preformatted{
+  S refinements did not converge (to refine.tol=1e-07) in 200 (= k.max) steps
+}
+      and often can simply be remedied by increasing (i.e. weakening)
+      \code{refine.tol} or increasing the allowed number of iterations
+      \code{k.max}, see \code{\link{lmrob.control}}.
     }
     \item{Method \code{method}:}{
       The following chain of estimates is customizable via the
@@ -133,8 +139,8 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
   }%end {describe}
 }
 \value{
-  An object of class \code{lmrob}. A list that includes the
-  following components:
+  An object of class \code{lmrob}; a list including the following
+  components:
   \item{coefficients}{The estimate of the coefficient vector}
   \item{scale}{The scale as used in the M estimator.}
   \item{residuals}{Residuals associated with the estimator.}
@@ -203,7 +209,7 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
   High breakdown-point and high efficiency estimates for regression.
   \emph{The Annals of Statistics} \bold{15}, 642--65.
 }
-\author{ Matias Salibian-Barrera and Manuel Koller}
+\author{Matias Salibian-Barrera and Manuel Koller}
 \seealso{
   \code{\link{lmrob.control}};
   for the algorithms \code{\link{lmrob.S}}, \code{\link{lmrob.M.S}} and
@@ -216,8 +222,12 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
 \examples{
 data(coleman)
 set.seed(0)
+## Default for a very long time:
 summary( m1 <- lmrob(Y ~ ., data=coleman) )
-summary( m2 <- lmrob(Y ~ ., data=coleman, setting = 'KS2011') )
+## Nowadays strongly recommended for routine use:
+summary( m2 <- lmrob(Y ~ ., data=coleman, setting = "KS2011") )
+plot(residuals(m2) ~ weights(m2, type="robustness")) ##-> weights.lmrob()
+abline(h=0, lty=3)
 
 data(starsCYG, package = "robustbase")
 ## Plot simple data and fitted lines
@@ -248,7 +258,6 @@ m4 <- lmrob(Y ~ ., data=coleman, method = "M", init = initFun)
 m5 <- lmrob(Y ~ ., data=coleman, method = "M",
             init = list(coefficients = m3$init$coef, scale = m3$scale))
 stopifnot(all.equal(m4[-17], m5[-17]))
-
 }
 \keyword{robust}
 \keyword{regression}

@@ -7,3 +7,9 @@
 ##     ## for glmrob :
 ##     nobs.glm <- function(object, ...) sum(!is.na(object$residuals))
 ## }
+
+## Not exported, and only used because CRAN checks must be faster
+doExtras <- function() {
+    interactive() || nzchar(Sys.getenv("R_robustbase_check_extra")) ||
+        identical("true", unname(Sys.getenv("R_PKG_CHECKING_doExtras")))
+}

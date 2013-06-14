@@ -172,6 +172,13 @@ lmrob.control(setting, seed = NULL, nResample = 500,
 ## Show the default settings:
 str(lmrob.control())
 
+## Artificial data for a  simple  "robust t test":
+set.seed(17)
+y <- y0 <- rnorm(200)
+y[sample(200,20)] <- 100*rnorm(20)
+gr <- as.factor(rbinom(200, 1, prob = 1/8))
+lmrob(y0 ~ 0+gr)
+
 ## Use  Koller & Stahel(2011)'s recommendation but a larger  'max.it':
 str(ctrl <- lmrob.control("KS2011", max.it = 1000))
 }

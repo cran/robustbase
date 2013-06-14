@@ -24,15 +24,10 @@ glmrobMqle(X, y, weights = NULL, start = NULL, offset = NULL,
 glmrobMqleDiffQuasiDevB   (mu, mu0, y, ni, w.x, phi, tcc)
 glmrobMqleDiffQuasiDevPois(mu, mu0, y, ni, w.x, phi, tcc)
 
-wts_HiiDist(X)
-wts_RobDist(X, intercept, covFun)
-
 % rflmFixedScale(x, y, weights, w = rep(1, nrow(x)), init, scale,
 %                psi = psi.huber, maxit = 20, acc = 1e-04,
 %                test.vec = "resid", wt.method = "inv.var")
 
-%% for nlrob
-\method{print}{nlrob}(x, \dots)
 
 %% for modsel.* aka anova.glmrob():
 psi.bisquare(u, c = 4.685, deriv = 0, rho = FALSE)

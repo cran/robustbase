@@ -1,9 +1,6 @@
 ## Test implementation of M-S estimator
 require(robustbase)
 source(system.file("xtraR/m-s_fns.R", package = "robustbase", mustWork=TRUE))
-lmrob.conv.cc  <- robustbase::: lmrob.conv.cc
-lmrob.psi2ipsi <- robustbase::: lmrob.psi2ipsi
-lmrob.wgtfun   <- robustbase::: lmrob.wgtfun
 
 ## dataset with factors and continuous variables:
 data(education)
@@ -78,7 +75,7 @@ fmS <- lmrob(Y ~ Region + X1 + X2 + X3, education, init="S")
 coef(fmS)
 fmS$scale
 
-###  Comparing m-s_descent implementations()  {our C and R} : ---------------------
+###  Comparing m-s_descent implementations()  {our C and R} : -------------------
 
 ctrl <- control
 #ctrl$trace.lev <- 5
@@ -91,8 +88,9 @@ stopifnot(all.equal(mC[nm], mR[nm], check.attr = FALSE, tol=5e-15))
 ## control$k.m_s <- 100
 res3 <- vector("list", 100)
 time <- system.time(for (i in seq_along(res3)) {
+    ri <- res[[i]]
     res3[[i]] <- unlist(m_s_descent(x1, x2, y, control,
-                                    res[[i]][1:4], res[[i]][5:7], res[[i]][8]))
+				    ri[1:4], ri[5:7], ri[8]))
 })
 cat('Time elapsed in descent proc: ', time,'\n')
 
@@ -106,14 +104,19 @@ abline(0,1, col=adjustcolor("gray", 0.5))
 ## Test lmrob.M.S
 x <- model.matrix(fmS)
 control$trace.lev <- 3
+##      ---------   --
 set.seed(1003)
 fMS <- lmrob.M.S(x, y, control, fmS$model)
 resid <- drop(y - x %*% fMS$coef)
 stopifnot(all.equal(resid, fMS$resid, check.attr=FALSE))
 
 ## Test direct call to lmrob
+## 1. trace_lev output:
+set.seed(17)
+fMS <- lmrob(Y ~ Region + X1 + X2 + X3, education, init = "M-S", trace.lev=2)
+
 set.seed(13)
-fiMS <- lmrob(Y ~ Region + X1 + X2 + X3, education, init="M-S")
+fiMS <- lmrob(Y ~ Region + X1 + X2 + X3, education, init = "M-S")
 out2 <- capture.output(summary(fiMS))
 writeLines(out2)
 
@@ -122,7 +125,10 @@ fiM.S <- lmrob(Y ~ Region + X1 + X2 + X3, education, init=lmrob.M.S)
 out3 <- capture.output(summary(fiM.S))
 
 ## must be the same {apart from the "init=" in the call}:
-stopifnot(identical(out2[-4], out3[-4]))
+i <- 3
+stopifnot(identical(out2[-i], out3[-i]))
+## the difference:
+c(rbind(out2[i], out3[i]))
 
 
 ###  "Skipping design matrix equilibration" warning can arise for reasonable designs -----
@@ -130,7 +136,7 @@ set.seed(1)
 x2 <- matrix(rnorm(2*30), 30, 2)
 data <- data.frame(y = rnorm(30), group = rep(letters[1:3], each=10), x2)
 
-obj <- lmrob(y ~ ., data, init="M-S")
+obj <- lmrob(y ~ ., data, init="M-S", trace.lev=1)
 
 ## illustration: the zero row is introduced during the orthogonalization of x2 wrt x1
 ## l1 regression always produces p zero residuals
@@ -147,4 +153,22 @@ for(i in 1:ncol(x2)) {
     tmp <- lmrob.lar(x1, x2[,i], control)
     x2.tilde[,i] <- tmp$resid
 }
-x2.tilde == 0 
+x2.tilde == 0
+
+
+## Specifying init="M-S" for a model without categorical variables
+## used to cause a segfault; now uses "S"
+lmrob(LNOx ~ LNOxEm, NOxEmissions[1:10,], init="M-S")
+
+## Now an ANOVA model with *only* categorical variables
+n <- 64 # multiple of 16
+stopifnot(n %% 16 == 0)
+d.AOV <- data.frame(y = round(100*rnorm(64)),
+		    A=gl(4,n/4), B=gl(2,8, n), C=gl(2,4,n))
+fm <- lmrob(y ~ A*B*C, data = d.AOV, init = "M-S", trace.lev=2)
+## lmrob_M_S(n = 64, nRes = 500, (p1,p2)=(16,0), (orth,subs,desc)=(1,1,1))
+##  Starting subsampling procedure.. Error in lmrob.M.S(x, y, control, mf) :
+##   'Calloc' could not allocate memory (18446744073709551616 of 4 bytes)
+
+## BTW: Can we compute an  M-estimate (instead of MM-*) as we
+## ---  cannot have any x-outliers in such an ANOVA!

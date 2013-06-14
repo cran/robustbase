@@ -14,7 +14,7 @@ adjbox.default <- function (x, ..., range = 1.5, doReflect=FALSE, width = NULL, 
 	if(!is.null(attributes(args)$names))
 	    attributes(args)$names != ""
 	else
-	    rep(FALSE, length.out = length(args))
+	    logical(length(args))# all FALSE
     ## pars <- c(args[namedargs], pars)
     groups <- if(is.list(x)) x else args[!namedargs]
     if(0 == (n <- length(groups)))

@@ -34,5 +34,7 @@ education.x <- data.matrix(education[, 3:5])
 %%______ FIXME ___ X1:X3 is not what you mean !! ________
 summary(lm.education <- lm(Y ~ Region + X1+X2+X3, data=education))
 %%summary(lts.education <- ltsReg(Y .....)
+
+## See  example(lmrob.M.S) # for how robust regression is used
 }
 \keyword{datasets}

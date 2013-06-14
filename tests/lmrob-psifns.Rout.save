@@ -1,7 +1,6 @@
 
-R version 2.15.1 (2012-06-22) -- "Roasted Marshmallows"
-Copyright (C) 2012 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
+R Under development (unstable) (2013-05-30 r62840) -- "Unsuffered Consequences"
+Copyright (C) 2013 The R Foundation for Statistical Computing
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -17,45 +16,135 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > #### Tests psi(), chi(),... etc and  tuning.psi, tuning.chi :
->
+> 
 > library(robustbase)
 > source(system.file("xtraR/plot-psiFun.R", package = "robustbase", mustWork=TRUE))
->
+> 
 > ### (1) Test the functions themselves --------------------------------
 > pdf("rob-psifns.pdf")
->
-> psiF <- robustbase:::lmrob.psifun # deriv = -1 (rho), 0, 1
-> chiF <- robustbase:::lmrob.chifun # rho(.) normalized to max|.| = 1;  deriv
-> wgtF <- robustbase:::lmrob.wgtfun
->
+> 
 > ## Simple version, no error checking, no derivative, nothing:
 > psiGGW <- function(x, a,b,c) {
 +     ifelse((ax <- abs(x)) < c,
 +            x,
 +            ifelse((ea <- -((ax-c)^b)/(2*a)) < -708.4, 0, x * exp(ea)))
 + }
-> stopifnot(all.equal(psiF  (5:9, cc=c(0,a=1/8,b=2,c=1/8,NA), "GGW"),
+> stopifnot(all.equal(Mpsi  (5:9, cc=c(0,a=1/8,b=2,c=1/8,NA), "GGW"),
 + 		    psiGGW(5:9,	       a=1/8,b=2,c=1/8), tol = 1e-13))
->
->
-> funs <- list(psiF, chiF, wgtF)
-> ## Check that psi(<empty>)  |->  <empty>  works
-> cG <- c(-.5,1,.95,NA)
+> 
+> 
+> ## Check that psi(<empty>)  |->  <empty>  works; ditto for +-Inf, NA,..
+> cG <- c(-.5, 1, .95, NA) # one of the 6 "builtin"s
 > d0 <- numeric()
 > IoI <- c(-Inf, 0, Inf)
-> ## TODO: Do these checks for a *list* of combinations such as  (cG, "GGW"):
-> ## ^^^^^
-> for(FUN in funs)
-+     stopifnot(identical(d0, FUN(d0, cG, "GGW")))
-> stopifnot(identical(c(0,0,0), psiF(IoI, cG,"GGW")),
-+ 	  identical(c(1,0,1), chiF(IoI, cG,"GGW")),
-+ 	  identical(c(0,1,0), wgtF(IoI, cG,"GGW")))
->
-> ## FIXME: Check  chiF() <-> psiF(*, deriv = -1)
->
->
+> NN <- c(NaN, NA)
+> 
+> cGs <- list(  c(-.4, 1.5,    0.85,  NA)
++             , c(-.4, 1.5 ,   0.90,  NA)
++             , c(-.4, 1.5 ,   0.95,  NA)
++             , c(-.4, 1.5,    0.975, NA)
++             , c(-.4, 1.5,    0.99 , NA)
++             , c(-.4, 1.5,    0.995, NA)
++             ##
++             , c(-.4, 1.25,   0.975, NA)
++             , c(-.4, 1.1,    0.975, NA)
++             , c(-.4, 1.025,  0.975, NA)
++             , c(-.4, 1.0125, 0.975, NA)
++             ##
++             ## FIXME , c(-.1, 1.25, 0.95, NA)
++             ## FIXME , c(-.1, 1.25, 0.99, NA)
++             )
+> st <- system.time(
++ cG.cnst <- lapply(cGs, function(cc)
++                   lmrob.control(psi = "ggw", tuning.psi = cc)$tuning.psi)
++ )
+> cat('Time for constants computation of tuning.psi: ', st,'\n')
+Time for constants computation of tuning.psi:  0.29 0.001 0.294 0 0 
+> cGct <- t(sapply(cG.cnst, attr, "constants"))[,-1]
+> colnames(cGct) <- c("a","b","c", "rhoInf")
+> signif(cGct, 4)
+           a     b      c rhoInf
+ [1,] 1.0170 1.500 0.4996  2.384
+ [2,] 1.2810 1.500 0.5826  3.242
+ [3,] 1.8100 1.500 0.7335  5.139
+ [4,] 2.4430 1.500 0.8959  7.666
+ [5,] 3.4380 1.500 1.1250 12.090
+ [6,] 4.2970 1.500 1.3050 16.280
+ [7,] 1.3780 1.250 1.4350  7.654
+ [8,] 1.0140 1.100 1.7000  7.643
+ [9,] 0.8873 1.025 1.8130  7.712
+[10,] 0.8693 1.012 1.8300  7.733
+> stopifnot(all.equal(sapply(cG.cnst, function(cc) MrhoInf(cc, "ggw")),
++                     cGct[,"rhoInf"]))
+> 
+> 
+> ## Do these checks for a *list* of (c.par, psi) combinations:
+> c.psi.list <- list(
++     list(cG, "GGW"),
++     list(c(2,4,8), "Hampel"),
++     list(c(1.5,3.5,8)*0.90, "Hampel"),
++     list(par=c(-.5,1.5,.95,NA), "lqq"),
++     list(bcs=c(1, 1, 1.25), "lqq"),
++     list(1.1, "optimal"),
++     list(0.1, "optimal"),
++     list(2.3, "Welsh")
++     )
+> 
+> for(c.psi in c.psi.list) {
++     tPar <-  c.psi[[1]]; psi <- c.psi[[2]]
++     stopifnot(is.numeric(tPar), is.character(psi))
++     cat("Psi function ", psi,"; tuning par. c[]= (",
++         paste(formatC(tPar, width=1), collapse=", "),")\n")
++     for(FUN in list(Mpsi, Mchi, Mwgt))
++ 	stopifnot(identical(d0, FUN(d0, tPar, psi=psi)),
++                   identical(NN, FUN(NN, tPar, psi=psi)))
++     stopifnot(identical(c(0,0,0), Mpsi(IoI, tPar,psi=psi)),
++               identical(c(1,0,1), Mchi(IoI, tPar,psi=psi)),
++               identical(c(0,1,0), Mwgt(IoI, tPar,psi=psi)))
++     cat("chkPsi..(): ")
++     chkPsi..(c(-5, 10), psi=psi, par=tPar)
++     cat(" [Ok]\n------------------------\n\n")
++ }
+Psi function  GGW ; tuning par. c[]= ( -0.5, 1, 0.95, NA )
+chkPsi..(): Not checking psi''() := Mpsi(*, deriv=2)
+ [Ok]
+------------------------
+
+Psi function  Hampel ; tuning par. c[]= ( 2, 4, 8 )
+chkPsi..():  [Ok]
+------------------------
+
+Psi function  Hampel ; tuning par. c[]= ( 1.35, 3.15, 7.2 )
+chkPsi..():  [Ok]
+------------------------
+
+Psi function  lqq ; tuning par. c[]= ( -0.5, 1.5, 0.95, NA )
+chkPsi..():  [Ok]
+------------------------
+
+Psi function  lqq ; tuning par. c[]= ( 1, 1, 1.25 )
+chkPsi..():  [Ok]
+------------------------
+
+Psi function  optimal ; tuning par. c[]= ( 1.1 )
+chkPsi..(): Not checking psi''() := Mpsi(*, deriv=2)
+ [Ok]
+------------------------
+
+Psi function  optimal ; tuning par. c[]= ( 0.1 )
+chkPsi..(): Not checking psi''() := Mpsi(*, deriv=2)
+ [Ok]
+------------------------
+
+Psi function  Welsh ; tuning par. c[]= ( 2.3 )
+chkPsi..(): Not checking psi''() := Mpsi(*, deriv=2)
+ [Ok]
+------------------------
+
+> 
+> 
 > ## Nice plots -- and check derivatives ----
->
+> 
 > head(x. <- seq(-5, 10, length=1501))
 [1] -5.00 -4.99 -4.98 -4.97 -4.96 -4.95
 > ## [separate lines, for interactive "play": ]
@@ -66,322 +155,320 @@ Type 'q()' to quit R.
 +                                par = ## Default, but rounded:
 +                                round(c(1.5, 3.5, 8) * 0.9016085, 1)),
 +                       tol = 1e-3))
->
+> 
 > stopifnot(chkPsiDeriv(p.psiFun(x., "biweight", par = 4)))
 > stopifnot(chkPsiDeriv(p.psiFun(x., "Welsh", par = 1.5)))
->
+> 
 > ## The same 6, all in one plot:
 > op <- par(mfrow=c(3,2), mgp = c(1.5, .6, 0), mar = .1+c(3,3,2,.5))
 > p.psiFun2(x., "LQQ", par=c(-.5,1.5,.95,NA))
 > p.psiFun2(x., "GGW", par= cG)
-> p.psiFun2(x., "optimal", par=2)
+> p.psiFun2(x., "optimal", par=1.3)
 > p.psiFun2(x., "Hampel", par = round(c(1.5, 3.5, 8) * 0.9016085, 1))
 > p.psiFun2(x., "biweight", par = 4)
 > p.psiFun2(x., "Welsh", par = 1.5)
 > par(op)
->
+> 
 > ### (2) Test them as  arguments of  lmrob() or  lmrob.control(): -----
->
+> 
 > data(aircraft)
->
+> 
 > set.seed(1)
 > summary(mp0 <- lmrob(Y ~ ., data = aircraft, psi = 'bisquare', method = 'SMDM'))
 
 Call:
 lmrob(formula = Y ~ ., data = aircraft, method = "SMDM", psi = "bisquare")
-
+ \--> method = "SMDM"
 Residuals:
-    Min      1Q  Median      3Q     Max
--8.5552 -1.8395 -0.2113  2.8205 46.6311
+    Min      1Q  Median      3Q     Max 
+-8.5552 -1.8395 -0.2113  2.8205 46.6311 
 
 Coefficients:
-              Estimate Std. Error t value Pr(>|t|)
-(Intercept)  6.8785690  6.5583559   1.049 0.308138
-X1          -3.2192206  1.0951675  -2.939 0.008764 **
-X2           1.5876658  0.7471954   2.125 0.047707 *
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  6.8785690  6.5583559   1.049 0.308138    
+X1          -3.2192206  1.0951675  -2.939 0.008764 ** 
+X2           1.5876658  0.7471954   2.125 0.047707 *  
 X3           0.0018266  0.0004310   4.238 0.000495 ***
-X4          -0.0008677  0.0003699  -2.345 0.030666 *
+X4          -0.0008677  0.0003699  -2.345 0.030666 *  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Robust residual standard error: 5.335
+Robust residual standard error: 5.335 
 Convergence in 22 IRWLS iterations
 
-Robustness weights:
- observation 22 is an outlier with |weight| = 0 ( < 0.0043);
+Robustness weights: 
+ observation 22 is an outlier with |weight| = 0 ( < 0.0043); 
  3 weights are ~= 1. The remaining 19 ones are summarized as
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
- 0.3958  0.8772  0.9738  0.9139  0.9892  0.9972
-Algorithmic parameters:
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001
-     nResample         max.it       best.r.s       k.fast.s          k.max
-           500             50              2              1            200
-   maxit.scale      trace.lev            mts     compute.rd      numpoints
-           200              0           1000              0             10
-fast.s.large.n
-          2000
-          psi   subsampling        method           cov
-   "bisquare" "nonsingular"        "SMDM"     ".vcov.w"
-seed : int(0)
->
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.3958  0.8772  0.9738  0.9139  0.9892  0.9972 
+Algorithmic parameters: 
+tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
+ 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
+          psi   subsampling           cov 
+   "bisquare" "nonsingular"     ".vcov.w" 
+seed : int(0) 
+> 
 > set.seed(2)
 > summary(mp1 <- update(mp0, psi = 'optimal'))
 
 Call:
 lmrob(formula = Y ~ ., data = aircraft, method = "SMDM", psi = "optimal")
-
+ \--> method = "SMDM"
 Residuals:
-    Min      1Q  Median      3Q     Max
--6.6691 -2.4291  0.2249  3.8876 54.2841
+    Min      1Q  Median      3Q     Max 
+-6.6691 -2.4291  0.2249  3.8876 54.2841 
 
 Coefficients:
-              Estimate Std. Error t value Pr(>|t|)
-(Intercept)  9.5007403  5.6129595   1.693  0.10776
+              Estimate Std. Error t value Pr(>|t|)   
+(Intercept)  9.5007403  5.6129595   1.693  0.10776   
 X1          -3.0487969  0.9249853  -3.296  0.00402 **
-X2           1.2100330  0.6533535   1.852  0.08049 .
+X2           1.2100330  0.6533535   1.852  0.08049 . 
 X3           0.0013810  0.0003949   3.497  0.00257 **
-X4          -0.0005549  0.0003302  -1.681  0.11012
+X4          -0.0005549  0.0003302  -1.681  0.11012   
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Robust residual standard error: 4.545
+Robust residual standard error: 4.545 
 Convergence in 1 IRWLS iterations
 
-Robustness weights:
- 2 observations c(16,22) are outliers with |weight| = 0 ( < 0.0043);
+Robustness weights: 
+ 2 observations c(16,22) are outliers with |weight| = 0 ( < 0.0043); 
  21 weights are ~= 1.
-Algorithmic parameters:
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol
- 0.4047000  0.5000000  1.0601580  0.0000001  0.0000001  0.0000001
-     nResample         max.it       best.r.s       k.fast.s          k.max
-           500             50              2              1            200
-   maxit.scale      trace.lev            mts     compute.rd      numpoints
-           200              0           1000              0             10
-fast.s.large.n
-          2000
-          psi   subsampling        method           cov
-    "optimal" "nonsingular"        "SMDM"     ".vcov.w"
-seed : int(0)
->
+Algorithmic parameters: 
+tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
+ 0.4047000  0.5000000  1.0601580  0.0000001  0.0000001  0.0000001 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
+          psi   subsampling           cov 
+    "optimal" "nonsingular"     ".vcov.w" 
+seed : int(0) 
+> 
 > set.seed(3)
 > summary(mp2 <- update(mp0, psi = 'ggw'))
 
 Call:
 lmrob(formula = Y ~ ., data = aircraft, method = "SMDM", psi = "ggw")
-
+ \--> method = "SMDM"
 Residuals:
-    Min      1Q  Median      3Q     Max
--8.4418 -1.7993 -0.1711  2.8466 47.0906
+    Min      1Q  Median      3Q     Max 
+-8.4418 -1.7993 -0.1711  2.8466 47.0906 
 
 Coefficients:
-              Estimate Std. Error t value Pr(>|t|)
-(Intercept)  6.8192703  6.5604010   1.039 0.312353
-X1          -3.1718079  1.0963584  -2.893 0.009690 **
-X2           1.5705706  0.7575202   2.073 0.052773 .
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  6.8192703  6.5604010   1.039 0.312353    
+X1          -3.1718079  1.0963584  -2.893 0.009690 ** 
+X2           1.5705706  0.7575202   2.073 0.052773 .  
 X3           0.0017983  0.0004337   4.146 0.000607 ***
-X4          -0.0008434  0.0003723  -2.265 0.036056 *
+X4          -0.0008434  0.0003723  -2.265 0.036056 *  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Robust residual standard error: 5.367
+Robust residual standard error: 5.367 
 Convergence in 20 IRWLS iterations
 
-Robustness weights:
- observation 22 is an outlier with |weight| <= 0.00044 ( < 0.0043);
+Robustness weights: 
+ observation 22 is an outlier with |weight| <= 0.00044 ( < 0.0043); 
  16 weights are ~= 1. The remaining 6 ones are
-     3      4     12     16     17     19
-0.9892 0.9891 0.8770 0.4139 0.9796 0.9839
-Algorithmic parameters:
-tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1
-   -5.0e-01     1.5e+00          NA     5.0e-01     5.0e-01    -5.0e-01
-tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol
-    1.5e+00     9.5e-01          NA     1.0e-07     1.0e-07     1.0e-07
-     nResample         max.it       best.r.s       k.fast.s          k.max
-           500             50              2              1            200
-   maxit.scale      trace.lev            mts     compute.rd      numpoints
-           200              0           1000              0             10
-fast.s.large.n
-          2000
-          psi   subsampling        method           cov
-        "ggw" "nonsingular"        "SMDM"     ".vcov.w"
-seed : int(0)
->
+     3      4     12     16     17     19 
+0.9892 0.9891 0.8770 0.4139 0.9796 0.9839 
+Algorithmic parameters: 
+tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1 
+   -5.0e-01     1.5e+00          NA     5.0e-01     5.0e-01    -5.0e-01 
+tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol 
+    1.5e+00     9.5e-01          NA     1.0e-07     1.0e-07     1.0e-07 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
+          psi   subsampling           cov 
+        "ggw" "nonsingular"     ".vcov.w" 
+seed : int(0) 
+> 
 > set.seed(4)
 > summary(mp3 <- update(mp0, psi = 'welsh'))
 
 Call:
 lmrob(formula = Y ~ ., data = aircraft, method = "SMDM", psi = "welsh")
-
+ \--> method = "SMDM"
 Residuals:
-    Min      1Q  Median      3Q     Max
--8.7243 -1.9199 -0.2471  2.8060 45.9435
+    Min      1Q  Median      3Q     Max 
+-8.7243 -1.9199 -0.2471  2.8060 45.9435 
 
 Coefficients:
-              Estimate Std. Error t value Pr(>|t|)
-(Intercept)  6.6404575  6.5826037   1.009 0.326445
-X1          -3.2329194  1.1000771  -2.939 0.008777 **
-X2           1.6174887  0.7474328   2.164 0.044152 *
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  6.6404575  6.5826037   1.009 0.326445    
+X1          -3.2329194  1.1000771  -2.939 0.008777 ** 
+X2           1.6174887  0.7474328   2.164 0.044152 *  
 X3           0.0018656  0.0004297   4.342 0.000393 ***
-X4          -0.0008941  0.0003695  -2.420 0.026346 *
+X4          -0.0008941  0.0003695  -2.420 0.026346 *  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Robust residual standard error: 5.408
+Robust residual standard error: 5.408 
 Convergence in 18 IRWLS iterations
 
-Robustness weights:
- observation 22 is an outlier with |weight| <= 0.0003 ( < 0.0043);
+Robustness weights: 
+ observation 22 is an outlier with |weight| <= 0.0003 ( < 0.0043); 
  2 weights are ~= 1. The remaining 20 ones are summarized as
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
- 0.4284  0.8583  0.9701  0.9112  0.9874  0.9985
-Algorithmic parameters:
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol
- 0.5773502  0.5000000  2.1100000  0.0000001  0.0000001  0.0000001
-     nResample         max.it       best.r.s       k.fast.s          k.max
-           500             50              2              1            200
-   maxit.scale      trace.lev            mts     compute.rd      numpoints
-           200              0           1000              0             10
-fast.s.large.n
-          2000
-          psi   subsampling        method           cov
-      "welsh" "nonsingular"        "SMDM"     ".vcov.w"
-seed : int(0)
->
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.4284  0.8583  0.9701  0.9112  0.9874  0.9985 
+Algorithmic parameters: 
+tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
+ 0.5773502  0.5000000  2.1100000  0.0000001  0.0000001  0.0000001 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
+          psi   subsampling           cov 
+      "welsh" "nonsingular"     ".vcov.w" 
+seed : int(0) 
+> 
 > set.seed(5)
 > summary(mp4 <- update(mp0, psi = 'ggw', tuning.psi = c(-.5, 1.5, 0.85, NA),
 +                       tuning.chi = c(-0.5, 1.5, NA, 0.5)))
 
 Call:
-lmrob(formula = Y ~ ., data = aircraft, method = "SMDM", psi = "ggw",
-    tuning.psi = c(-0.5, 1.5, 0.85, NA), tuning.chi = c(-0.5,
-        1.5, NA, 0.5))
-
+lmrob(formula = Y ~ ., data = aircraft, method = "SMDM", psi = "ggw", tuning.psi = c(-0.5, 
+    1.5, 0.85, NA), tuning.chi = c(-0.5, 1.5, NA, 0.5))
+ \--> method = "SMDM"
 Residuals:
-    Min      1Q  Median      3Q     Max
--7.2207 -2.2226  0.3446  3.5745 52.2885
+    Min      1Q  Median      3Q     Max 
+-7.2207 -2.2226  0.3446  3.5745 52.2885 
 
 Coefficients:
-              Estimate Std. Error t value Pr(>|t|)
-(Intercept)  9.6540916  6.6567809   1.450  0.16419
+              Estimate Std. Error t value Pr(>|t|)   
+(Intercept)  9.6540916  6.6567809   1.450  0.16419   
 X1          -3.2353135  1.0972643  -2.949  0.00859 **
-X2           1.3343505  0.7654174   1.743  0.09834 .
+X2           1.3343505  0.7654174   1.743  0.09834 . 
 X3           0.0015256  0.0004630   3.295  0.00402 **
-X4          -0.0006913  0.0003912  -1.767  0.09414 .
+X4          -0.0006913  0.0003912  -1.767  0.09414 . 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Robust residual standard error: 5.117
+Robust residual standard error: 5.117 
 Convergence in 15 IRWLS iterations
 
-Robustness weights:
- observation 22 is an outlier with |weight| <= 2.8e-08 ( < 0.0043);
+Robustness weights: 
+ observation 22 is an outlier with |weight| <= 2.8e-08 ( < 0.0043); 
  15 weights are ~= 1. The remaining 7 ones are
-      3       4      12      16      17      19      23
-0.87262 0.79602 0.73029 0.06024 0.96761 0.73117 0.97769
-Algorithmic parameters:
-tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1
-   -5.0e-01     1.5e+00          NA     5.0e-01     5.0e-01    -5.0e-01
-tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol
-    1.5e+00     8.5e-01          NA     1.0e-07     1.0e-07     1.0e-07
-     nResample         max.it       best.r.s       k.fast.s          k.max
-           500             50              2              1            200
-   maxit.scale      trace.lev            mts     compute.rd      numpoints
-           200              0           1000              0             10
-fast.s.large.n
-          2000
-          psi   subsampling        method           cov
-        "ggw" "nonsingular"        "SMDM"     ".vcov.w"
-seed : int(0)
->
+      3       4      12      16      17      19      23 
+0.87262 0.79602 0.73029 0.06024 0.96761 0.73117 0.97769 
+Algorithmic parameters: 
+tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1 
+   -5.0e-01     1.5e+00          NA     5.0e-01     5.0e-01    -5.0e-01 
+tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol 
+    1.5e+00     8.5e-01          NA     1.0e-07     1.0e-07     1.0e-07 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
+          psi   subsampling           cov 
+        "ggw" "nonsingular"     ".vcov.w" 
+seed : int(0) 
+> 
 > set.seed(6)
 > summary(mp5 <- update(mp0, psi = 'ggw', tuning.psi = c(-.5, 1.0, 0.95, NA),
 +                       tuning.chi = c(-0.5, 1.0, NA, 0.5)))
 
 Call:
-lmrob(formula = Y ~ ., data = aircraft, method = "SMDM", psi = "ggw",
-    tuning.psi = c(-0.5, 1, 0.95, NA), tuning.chi = c(-0.5, 1,
-        NA, 0.5))
-
+lmrob(formula = Y ~ ., data = aircraft, method = "SMDM", psi = "ggw", tuning.psi = c(-0.5, 
+    1, 0.95, NA), tuning.chi = c(-0.5, 1, NA, 0.5))
+ \--> method = "SMDM"
 Residuals:
-    Min      1Q  Median      3Q     Max
--8.4182 -1.7447 -0.1322  2.8735 47.0376
+    Min      1Q  Median      3Q     Max 
+-8.4182 -1.7447 -0.1322  2.8735 47.0376 
 
 Coefficients:
-              Estimate Std. Error t value Pr(>|t|)
-(Intercept)  6.7557666  6.1364255   1.101 0.285433
-X1          -3.1767976  1.0271470  -3.093 0.006277 **
-X2           1.5756461  0.7101703   2.219 0.039604 *
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  6.7557666  6.1364255   1.101 0.285433    
+X1          -3.1767976  1.0271470  -3.093 0.006277 ** 
+X2           1.5756461  0.7101703   2.219 0.039604 *  
 X3           0.0018004  0.0004032   4.465 0.000299 ***
-X4          -0.0008432  0.0003471  -2.429 0.025825 *
+X4          -0.0008432  0.0003471  -2.429 0.025825 *  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Robust residual standard error: 5.502
+Robust residual standard error: 5.502 
 Convergence in 19 IRWLS iterations
 
-Robustness weights:
+Robustness weights: 
  21 weights are ~= 1. The remaining 2 ones are
-      16       22
-0.423706 0.005042
-Algorithmic parameters:
-tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1
-   -5.0e-01     1.0e+00          NA     5.0e-01     5.0e-01    -5.0e-01
-tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol
-    1.0e+00     9.5e-01          NA     1.0e-07     1.0e-07     1.0e-07
-     nResample         max.it       best.r.s       k.fast.s          k.max
-           500             50              2              1            200
-   maxit.scale      trace.lev            mts     compute.rd      numpoints
-           200              0           1000              0             10
-fast.s.large.n
-          2000
-          psi   subsampling        method           cov
-        "ggw" "nonsingular"        "SMDM"     ".vcov.w"
-seed : int(0)
->
+      16       22 
+0.423706 0.005042 
+Algorithmic parameters: 
+tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1 
+   -5.0e-01     1.0e+00          NA     5.0e-01     5.0e-01    -5.0e-01 
+tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol 
+    1.0e+00     9.5e-01          NA     1.0e-07     1.0e-07     1.0e-07 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
+          psi   subsampling           cov 
+        "ggw" "nonsingular"     ".vcov.w" 
+seed : int(0) 
+> 
 > set.seed(7)
 > summary(mp6 <- update(mp0, psi = 'hampel'))
 
 Call:
 lmrob(formula = Y ~ ., data = aircraft, method = "SMDM", psi = "hampel")
-
+ \--> method = "SMDM"
 Residuals:
-   Min     1Q Median     3Q    Max
--8.706 -1.937 -0.234  2.825 46.037
+   Min     1Q Median     3Q    Max 
+-8.706 -1.937 -0.234  2.825 46.037 
 
 Coefficients:
-              Estimate Std. Error t value Pr(>|t|)
-(Intercept)  6.4297956  6.8509810   0.939 0.360400
-X1          -3.1885813  1.1482245  -2.777 0.012435 *
-X2           1.6224243  0.7918912   2.049 0.055350 .
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  6.4297956  6.8509810   0.939 0.360400    
+X1          -3.1885813  1.1482245  -2.777 0.012435 *  
+X2           1.6224243  0.7918912   2.049 0.055350 .  
 X3           0.0018590  0.0004491   4.140 0.000615 ***
-X4          -0.0008851  0.0003871  -2.287 0.034544 *
+X4          -0.0008851  0.0003871  -2.287 0.034544 *  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Robust residual standard error: 5.475
+Robust residual standard error: 5.475 
 Convergence in 11 IRWLS iterations
 
-Robustness weights:
- observation 22 is an outlier with |weight| = 0 ( < 0.0043);
+Robustness weights: 
+ observation 22 is an outlier with |weight| = 0 ( < 0.0043); 
  20 weights are ~= 1. The remaining 2 ones are
-    12     16
-0.8504 0.4975
-Algorithmic parameters:
-tuning.chi1 tuning.chi2 tuning.chi3          bb tuning.psi1 tuning.psi2
-  0.3178745   0.7417071   1.6953304   0.5000000   1.3524128   3.1556298
-tuning.psi3  refine.tol     rel.tol   solve.tol
-  7.2128680   0.0000001   0.0000001   0.0000001
-     nResample         max.it       best.r.s       k.fast.s          k.max
-           500             50              2              1            200
-   maxit.scale      trace.lev            mts     compute.rd      numpoints
-           200              0           1000              0             10
-fast.s.large.n
-          2000
-          psi   subsampling        method           cov
-     "hampel" "nonsingular"        "SMDM"     ".vcov.w"
-seed : int(0)
->
+    12     16 
+0.8504 0.4975 
+Algorithmic parameters: 
+tuning.chi1 tuning.chi2 tuning.chi3          bb tuning.psi1 tuning.psi2 
+  0.3178745   0.7417071   1.6953304   0.5000000   1.3524128   3.1556298 
+tuning.psi3  refine.tol     rel.tol   solve.tol 
+  7.2128680   0.0000001   0.0000001   0.0000001 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
+          psi   subsampling           cov 
+     "hampel" "nonsingular"     ".vcov.w" 
+seed : int(0) 
+> 
 > set.seed(8)
 > ctrl <- lmrob.control(psi = 'ggw', tuning.psi = c(-.3, 1.4, 0.95, NA),
 +                       tuning.chi = c(-0.3, 1.4, NA, 0.5))
@@ -397,10 +484,10 @@ attr(,"constants")
 
 Call:
 lmrob(formula = Y ~ ., data = aircraft, control = ctrl)
-
+ \--> method = "S"
 Residuals:
-    Min      1Q  Median      3Q     Max
--7.6919 -1.9269  0.1767  3.7081 48.5800
+    Min      1Q  Median      3Q     Max 
+-7.6919 -1.9269  0.1767  3.7081 48.5800 
 
 Algorithm did not converge
 
@@ -412,70 +499,70 @@ X2           1.647243         NA      NA       NA
 X3           0.001817         NA      NA       NA
 X4          -0.001035         NA      NA       NA
 
-Robustness weights:
- 2 observations c(16,22) are outliers with |weight| <= 0.0003 ( < 0.0043);
+Robustness weights: 
+ 2 observations c(16,22) are outliers with |weight| <= 0.0003 ( < 0.0043); 
  4 weights are ~= 1. The remaining 17 ones are summarized as
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
-0.03669 0.20120 0.58410 0.52290 0.71930 0.99120
-Algorithmic parameters:
-tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1
-   -3.0e-01     1.4e+00          NA     5.0e-01     5.0e-01    -3.0e-01
-tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol
-    1.4e+00     9.5e-01          NA     1.0e-07     1.0e-07     1.0e-07
-     nResample         max.it       best.r.s       k.fast.s          k.max
-           500             50              2              1            200
-   maxit.scale      trace.lev            mts     compute.rd fast.s.large.n
-           200              0           1000              0           2000
-          psi   subsampling        method           cov
-        "ggw" "nonsingular"           "S" ".vcov.avar1"
-seed : int(0)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.03669 0.20120 0.58410 0.52290 0.71930 0.99120 
+Algorithmic parameters: 
+tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1 
+   -3.0e-01     1.4e+00          NA     5.0e-01     5.0e-01    -3.0e-01 
+tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol 
+    1.4e+00     9.5e-01          NA     1.0e-07     1.0e-07     1.0e-07 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
+           200              0           1000              0           2000 
+          psi   subsampling           cov 
+        "ggw" "nonsingular" ".vcov.avar1" 
+seed : int(0) 
 Warning message:
 In lmrob.S(x, y, control = control) :
-  S refinements did not converge (to tol=1e-07) in 200 iterations
->
+  S refinements did not converge (to refine.tol=1e-07) in 200 (= k.max) steps
+> 
 > set.seed(9)
 > summary(mp8 <- update(mp0, psi = 'lqq'))
 
 Call:
 lmrob(formula = Y ~ ., data = aircraft, method = "SMDM", psi = "lqq")
-
+ \--> method = "SMDM"
 Residuals:
-   Min     1Q Median     3Q    Max
--8.280 -1.717 -0.138  2.857 47.743
+   Min     1Q Median     3Q    Max 
+-8.280 -1.717 -0.138  2.857 47.743 
 
 Coefficients:
-              Estimate Std. Error t value Pr(>|t|)
-(Intercept)  7.0858566  6.3975970   1.108 0.282624
-X1          -3.1657682  1.0678605  -2.965 0.008300 **
-X2           1.5402736  0.7390833   2.084 0.051680 .
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  7.0858566  6.3975970   1.108 0.282624    
+X1          -3.1657682  1.0678605  -2.965 0.008300 ** 
+X2           1.5402736  0.7390833   2.084 0.051680 .  
 X3           0.0017612  0.0004253   4.141 0.000614 ***
-X4          -0.0008188  0.0003642  -2.248 0.037346 *
+X4          -0.0008188  0.0003642  -2.248 0.037346 *  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Robust residual standard error: 5.319
+Robust residual standard error: 5.319 
 Convergence in 19 IRWLS iterations
 
-Robustness weights:
- observation 22 is an outlier with |weight| = 0 ( < 0.0043);
+Robustness weights: 
+ observation 22 is an outlier with |weight| = 0 ( < 0.0043); 
  16 weights are ~= 1. The remaining 6 ones are
-     3      4     12     16     17     19
-0.9861 0.9842 0.8921 0.3720 0.9820 0.9782
-Algorithmic parameters:
-tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1
-   -5.0e-01     1.5e+00          NA     5.0e-01     5.0e-01    -5.0e-01
-tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol
-    1.5e+00     9.5e-01          NA     1.0e-07     1.0e-07     1.0e-07
-     nResample         max.it       best.r.s       k.fast.s          k.max
-           500             50              2              1            200
-   maxit.scale      trace.lev            mts     compute.rd      numpoints
-           200              0           1000              0             10
-fast.s.large.n
-          2000
-          psi   subsampling        method           cov
-        "lqq" "nonsingular"        "SMDM"     ".vcov.w"
-seed : int(0)
->
+     3      4     12     16     17     19 
+0.9861 0.9842 0.8921 0.3720 0.9820 0.9782 
+Algorithmic parameters: 
+tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1 
+   -5.0e-01     1.5e+00          NA     5.0e-01     5.0e-01    -5.0e-01 
+tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol 
+    1.5e+00     9.5e-01          NA     1.0e-07     1.0e-07     1.0e-07 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd      numpoints 
+           200              0           1000              0             10 
+fast.s.large.n 
+          2000 
+          psi   subsampling           cov 
+        "lqq" "nonsingular"     ".vcov.w" 
+seed : int(0) 
+> 
 > set.seed(10)
 > ctrl <- lmrob.control(psi = 'lqq', tuning.psi = c(-.3, 1.4, 0.95, NA),
 +                       tuning.chi = c(-0.3, 1.4, NA, 0.5))
@@ -491,45 +578,45 @@ attr(,"constants")
 
 Call:
 lmrob(formula = Y ~ ., data = aircraft, control = ctrl)
-
+ \--> method = "MM"
 Residuals:
-     Min       1Q   Median       3Q      Max
--10.4131  -2.6546  -0.4163   3.7992  38.6135
+     Min       1Q   Median       3Q      Max 
+-10.4131  -2.6546  -0.4163   3.7992  38.6135 
 
 Coefficients:
-              Estimate Std. Error t value Pr(>|t|)
-(Intercept)  3.4885376 12.9467703   0.269  0.79065
+              Estimate Std. Error t value Pr(>|t|)   
+(Intercept)  3.4885376 12.9467703   0.269  0.79065   
 X1          -3.2959306  0.9474381  -3.479  0.00268 **
-X2           1.8969101  0.9908611   1.914  0.07160 .
-X3           0.0022811  0.0014320   1.593  0.12860
-X4          -0.0011575  0.0008954  -1.293  0.21246
+X2           1.8969101  0.9908611   1.914  0.07160 . 
+X3           0.0022811  0.0014320   1.593  0.12860   
+X4          -0.0011575  0.0008954  -1.293  0.21246   
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Robust residual standard error: 6.127
+Robust residual standard error: 6.127 
 Convergence in 33 IRWLS iterations
 
-Robustness weights:
+Robustness weights: 
  17 weights are ~= 1. The remaining 6 ones are
-      3       4      12      16      17      22
-0.97705 0.99845 0.82593 0.78812 0.91316 0.06876
-Algorithmic parameters:
-tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1
-   -3.0e-01     1.4e+00          NA     5.0e-01     5.0e-01    -3.0e-01
-tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol
-    1.4e+00     9.5e-01          NA     1.0e-07     1.0e-07     1.0e-07
-     nResample         max.it       best.r.s       k.fast.s          k.max
-           500             50              2              1            200
-   maxit.scale      trace.lev            mts     compute.rd fast.s.large.n
-           200              0           1000              0           2000
-          psi   subsampling        method           cov
-        "lqq" "nonsingular"          "MM" ".vcov.avar1"
-seed : int(0)
->
->
+      3       4      12      16      17      22 
+0.97705 0.99845 0.82593 0.78812 0.91316 0.06876 
+Algorithmic parameters: 
+tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1 
+   -3.0e-01     1.4e+00          NA     5.0e-01     5.0e-01    -3.0e-01 
+tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol 
+    1.4e+00     9.5e-01          NA     1.0e-07     1.0e-07     1.0e-07 
+     nResample         max.it       best.r.s       k.fast.s          k.max 
+           500             50              2              1            200 
+   maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
+           200              0           1000              0           2000 
+          psi   subsampling           cov 
+        "lqq" "nonsingular" ".vcov.avar1" 
+seed : int(0) 
+> 
+> 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  5.495 0.09 5.832 0 0.001
->
+Time elapsed:  5.412 0.133 5.68 0.001 0.003 
+> 
 > proc.time()
-   user  system elapsed
-  5.495   0.091   5.832
+   user  system elapsed 
+  5.413   0.136   5.680 

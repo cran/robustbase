@@ -15,10 +15,11 @@ LU.gaxpy <- function(A, pivot=TRUE, tol = 1e-7, verbose = FALSE)
     p <- integer(m-1) ## pivots
     idc <- 1L:n ## which columns of A are used
     idr <- 1L:m ## how to rows of A are permuted
-    lenidc <- length(idc)
     for(j in 1L:m) {
 	sing <- TRUE
 	while(sing) {
+            if (length(idc) < j)
+                break
 	    if (j == 1L) {
 		v[j:m] <- A[idr[j:m], idc[j]]
 	    } else {
@@ -52,10 +53,7 @@ LU.gaxpy <- function(A, pivot=TRUE, tol = 1e-7, verbose = FALSE)
 	    if (abs(v[j]) < tol) {
 		if(verbose) cat("* singularity detected in step ", j,
 				"; candidate ", idc[j],"\n")
-		idc[j] <- idc[lenidc]
-		lenidc <- lenidc - 1
-		if (lenidc < j)
-		    break
+		idc <- idc[-j]
 	    } else sing <- FALSE
 	}## {while}
     }## {for}
@@ -74,7 +72,7 @@ Rsubsample <- function(x, y, mts=0, tolInverse = 1e-7) {
        m=as.integer(p),
        beta=double(p),
        ind_space=integer(n),
-       idc = integer(n),
+       idc = integer(n), ## elements 1:p: chosen subsample
        idr = integer(n),
        lu = matrix(double(1), p,p),
        v=double(p),
@@ -134,8 +132,9 @@ subsample <- function(x, y=rnorm(n), compareMatrix = TRUE,
     } else {
         stopifnot(all.equal(LU.$L, L, tol=eq.tol),
                   all.equal(LU.$U, U, tol=eq.tol),
-                  all.equal(LU.$p, pivot, tol=0),
-                  all.equal(LU.$idc, idc, tol=0))
+		  LU.$p == pivot,
+                  ## only compare the indices selected before stopping
+		  LU.$idc[seq_along(LU.$p)] == idc[seq_along(pivot)])
     }
 
     ## compare with Matrix result

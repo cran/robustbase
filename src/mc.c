@@ -10,11 +10,6 @@
 #include <inttypes.h>
 // -> int64_t
 
-#include <R.h>
-/*	  --- includes <R_ext/Boolean.h> which has TRUE/FALSE
- * also <R_ext/Utils.h>	 which has the sort routines and
- *  R_CheckUserInterrupt();
-*/
 #include <Rmath.h>
 /* -> fmax2(.,.) */
 

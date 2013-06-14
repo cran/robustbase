@@ -119,7 +119,7 @@ nlrob <-
 		   coefficients = coef,
 		   working.residuals = as.vector(resid),
 		   fitted.values = fit, residuals = y - fit,
-		   Scale = Scale, w = w, w.r = psi(resid/Scale, ...),
+		   Scale = Scale, w = w, rweights = psi(resid/Scale, ...),
 		   cov=asCov, status = status, iter=iiter,
 		   psi = psi, data = dataName,
 		   dataClasses = attr(attr(mf, "terms"), "dataClasses")))
@@ -189,12 +189,12 @@ residuals.nlrob <- function (object, type = c("response", "working", "pearson"),
 
 summary.nlrob <- function (object, correlation = FALSE, symbolic.cor = FALSE, ...)
 {
-    w <- object$w ## weights * w.r, scaled such that sum(w)=1
+    w <- object$w ## weights * rweights, scaled such that sum(w)=1
     n <- sum(w > 0)
     param <- coef(object)
     p <- length(param)
     rdf <- n - p
-    ans <- object[c("formula", "residuals", "Scale", "w", "w.r", "cov",
+    ans <- object[c("formula", "residuals", "Scale", "w", "rweights", "cov",
 		    "call", "status", "iter", "control")]
     ans$df <- c(p, rdf)
     cf <-
@@ -247,7 +247,7 @@ print.summary.nlrob <-
 	    }
 	}
 	cat("Convergence in", x$iter, "IRWLS iterations\n\n")
-	summarizeRobWeights(x$w.r, digits = digits, ...)
+	summarizeRobWeights(x$rweights, digits = digits, ...)
     }
     else
 	cat("** IRWLS iterations did *not* converge!\n\n")

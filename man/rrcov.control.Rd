@@ -1,18 +1,16 @@
 \name{rrcov.control}
 \alias{rrcov.control}
-%%% FIXME --- naming and more --------------
-%%% -----
-\title{Control object for the estimation parameters }
+\title{Control Settings for covMcd and ltsReg}
 \description{
-     Auxiliary function for passing the estimation options as parameters to the
-     estimation functions.
-
-     \bold{NOTE: The name  WILL change !!!!}
+  Auxiliary function for passing the estimation options as parameters to the
+  estimation functions.
 }
 \usage{
 rrcov.control(alpha = 1/2, nsamp = 500, nmini = 300,
               seed = NULL, tolSolve = 1e-14, trace = FALSE,
-              use.correction = TRUE, adjust = FALSE)
+              wgtFUN = "01.original",
+              use.correction = identical(wgtFUN, "01.original"),
+              adjust = FALSE)
 }
 \arguments{
   \item{alpha}{This parameter controls the size of the subsets over
@@ -33,27 +31,29 @@ rrcov.control(alpha = 1/2, nsamp = 500, nmini = 300,
     \code{\link{.Random.seed}} and the description of the \code{seed}
     argument in \code{\link{lmrob.control}}.}
   \item{tolSolve}{numeric tolerance to be used for inversion
-    (\code{\link{solve}}) of the covariance matrix in
-    \code{\link{mahalanobis}}.}
+    (\code{\link{solve}}) of the covariance matrix in \code{\link{mahalanobis}}.}
   \item{trace}{whether to print intermediate results.  Default is
     \code{trace = FALSE}}
+  \item{wgtFUN}{a character string or \code{\link{function}}, specifying
+    how the weights for the reweighting step should be computed, see
+    \code{\link{ltsReg}} or \code{\link{covMcd}}, respectively.  The
+    default, the original 1999 proposal, is specified by
+    \code{"01.original"}, as the resulting weights are 0 or 1.}
   \item{use.correction}{whether to use finite sample correction factors.
     Defaults to \code{TRUE}.}
-  \item{adjust}{whether to perform intercept adjustment at each
-    step.  Because this can be quite time consuming, the default is
-    \code{adjust = FALSE}.}
+  \item{adjust}{[for \code{\link{ltsReg}():} whether to perform
+    intercept adjustment at each step.  Because this can be quite time
+    consuming, the default is \code{adjust = FALSE}.}
 }
-\details{
-  For details about the estimation options see the corresponding
-  estimation functions.
+\seealso{
+  For details about the options, see the documentation
+  about the estimation functions,
+  \code{\link{ltsReg}} and \code{\link{covMcd}}, respectively.
 }
 \value{
   A list with components, as the parameters passed  by the invocation
 }
 \author{Valentin Todorov}
-% \references{
-% }
-
 \examples{
 data(Animals, package = "MASS")
 brain <- Animals[c(1:24, 26:25, 27:28),]

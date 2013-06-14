@@ -1,6 +1,13 @@
-#### These Chi() and Psi() functions are currently used by lmrob() functions
+#### These Chi() and Psi() used to be called by lmrob() functions
+####  but no longer --> Have interface  via .psi2ipsi() and .C(..)
 #### FIXME: integrate these with the psi-rho objects --> ./psi-rho-funs.R
 
+## In the vignette ../inst/doc/psi_functions.Rnw, we call this
+##  scaled \rho  "\tilde{\rho}"
+##- Maronna et al (2006) define their rho to be standardized
+##-    (only if possible <==>  only if redescending psi !)
+
+##- {TODO: *Where* in the Hampel_et_al book ??? }
 ## Hampel et al (1986):  \chi(x) := \rho(x) / \rho(\infty)
 ##                       ======
 ## <==> chi() is a scaled version of rho(.) such that
@@ -14,6 +21,7 @@
 
 tukeyChi <- function(x, cc, deriv = 0)
 {
+    .Deprecated("Mchi")
     x <- x / cc
     x2 <- x*x
     out <- x2 > 1
@@ -35,28 +43,30 @@ tukeyChi <- function(x, cc, deriv = 0)
 }
 
 ## we call this  '*Psi1'  such as to not be confounded with
-## the (future!) S4 object tukeyPsi1() !
+## the (future!) S4 object tukeyPsi() !
 tukeyPsi1 <- function(x, cc, deriv = 0)
 {
+    .Deprecated("Mpsi")
     ## This version of psi() is scaled such that psi'(0) = 1
     x2 <- (x / cc)^2
-    out <- x2 > 1
+    if(deriv < 0) out <- x2 > 1 else in. <- x2 < 1
     switch(deriv + 2,
        {  ## deriv = -1
-           c. <- cc^2/6
+	   c. <- cc^2/6
 	   r <- c.*(1 - (1- x2)^3)
 	   r[out] <- c.
+	   r
        },
        {  ## deriv = 0
-	   r <- x * (1-x2)^2
-	   r[out] <- 0
+	   in. * x * (1-x2)^2
        },
        {  ## deriv = 1
-	   r <- (1 - x2) * (1 - 5*x2)
-	   r[out] <- 0
+	   in. * (1 - x2) * (1 - 5*x2)
        },
-       stop("deriv must be in {-1,0,1}"))
-    r
+       {  ## deriv = 2
+	   in. * 4*x/cc^2 * (5*x2 - 3)
+       },
+       stop("deriv must be in {-1,0,1,2}"))
 }
 
 if(FALSE)

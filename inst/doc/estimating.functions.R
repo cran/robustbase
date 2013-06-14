@@ -1,3 +1,6 @@
+## Called from ./lmrob_simulation.Rnw
+##              ~~~~~~~~~~~~~~~~~~~~~
+
 ###########################################################################
 ## Prediction
 ###########################################################################
@@ -221,7 +224,7 @@ robustness.weights.lmRob <- function(obj) {
   if (obj$robust.control$weight[2] != 'Optimal') {
     c.psi <- f.eff2c.psi(obj$robust.control$efficiency, obj$robust.control$weight[2])
     rs <- obj$residuals / obj$scale
-    obj$M.weights <- robustbase:::lmrob.wgtfun(rs, c.psi, obj$robust.control$weight[2])
+    obj$M.weights <- Mwgt(rs, c.psi, obj$robust.control$weight[2])
   }
   naresid(obj$na.action, obj$M.weights)
 }
@@ -234,8 +237,12 @@ robustness.weights.lmRob <- function(obj) {
 
 robustness.weights.lmrob.S <- function(obj) {
   rstand <- resid(obj)/sigma(obj)
-  robustbase:::lmrob.wgtfun(rstand, obj$control$tuning.chi, obj$control$psi)
+  Mwgt(rstand, obj$control$tuning.chi, obj$control$psi)
 }
+
+## MM: Why on earth is this called  covariance.matrix() ?? -- S and R standard is vcov() !!
+## -- For lm, they are indeed identical;  for  lmrob, too
+## HOWEVER, the *.rlm() method of cov..matrix() *differs* from vcov.rlm() -- why?
 
 covariance.matrix <- function(x, ...) UseMethod("covariance.matrix")
   ## Purpose: retrieve covariance matrix from robust regression return
@@ -415,17 +422,28 @@ lmrob.u <- function(formula, data, subset, weights, na.action, ..., start)
 ##                 start = obj3)
 ## all.equal(obj1, test[names(obj1)], check.attr = FALSE)
 
-## this function calculates the MM-estimate with
-## corrections qE or qT as in Maronna and Yohai, 2009
-lmrob.mar <- function(formula, data, subset, weights, na.action, ..., type = 'qE') {
+##' Compute the MM-estimate with corrections qE or qT as in
+##' 	Maronna, R. A., Yohai, V. J., 2010.
+##' 	Correcting MM estimates for "fat" data sets.
+##' 	Computational Statistics & Data Analysis 54 (12), 3168–3173.
+##' @title MM-estimate with Maronna-Yohai(2010) corrections
+##' @param formula
+##' @param data
+##' @param subset
+##' @param weights
+##' @param na.action
+##' @param ...
+##' @param type
+##' @return
+##' @author Manuel Koller
+lmrob.mar <- function(formula, data, subset, weights, na.action, ...,
+                      type = c("qE", "qT"))
+{
   ## get call and modify it so that
   ## lmrob returns the appropriate S-estimate
   cl <- match.call()
   method <- if (is.null(cl$method)) {
-    if (!is.null(cl$control)) {
-      args <- list(...)
-      args$control$method
-    } else 'MM'
+    if (!is.null(cl$control)) list(...)[["control"]]$method else 'MM'
   } else cl$method
   cl$type <- NULL
   cl$method <- 'S'
@@ -437,9 +455,10 @@ lmrob.mar <- function(formula, data, subset, weights, na.action, ..., type = 'qE
   ## correct S-scale estimate according to formula
   n <- length(obj$resid)
   p <- obj$rank
+  type <- match.arg(type)
   ## for type qE: adjust tuning.chi (h0) to account for different delta
   if (type == 'qE') {
-    if (obj$control$psi != 'bisquare')
+    if (obj$control$psi != 'bisquare')## FIXME: "tukey" should work, too
       stop('lmrob.mar: type qE is only available for bisquare psi')
     h0 <- uniroot(function(c) robustbase:::lmrob.bp('bisquare', c) - (1-p/n)/2,
                   c(1, 3))$root
@@ -449,24 +468,24 @@ lmrob.mar <- function(formula, data, subset, weights, na.action, ..., type = 'qE
   }
   ## calculate q
   q <- switch(type,
-              qT = {
-                rs <- obj$resid / obj$scale
-                ## \hat a = \mean \rho(r/sigma)^2
-                ## obj$control$tuning.chi == h_0
-                ahat <- mean(robustbase:::lmrob.psifun(rs, obj$control$tuning.chi,
-                                                       obj$control$psi)^2)
-                ## \hat b = \mean \rho''(r/sigma)
-                bhat <- mean(robustbase:::lmrob.psifun(rs, obj$control$tuning.chi,
-                                                       obj$control$psi, 1))
-                ## \hat c = \mean \rho'(r/sigma) * r/sigma
-                chat <- mean(robustbase:::lmrob.psifun(rs, obj$control$tuning.chi,
-                                                       obj$control$psi)*rs)
-                ## qT:
-                1 + p*ahat/n/2/bhat/chat
-              }, ## qE:
-              qE = 1 / (1 - (1.29 - 6.02/n)*p/n)
+              "qT" = {
+                  rs <- obj$resid / obj$scale
+                  ## \hat a = \mean \rho(r/sigma)^2
+                  ## obj$control$tuning.chi == h_0
+                  ahat <- mean(Mpsi(rs, obj$control$tuning.chi,
+                                    obj$control$psi)^2)
+                  ## \hat b = \mean \rho''(r/sigma)
+                  bhat <- mean(Mpsi(rs, obj$control$tuning.chi,
+                                    obj$control$psi, 1))
+                  ## \hat c = \mean \rho'(r/sigma) * r/sigma
+                  chat <- mean(Mpsi(rs, obj$control$tuning.chi,
+                                    obj$control$psi)*rs)
+                  ## qT:
+                  1 + p*ahat/n/2/bhat/chat
+              },
+              "qE" = 1 / (1 - (1.29 - 6.02/n)*p/n)
               ,
-              stop('lmrob.mar: unknown type, only "qE" and "qT" are supported.'))
+              stop("unknown type ", type))
   ## update scale
   obj$scale.uncorrected <- obj$scale
   obj$scale <- q * obj$scale
@@ -484,7 +503,7 @@ lmrob.mar <- function(formula, data, subset, weights, na.action, ..., type = 'qE
   ## update class
   class(obj) <- 'lmrob'
   ## return
-  return(obj)
+  obj
 }
 
 ## summary(lmrob(y ~ x, d.data))
@@ -503,7 +522,7 @@ lmrob.mscale <- function(e, control, p = 0L) {
             scale = as.double(mad(e)),
             coef = double(1),
             as.double(control$tuning.chi),
-            as.integer(robustbase:::lmrob.psi2ipsi(control$psi)),
+            as.integer(robustbase:::.psi2ipsi(control$psi)),
             as.double(control$bb), ## delta
             best_r = as.integer(control$best.r.s),
             groups = as.integer(control$groups),
@@ -521,7 +540,7 @@ lmrob.mscale <- function(e, control, p = 0L) {
 lmrob.dscale <- function(r, control,
                          kappa = robustbase:::lmrob.kappa(control = control)) {
   tau <- rep.int(1, length(r))
-  w <- robustbase:::lmrob.wgtfun(r, control$tuning.psi, control$psi)
+  w <- Mwgt(r, control$tuning.psi, control$psi)
   scale <- sqrt(sum(w * r^2) / kappa / sum(tau^2*w))
   psi <- control$psi
   c.psi <- robustbase:::lmrob.conv.cc(psi, control$tuning.psi)
@@ -532,7 +551,7 @@ lmrob.dscale <- function(r, control,
             length = as.integer(length(r)),
             scale = as.double(scale),
             c = as.double(c.psi),
-            ipsi = robustbase:::lmrob.psi2ipsi(psi),
+            ipsi = robustbase:::.psi2ipsi(psi),
             type = 3L, ## dt1 as only remaining option
             rel.tol = as.double(control$rel.tol),
             k.max = as.integer(control$k.max),

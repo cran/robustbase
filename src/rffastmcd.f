@@ -129,7 +129,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c     ------ nhalff = quan = h(alpha);  krep == nsamp
      *     initcov,initmean,
      *     inbest,det,weight,fit,coeff,kount,adcov,
-     *     iseed,
+cc     *     iseed,
      *     temp, index1, index2, nmahad, ndist, am, am2, slutn,
      *     med, mad, sd, means, bmeans, w, fv1, fv2,
      *     rec, sscp1, cova1, corr1, cinv1, cova2, cinv2, z,
@@ -185,7 +185,8 @@ cc
       integer nmaxi
       integer rfncomb
 c unused   integer rfnbreak
-      integer ierr,matz,seed,tottimes,step
+cc      integer seed
+      integer ierr,matz,tottimes,step
       integer pnsel
       integer flag(km10)
       integer mini(kmini)
@@ -369,7 +370,7 @@ cc          always true for (very) small n, but also when krep=0 (special value)
 cc    subdat = matrix with a first row containing indices of observations
 cc             and a second row indicating the corresponding subdataset
 cc
-      seed=iseed
+c      seed=iseed
       matz=1
       nsel=nvar+1
       nmaxi = nmini*kmini
@@ -475,7 +476,7 @@ C            nrep=500
             all=.false.
          endif
       endif
-      seed=iseed
+c      seed=iseed
 
 cc
 cc  Some more initializations:

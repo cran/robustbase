@@ -1,5 +1,4 @@
 library(robustbase)
-#library(robustbase, lib="/u/maechler/R/Pkgs/robustbase.Rcheck")
 
 ### Binomial example with  *small*  ni
 

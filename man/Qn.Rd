@@ -21,7 +21,8 @@ s_Qn(x, mu.too = FALSE, \dots)
     achieves consistency for normally distributed data.  Note that until
     Nov. 2010, \dQuote{thanks} to a typo in the very first papers, a slightly
     wrong default constant, 2.2219, was used instead of the correct one
-    which is equal to \code{1 / (sqrt(2) * qnorm(5/8))}.
+    which is equal to \code{1 / (sqrt(2) * qnorm(5/8))} (as mentioned
+    already on p.1277, after (3.7) in Rousseeuw and Croux (1993)).
 
     If you need the old slightly off version for historical
     reproducibility, you can use \code{Qn.old()}.
@@ -65,10 +66,16 @@ s_Qn(x, mu.too = FALSE, \dots)
   Physica-Verlag Heidelberg, 411--428;\cr
   also available from
   \url{http://win-www.uia.ac.be/u/statis/abstract/Timeff92.htm}.
+
+  About the typo in the \code{constant}:\cr
+  Christophe Croux (2010)
+  Private e-mail, Fri Jul 16, w/ Subject
+  \emph{Re: Slight inaccuracy of Qn implementation \dots\dots}.
 }
 \seealso{\code{\link[stats]{mad}} for the \sQuote{most robust} but much less efficient
   scale estimator; \code{\link{Sn}} for a similar faster but less
-  efficient alternative; \code{\link{scaleTau2}}.
+  efficient alternative.  Finally, \code{\link{scaleTau2}} which some
+  consider \dQuote{uniformly} better than Qn or competitors.
 }
 \author{Original Fortran code:
   Christophe Croux and Peter Rousseeuw \email{rousse@wins.uia.ac.be}.

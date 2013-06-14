@@ -291,7 +291,7 @@ print(xtable(tbl), sanitize.text.function=identity,
 <<fig-psi-functions,fig=TRUE,include=FALSE,eval=FALSE,echo=FALSE>>=
 f.plot.psi <- function(x, psi) {
   cc <- lmrob.control(psi = psi)$tuning.psi
-  data.frame(x=x, value=robustbase:::lmrob.psifun(x, cc, psi), psi = psi)
+  data.frame(x=x, value=Mpsi(x, cc, psi), psi = psi)
 }
 x <- seq(0, 10, length.out = 1000)
 tmp <- rbind(f.plot.psi(x, 'optimal'),
@@ -606,10 +606,10 @@ if (!file.exists(aggrResultsFile)) {
           }
           ## calculate correction factors
           ## A
-          lsp2 <- rowSums(robustbase:::lmrob.psifun(lresid,lctrl$tuning.psi,
+          lsp2 <- rowSums(Mpsi(lresid,lctrl$tuning.psi,
                                                     lctrl$psi)^2)
           ## B
-          lspp <- rowSums(lpp <- robustbase:::lmrob.psifun(lresid,lctrl$tuning.psi,
+          lspp <- rowSums(lpp <- Mpsi(lresid,lctrl$tuning.psi,
                                                            lctrl$psi,1))
           ## calculate Huber\'s small sample correction factor
           lK <- 1 + rowSums((lpp - lspp/n)^2)*NCOL(lX)/lspp^2 ## 1/n cancels
@@ -619,7 +619,7 @@ if (!file.exists(aggrResultsFile)) {
         ## only calculate tau variants if possible
         if (grepl('args.method=\\w*(D|T)\\w*\\b', lcdn[1])) { ## SMD or SMDM
           ## calculate robustness weights
-          lwgts <- robustbase:::lmrob.wgtfun(lresid,lctrl$tuning.psi, lctrl$psi)
+          lwgts <- Mwgt(lresid,lctrl$tuning.psi, lctrl$psi)
           ## function to calculate robustified leverages
           tfun <- if (is.function(attr(estlist$design, 'gen')))
             function(i) {
@@ -635,10 +635,10 @@ if (!file.exists(aggrResultsFile)) {
           ## normalize residuals with tau (transpose lresid)
           lresid <- t(lresid) / lt
           ## A
-          lsp2t <- colSums(robustbase:::lmrob.psifun(lresid,lctrl$tuning.psi,
+          lsp2t <- colSums(Mpsi(lresid,lctrl$tuning.psi,
                                                      lctrl$psi)^2)
           ## B
-          lsppt <- colSums(robustbase:::lmrob.psifun(lresid,lctrl$tuning.psi,
+          lsppt <- colSums(Mpsi(lresid,lctrl$tuning.psi,
                                                      lctrl$psi,1))
         } else {
           lsp2t <- lsppt <- NA
@@ -1432,7 +1432,7 @@ asymptotic bias as in \citet{berrendero2007maximum}.
 g <- Vectorize(function(s, theta, mu, ...) {
   lctrl <- lmrob.control(...)
   rho <- function(x)
-    robustbase:::lmrob.chifun(x, lctrl$tuning.chi, lctrl$psi, deriv = 0)
+    Mchi(x, lctrl$tuning.chi, lctrl$psi, deriv = 0)
   integrate(function(x) rho(((1 + theta^2)/s^2*x)^2)*dchisq(x, 1, mu^2/(1 + theta^2)),
             -Inf, Inf)$value
 })
@@ -1448,7 +1448,7 @@ g.2.MM <- Vectorize(function(s, theta, mu, ...) {
 g.3 <- Vectorize(function(s, theta, mu, ...) {
   lctrl <- lmrob.control(...)
   rho <- function(x)
-    robustbase:::lmrob.chifun(x, lctrl$tuning.chi, lctrl$psi, deriv = 0)
+    Mchi(x, lctrl$tuning.chi, lctrl$psi, deriv = 0)
   int.x <- Vectorize(function(y) {
     integrate(function(x) rho((y - x*theta - mu)/s)*dnorm(x)*dnorm(y),-Inf, Inf)$value })
   integrate(int.x,-Inf, Inf)$value

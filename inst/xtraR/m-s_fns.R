@@ -1,8 +1,11 @@
+#### Testing M-S estimator --- self-contained utility functions ---
+####
+
+## Exercised from ../../tests/m-s-estimator.R
+##		  ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ## Test subsampling algorithm
 m_s_subsample <- function(x1, x2, y, control, orthogonalize=TRUE) {
-    x1 <- as.matrix(x1)
-    x2 <- as.matrix(x2)
-    y <- y
     storage.mode(x1) <- "double"
     storage.mode(x2) <- "double"
     storage.mode(y) <- "double"
@@ -13,21 +16,21 @@ m_s_subsample <- function(x1, x2, y, control, orthogonalize=TRUE) {
             y,
             res=double(length(y)),
             n=length(y),
-            p1=ncol(x1),
-            p2=ncol(x2),
+            p1=NCOL(x1),
+            p2=NCOL(x2),
             nResample=as.integer(control$nResample),
             max_it_scale=as.integer(control$maxit.scale),
             scale=double(1),
-            b1=double(ncol(x1)),
-            b2=double(ncol(x2)),
+            b1=double(NCOL(x1)),
+            b2=double(NCOL(x2)),
             tuning_chi=as.double(control$tuning.chi),
-            ipsi=as.integer(lmrob.psi2ipsi(control$psi)),
+            ipsi=robustbase:::.psi2ipsi(control$psi),
             bb=as.double(control$bb),
             K_m_s=as.integer(control$k.m_s),
             max_k=as.integer(control$k.max),
             rel_tol=as.double(control$rel.tol),
 	    inv_tol=as.double(control$solve.tol),
-            converged=logical(1),
+            converged=FALSE,
             trace_lev=as.integer(control$trace.lev),
             orthogonalize=as.logical(orthogonalize),
             subsample=TRUE,
@@ -39,9 +42,6 @@ m_s_subsample <- function(x1, x2, y, control, orthogonalize=TRUE) {
 
 ## Test descent algorithm
 m_s_descent <- function(x1, x2, y, control, b1, b2, scale) {
-    x1 <- as.matrix(x1)
-    x2 <- as.matrix(x2)
-    y <- y
     storage.mode(x1) <- "double"
     storage.mode(x2) <- "double"
     storage.mode(y) <- "double"
@@ -52,15 +52,15 @@ m_s_descent <- function(x1, x2, y, control, b1, b2, scale) {
             y=y,
             res=double(length(y)),
             n=length(y),
-            p1=ncol(x1),
-            p2=ncol(x2),
+            p1=NCOL(x1),
+            p2=NCOL(x2),
             nResample=as.integer(control$nResample),
             max_it_scale=as.integer(control$maxit.scale),
             scale=as.double(scale),
             b1=as.double(b1),
             b2=as.double(b2),
             tuning_chi=as.double(control$tuning.chi),
-            ipsi=as.integer(lmrob.psi2ipsi(control$psi)),
+            ipsi=robustbase:::.psi2ipsi(control$psi),
             bb=as.double(control$bb),
             K_m_s=as.integer(control$k.m_s),
             max_k=as.integer(control$k.max),
@@ -78,7 +78,7 @@ m_s_descent <- function(x1, x2, y, control, b1, b2, scale) {
 }
 
 find_scale <- function(r, s0, n, p, control) {
-    c.chi <- lmrob.conv.cc(control$psi, control$tuning.chi)
+    c.chi <- robustbase:::lmrob.conv.cc(control$psi, control$tuning.chi)
 
     b <- .C(robustbase:::R_lmrob_S,
             x = double(1),
@@ -89,7 +89,7 @@ find_scale <- function(r, s0, n, p, control) {
             scale = as.double(s0),
             coefficients = double(p),
             as.double(c.chi),
-            as.integer(lmrob.psi2ipsi(control$psi)),
+            robustbase:::.psi2ipsi(control$psi),
             as.double(control$bb),
             best_r = 0L,
             groups = 0L,
@@ -125,12 +125,12 @@ m_s_descent_Ronly <- function(x1, x2, y, control, b1, b2, scale) {
     ## stop after k.fast.m_s step of no improvement
     if (control$trace.lev > 4) cat("scale:", scale, "\n")
     if (control$trace.lev > 4) cat("res:", rs, "\n")
-    n.imp <- nnoimprovement <- nref <- 0; conv <- FALSE
+    n.imp <- nnoimprovement <- nref <- 0L; conv <- FALSE
     while((nref <- nref + 1) <= control$k.max && !conv &&
           nnoimprovement < control$k.m_s) {
         ## STEP 1: UPDATE B2
         y.tilde <- y - x1 %*% t1
-        w <- lmrob.wgtfun(rs / sc, control$tuning.chi, control$psi)
+        w <- Mwgt(rs / sc, control$tuning.chi, control$psi)
         if (control$trace.lev > 4) cat("w:", w, "\n")
         z2 <- lm.wfit(x2, y.tilde, w)
         t2 <- z2$coef
@@ -145,15 +145,17 @@ m_s_descent_Ronly <- function(x1, x2, y, control, b1, b2, scale) {
         sc <- find_scale(rs, sc, n, p, control)
         if (control$trace.lev > 4) cat("sc:", sc, "\n")
         ## STEP 4: CHECK FOR CONVERGENCE
-        #... <FIXME>
+
+        ##... FIXME
+
         ## STEP 5: UPDATE BEST FIT
         if (sc < scale) {
             scale <- sc
             b1 <- t1
             b2 <- t2
-            nnoimprovement <- 0
-            n.imp <- n.imp + 1
-        } else nnoimprovement <- nnoimprovement + 1
+            nnoimprovement <- 0L
+            n.imp <- n.imp + 1L
+        } else nnoimprovement <- nnoimprovement + 1L
     }
     ## STEP 6: FINISH
     if (nref == control$k.max)

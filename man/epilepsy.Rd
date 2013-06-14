@@ -61,9 +61,10 @@ pairs(epilepsy[,c("Ysum","Base4","Trt","Age10")])
 Efit1 <- glm(Ysum ~ Age10 + Base4*Trt, family=poisson, data=epilepsy)
 summary(Efit1)
 
-## Robust Fit : %%>>>>> FIXME <<<<
-% Efit2 <- robglm(Ysum ~ Age10 + Base4*Trt, family=poisson, data=epilepsy,
-%                 method="Mqle", control=robglmMqle.control(tcc=1.2,maxit=100))
-% summary(Efit2)
+## Robust Fit :
+Efit2 <- glmrob(Ysum ~ Age10 + Base4*Trt, family=poisson, data=epilepsy,
+                method = "Mqle",
+                tcc=1.2, maxit=100)
+summary(Efit2)
 }
 \keyword{datasets}

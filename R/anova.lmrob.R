@@ -2,7 +2,7 @@ anova.lmrob <- function(object, ..., test = c("Wald", "Deviance"))
 {
     dotargs <- list(...)
     named <- if (is.null(names(dotargs)))
-	rep(FALSE, length(dotargs))
+	logical(length(dotargs))# FALSE
     else (names(dotargs) != "")
     if (any(named))
 	warning("the following arguments to 'anova.lmrob' are invalid and \n",
@@ -111,7 +111,7 @@ anovaLmrobPair <- function(FMfit, reduced.model, initCoef, test)
 	y <- FMfit$residuals + FMfit$fitted.values
 	s0 <- FMfit$scale
 	psi <- function(u, deriv = 0)
-	    lmrob.psifun(u, cc = FMfit$control$tuning.psi,
+	    Mpsi(u, cc = FMfit$control$tuning.psi,
                          psi = FMfit$control$psi, deriv)
 	iC <-
 	    if(is.null(initCoef)) {

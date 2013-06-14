@@ -1,5 +1,54 @@
 TO DO
-------
+------ [MM:  grep-r -e '\(FIXME\|TODO\)'  ]
+
+o  BYlogreg()  [ R/BYlogreg.R ]
+   --> more tests in ./tests/glmrob-1.R
+   --> glm.fit() instead of glm()
+   --> vcov() instead of just std.err. {is already there}
+
+o  Psi/Rho/Chi/Wgt Functions
+   -------------------------
+   Our "mess":  We have quite a few "partial" collections of rho/psi functions:
+
+   1) have the nice S4 class psi_func  + psiFunc() and .defDwgt() functions in
+
+      ./R/psi-rho-funs.R    with explorations, ideas in
+      ~~~~~~~~~~~~~~~~~~
+      ./experi-psi-rho-funs.R
+
+   2) have "old" tukeyChi() & tukeyPsi1()  originally called from lmrob() , in
+      ./R/biweight-funs.R
+   3) psi.*(....,  rho = FALSE/TRUE)   functions from Andreas
+      should be replaced by using the new  psi_func  objects
+      ./R/psi-funs-AR.R  &  ./man/pkg-internal.Rd
+      ~~~~~~~~~~~~~~~~~  ===> Change  nlrob() slightly: allowing 'psi'
+      to be a function *or* a psiFunc:
+      --> ./R/nlrob.R+psi ./man/nlrob.Rd+psi
+      Before that we *do* need "real" checks (numbers!) for nlrob
+
+   4) have the C-based functions, now used from lmrob(), in
+      ./R/lmrob.MM.R
+
+      now called  Mpsi(), Mchi(), Mwgt() plus new MrhoInf()
+      {now exported and documented in man/M.psi.Rd }
+
+    Further files, illustrating features, differences, etc:
+
+	./inst/doc/psi_functions.Rnw -- with quite a few FIXME
+	 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	./inst/xtraR/plot-psiFun.R	chkPsiDeriv() {and plot utils}
+	./tests/psi-rho-etc.R   	compute asymp.efficiency and breakdown point !
+	./tests/lmrob-psifns.R 	   	plot and lmrob()-test them
+
+    TODO: Done: -> '32)'; Rest:
+	   .) *Deprecate* the "2)", tukeyChi() etc, making them call the M.*fun():
+	      *CARE*: tukeyPsi1(*, d = 2) is now needed asymp.cov() of glmrobMT()
+           .) provide  '1)'-i.e. psi_func  versions of them
+
+    *) Mpsi(*, "GGW") etc :  there is (??) no reasonable to directly specify
+       ---------------- the (a,b,c) tuning parameters
+
 
 o  New  lmrob() "M-S" etc features:
 
@@ -8,8 +57,16 @@ o  New  lmrob() "M-S" etc features:
 
    - checking .vcov.avar1() and its "posdefify" options ??
 
-   - lmrob.mar()  [should get a different name and] be part of robustbase;
-     e.g. via lmrob( ... control ..) or directly.
+   - lmrob.mar() [ inst/doc/estimating.functions.R ]: should become part
+     ~~~~~~~~~~  of robustbase, maybe under a better name,
+      e.g. via lmrob( ... control ..) or directly.
+     It is much used in the simulations of Koller & Stahel (2011)
+
+o  Consider allowing
+   lmrob(*,  method = "M") --> default init = "ls" (Least Sq; as MASS:::rlm.default)
+   which calls  lmrob..M..fit() which is already documented as "simple"
+   M-estimator (though the *scale* is kept fixed; i.e., no  'proposal 2').
+
 
 o  inst/doc/lmrob_simulation.Rnw :
 
@@ -63,15 +120,17 @@ o ltsReg():  has  undocumented '$resid'
 
 --- glmrob --
 
-o glmrob(*, weights.on.x = "robCov")  currently uses  MASS::cov.rob(),
-  i.e. "MVE" and Andreas had a comment that "mcd" is worse. [ -> R/glmrobMqle.R ]
-  But still, I (MM) strongly believe we should use  covMcd() instead.
+o glmrob(*, weights.on.x = "robCov")  uses  MASS::cov.rob(),
+  i.e. "MVE" and Andreas had a comment that "mcd" is worse.
+  "covMcd" has been available for a while; now via robXweights() in ./R/glmrobMqle.R
   HOWEVER: Need something better when 'X' has (binary!) factors!
   "hat" +- works, but needs more work
 
-o psi.*(....,  rho = FALSE/TRUE)   functions from Andreas
-  should be replaced by using the new  psi_func  objects
-  --> ./R/psi-funs-AR.R  &  ./man/pkg-internal.Rd
+o glmrob(<Gamma>):  anova() has  three variants: "V1", "Eva1", "Andreas1"
+   --> ./R/glmrobMqle-DQD.R
+   - gives warning every time {-> easy to fix}
+   -  Default is "V1" is that a good idea?
+
 
 o glmrob() needs a bit more tests in ./tests/
            [also consider those from man/glmrob.Rd]
@@ -94,13 +153,10 @@ o anova.glmrob(): More modularization, allowing to provide own 'test' function.
   Test if Huber's C are different. Need theory to compare different C's and
   same model (which includes classical vs robust).
 
-o drop1() would be nice
+o add1() and/or drop1() would be nice
 
 
 --- nlrob ---
-
-o  FIXME -- no longer need the "put everything on the right" hack before calling nls()
-   --> cleaner code also when robustness weights become 0.
 
 o  residuals( nlrob(), type = "...") should provide types
    	      "as in the litterature"
@@ -117,12 +173,7 @@ o more tests in	tests/
 o fully implement and test the multivariate case (y = matrix with > 1 col.)
 
 o src/lmrob.c :
-
-   Things to fix:
-
-   - does many many vector and vector-matrix things itself
-     instead of using BLAS and LAPACK
-   - does median() , MAD() instead of using R's  sort() routines
+    does median() , MAD() instead of using R's  sort() routines
 
 ----
 

@@ -6,34 +6,76 @@ source(system.file("xtraR/plot-psiFun.R", package = "robustbase", mustWork=TRUE)
 ### (1) Test the functions themselves --------------------------------
 pdf("rob-psifns.pdf")
 
-psiF <- robustbase:::lmrob.psifun # deriv = -1 (rho), 0, 1
-chiF <- robustbase:::lmrob.chifun # rho(.) normalized to max|.| = 1;  deriv
-wgtF <- robustbase:::lmrob.wgtfun
-
 ## Simple version, no error checking, no derivative, nothing:
 psiGGW <- function(x, a,b,c) {
     ifelse((ax <- abs(x)) < c,
            x,
            ifelse((ea <- -((ax-c)^b)/(2*a)) < -708.4, 0, x * exp(ea)))
 }
-stopifnot(all.equal(psiF  (5:9, cc=c(0,a=1/8,b=2,c=1/8,NA), "GGW"),
+stopifnot(all.equal(Mpsi  (5:9, cc=c(0,a=1/8,b=2,c=1/8,NA), "GGW"),
 		    psiGGW(5:9,	       a=1/8,b=2,c=1/8), tol = 1e-13))
 
 
-funs <- list(psiF, chiF, wgtF)
-## Check that psi(<empty>)  |->  <empty>  works
-cG <- c(-.5,1,.95,NA)
+## Check that psi(<empty>)  |->  <empty>  works; ditto for +-Inf, NA,..
+cG <- c(-.5, 1, .95, NA) # one of the 6 "builtin"s
 d0 <- numeric()
 IoI <- c(-Inf, 0, Inf)
-## TODO: Do these checks for a *list* of combinations such as  (cG, "GGW"):
-## ^^^^^
-for(FUN in funs)
-    stopifnot(identical(d0, FUN(d0, cG, "GGW")))
-stopifnot(identical(c(0,0,0), psiF(IoI, cG,"GGW")),
-	  identical(c(1,0,1), chiF(IoI, cG,"GGW")),
-	  identical(c(0,1,0), wgtF(IoI, cG,"GGW")))
+NN <- c(NaN, NA)
 
-## FIXME: Check  chiF() <-> psiF(*, deriv = -1)
+cGs <- list(  c(-.4, 1.5,    0.85,  NA)
+            , c(-.4, 1.5 ,   0.90,  NA)
+            , c(-.4, 1.5 ,   0.95,  NA)
+            , c(-.4, 1.5,    0.975, NA)
+            , c(-.4, 1.5,    0.99 , NA)
+            , c(-.4, 1.5,    0.995, NA)
+            ##
+            , c(-.4, 1.25,   0.975, NA)
+            , c(-.4, 1.1,    0.975, NA)
+            , c(-.4, 1.025,  0.975, NA)
+            , c(-.4, 1.0125, 0.975, NA)
+            ##
+            ## FIXME , c(-.1, 1.25, 0.95, NA)
+            ## FIXME , c(-.1, 1.25, 0.99, NA)
+            )
+st <- system.time(
+cG.cnst <- lapply(cGs, function(cc)
+                  lmrob.control(psi = "ggw", tuning.psi = cc)$tuning.psi)
+)
+cat('Time for constants computation of tuning.psi: ', st,'\n')
+cGct <- t(sapply(cG.cnst, attr, "constants"))[,-1]
+colnames(cGct) <- c("a","b","c", "rhoInf")
+signif(cGct, 4)
+stopifnot(all.equal(sapply(cG.cnst, function(cc) MrhoInf(cc, "ggw")),
+                    cGct[,"rhoInf"]))
+
+
+## Do these checks for a *list* of (c.par, psi) combinations:
+c.psi.list <- list(
+    list(cG, "GGW"),
+    list(c(2,4,8), "Hampel"),
+    list(c(1.5,3.5,8)*0.90, "Hampel"),
+    list(par=c(-.5,1.5,.95,NA), "lqq"),
+    list(bcs=c(1, 1, 1.25), "lqq"),
+    list(1.1, "optimal"),
+    list(0.1, "optimal"),
+    list(2.3, "Welsh")
+    )
+
+for(c.psi in c.psi.list) {
+    tPar <-  c.psi[[1]]; psi <- c.psi[[2]]
+    stopifnot(is.numeric(tPar), is.character(psi))
+    cat("Psi function ", psi,"; tuning par. c[]= (",
+        paste(formatC(tPar, width=1), collapse=", "),")\n")
+    for(FUN in list(Mpsi, Mchi, Mwgt))
+	stopifnot(identical(d0, FUN(d0, tPar, psi=psi)),
+                  identical(NN, FUN(NN, tPar, psi=psi)))
+    stopifnot(identical(c(0,0,0), Mpsi(IoI, tPar,psi=psi)),
+              identical(c(1,0,1), Mchi(IoI, tPar,psi=psi)),
+              identical(c(0,1,0), Mwgt(IoI, tPar,psi=psi)))
+    cat("chkPsi..(): ")
+    chkPsi..(c(-5, 10), psi=psi, par=tPar)
+    cat(" [Ok]\n------------------------\n\n")
+}
 
 
 ## Nice plots -- and check derivatives ----
@@ -55,7 +97,7 @@ stopifnot(chkPsiDeriv(p.psiFun(x., "Welsh", par = 1.5)))
 op <- par(mfrow=c(3,2), mgp = c(1.5, .6, 0), mar = .1+c(3,3,2,.5))
 p.psiFun2(x., "LQQ", par=c(-.5,1.5,.95,NA))
 p.psiFun2(x., "GGW", par= cG)
-p.psiFun2(x., "optimal", par=2)
+p.psiFun2(x., "optimal", par=1.3)
 p.psiFun2(x., "Hampel", par = round(c(1.5, 3.5, 8) * 0.9016085, 1))
 p.psiFun2(x., "biweight", par = 4)
 p.psiFun2(x., "Welsh", par = 1.5)

@@ -33,9 +33,13 @@
     \item{\code{tDefs}:}{\emph{named} numeric vector of \bold{t}uning
       parameter \bold{Def}ault values.}
     %%% FIXME : Replace these by *methods*
-    \item{\code{Erho}:}{Object of class \code{"functionXal"} ~~ }
-    \item{\code{Epsi2}:}{Object of class \code{"functionXal"} ~~ }
-    \item{\code{EDpsi}:}{Object of class \code{"functionXal"} ~~ }
+    \item{\code{Erho}:}{A function of class \code{"functionXal"} for
+      computing \eqn{E[\rho(X)]} when \eqn{X} is standard normal
+      \eqn{\mathcal{N}(0,1)}{N(0,1)}.}
+    \item{\code{Epsi2}:}{A function of class \code{"functionXal"} for
+      computing \eqn{E[\psi^2(X)]} when \eqn{X} is standard normal.}
+    \item{\code{EDpsi}:}{A function of class \code{"functionXal"} for
+      computing \eqn{E[\psi'(X)]} when \eqn{X} is standard normal.}
 
     \item{\code{name}:}{Name of \eqn{\psi}{psi}-function used for printing.}
     \item{\code{xtras}:}{Potentially further information.}

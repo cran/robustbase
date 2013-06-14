@@ -1,7 +1,6 @@
 
-R version 2.15.0 Patched (2012-05-24 r59442) -- "Easter Beagle"
-Copyright (C) 2012 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
+R version 3.0.0 Patched (2013-04-28 r62686) -- "Masked Marvel"
+Copyright (C) 2013 The R Foundation for Statistical Computing
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -88,7 +87,7 @@ Intercept  63.3528     4.0227   15.75  1.9e-05 ***
 height     -1.2265     0.1403   -8.74  0.00032 ***
 weight      0.6884     0.0528   13.04  4.7e-05 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Residual standard error: 0.765 on 5 degrees of freedom
 Multiple R-Squared: 0.991,	Adjusted R-squared: 0.988 
@@ -124,7 +123,7 @@ Coefficients:
 Intercept   -8.500      1.926   -4.41  7.8e-05 ***
 log.Te       3.046      0.437    6.97  2.4e-08 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Residual standard error: 0.341 on 39 degrees of freedom
 Multiple R-Squared: 0.554,	Adjusted R-squared: 0.543 
@@ -161,7 +160,7 @@ Intercept  60.9149    10.1995    5.97  3.4e-05 ***
 inorg       1.2110     0.3549    3.41   0.0042 ** 
 organic     0.0883     0.2574    0.34   0.7366    
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Residual standard error: 12.7 on 14 degrees of freedom
 Multiple R-Squared: 0.519,	Adjusted R-squared: 0.45 
@@ -199,7 +198,7 @@ Air.Flow     0.7977     0.0674   11.83  2.5e-08 ***
 Water.Temp   0.5773     0.1660    3.48   0.0041 ** 
 Acid.Conc.  -0.0671     0.0616   -1.09   0.2961    
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Residual standard error: 1.25 on 13 degrees of freedom
 Multiple R-Squared: 0.975,	Adjusted R-squared: 0.969 
@@ -239,7 +238,7 @@ sstatus     0.6662     0.0382   17.42  6.9e-10 ***
 teacherSc   1.1840     0.1643    7.21  1.1e-05 ***
 motherLev  -4.0668     0.8487   -4.79  0.00044 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Residual standard error: 0.782 on 12 degrees of freedom
 Multiple R-Squared: 0.988,	Adjusted R-squared: 0.983 
@@ -277,7 +276,7 @@ X1           0.443      0.086    5.15  4.9e-05 ***
 X2          -0.206      0.138   -1.50     0.15    
 X3          -1.373      0.195   -7.06  7.7e-07 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Residual standard error: 1.03 on 20 degrees of freedom
 Multiple R-Squared: 0.899,	Adjusted R-squared: 0.884 
@@ -316,7 +315,7 @@ X2         1.210033   0.649230    1.86   0.0808 .
 X3         0.001381   0.000392    3.52   0.0028 **
 X4        -0.000555   0.000328   -1.69   0.1102   
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Residual standard error: 4.35 on 16 degrees of freedom
 Multiple R-Squared: 0.826,	Adjusted R-squared: 0.782 
@@ -353,7 +352,7 @@ Intercept  3.71959    0.91011    4.09  0.00063 ***
 n.prod     1.40578    0.13128   10.71  1.7e-09 ***
 distance   0.01625    0.00301    5.40  3.3e-05 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Residual standard error: 2.32 on 19 degrees of freedom
 Multiple R-Squared: 0.962,	Adjusted R-squared: 0.958 
@@ -393,7 +392,7 @@ x3         -0.5643     0.0435  -12.98  1.4e-07 ***
 x4         -0.4003     0.0654   -6.12  0.00011 ***
 x5          0.6074     0.0786    7.73  1.6e-05 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Residual standard error: 0.00745 on 10 degrees of freedom
 Multiple R-Squared: 0.958,	Adjusted R-squared: 0.937 
@@ -432,7 +431,7 @@ X1          0.0814     0.0667    1.22    0.227
 X2          0.0399     0.0405    0.99    0.328  
 X3         -0.0517     0.0354   -1.46    0.149  
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Residual standard error: 0.557 on 61 degrees of freedom
 Multiple R-Squared: 0.0428,	Adjusted R-squared: -0.00429 
@@ -446,7 +445,6 @@ F-statistic: 0.909 on 3 and 61 DF,  p-value: 0.442
 + }
 > 
 > test_rsquared()
-Initial scale 0 because more than 'h' (=16) observations are identical.
 
 Call:
 ltsReg.default(x = y1, y = x1, alpha = 0.8)
@@ -457,7 +455,6 @@ Intercept         y1
 
 Scale estimate 18 
 
-Initial scale 0 because more than 'h' (=16) observations are identical.
 
 Call:
 ltsReg.default(x = y1, y = x1, intercept = FALSE, alpha = 0.8)
@@ -468,6 +465,11 @@ Coefficients:
 
 Scale estimate 24.6 
 
+Warning messages:
+1: In covMcd(X, alpha = alpha, use.correction = use.correction) :
+  Initial scale 0 because more than 'h' (=16) observations are identical.
+2: In covMcd(X, alpha = alpha, use.correction = use.correction) :
+  Initial scale 0 because more than 'h' (=16) observations are identical.
 > test_location()
 
 Call:
@@ -531,8 +533,8 @@ Scale estimate 19.3
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  0.51 0.05 0.632 0 0.005 
+Time elapsed:  0.668 0.059 0.807 0.001 0.005 
 > 
 > proc.time()
    user  system elapsed 
-  0.510   0.055   0.632 
+  0.670   0.064   0.807 

@@ -1,3 +1,24 @@
+2013-05-22  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/lmrob.MM.R (Mpsi, Mchi, Mwgt): now all work via .Call():
+	is  9 x  faster for n ~ 4000, and a few NAs.
+
+2013-05-18  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/lmrob.MM.R (MrhoInf): new, providing rho(Inf), i.e.,
+	the scaling constant (rho |--> rho~ = chi)
+	* R/lmrob.MM.R (Mpsi, Mchi, Mwgt): renamed, exported and documented,
+	from former hidden lmrob.psifun(), lmrob.chifun(), lmrob.wgtfun().
+	* TODO: now has an extensive section on psi/rho/chi etc
+
+2013-03-27  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.9-8, released to CRAN on ..........
+
+2013-03-06  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.9-7, released to CRAN on 2013-03-06
+
 2013-03-01  Manuel Koller   <mkoller@ispm.unibe.ch>
 
 	* R/lmrob.R (lmrob): Adding weights and offset arguments.
@@ -29,6 +50,10 @@
 	the number of non-aliased coefficients (used to be just (n-p)).
 	'aliased': named logical vector showing if the original
 	coefficients are aliased (was not returned before).
+
+2012-09-11  Manuel Koller  <koller@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.9-4, released to CRAN on 2012-09-11
 
 2012-05-14  Martin Maechler  <maechler@stat.math.ethz.ch>
 

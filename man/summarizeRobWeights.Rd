@@ -23,13 +23,18 @@ summarizeRobWeights(w, digits = getOption("digits"),
   \item{\dots}{potential further arguments, passed to
     \code{\link{print}()}.}
 }
+\seealso{
+  The \code{\link{summary}} methods for \code{\link{lmrob}}
+  and \code{\link{glmrob}} make use of \code{summarizeRobWeights()}.
+
+  Our methods for \code{\link{weights}()},
+  \code{\link{weights.lmrob}(*, type="robustness")} and
+  \code{\link{weights.glmrob}(*, type="robustness")}.
+}
 \value{
   none; the function is used for its side effect of printing.
 }
 \author{Martin Maechler}
-\seealso{The \code{\link{summary}} methods for \code{\link{lmrob}}
-  and \code{\link{glmrob}} make use of \code{summarizeRobWeights()}.
-}
 \examples{
 w <- c(1,1,1,1,0,1,1,1,1,0,1,1,.9999,.99999, .5,.6,1e-12)
 summarizeRobWeights(w) # two outside ~= {0,1}

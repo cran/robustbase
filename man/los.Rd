@@ -44,12 +44,12 @@
  hist(log(los))
  boxplot(log(los), add=TRUE, col=2, border=2, horizontal = TRUE, at = -1)
 
- if(R.version$arch == "x86_64") { ## FIXME -- bug in C code
-
-   ## Hubert and Vandervieren (2006), p. 15, Fig. 11.
-   adjbox(los, col = "gray", outcol = "red")
-   boxplot(los, add = TRUE, staplewex = 0.2, outcex = 0.5, outpch = 4)
-   title("adjbox(los) and boxplot(los) superimposed")
- }
+ ## Hubert and Vandervieren (2006), p. 15, Fig. 11.
+ adjbox(los, col = "gray", staplecol="red", outcol = "red",
+        main = "(Skewness-)Adjusted and original boxplot for 'los' data")
+ boxplot(los, add = TRUE, staplewex= 0.2, outcex= 0.5, outpch= 4,
+         staplecol = "blue", outcol = "blue", staplelwd=2)
+ legend("topright", c("adjbox(los)", "boxplot(los)"),
+        col=c("red","blue"), lwd = 1:2, bty="n")
 }
 \keyword{datasets}

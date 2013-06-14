@@ -1,6 +1,27 @@
 /* External and interal  API  of  C and Fortran routines in robustbase */
 
-/* C code which includes this, typically includes <R.h> */
+#include <R.h>
+// for SEXP
+#include <Rinternals.h>
+
+/**< For internationalized messages */
+#ifdef ENABLE_NLS
+#include <libintl.h>
+#define _(String) dgettext ("Matrix", String)
+#else
+#define _(String) (String)
+#define dngettext(pkg, String, StringP, N) (N > 1 ? StringP : String)
+#endif
+
+#ifndef LONG_VECTOR_SUPPORT
+# ifndef XLENGTH
+   // for  R <= 2.15.x :
+#  define XLENGTH(x) LENGTH(x)
+   typedef int R_xlen_t;
+# endif
+#endif
+
+
 
 /* --------- ./qn_sn.c : -------- */
 #define Sint int
@@ -37,6 +58,8 @@ double mc_C_d(double *z, int n, double *eps, int *iter);
 
 /* --------- ./lmrob.c --------- */
 
+SEXP R_rho_inf(SEXP cc, SEXP ipsi);
+
 void R_lmrob_S(double *X, double *y, int *n, int *P,
 	       int *nRes, double *scale, double *beta_s,
 	       double *C, int *iipsi, double *bb,
@@ -69,9 +92,9 @@ void R_subsample(const double *x, const double *y, int *n, int *m,
 		 int *status, int *sample, int *mts, int *ss, double *tol_inv,
 		 int *solve);
 
-void R_psifun(double *xx, const double cc[], int *iipsi, int *dderiv, int *llength);
-void R_chifun(double *xx, const double cc[], int *iipsi, int *dderiv, int *llength);
-void R_wgtfun(double *xx, const double cc[], int *iipsi, int *llength);
+SEXP R_psifun(SEXP x_, SEXP c_, SEXP ipsi_, SEXP deriv_);
+SEXP R_chifun(SEXP x_, SEXP c_, SEXP ipsi_, SEXP deriv_);
+SEXP R_wgtfun(SEXP x_, SEXP c_, SEXP ipsi_);
 
 
 void R_find_D_scale(double *rr, double *kkappa, double *ttau, int *llength,

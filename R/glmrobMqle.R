@@ -3,6 +3,42 @@
 
 globalVariables(c("residP", "residPS", "dmu.deta"), add=TRUE)
 
+##' @title
+##' @param wts a character string \dQuote{weights.on.x} specifying how weights should be computed
+##'            *or* a numeric vector of final weights in which case nothing is computed.
+##' @param X  n x p  design matrix aka model.matrix()
+##' @param intercept logical, if true, X[,] has an intercept column which should
+##'                  not be used for rob.wts
+##' @return n-vector of non-negative weights
+##' @author Martin Maechler
+robXweights <- function(wts, X, intercept=TRUE) {
+    stopifnot(length(d <- dim(X)) == 2, is.logical(intercept))
+    nobs <- d[1]
+    if(d[2]) { ## X has >= 1 column, and hence there *are* coefficients in the end
+        if(is.character(wts)){
+            switch(wts,
+                   "none" = rep.int(1, nobs),
+                   "hat" = wts_HiiDist(X)^2, # = (1 - Hii)^2
+                   "robCov" = wts_RobDist(X, intercept, covFun = MASS::cov.rob),
+                                        # ARu said 'method="mcd" was worse'
+                   "covMcd" = wts_RobDist(X, intercept, covFun = covMcd),
+                   stop("Weighting method", sQuote(wts),
+                        " is not implemented"))
+        }
+        else{
+	    if(!is.numeric(wts) || length(wts) != nobs)
+		stop(gettextf("wts needs %d none-negative values", nobs))
+            if(any(wts) < 0)
+                stop("All weights.on.x must be none negative")
+        }
+    }
+    else ## p = ncoef == 0 {maybe intercept, but that's not relevant here}
+        rep.int(1,nobs)
+}
+
+
+##' @param intercept logical, if true, X[,] has an intercept column which should
+##'                  not be used for rob.wts
 glmrobMqle <-
     function(X, y, weights = NULL, start = NULL, offset = NULL,
 	     family, weights.on.x = "none",
@@ -10,15 +46,15 @@ glmrobMqle <-
              trace = FALSE)
 {
     ## To DO:
-    ## o weights are not really implemented. e.g. as "user weights for poisson"
+    ## o weights are not really implemented as *extra* user weights; rather as "glm-weights"
     ## o offset is not fully implemented (really? -- should have test case!)
 
-    X <- as.matrix(X)
+    if(!is.matrix(X)) X <- as.matrix(X)
 ## never used:
 ##     xnames <- dimnames(X)[[2]]
 ##     ynames <- if (is.matrix(y)) rownames(y) else names(y)
     nobs <- NROW(y)
-    ncoef <- ncol(X)
+    stopifnot(nobs == nrow(X))
     if (is.null(weights))
 	weights <- rep.int(1, nobs)
     else if(any(weights <= 0))
@@ -34,33 +70,14 @@ glmrobMqle <-
     if (is.null(valideta <- family$valideta)) valideta <- function(eta) TRUE
     if (is.null(validmu	 <- family$validmu))  validmu <-  function(mu) TRUE
 
-    w.x <- if(ncoef) {
-        if(is.character(weights.on.x)){
-            switch(weights.on.x,
-                   "none" = rep.int(1, nobs),
-                   "hat" = wts_HiiDist(X = X)^4,
-                   "robCov" = wts_RobDist(X, intercept, covFun = MASS::cov.rob),
-                                        # ARu said 'method="mcd" was worse'
-                   "covMcd" = wts_RobDist(X, intercept, covFun = covMcd),
-                   stop("Weighting method", sQuote(weights.on.x),
-                        " is not implemented"))
-        }
-        else{
-            if(length(weights.on.x) != nobs)
-                stop(gettextf("weights.on.x needs %d none negative values",
-                              nobs))
-            if(any(weights.on.x) < 0)
-                stop("All weights.on.x must be none negative")
-        }
-    }
-    else ## ncoef == 0
-        rep.int(1,nobs)
+    ncoef <- ncol(X)
+    w.x <- robXweights(weights.on.x, X=X, intercept=intercept)
 
 ### Initializations
     stopifnot(control$maxit >= 1, (tcc <- control$tcc) >= 0)
 
     ## note that etastart and mustart are used to make 'family$initialize' run
-    etastart <-  NULL;  mustart <- NULL
+    etastart <- NULL;  mustart <- NULL
     ## note that 'weights' are used and set by binomial()$initialize !
     eval(family$initialize) ## --> n, mustart, y and weights (=ni)
     ni <- as.vector(weights)# dropping attributes for computation
@@ -175,7 +192,7 @@ glmrobMqle <-
         eval(comp.scaling) #-> (sV, residPS)
         eval(comp.Epsi.init)
 	## Computation of alpha and (7) using matrix column means:
-	cpsi <- pmax.int(-tcc, pmin(residPS,tcc)) - eval(Epsi)
+	cpsi <- pmax.int(-tcc, pmin.int(residPS,tcc)) - eval(Epsi)
 	EEq <- colMeans(cpsi * w.x * sni/sV * dmu.deta * X)
 	##
 	## Solve  1/n (t(X) %*% B %*% X) %*% delta.coef	  = EEq
@@ -267,28 +284,38 @@ glmrobMqle <-
 }
 
 
+## NB: X  is model.matrix() aka design matrix used; typically including an intercept
 wts_HiiDist <- function(X) {
+    ## Hii := diag( tcrossprod( qr.Q(qr(X)) ) ) == rowSums( qr.Q(qr(X)) ^2 ) :
     x <- qr(X)
     Hii <- rowSums(qr.qy(x, diag(1, nrow = NROW(X), ncol = x$rank))^2)
-    sqrt(1-Hii)
+    (1-Hii)
 }
 
+##' "weights.on.x": Compute robustness weights depending on the design 'X'
+##'   only, using robust mahalanobis distances
+##' @title Compute Robust Weights based on Robustified Mahalanobis - Distances
+##' @param X n x p  numeric matrix
+##' @param intercept logical; should be true iff  X[,1] is a column with the intercept
+##' @param covFun function for computing a \bold{robust} covariance matrix;
+##'        e.g., MASS::cov.rob(), or covMcd().
+##' @return n-vector of non-negative weights.
+##' @author Martin Maechler
 wts_RobDist <- function(X, intercept, covFun)
 {
-    if(intercept) {
+    D2 <- if(intercept) { ## X[,] has intercept column which should not be used for rob.wts
 	X <- as.matrix(X[, -1])
 	Xrc <- covFun(X)
-	dist2 <- mahalanobis(X, center = Xrc$center, cov = Xrc$cov)
+	mahalanobis(X, center = Xrc$center, cov = Xrc$cov)
     }
-    else {
+    else { ## X[,]  can be used directly
 	if(!is.matrix(X)) X <- as.matrix(X)
 	Xrc <- covFun(X)
-	mu <- as.matrix(Xrc$center)
-	Mu <- Xrc$cov + tcrossprod(mu)
-	dist2 <- mahalanobis(X, center = rep(0,ncol(X)), cov = Mu)
+	S <- Xrc$cov + tcrossprod(Xrc$center)
+	mahalanobis(X, center = rep.int(0,ncol(X)), cov = S)
     }
     ncoef <- ncol(X) ## E[chi^2_p] = p
-    1/sqrt(1+ pmax.int(0, 8*(dist2 - ncoef)/sqrt(2*ncoef)))
+    1/sqrt(1+ pmax.int(0, 8*(D2 - ncoef)/sqrt(2*ncoef)))
 }
 
 
@@ -322,7 +349,7 @@ glmrobMqle.control <-
 
 ## FIXME:  Do use a "robFamily", a  *list* of functions
 ## ------  which all have the same environment
-##   ===> can get same efficiency as expressions, but better OO
+##   ===> can get same efficiency as expressions, but better OOP
 
 
 ### --- Poisson -- family ---
@@ -484,7 +511,7 @@ Huberprop2.gehtnicht <- function(phi, ns.resid, mu, Vmu, tcc)
     compEpsi2 <- eval(Epsi2)
     ##
     ## return h :=
-    sum(pmax.int(-tcc,pmin(ns.resid*snu,tcc))^2) -  nobs*compEpsi2
+    sum(pmax.int(-tcc,pmin.int(ns.resid*snu,tcc))^2) -  nobs*compEpsi2
 }
 
 Huberprop2 <- function(phi, ns.resid, mu, Vmu, tcc)
@@ -506,5 +533,5 @@ Huberprop2 <- function(phi, ns.resid, mu, Vmu, tcc)
     ##
     compEpsi2 <- tcc^2 + (pPtc - pMtc)*(1-tcc^2) + GLtcc - GUtcc
     ## return h :=
-    sum(pmax.int(-tcc,pmin(ns.resid*snu,tcc))^2) -  nobs*compEpsi2
+    sum(pmax.int(-tcc,pmin.int(ns.resid*snu,tcc))^2) -  nobs*compEpsi2
 }

@@ -1,7 +1,7 @@
 \name{vaso}
 \alias{vaso}
 \docType{data}
-\title{Vaso Constriction Data Set}
+\title{Vaso Constriction Skin Data Set}
 \description{
   Finney's data on vaso constriction in the skin of the digits.
 }

@@ -16,9 +16,10 @@ ltsReg(x, \dots)
        model = TRUE, x.ret = FALSE, y.ret = FALSE,
        contrasts = NULL, offset, \dots)
 
-\method{ltsReg}{default}(x, y, intercept = TRUE, alpha = 1/2, nsamp = 500,
-       adjust = FALSE, mcd = TRUE, qr.out = FALSE, yname = NULL,
-       seed = NULL, trace = FALSE, use.correction=TRUE, control, \dots)
+\method{ltsReg}{default}(x, y, intercept = TRUE, alpha = , nsamp = , adjust = ,
+       mcd = TRUE, qr.out = FALSE, yname = NULL,
+       seed = , trace = , use.correction = , wgtFUN = , control = rrcov.control(),
+       \dots)
 }
 \arguments{
   \item{formula}{a \code{\link{formula}} of the form \code{y ~ x1 + x2 + ...}.}
@@ -77,6 +78,10 @@ ltsReg(x, \dots)
     also produce print from the internal (Fortran) code.}
   \item{use.correction}{ whether to use finite sample correction factors.
     Default is \code{use.correction=TRUE}}
+  \item{wgtFUN}{a character string or \code{\link{function}}, specifying
+    how the weights for the reweighting step should be computed.
+    Up to April 2013, the only option has been the original proposal in
+    (1999), now specified by \code{wgtFUN = "01.original"} (or via \code{control}).}
   %% MM:  want control also for formula !?!?!?!?!!
   \item{control}{a list with estimation options - same as these provided
   in the function specification.  If the control object is supplied, the

@@ -1,21 +1,22 @@
-lmrob.control <- function  (setting, seed = NULL, nResample = 500,
-                            tuning.chi = NULL, bb = 0.5,
-                            tuning.psi = NULL, max.it = 50,
-                            groups = 5, n.group = 400, k.fast.s = 1, best.r.s = 2,
-                            k.max = 200, maxit.scale = 200, k.m_s = 20,
-                            ##           ^^^^^^^^^^^ had MAX_ITER_FIND_SCALE 200 in ../src/lmrob.c
-                            refine.tol = 1e-7, rel.tol = 1e-7,
-                            solve.tol = 1e-7,
-                            ## had  ^^^^^^^^  TOL_INVERSE 1e-7 in ../src/lmrob.c
-                            trace.lev = 0, mts = 1000,
-                            subsampling = c("nonsingular", "simple"),
-                            compute.rd = FALSE, method = 'MM',
-                            psi = c('bisquare', 'lqq', 'welsh', 'optimal', 'hampel',
-                              'ggw'),
-			    numpoints = 10, cov = NULL,
-                            split.type = c("f", "fi", "fii"),
-                            fast.s.large.n = 2000,
-                            ...)
+lmrob.control <-
+    function(setting, seed = NULL, nResample = 500,
+	     tuning.chi = NULL, bb = 0.5,
+	     tuning.psi = NULL, max.it = 50,
+	     groups = 5, n.group = 400, k.fast.s = 1, best.r.s = 2,
+	     k.max = 200, maxit.scale = 200, k.m_s = 20,
+	     ##           ^^^^^^^^^^^ had MAX_ITER_FIND_SCALE 200 in ../src/lmrob.c
+	     refine.tol = 1e-7, rel.tol = 1e-7,
+	     solve.tol = 1e-7,
+	     ## had  ^^^^^^^^  TOL_INVERSE 1e-7 in ../src/lmrob.c
+	     trace.lev = 0, mts = 1000,
+	     subsampling = c("nonsingular", "simple"),
+	     compute.rd = FALSE,
+	     method = 'MM',
+	     psi = c('bisquare', 'lqq', 'welsh', 'optimal', 'hampel', 'ggw'),
+	     numpoints = 10, cov = NULL,
+	     split.type = c("f", "fi", "fii"),
+	     fast.s.large.n = 2000,
+             ...)
 {
     if (!missing(setting)) {
         if (setting == 'KS2011') {
@@ -42,7 +43,7 @@ lmrob.control <- function  (setting, seed = NULL, nResample = 500,
                              'ggw' = c(-0.5, 1.5, NA, .5), ## min slope, b, eff, bp
                              'lqq' = c(-0.5, 1.5, NA, .5), ## min slope, b, eff, bp
                              'optimal' = 0.4047,
-                             'hampel' = c(1.5, 3.5, 8) * 0.2119163) ## a, b, c
+                             'hampel' = c(1.5, 3.5, 8) * 0.2119163) ## a, b, r
     if (missing(tuning.psi) || is.null(tuning.psi))
         tuning.psi <- switch(psi,
                              'bisquare' = 4.685061,
@@ -50,7 +51,7 @@ lmrob.control <- function  (setting, seed = NULL, nResample = 500,
                              'ggw' = c(-0.5, 1.5, .95, NA), ## min slope, b, eff, bp
                              'lqq' = c(-0.5, 1.5, .95, NA), ## min slope, b, eff, bp
                              'optimal' = 1.060158,
-                             'hampel' = c(1.5, 3.5, 8) * 0.9016085) ## a, b, c
+                             'hampel' = c(1.5, 3.5, 8) * 0.9016085) ## a, b, r
 
     ## in ggw, lqq:  tuning.psi, *.chi  are non-standard, calculate coefficients:
     if (psi %in% c('ggw', 'lqq')) {
@@ -71,6 +72,49 @@ lmrob.control <- function  (setting, seed = NULL, nResample = 500,
       list(...))
 }
 
+##' @title Modify lmrob control list to contain only parameters that were actually used
+##' @param control a list, typically the 'control' componenent of a \code{\link{lmrob}()} call,
+##'   or the result of  \code{\link{lmrob.control}()}
+##' @return list: the (typically) modified \code{control}
+##' @author Martin Maechler {from Manuel's original code}
+lmrob.control.neededOnly <- function(control) {
+    if(is.null(control)) return(control)
+    switch(sub("^(S|M-S).*", "\\1", control$method),
+	   S = {                       # remove all M-S specific control pars
+	       control$k.m_s <- NULL
+	       control$split.type <- NULL
+					# if large_n is not used, remove corresp control pars
+	       if (length(residuals) <= control$fast.s.large.n) {
+		   control$groups <- NULL
+		   control$n.group <- NULL
+	       }
+	   },
+	   `M-S` = {                # remove all fast S specific control pars
+	       control$refine.tol <- NULL
+	       control$groups <- NULL
+	       control$n.group <- NULL
+	       control$best.r.s <- NULL
+	       control$k.fast.s <- NULL
+	   }, { # else: do not keep parameters used by initial ests. only
+	       control$tuning.chi <- NULL
+	       control$bb <- NULL
+	       control$refine.tol <- NULL
+	       control$nResample <- NULL
+	       control$groups <- NULL
+	       control$n.group <- NULL
+	       control$best.r.s <- NULL
+	       control$k.fast.s <- NULL
+	       control$k.max <- NULL
+	       control$k.m_s <- NULL
+	       control$split.type <- NULL
+	       control$mts <- NULL
+	       control$subsampling <- NULL
+	   } )
+    if (!grepl("D", control$method)) control$numpoints <- NULL
+    if (control$method == 'SM') control$method <- 'MM'
+    control
+}
+
 lmrob.fit.MM <- function(x, y, control) ## deprecated
 {
     .Deprecated("lmrob.fit(*, control) with control$method = 'SM'")
@@ -82,46 +126,52 @@ lmrob.fit <- function(x, y, control, init=NULL) {
     if(!is.matrix(x)) x <- as.matrix(x)
     ## old notation: MM -> SM
     if (control$method == "MM") control$method <- "SM"
-    if (is.null(init)) {
+    ## Assumption:  if(is.null(init))  method = "S..."   else  method = "..."
+    ## ---------    where "..." consists of letters {"M", "D"}
+    est <- if (is.null(init)) {
         ## --- initial S estimator
-        if (substr(control$method,1,1) != 'S') {
-            warning("Initial estimator '", substr(control$method,1,1), "' not supported",
-                    " using S-estimator instead")
+        if ((M1 <- substr(control$method,1,1)) != 'S') {
+	    warning(gettextf("Initial estimator '%s' not supported; using S-estimator instead",
+			     M1), domain = NA)
             substr(control$method,1,1) <- 'S'
         }
         init <- lmrob.S(x,y,control=control)
-        est <- 'S'
+        'S'
     } else {
+	stopifnot(is.list(init))
         if (is.null(init$converged)) init$converged <- TRUE
-        if (is.null(init$control)) {
-            init$control <- control
-            init$control$method <- ''
-        }
-        est <- init$control$method
+	if (is.null(init$control)) {
+	    init$control <- control
+	    M <- init$control$method <- 'l'
+	} else if(!length(M <- init$control$method) || !nzchar(M))
+	    M <- "l"
+	M
     }
     stopifnot(is.numeric(init$coef), length(init$coef) == ncol(x),
               is.numeric(init$scale), init$scale >= 0)
     if (est != 'S' && control$cov == '.vcov.avar1') {
-        warning("Can only use .vcov.avar1 for S as initial estimator",
-                " using .vcov.w instead")
+        warning(
+	".vcov.avar1 can only be used when initial estimator is S; using .vcov.w instead")
         control$cov <- ".vcov.w"
     }
     if (init$converged) {
-        ## --- loop through the other estimators
-        method <- sub(est, '', control$method)
+        ## --- loop through the other estimators; build up 'est' string
+        method <- sub(paste0("^", est), '', control$method)
         for (step in strsplit(method,'')[[1]]) {
             ## now we have either M or D steps
-            est <- paste(est, step, sep = '')
+            est <- paste0(est, step)
             init <- switch(step,
                            ## D(AS)-Step
                            D = lmrob..D..fit(init, x),
                            ## M-Step
                            M = lmrob..M..fit(x = x, y = y, obj=init),
-                           stop('only M and D are steps supported'))
+                           stop('only M and D are steps supported after "init" computation'))
             ## break if an estimator did not converge
             if (!init$converged) {
-                warning(step, "-step did NOT converge. Returning unconverged ", est,
-                        "-estimate.")
+		warning(gettextf(
+		    "%s-step did NOT converge. Returning unconverged %s-estimate",
+		    step, est),
+			domain = NA)
                 break
             }
         }
@@ -129,27 +179,27 @@ lmrob.fit <- function(x, y, control, init=NULL) {
     ## << FIXME? qr(.)  should be available from earlier
     if (is.null(init$qr)) init$qr <- qr(x * sqrt(init$rweights))
     if (is.null(init$rank)) init$rank <- init$qr$rank
+    control$method <- est ## ~= original 'method', but only with the steps executed.
+    init$control <- control
 
     ## --- covariance estimate
-    if (init$scale == 0) { ## exact fit
-        init$cov <- matrix(0, ncol(x), ncol(x),
-                           dimnames=list(colnames(x), colnames(x)))
-    } else if (!init$converged || is.null(x)) {
-        init$cov <- NA
-    } else {
-        control$method <- est
-        init$control <- control
-        init$cov <-
-            if (is.null(control$cov) || control$cov == "none") NA
-            else {
-                lf.cov <- if (!is.function(control$cov))
-                    get(control$cov, mode='function') else control$cov
-                lf.cov(init, x)
-            }
-    }
+    init$cov <-
+	if (init$scale == 0) { ## exact fit
+	    matrix(0, ncol(x), ncol(x),
+		   dimnames=list(colnames(x), colnames(x)))
+	} else if (!init$converged || is.null(x)) {
+	    NA
+	} else {
+	    if (is.null(control$cov) || control$cov == "none")
+		NA
+	    else {
+		lf.cov <- if (!is.function(control$cov))
+		    get(control$cov, mode='function') else control$cov
+		lf.cov(init, x)
+	    }
+	}
     df <- NROW(y) - init$rank ## sum(init$r?weights)-init$rank
     init$degree.freedom <- init$df.residual <- df
-
     init
 }
 
@@ -248,8 +298,8 @@ globalVariables("r", add=TRUE) ## below and in other lmrob.E() expressions
             else if (!is.null(obj$init$tau)) obj$init$tau
             else stop("(tau / hybrid): tau not found in 'obj'") } else rep(1,n)
 	rstand <- rstand / tau
-        r.psi   <- lmrob.psifun(rstand, c.psi, psi)
-        r.psipr <- lmrob.psifun(rstand, c.psi, psi, deriv = 1)
+        r.psi   <- Mpsi(rstand, c.psi, psi)
+        r.psipr <- Mpsi(rstand, c.psi, psi, deriv = 1)
         if (any(is.na(r.psipr))) warning(":.vcov.w: Caution. Some psiprime are NA")
         mpp2 <- (mpp <- mean(r.psipr, na.rm=TRUE))^2
         ## Huber's correction
@@ -319,8 +369,8 @@ globalVariables("r", add=TRUE) ## below and in other lmrob.E() expressions
     p <- ncol(x)
     r.s	 <- r / scale # final   scaled residuals
     r0.s <- r0 / scale # initial scaled residuals
-    w  <- lmrob.psifun(r.s, cc = c.psi, psi = psi, deriv = 1)
-    w0 <- lmrob.chifun(r0.s, cc = c.chi, psi = chi, deriv = 1)
+    w  <- Mpsi(r.s, cc = c.psi, psi = psi, deriv = 1)
+    w0 <- Mchi(r0.s, cc = c.chi, psi = chi, deriv = 1)
     ## FIXME for multivariate y :
     x.wx <- crossprod(x, x * w)
     if(inherits(A <- tryCatch(solve(x.wx) * scale,
@@ -331,10 +381,10 @@ globalVariables("r", add=TRUE) ## below and in other lmrob.E() expressions
 	    stop("X'WX is singular. Rather use cov = \".vcov.w\"")
     }
     a <- A %*% (crossprod(x, w * r.s) / mean(w0 * r0.s))
-    w <- lmrob.psifun( r.s, cc = c.psi, psi = psi)
+    w <- Mpsi( r.s, cc = c.psi, psi = psi)
 
     ## 3) now the standard part  (w, x, r0.s,  n, A,a, c.chi, bb)
-    w0 <- lmrob.chifun(r0.s, cc = c.chi, psi = chi)
+    w0 <- Mchi(r0.s, cc = c.chi, psi = chi)
     Xww <- crossprod(x, w*w0)
     u1 <- A %*% crossprod(x, x * w^2) %*% (n * A)
     u2 <- a %*% crossprod(Xww, A)
@@ -377,7 +427,7 @@ globalVariables("r", add=TRUE) ## below and in other lmrob.E() expressions
 		   ## rescale to the original diagonal values
 		   ## D <- sqrt(o.diag/diag(ret))
 		   ## where they are >= 0 :
-		   D <- sqrt(pmax(0, o.diag)/diag(ret))
+		   D <- sqrt(pmax.int(0, o.diag)/diag(ret))
 		   ret[] <- D * ret * rep(D, each = p) ## == diag(D) %*% m %*% diag(D)
 	       },
 	       stop("invalid 'posdef.meth': ", posdef.meth))
@@ -391,7 +441,7 @@ lmrob..M..fit <- function (x=obj$x, y=obj$y, beta.initial=obj$coef,
                            scale=obj$scale, control=obj$control, obj)
 {
     c.psi <- lmrob.conv.cc(control$psi, control$tuning.psi)
-    ipsi <- lmrob.psi2ipsi(control$psi)
+    ipsi <- .psi2ipsi(control$psi)
     stopifnot(is.matrix(x))
     n <- nrow(x)
     p <- ncol(x)
@@ -418,7 +468,7 @@ lmrob..M..fit <- function (x=obj$x, y=obj$y, beta.initial=obj$coef,
               converged = logical(1),
               trace.lev = as.integer(control$trace.lev),
               mts = as.integer(control$mts),
-              ss = .convSs(control$subsampling)
+              ss =  .convSs(control$subsampling)
               )[c("coefficients",  "scale", "residuals", "loss", "converged", "iter")]
     ## FIXME?: Should rather warn *here* in case of non-convergence
     names(ret$coefficients) <- colnames(x)
@@ -427,7 +477,7 @@ lmrob..M..fit <- function (x=obj$x, y=obj$y, beta.initial=obj$coef,
     ret$fitted.values <- drop(x %*% ret$coefficients)
     if (!grepl('M$', control$method)) {
         ## update control$method if it's not there already
-        control$method <- paste(control$method, 'M', sep = '')
+        control$method <- paste0(control$method, 'M')
     }
     ret$control <- control
     if (!missing(obj)) {
@@ -439,17 +489,16 @@ lmrob..M..fit <- function (x=obj$x, y=obj$y, beta.initial=obj$coef,
             ret$init.S <- obj
         } else {
             ret$init <-
-                obj[names(obj)[na.omit(match(c("coefficients","scale", "residuals",
-                                               "loss", "converged", "iter", "rweights",
-                                               "fitted.values", "control", "init.S", "init",
-                                               "kappa", "tau"),
-                                             names(obj)))]]
+                obj[names(obj)[na.omit(match(
+                    c("coefficients","scale", "residuals", "loss", "converged",
+                      "iter", "rweights", "fitted.values", "control",
+                      "init.S", "init", "kappa", "tau"), names(obj)))]]
             class(ret$init) <- 'lmrob'
             ret <- c(ret,
-                     obj[names(obj)[na.omit(match(c("df.residual", "degree.freedom",
-                                                    "xlevels", "terms", "model", "x", "y",
-                                                    "na.action", "contrasts", "MD"),
-                                                  names(obj)))]])
+                     obj[names(obj)[na.omit(match(
+                         c("df.residual", "degree.freedom",
+                           "xlevels", "terms", "model", "x", "y",
+                           "na.action", "contrasts", "MD"), names(obj)))]])
         }
         ret$qr <- qr(x * sqrt(ret$rweights))
         ret$rank <- ret$qr$rank
@@ -511,7 +560,7 @@ lmrob.S <- function (x, y, control, trace.lev = control$trace.lev, mf = NULL)
             scale = double(1),
             coefficients = double(p),
             as.double(c.chi),
-            as.integer(lmrob.psi2ipsi(control$psi)),
+            .psi2ipsi(control$psi),
             bb,
             best_r = best.r,
             groups = groups,
@@ -530,7 +579,9 @@ lmrob.S <- function (x, y, control, trace.lev = control$trace.lev, mf = NULL)
             )[c("coefficients", "scale", "k.iter", "converged")]
     scale <- b$scale
     if (scale < 0)
-        stop("C function R_lmrob_S() exited prematurely")
+	stop("C function R_lmrob_S() exited prematurely")
+    if (scale == 0)
+	warning("S-estimated scale == 0:  Probably exact fit; check your data")
     class(b) <- 'lmrob.S'
     ## FIXME: get 'res'iduals from C
 
@@ -565,10 +616,9 @@ lmrob..D..fit <- function(obj, x=obj$x, control = obj$control)
                            control$tuning.chi else control$tuning.psi)
     if (!is.numeric(c.psi)) stop('lmrob..D..fit: parameter tuning.psi is not numeric')
 
-    obj$init <- obj[names(obj)[na.omit(match(c("coefficients","scale", "residuals",
-                                               "loss", "converged", "iter", "rweights",
-                                               "fitted.values", "control", "init.S", "init"),
-                                             names(obj)))]]
+    obj$init <- obj[names(obj)[na.omit(match(
+        c("coefficients","scale", "residuals", "loss", "converged", "iter",
+	  "rweights", "fitted.values", "control", "init.S", "init"), names(obj)))]]
     obj$init.S <- NULL
 
     if (is.null(obj$kappa))
@@ -587,7 +637,7 @@ lmrob..D..fit <- function(obj, x=obj$x, control = obj$control)
               length = as.integer(length(r)),
               scale = as.double(scale.1),
               c = as.double(c.psi),
-              ipsi = lmrob.psi2ipsi(psi),
+              ipsi = .psi2ipsi(psi),
               type = 3L, ## dt1 as only remaining option
               rel.tol = as.double(control$rel.tol),
               k.max = as.integer(control$k.max),
@@ -599,7 +649,7 @@ lmrob..D..fit <- function(obj, x=obj$x, control = obj$control)
         ## append "D"  to control$method if it's not there already
         method <- control$method
         if (method == 'MM') method <- 'SM'
-        control$method <- paste(method, 'D', sep = '')
+        control$method <- paste0(method, 'D')
     }
     ## update call
     if (!is.null(obj$call)) obj$call$method <- control$method
@@ -679,11 +729,10 @@ lmrob.tau <- function(obj, x=obj$x, control = obj$control, h, fast = TRUE)
         if (!is.na(tfact))
             return(sqrt(1 - tfact*h) * (tcorr*h + 1))
     }
+    ## else "non-fast" -- need to compute the integrals :
 
     ## kappa
-    if (is.null(obj$kappa))
-        obj$kappa <- lmrob.kappa(obj, control)
-    kappa <- obj$kappa
+    kappa <- if(is.null(obj$kappa)) lmrob.kappa(obj, control) else obj$kappa
     ## local variables
     n <- length(h)
     ## set psi and c.psi
@@ -694,12 +743,12 @@ lmrob.tau <- function(obj, x=obj$x, control = obj$control, h, fast = TRUE)
     if (!is.numeric(c.psi)) stop('parameter tuning.psi is not numeric')
 
     ## constant for stderr of u_{-i} part and other constants
-    inta <- function(r) lmrob.psifun(r, c.psi, psi)^2 * dnorm(r)
-    intb <- function(r) lmrob.psifun(r, c.psi, psi, deriv = 1) * dnorm(r)
-    intc <- function(r) lmrob.psifun(r, c.psi, psi) * r * dnorm(r) ## changed from psi/e to psi*e
-    ta <- (integrate(inta, -Inf,Inf))$value
-    tb <- (integrate(intb, -Inf,Inf))$value
-    tE <- (integrate(intc, -Inf,Inf))$value
+    inta <- function(r) Mpsi(r, c.psi, psi)^2 * dnorm(r)
+    intb <- function(r) Mpsi(r, c.psi, psi, deriv = 1) * dnorm(r)
+    intc <- function(r) Mpsi(r, c.psi, psi) * r * dnorm(r) ## changed from psi/e to psi*e
+    ta <- integrate(inta, -Inf,Inf)$value
+    tb <- integrate(intb, -Inf,Inf)$value
+    tE <- integrate(intc, -Inf,Inf)$value
 
     ## calculate tau for unique h
     hu <- unique(h)
@@ -720,9 +769,9 @@ lmrob.tau <- function(obj, x=obj$x, control = obj$control, h, fast = TRUE)
         tc2 <- hu[i]/tb
         ## function to be integrated
         fun <- function(w, v, sigma.i) {
-            t <- (v-tc2*lmrob.psifun(v,c.psi,psi)+w*s)/sigma.i
-            (lmrob.psifun(t,c.psi,psi)*t - kappa*lmrob.psifun(t, c.psi, psi)/t)*
-                dnorm(v)*dnorm(w)
+            t <- (v-tc2*Mpsi(v,c.psi,psi)+w*s)/sigma.i
+	    psi.t <- Mpsi(t, c.psi, psi)
+	    (psi.t*t - kappa*psi.t/t) * dnorm(v)*dnorm(w)
         }
         ## integrate over w
         wint <- function(v, sigma.i) {
@@ -767,16 +816,15 @@ lmrob.hatmatrix <- function(x, w = rep(1, NROW(x)), wqr = qr(sqrt(w) * x))
 lmrob.leverages <- function(x, w = rep(1, NROW(x)), wqr = qr(sqrt(w) * x))
 {
     if (missing(wqr) && !is.matrix(x)) x <- as.matrix(x)
-
-    ## we don't actually need the whole hat matrix!
-    ## diag(lmrob.hatmatrix(x, w, ...))
-    ## better:
+    ## Faster, than computing the whole hat matrix, and then diag(.) :
+    ## == diag(lmrob.hatmatrix(x, w, ...))
     rowSums(qr.Q(wqr)^2)
 }
 
-lmrob.psi2ipsi <- function(psi)
+.psi2ipsi <- function(psi)
 {
     switch(casefold(psi),
+           'huber' = 0L,
            'tukey' = , 'biweight' = , 'bisquare' = 1L,
            'welsh' = 2L,
            'optimal' = 3L,
@@ -813,7 +861,7 @@ lmrob.conv.cc <- function(psi, cc)
            },
            'lqq' = {
                ## Input: 4 parameters, (minimal slope, b, efficiency, breakdown point)
-               ## Output: k[1:3]
+               ## Output: k[1:3] = (b, c, s)
                if (isTRUE(all.equal(cc, c(-.5, 1.5, 0.95, NA))))
                    return(c(1.4734061, 0.9822707, 1.5))
                else if (isTRUE(all.equal(cc, c(-.5, 1.5, NA, 0.5))))
@@ -835,13 +883,22 @@ lmrob.conv.cc <- function(psi, cc)
 
     return(cc)
 }
-
-lmrob.ggw.mx <- function(a, b, c, ...) ## find x with minimal slope
-    optimize(lmrob.psifun, c(c, max(a+b+2*c, 0.5)),
-             cc=c(0, a, b, c, 1), psi = 'ggw', deriv = 1, ...)[[1]]
+##' @title For GGW's psi(), find x with minimal slope, and the min.slope
+##' @param a "scale" of GGW's psi
+##' @param b exponent of GGW's psi
+##' @param c "huber-cutoff" of GGW's psi
+##' @param ... further arguments passed to optimize()
+##' @return the return value of optimize():  list(minimum, objective)
+##' @author Manuel Kohler and Martin Maechler
+lmrob.ggw.mxs <- function(a, b, c, ...) {
+    ipsi <- .psi2ipsi('ggw')
+    ccc <- c(0, a, b, c, 1) ## == lmrob.conv.cc('ggw', cc=c(0, a, b, c, 1))
+    optimize(.Mpsi, c(c, max(a+b+2*c, 0.5)), ccc=ccc, ipsi=ipsi,
+	     deriv = 1, ...)
+}
 
 lmrob.ggw.ms <- function(a, b, c, ...) ## find minimal slope
-    lmrob.psifun(lmrob.ggw.mx(a, b, c, ...), c(0, a, b, c, 1), 'ggw', 1)
+    lmrob.ggw.mxs(a, b, c, ...)[["objective"]]
 
 lmrob.ggw.finda <- function(ms, b, c, ...) ## find a constant
 {
@@ -853,13 +910,19 @@ lmrob.ggw.finda <- function(ms, b, c, ...) ## find a constant
 
 lmrob.ggw.ac <- function(a, b, c) ## calculate asymptotic efficiency
 {
-    lmrob.E(lmrob.psifun(r, c(0, a, b, c, 1), 'ggw', 1), use.integrate = TRUE)^2 /
-    lmrob.E(lmrob.psifun(r, c(0, a, b, c, 1), 'ggw')^2, use.integrate = TRUE)
+    ipsi <- .psi2ipsi('ggw')
+    abc <- c(0, a, b, c)
+    ccc <- c(abc, 1)
+    lmrob.E(.Mpsi(r, ccc, ipsi, deriv=1), use.integrate = TRUE)^2 /
+    lmrob.E(.Mpsi(r, ccc, ipsi) ^2,       use.integrate = TRUE)
 }
 
-lmrob.ggw.bp <- function(a, b, c) { ## calculate kappa
-    nc <- integrate(function(x) lmrob.psifun(x, c(0, a, b, c, 1), 'ggw'), 0, Inf)$value
-    lmrob.E(lmrob.chifun(r, c(0, a, b, c, nc), 'ggw'), use.integrate = TRUE)
+lmrob.ggw.bp <- function(a, b, c, ...) { ## calculate kappa
+    ipsi <- .psi2ipsi('ggw')
+    abc <- c(0, a, b, c)
+    ccc <- c(abc, 1)
+    ccc[[5]] <- nc <- integrate(.Mpsi, 0, Inf, ccc=ccc, ipsi=ipsi, ...)$value
+    lmrob.E(.Mchi(r, ccc, ipsi), use.integrate = TRUE)
 }
 
 lmrob.ggw.findc <- function(ms, b, eff = NA, bp = NA) {
@@ -879,17 +942,25 @@ lmrob.ggw.findc <- function(ms, b, eff = NA, bp = NA) {
     }
 
     a <- lmrob.ggw.finda(ms, b, c)
-    nc <- integrate(function(x) lmrob.psifun(x, c(0, a, b, c, 1), 'ggw'), 0, Inf)$value
-    return(c(0, a, b, c, nc))
+    ipsi <- .psi2ipsi('ggw')
+    ccc <- c(0, a, b, c, 1)
+    nc <- integrate(.Mpsi, 0, Inf, ccc=ccc, ipsi=ipsi)$value
+    ## return
+    c(0, a, b, c, nc)
 }
 
 lmrob.efficiency <-  function(psi, cc, ...) {
-  integrate(function(x) lmrob.psifun(x, cc, psi, 1)*dnorm(x), -Inf, Inf, ...)$value^2 /
-  integrate(function(x) lmrob.psifun(x, cc, psi)^2 *dnorm(x), -Inf, Inf, ...)$value
+    ipsi <- .psi2ipsi(psi)
+    ccc <- lmrob.conv.cc(psi, cc=cc)
+
+    integrate(function(x) .Mpsi(x, ccc=ccc, ipsi=ipsi, deriv=1)*dnorm(x),
+	      -Inf, Inf, ...)$value^2 /
+    integrate(function(x) .Mpsi(x, ccc=ccc, ipsi=ipsi)^2 *dnorm(x),
+	      -Inf, Inf, ...)$value
 }
 
 lmrob.bp <- function(psi, cc, ...)
-  integrate(function(x) lmrob.chifun(x, cc, psi)*dnorm(x), -Inf, Inf, ...)$value
+  integrate(function(x) Mchi(x, cc, psi)*dnorm(x), -Inf, Inf, ...)$value
 
 ##' @title Find tuning constant for  "lqq"  psi function
 ##' @param cc numeric vector =  c(min_slope, b, eff, bp);
@@ -941,7 +1012,8 @@ lmrob.const <- function(cc, psi)
                      isTRUE(all.equal(cc, c(-.5, 1.5, 0.95, NA))) ||
                      isTRUE(all.equal(cc, c(-.5, 1.5, 0.85, NA))) ||
                      isTRUE(all.equal(cc, c(-.5, 1.5, NA, 0.5))))) {
-                   attr(cc, 'constants') <- lmrob.ggw.findc(cc[1],cc[2],cc[3],cc[4])
+		   attr(cc, 'constants') <-
+			lmrob.ggw.findc(ms=cc[1], b=cc[2], eff=cc[3], bp=cc[4])
                }
            },
            "lqq" = { ## only calculate for non-standard coefficients
@@ -954,49 +1026,43 @@ lmrob.const <- function(cc, psi)
     cc
 }
 
-lmrob.psifun <- function(x, cc, psi, deriv=0)
-{
-    ## apply to non-NAs only
-    if(any(idx <- !is.na(x))) {
-	cc <- lmrob.conv.cc(psi, cc)
-	x[idx] <- .C(R_psifun, x = as.double(x[idx]), cc = as.double(cc),
-		     ipsi = as.integer(lmrob.psi2ipsi(psi)), NAOK= TRUE, # for +- Inf
-		     deriv = as.integer(deriv), length = as.integer(length(x[idx])))$x
-    }
-    x
+Mpsi <- function(x, cc, psi, deriv=0)
+    .Call(R_psifun, x, lmrob.conv.cc(psi, cc), .psi2ipsi(psi), deriv)
+.Mpsi <- function(x, ccc, ipsi, deriv=0) .Call(R_psifun, x, ccc, ipsi, deriv)
+
+Mchi <- function(x, cc, psi, deriv=0)
+    .Call(R_chifun, x, lmrob.conv.cc(psi, cc), .psi2ipsi(psi), deriv)
+.Mchi <- function(x, ccc, ipsi, deriv=0) .Call(R_chifun, x, ccc, ipsi, deriv)
+
+Mwgt <- function(x, cc, psi)
+    .Call(R_wgtfun, x, lmrob.conv.cc(psi, cc), .psi2ipsi(psi))
+.Mwgt <- function(x, ccc, ipsi) .Call(R_wgtfun, x, ccc, ipsi)
+
+## only for nlrob() -- and to use instead of MASS:::psi.huber etc:
+.M.w.psi1 <- function(psi, cc) { ## returns a *function* a la  psi.huber()
+    ipsi <- .psi2ipsi(psi)
+    ccc <- lmrob.conv.cc(psi, cc)
+    ## return function *closure* :
+    function(x, deriv = 0)
+    if(deriv) .Mpsi(x, ccc, ipsi, deriv=deriv) else .Mwgt(x, ccc, ipsi)
 }
 
-lmrob.chifun <- function(x, cc, psi, deriv=0)
-{
-    ## apply to non-NAs only
-    if(any(idx <- !is.na(x))) {
-	cc <- lmrob.conv.cc(psi, cc)
-	x[idx] <- .C(R_chifun, x = as.double(x[idx]), cc = as.double(cc),
-		     ipsi = as.integer(lmrob.psi2ipsi(psi)), NAOK= TRUE, # for +- Inf
-		     deriv = as.integer(deriv), length = as.integer(length(x[idx])))$x
-    }
-    x
+##' The normalizing constant for  rho(.) <--> rho~(.)
+MrhoInf <- function(cc, psi) {
+    cc <- lmrob.conv.cc(psi, cc)
+    .Call(R_rho_inf, cc, .psi2ipsi(psi))
 }
+.MrhoInf <- function(ccc, ipsi) .Call(R_rho_inf, ccc, ipsi)
 
-lmrob.wgtfun <- function(x, cc, psi)
-{
-    ## apply to non-NAs only
-    if(any(idx <- !is.na(x))) {
-	cc <- lmrob.conv.cc(psi, cc)
-	x[idx] <- .C(R_wgtfun, x = as.double(x[idx]), cc = as.double(cc),
-		     ipsi = as.integer(lmrob.psi2ipsi(psi)), NAOK= TRUE, # for +- Inf
-		     length = as.integer(length(x[idx])))$x
-    }
-    x
-}
 
 lmrob.rweights <- function(resid, scale, cc, psi) {
     if (scale == 0) { ## exact fit
         return(as.numeric(abs(resid) < .Machine$double.eps))
     }
-    lmrob.wgtfun(resid / scale, cc, psi)
+    Mwgt(resid / scale, cc, psi)
 }
 
+## even simpler than residuals.default():
 residuals.lmrob.S <- function(obj) obj$residuals
 
 lmrob.E <- function(expr, control, dfun = dnorm, use.integrate = FALSE, obj, ...)
@@ -1013,9 +1079,9 @@ lmrob.E <- function(expr, control, dfun = dnorm, use.integrate = FALSE, obj, ...
 			  "tuning.chi" else "tuning.psi"]]
         if (!is.numeric(c.psi)) stop('tuning parameter (chi/psi) is not numeric')
 
-        list(psi = function(r, deriv = 0) lmrob.psifun(r, c.psi, psi, deriv),
-             chi = function(r, deriv = 0) lmrob.chifun(r, c.psi, psi, deriv), ## change?
-             wgt = function(r) lmrob.wgtfun(r, c.psi, psi)) ## change?
+        list(psi = function(r, deriv = 0) Mpsi(r, c.psi, psi, deriv),
+             chi = function(r, deriv = 0) Mchi(r, c.psi, psi, deriv), ## change?
+             wgt = function(r) Mwgt(r, c.psi, psi)) ## change?
 
       } else list()
 

@@ -157,3 +157,6 @@ stopifnot(all.equal(vcov(cm0), vcov(rm0), check.attr=FALSE),
           all.equal(vcov(cm2), vcov(rm2), check.attr=FALSE))
 
 ## Null fits (rank(X)==0) are tested in NAcoef.R
+
+## testing weight=0 bug
+lmrob(y ~ x3, data, weights=weights)

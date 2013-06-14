@@ -1,8 +1,9 @@
 glmrob <-
 function (formula, family, data, weights, subset,
-	  na.action, start = NULL, offset, method = "Mqle",
+	  na.action, start = NULL, offset,
+          method = c("Mqle", "BY", "WBY", "MT"),
 	  weights.on.x = c("none", "hat", "robCov", "covMcd"), control = NULL,
-	  model = TRUE, x = FALSE, y = TRUE, contrasts = NULL, trace = FALSE,
+	  model = TRUE, x = FALSE, y = TRUE, contrasts = NULL, trace.lev = 0,
 	  ...)
 {
     call <- match.call()
@@ -19,8 +20,6 @@ function (formula, family, data, weights, subset,
 	stop(gettextf("Robust GLM fitting not yet implemented for family %s",
 			  fami))
     }
-    if(is.null(control)) # -> use e.g., glmrobMqle.control()
-	control <- get(paste("glmrob", method, ".control", sep = ""))(...)
     if (missing(data))
 	data <- environment(formula)
     ##
@@ -31,7 +30,7 @@ function (formula, family, data, weights, subset,
     mf$drop.unused.levels <- TRUE
     mf[[1]] <- as.name("model.frame")
     mf <- eval(mf, parent.frame())
-    if(method == "model.frame") return(mf)
+    if(identical(method, "model.frame")) return(mf)
     mt <- attr(mf, "terms")
     Y <- model.response(mf, "any")# "numeric" or "factor"
     if (length(dim(Y)) == 1) {
@@ -49,6 +48,14 @@ function (formula, family, data, weights, subset,
     if (!is.null(offset) && length(offset) != NROW(Y))
 	stop(gettextf("Number of offsets is %d, should rather equal %d (number of observations)",
 		      length(offset), NROW(Y)))
+    method <- match.arg(method)
+    meth. <- if(method == "WBY") "BY" else method
+### FIXME: the whole 'control' should be changed to "copy"  lmrob() and lmrob.control()
+## ------- --> *one* exported glmrob.control() function with 'method' and switch() inside...
+## see >>> ./lmrob.MM.R
+
+    if(is.null(control)) # -> use e.g., glmrobMqle.control()
+	control <- get(paste0("glmrob", meth., ".control"))(...)
     weights.on.x <- match.arg(weights.on.x)
     if(!is.null(start) && !is.numeric(start)) {
 	## initialization methods
@@ -56,31 +63,43 @@ function (formula, family, data, weights, subset,
 	    stop("'start' must be a numeric vector, NULL, or a character string")
 	start <-
 	    switch(start,
-		   "lmrobMM" = {
+		   "lmrob" =, "lmrobMM" = {
 		       if(!is.null(weights))
 			   warnings("weights are not yet used in computing start estimate")
-		       lmrob.fit.MM(X, family$linkinv(Y),
-				    control=lmrob.control())$coefficients
+		       lmrob.fit(x = X, y = family$linkinv(Y),
+				 control=lmrob.control())$coefficients
 		   },
 		   stop("invalid 'start' string"))
     }
     fit <- switch(method,
-		  "cubif" = ## FIXME: not yet implemented !
-		  stop("glmrobCubif() has not yet been implemented")
-		  ## glmrobCubif(X = X, y = Y, weights = weights, start = start,
-		  ##		 offset = offset, family = family,
-		  ##		 weights.on.x = weights.on.x, control = control,
-		  ##		 intercept = attr(mt, "intercept") > 0,trace=trace)
+		  "cubif" = stop("For method 'cubif', use glmRob() from package 'robust'")
 		  ,
 		  "Mqle" = ## --> ./glmrobMqle.R
 		  glmrobMqle(X = X, y = Y, weights = weights, start = start,
 			     offset = offset, family = family,
 			     weights.on.x = weights.on.x, control = control,
-			     intercept = attr(mt, "intercept") > 0, trace=trace),
+			     intercept = attr(mt, "intercept") > 0, trace=trace.lev),
+                  "BY" =, "WBY" = {
+                      if(fami != "binomial")
+                          stop(gettextf(
+			"method='%s' is only applicable for binomial family, but family=\"\"",
+                              method, fami))
+                      ### FIXME: use glmrobBY(..) with these arguments, including 'weights'
+                      glmrobBY(X=X, y=Y, weights=weights, start=start,
+                               method=method, ## == "BY" / "WBY"
+                               weights.on.x = weights.on.x, control = control,
+                               intercept = attr(mt, "intercept") > 0,
+                               trace.lev=trace.lev)
+                  },
+                  "MT" = {
+                      glmrobMT(x=X,y=Y, weights=weights, start=start, offset = offset,
+			       family=family, weights.on.x=weights.on.x, control=control,
+                               intercept = attr(mt, "intercept") > 0, trace.lev=trace.lev)
+                  },
 		  stop("invalid 'method': ", method))
     ##-	    if (any(offset) && attr(mt, "intercept") > 0) {
     ##-		fit$null.deviance <- glm.fit(x = X[, "(Intercept)", drop = FALSE],
-    ##-		    y = Y, weights = weights, offset = offset, family = family,
+    ##-		    y = Y, weights = weights, offset = offset,
     ##-		    control = control, intercept = TRUE)$deviance
     ##-	    }
     fit$na.action <- attr(mf, "na.action")
@@ -115,7 +134,7 @@ summary.glmrob <- function(object, correlation=FALSE, symbolic.cor=FALSE, ...)
     zvalue <- coefs/s.err
     pvalue <- 2 * pnorm(-abs(zvalue))
     coef.table <- cbind("Estimate" = coefs, "Std. Error" = s.err,
-			"z-value" = zvalue, "Pr(>|z|)" = pvalue)
+			"z value" = zvalue, "Pr(>|z|)" = pvalue)
 
     ans <- c(object[c("call", "terms", "family", "iter", "control", "method",
 		      "residuals", "fitted.values", "w.r", "w.x")],
@@ -214,9 +233,20 @@ print.summary.glmrob <-
     }
 
     printControl(x$control, digits = digits)
-
     cat("\n")
     invisible(x)
+}
+
+weights.glmrob <- function(object, type = c("prior", "robustness"), ...) {
+    type <- match.arg(type)
+    w <- if (type == "prior") {
+	## Issue warning only if called from toplevel. Otherwise the warning pop
+	## up at quite unexpected places, e.g., case.names().
+	if (is.null(object[["weights"]]) && identical(parent.frame(), .GlobalEnv))
+	    warning("No weights defined for this object. Use type=\"robustness\" argument to get robustness weights.")
+	object[["weights"]]
+    } else object$w.r * object$w.x ## those also used summarizeRobWeights(x$w.r * x$w.x, ..)
+    if (is.null(object$na.action)) w else naresid(object$na.action, w)
 }
 
 ## Stems from a copy of residuals.glm() in
@@ -245,7 +275,7 @@ residuals.glmrob <-
     res <- switch(type,
 ##		  deviance = if(object$df.residual > 0) {
 		  deviance = if((nobs(object) - p) > 0) {
-		      d.res <- sqrt(pmax((object$family$dev.resids)(y, mu, wts), 0))
+		      d.res <- sqrt(pmax.int((object$family$dev.resids)(y, mu, wts), 0))
 		      ifelse(y > mu, d.res, -d.res)
 		  } else rep.int(0, length(mu)),
 		  pearson = (y-mu)*sqrt(wts)/sqrt(object$family$variance(mu)),

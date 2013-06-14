@@ -19,6 +19,9 @@
     }
   }
 }
+\seealso{
+  \code{\link{psiFunc}}
+}
 \examples{
 ## Hampel's psi and rho:
 H.38 <- chgDefaults(hampelPsi, k = c(1.5, 3.5, 8))

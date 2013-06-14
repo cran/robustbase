@@ -15,12 +15,25 @@
 ##  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 ##
 
+## "FIXME": If you would change this, you must "sync" with
+##          1) covMcd()'s         default in ./covMcd.R
+##          2) ltsReg.default()'s default in ./ltsReg.R
 rrcov.control <-
     function(alpha = 1/2, nsamp = 500, nmini = 300,
              seed = NULL, tolSolve = 1e-14,
-	     trace = FALSE, use.correction = TRUE, adjust = FALSE)
+	     trace = FALSE, wgtFUN = "01.original",
+             use.correction = identical(wgtFUN, "01.original"),
+             adjust = FALSE)
 {
-    list(alpha = alpha, nsamp = nsamp, nmini = nmini, seed = as.integer(seed),
-	 tolSolve = tolSolve,
-	 trace = trace, use.correction = use.correction, adjust = adjust)
+    list(alpha=alpha, nsamp=nsamp, nmini=nmini, seed = as.integer(seed),
+	 tolSolve=tolSolve, trace=trace, wgtFUN=wgtFUN,
+	 use.correction=use.correction, adjust=adjust)
+}
+
+## Only for back compatibility, as some new args did not exist pre 2013-04,
+## and callers of covMcd() may use a "too small"  'control' list:
+getDefCtrl <- function(nm) {
+    callerEnv <- parent.frame()
+    if(is.null(get(nm, envir = callerEnv)))
+	assign(nm, rrcov.control()[[nm]], envir=callerEnv)
 }

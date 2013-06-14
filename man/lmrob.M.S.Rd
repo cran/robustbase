@@ -9,11 +9,12 @@
 lmrob.M.S(x, y, control, mf, split)
 }
 \arguments{
-  \item{x}{ numeric matrix for the predictors }
-  \item{y}{ numeric vector for the response }
-  \item{control}{ list as returned by \code{\link{lmrob.control}} }
-  \item{mf}{ model.frame as returned by \code{\link{model.frame}} }
-  \item{split}{ (optional) list as returned by \code{\link{splitFrame}} }
+  \item{x}{numeric matrix (a \code{\link{model.matrix}}) of the
+    predictors.}
+  \item{y}{numeric vector for the response }
+  \item{control}{ list as returned by \code{\link{lmrob.control}}.}
+  \item{mf}{a model frame as returned by \code{\link{model.frame}}.}
+  \item{split}{(optional) list as returned by \code{\link{splitFrame}}.}
 }
 \details{
   This function is used by \code{\link{lmrob}} and not intended to be

@@ -1,3 +1,4 @@
+\newcommand{\CRANpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
 \name{covMcd}
 \alias{covMcd}
 \alias{print.mcd}
@@ -10,12 +11,16 @@
      Determinant) estimator.
 }
 \usage{
-covMcd(x, cor = FALSE, alpha = 1/2, nsamp = 500, nmini = 300, seed = NULL,
-       trace = FALSE, use.correction = TRUE, control = rrcov.control())
+covMcd(x, cor = FALSE, raw.only = FALSE,
+       alpha =, nsamp =, nmini =, seed =, tolSolve=, trace =,
+       use.correction =, wgtFUN =, control = rrcov.control())
 }
 \arguments{
   \item{x}{a matrix or data frame. }
   \item{cor}{should the returned result include a correlation matrix?
+    Default is \code{cor = FALSE}}.
+  \item{raw.only}{should only the \dQuote{raw} estimate be returned,
+    i.e., no weighted reweit the returned result include a correlation matrix?
     Default is \code{cor = FALSE}}.
   \item{alpha}{numeric parameter controlling the size of the subsets
     over which the determinant is minimized, i.e., \code{alpha*n}
@@ -33,11 +38,17 @@ covMcd(x, cor = FALSE, alpha = 1/2, nsamp = 500, nmini = 300, seed = NULL,
     \code{nmini}. %% FIXME? -- more accurately and in detail ?!
     The original algorithm had \code{nmini = 300} hard coded.}
   \item{seed}{initial seed for random generator, see \code{\link{rrcov.control}}.}
+  \item{tolSolve}{numeric tolerance to be used for inversion
+    (\code{\link{solve}}) of the covariance matrix in \code{\link{mahalanobis}}.}
   \item{trace}{logical (or integer) indicating if intermediate results
     should be printed; defaults to \code{FALSE}; values \eqn{\ge 2}{>= 2}
     also produce print from the internal (Fortran) code.}
   \item{use.correction}{ whether to use finite sample correction
     factors; defaults to \code{TRUE}.}
+  \item{wgtFUN}{a character string or \code{\link{function}}, specifying
+    how the weights for the reweighting step should be computed.
+    Up to April 2013, the only option has been the original proposal in
+    (1999), now specified by \code{wgtFUN = "01.original"} (or via \code{control}).}
   \item{control}{a list with estimation options - this includes those
     above provided in the function specification, see
     \code{\link{rrcov.control}} for the defaults.  If \code{control} is
@@ -55,27 +66,35 @@ covMcd(x, cor = FALSE, alpha = 1/2, nsamp = 500, nmini = 300, seed = NULL,
 
   The raw MCD estimate of location is then the average of these \eqn{h} points,
   whereas the raw MCD estimate of scatter is their covariance matrix,
-  multiplied by a consistency factor and a finite sample correction factor
-  (to make it consistent at the normal model and unbiased at small samples).
+  multiplied by a consistency factor and (if \code{use.correction} is
+  true) a finite sample correction factor, to make it consistent at the
+  normal model and unbiased at small samples.  Both rescaling factors
+  (consistency and finite sample) are returned in the length-2 vector
+  \code{raw.cnp2}.
 
   The implementation of \code{covMcd} uses the Fast MCD algorithm of
   Rousseeuw and Van Driessen (1999) to approximate the minimum
   covariance determinant estimator.
 
-  Both rescaling factors (consistency and finite sample) are returned
-  also in the vector \code{raw.cnp2} of length 2.  Based on these raw
-  MCD estimates, a reweighting step is performed which increases the
-  finite-sample eficiency considerably - see Pison et al. (2002).  The
-  rescaling factors for the reweighted estimates are returned in the
-  vector \code{cnp2} of length 2.  Details for the computation of the
-  finite sample correction factors can be found in Pison et al. (2002).
+  Based on these raw MCD estimates, (unless argument \code{raw.only} is
+  true), a reweighting step is performed, i.e., \code{V <- \link{cov.wt}(x,w)},
+  where \code{w} are weights determined by \dQuote{outlyingness} with
+  the respect to the scaled raw MCD.  Again, a consistency factor and
+  (if \code{use.correction} is true) a finite sample correction factor
+  are applied.
+  The reweighted covariance is typically considerably more efficient
+  than the raw one, see Pison et al. (2002).
 
-  The finite sample corrections can be suppressed by setting
-  \code{use.correction = FALSE}.
+  The two rescaling factors for the reweighted estimates are returned in
+  \code{cnp2}.  Details for the computation of the finite sample
+  correction factors can be found in Pison et al. (2002).
 }
 \author{Valentin Todorov \email{valentin.todorov@chello.at}, based on
   work written for S-plus by Peter Rousseeuw and Katrien van Driessen
   from University of Antwerp.% no E-mails for spam-protection
+
+  Visibility of (formerly internal) tuning parameters, notably
+  \code{wgtFUN()}: Martin Maechler
 }
 \value{
   An object of class \code{"mcd"} which is basically a
@@ -125,11 +144,14 @@ covMcd(x, cor = FALSE, alpha = 1/2, nsamp = 500, nmini = 300, seed = NULL,
 
   Pison, G., Van Aelst, S., and Willems, G. (2002),
   Small Sample Corrections for LTS and MCD,
-  \emph{Metrika}, \bold{55}, 111-123.
+  \emph{Metrika} \bold{55}, 111--123.% ~/save/papers/robust-diverse/Pison_VanAelst_Willems.pdf
 }
 \seealso{
-  \code{\link[MASS]{cov.mcd}} from package \pkg{MASS};
+  \code{\link[MASS]{cov.mcd}} from package \CRANpkg{MASS};
   \code{\link{covOGK}} as cheaper alternative for larger dimensions.
+
+  \code{\link[robustX]{BACON}} and \code{\link[robustX]{covNNC}},
+  from package \CRANpkg{robustX};
 }
 \examples{
 data(hbk)

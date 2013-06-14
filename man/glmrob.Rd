@@ -1,8 +1,7 @@
 \name{glmrob}
 \alias{glmrob}
-
 \title{Robust Fitting of Generalized Linear Models}
-
+\encoding{utf8}
 \description{
   \code{glmrob} is used to fit generalized linear models by robust
   methods.  The models are specified by giving a symbolic description of
@@ -13,9 +12,9 @@
 
 \usage{
 glmrob(formula, family, data, weights, subset, na.action,
-       start = NULL, offset, method = "Mqle",
+       start = NULL, offset, method = c("Mqle", "BY", "WBY", "MT"),
        weights.on.x = c("none", "hat", "robCov", "covMcd"), control = NULL,
-       model = TRUE, x = FALSE, y = TRUE, contrasts = NULL, trace = FALSE, ...)
+       model = TRUE, x = FALSE, y = TRUE, contrasts = NULL, trace.lev = 0, ...)
 }
 \arguments{
   \item{formula}{a \code{\link{formula}}, i.e., a symbolic description
@@ -43,14 +42,18 @@ glmrob(formula, family, data, weights, subset, na.action,
     the \code{na.action} setting in \code{\link{options}}. The
     \dQuote{factory-fresh} default is \code{\link{na.omit}}.}
 
-  \item{start}{starting values for the parameters in the linear predictor.}
+  \item{start}{starting values for the parameters in the linear
+    predictor.  Note that specifying \code{start} has somewhat different
+    meaning for the different \code{method}s.  Notably, for \code{"MT"},
+    this skips the expensive computation of initial estimates via sub
+    samples, but needs to be \emph{robust} itself.}
 
   \item{offset}{this can be used to specify an \emph{a priori}
     known component to be included in the linear predictor
     during fitting.}
 
-  \item{method}{a character string specifying the robust fitting method.
-    The details of method specification are given below. }
+  \item{method}{a character string specifying the robust fitting
+    method.  The details of method specification are given below.}
 
   \item{weights.on.x}{
     character string (can be abbreviated) specifying how points
@@ -77,13 +80,16 @@ glmrob(formula, family, data, weights, subset, na.action,
 
   \item{contrasts}{an optional list. See the \code{contrasts.arg}
     of \code{model.matrix.default}.}
-  \item{trace}{logical (or integer) indicating if intermediate results
-    should be printed; defaults to \code{FALSE}.}
+  \item{trace.lev}{logical (or integer) indicating if intermediate results
+    should be printed; defaults to \code{0} (the same as \code{FALSE}).}
   \item{\dots}{arguments passed to \code{\link{glmrobMqle.control}} when
     \code{control} is \code{NULL} (as per default).}
 }
 
 \details{
+  \code{method="model.frame"} returns the \code{\link{model.frame}()},
+  the same as \code{\link{glm}()}.
+  \cr
   \code{method="Mqle"} fits a generalized linear
   model using Mallows or Huber type robust estimators, as described in
   Cantoni and Ronchetti (2001) and Cantoni and Ronchetti (2006).  In
@@ -91,7 +97,15 @@ glmrob(formula, family, data, weights, subset, na.action,
   described in Cantoni (2004), the pure influence algorithm is
   implemented.
   \cr
-  Currently no other method is implemented.
+  \code{method="WBY"} and \code{method="BY"},
+  available for logistic regression (\code{family = binomial}) only, call
+  \code{\link{BYlogreg}(*, initwml= . )} for the (weighted) Bianco-Yohai
+  estimator, where \code{initwml} is true for \code{"WBY"}, and false
+  for \code{"BY"}.
+  \cr
+  \code{method="MT"}, currently only implemented for \code{family = poisson},
+  computes an \dQuote{[M]-Estimator based on [T]ransformation},
+  by Valdora and Yohai (2013).
 
   \code{weights.on.x= "robCov"} makes sense if all explanatory variables
   are continuous.
@@ -150,16 +164,16 @@ glmrob(formula, family, data, weights, subset, na.action,
 }
 
 \references{
-  E. Cantoni and E. Ronchetti (2001)
+  Eva Cantoni and Elvezio Ronchetti (2001)
   Robust Inference for Generalized Linear Models.
   \emph{JASA} \bold{96} (455), 1022--1030.
 
-  E. Cantoni (2004)
+  Eva Cantoni (2004)
   Analysis of Robust Quasi-deviances for Generalized Linear Models.
   \emph{Journal of Statistical Software}, \bold{10},
   \url{http://www.jstatsoft.org/v10/i04}
 
-  E. Cantoni and E. Ronchetti (2006)
+  Eva Cantoni and Elvezio Ronchetti (2006)
   A robust approach for skewed and heavy-tailed outcomes in the analysis
   of health care expenditures.
   \emph{Journal of Health Economics} \bold{25}, 198--213.
@@ -167,9 +181,12 @@ glmrob(formula, family, data, weights, subset, na.action,
   S. Heritier, E. Cantoni, S. Copt, M.-P. Victoria-Feser (2009)
   \emph{Robust Methods in Biostatistics}. Wiley Series in Probability
   and Statistics.
+
+  Marina Valdora and Víctor J. Yohai (2013)
+  Robust estimators for Generalized Linear Models.  In progress.
 }
 
-\author{Andreas Ruckstuhl}
+\author{Andreas Ruckstuhl ("Mqle") and Martin Maechler}
 %%\note{ }
 
 \seealso{
@@ -203,10 +220,13 @@ coef(Vfit1)
 
 Vfit2 <- glmrob(Y ~ log(Volume) + log(Rate), family=binomial, data=vaso,
                 method="Mqle", control = glmrobMqle.control(tcc=3.5))
-## Note the problems with  tcc <= 3 %% FIXME algorithm ???
 coef(Vfit2) # c = 3.5 ==> not much different from classical
+## Note the problems with  tcc <= 3 %% FIXME algorithm ???
 
-
+Vfit3 <- glmrob(Y ~ log(Volume) + log(Rate), family=binomial, data=vaso,
+                method= "BY")
+coef(Vfit3)## note that results differ much.
+## That's not unreasonable however, see Kuensch et al.(1989), p.465
 
 ## Poisson response --------------
 data(epilepsy)
@@ -230,6 +250,9 @@ Efit4 <- glmrob(Ysum ~ Age10 + Base4*Trt, family = poisson,
                 data = epilepsy, method= "Mqle", weights.on.x = "covMcd",
                 control = glmrobMqle.control(tcc=1.2, maxit=100))
 )
+
+##--> See  example(possumDiv)  for another  Poisson-regression
+
 
 ### -------- Gamma family -- data from example(glm) ---
 

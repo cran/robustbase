@@ -30,31 +30,23 @@ h.alpha.n <- function(alpha, n, p) {
     floor(2 * n2 - n + 2 * (n - n2) * alpha)
 }
 
+## MM: the way it's set up, *must* be kept in sync with rrcov.control()'s
+## defaults --> ./rrcov.control.R  :
 covMcd <- function(x,
            cor = FALSE,
-           alpha = 1/2,
-           nsamp = 500,
-           nmini = 300,
-           seed = NULL,
-           trace = FALSE,
-           use.correction = TRUE,
+	   raw.only = FALSE,
+           alpha = control$ alpha,
+           nsamp = control$ nsamp,
+           nmini = control$ nmini,
+           seed  = control$ seed,
+           tolSolve = control$ tolSolve, # had 1e-10 hardwired {now 1e-14 default}
+           trace = control$ trace,
+           use.correction = control$ use.correction,
+           wgtFUN = control$ wgtFUN,
            control = rrcov.control())
 {
+    logdet.Lrg <- 50
     ##   Analyze and validate the input parameters ...
-
-    ## if a control object was supplied, take the option parameters
-    ## from it, but if single parameters were passed (not defaults)
-    ## they will override the control object.
-    ## defCtrl <- rrcov.control()# default control
-    # 'control' specified
-    if(missing(alpha))  alpha <- control$alpha
-    if(missing(nsamp))  nsamp <- control$nsamp
-    if(missing(seed))    seed <- control$seed
-    if(missing(trace))  trace <- control$trace
-    if(missing(use.correction)) use.correction <- control$use.correction
-
-    tolSolve <- control$tolSolve # had 1e-10 hardwired {now defaults to 1e-14}
-
     if(length(seed) > 0) {
         if(exists(".Random.seed", envir=.GlobalEnv, inherits=FALSE))  {
             seed.keep <- get(".Random.seed", envir=.GlobalEnv, inherits=FALSE)
@@ -63,11 +55,14 @@ covMcd <- function(x,
         assign(".Random.seed", seed, envir=.GlobalEnv)
     }
 
+    ## For back compatibility, as some new args did not exist pre 2013-04,
+    ## and callers of covMcd() may use a "too small"  'control' list:
+    if(missing(wgtFUN)) getDefCtrl("wgtFUN")
+
     ##   vt::03.02.2006 - added options "best" and "exact" for nsamp
     ##   nsamp will be further analized in the wrapper .fastmcd()
     if(!missing(nsamp) && is.numeric(nsamp) && nsamp <= 0)
         stop("Invalid number of trials nsamp = ",nsamp, "!")
-
 
     if(is.data.frame(x))
         x <- data.matrix(x)
@@ -76,15 +71,12 @@ covMcd <- function(x,
                     dimnames = list(names(x), deparse(substitute(x))))
 
     ## drop all rows with missing values (!!) :
-    na.x <- !is.finite(x %*% rep(1, ncol(x)))
-    ok <- !na.x
+    ok <- is.finite(x %*% rep(1, ncol(x)))
     x <- x[ok, , drop = FALSE]
-    dx <- dim(x)
-    if(!length(dx))
+    if(!length(dx <- dim(x)))
         stop("All observations have missing values!")
+    n <- dx[1]; p <- dx[2]
     dimn <- dimnames(x)
-    n <- dx[1]
-    p <- dx[2]
     ## h(alpha) , the size of the subsamples
     h <- h.alpha.n(alpha, n, p)
     if(n <= p + 1) # ==> floor((n+p+1)/2) > n - 1  -- not Ok
@@ -105,23 +97,33 @@ covMcd <- function(x,
         stop("Sample size n  <  h(alpha; n,p) := size of \"good\" subsample")
     else if(alpha > 1) stop("alpha must be <= 1")
 
-    quantiel <- qchisq(0.975, p)
+    if(is.character(wgtFUN)) {
+	switch(wgtFUN,
+	       "01.original" = {
+		   cMah <- qchisq(0.975, p)
+		   wgtFUN <- function(d) as.numeric(d < cMah)
+	       },
+	       stop("unknown 'wgtFUN' specification: ", wgtFUN))
+    } else if(!is.function(wgtFUN))
+	stop("'wgtFUN' must be a function or a string specifying one")
+
+
     ## vt::03.02.2006 - raw.cnp2 and cnp2 are vectors of size 2 and  will
     ##   contain the correction factors (concistency and finite sample)
     ##   for the raw and reweighted estimates respectively. Set them
-    ##   initially to 1.  If use.correction is set to FALSE
-    ##   (default=TRUE), the finite sample correction factor will not
-    ##   be used (neither for the raw estimates nor for the reweighted)
+    ##   initially to 1.  If use.correction is false (not the default),
+    ##   the finite sample correction factor will not be used
+    ##   (neither for the raw estimates nor for the reweighted ones)
     raw.cnp2 <- cnp2 <- c(1,1)
 
     ans <- list(method = "Minimum Covariance Determinant Estimator.",
         call = match.call())
 
     if(alpha == 1) { ## alpha=1: Just compute the classical estimates --------
-        mcd <- cov.wt(x)$cov
+        mcd <- cov(x) #MM: was  cov.wt(x)$cov
         loc <- as.vector(colMeans(x))
         obj <- determinant(mcd, logarithm = TRUE)$modulus[1]
-        if ( -obj/p > 50 ) {
+        if ( -obj/p > logdet.Lrg ) {
             ans$cov <- mcd
             dimnames(ans$cov) <- list(dimn[[2]], dimn[[2]])
             if (cor)
@@ -131,30 +133,27 @@ covMcd <- function(x,
                 names(ans$center) <- dimn[[2]]
             ans$n.obs <- n
             ans$singularity <- list(kind = "classical")
-            if(trace) cat("classical estimate is singular\n")
-
             weights <- 1
         }
         else {
             mah <- mahalanobis(x, loc, mcd, tol = tolSolve)
             ## VT:: 01.09.2004 - bug in alpha=1
-            weights <- as.numeric(mah < quantiel) # 0/1
+            weights <- wgtFUN(mah) # 0/1
             sum.w <- sum(weights)
             ans <- c(ans, cov.wt(x, wt = weights, cor = cor))
-            ## ans$cov <- sum.w/(sum.w - 1) * ans$cov
-
+            ## cov.wt() -> list("cov", "center", "n.obs", ["wt", "cor"])
             ## Consistency factor for reweighted MCD
             if(sum.w != n) {
                 cnp2[1] <- MCDcons(p, sum.w/n)
                 ans$cov <- ans$cov * cnp2[1]
             }
-            if( - (determinant(ans$cov, logarithm = TRUE)$modulus[1] - 0)/p > 50) {
+            obj <- determinant(mcd, logarithm = TRUE)$modulus[1]
+            if( -obj/p > logdet.Lrg ) {
                 ans$singularity <- list(kind = "reweighted.MCD")
-                if(trace) cat("reweighted MCD is singular\n")
             }
             else {
                 mah <- mahalanobis(x, ans$center, ans$cov, tol = tolSolve)
-                weights <- as.numeric(mah < quantiel) # 0/1
+                weights <- wgtFUN(mah) # 0/1
             }
         }
 
@@ -171,7 +170,7 @@ covMcd <- function(x,
             paste(ans$method,
                   "\nThe minimum covariance determinant estimates based on",
                   n, "observations \nare equal to the classical estimates.")
-        ans$mcd.wt <- rep(NA, length(ok))
+        ans$mcd.wt <- rep.int(NA, length(ok))
         ans$mcd.wt[ok] <- weights
         if(length(dimn[[1]]))
             names(ans$mcd.wt) <- dimn[[1]]
@@ -219,22 +218,16 @@ covMcd <- function(x,
         } ## end { scale ~= 0 }
         else {
             ## Compute the weights for the raw MCD in case p=1
-            weights <- as.numeric(((x - center)/scale)^2 < quantiel) # 0/1
+            weights <- wgtFUN(((x - center)/scale)^2) # 0/1
             sum.w <- sum(weights)
-            ans <- c(ans, cov.wt(x, wt = weights, cor = cor))
-            ## ans$cov <- sum.w/(sum.w - 1) * ans$cov
+            ans <- c(ans, cov.wt(x, wt = weights, cor=cor))
 
-            ## Apply the correction factor for the reweighted cov
-            if(sum.w == n) {
-                cdelta.rew <- 1
-                correct.rew <- 1
-            }
-            else {
-                cdelta.rew  <- MCDcons(p, sum.w/n) ## VT::19.3.2007
-                correct.rew <- if(use.correction) MCDcnp2.rew(p, n, alpha) else 1.
-                cnp2 <- c(cdelta.rew, correct.rew)
-            }
-            ans$cov <- ans$cov * cdelta.rew * correct.rew
+	    if(sum.w != n) {
+		cdelta.rew <- MCDcons(p, sum.w/n) ## VT::19.3.2007
+		correct.rew <- if(use.correction) MCDcnp2.rew(p, n, alpha) else 1.
+		cnp2 <- c(cdelta.rew, correct.rew)
+		ans$cov <- ans$cov * cdelta.rew * correct.rew
+	    }
             ans$alpha <- alpha
             ans$quan <- h
             ans$raw.cov <- as.matrix(scale^2)
@@ -247,7 +240,7 @@ covMcd <- function(x,
                 sum(sort((x - as.double(mcd$initmean))^2, partial = h)[1:h])
             center <- ans$center
             scale <- as.vector(sqrt(ans$cov))
-            weights <- as.numeric(((x - center)/scale)^2 < quantiel)
+            weights <- wgtFUN(((x - center)/scale)^2)
         } ## end{ scale > 0 }
     } ## end p=1
 
@@ -258,39 +251,42 @@ covMcd <- function(x,
       mcd$initcovariance <- calpha * mcd$initcovariance * correct
       dim(mcd$initcovariance) <- c(p, p)
 
-      if(mcd$exactfit != 0) {
+      if(raw.only || mcd$exactfit != 0) {
         ## If not all observations are in general position, i.e. more than
         ## h observations lie on a hyperplane, the program still yields
         ## the MCD location and scatter matrix, the latter being singular
         ## (as it should be), as well as the equation of the hyperplane.
 
         dim(mcd$coeff) <- c(5, p)
-        ans$cov <- mcd$initcovariance
-        ans$center <- as.vector(mcd$initmean)
+        ans$cov <- ans$raw.cov <- mcd$initcovariance
+        ans$center <- ans$raw.center <- as.vector(mcd$initmean)
+
         if(!is.null(nms <- dimn[[2]])) {
             dimnames(ans$cov) <- list(nms, nms)
             names(ans$center) <- nms
         }
         ans$n.obs <- n
 
-  ## no longer relevant:
-  ##      if(mcd$exactfit == -1)
-  ##      stop("The program allows for at most ", mcd$kount, " observations.")
-  ##      if(mcd$exactfit == -2)
-  ##      stop("The program allows for at most ", mcd$kount, " variables.")
-        if(!(mcd$exactfit %in% c(1,2)))
-            stop("Unexpected 'exactfit' code ", mcd$exactfit, ". Please report!")
-        ## new (2007-01) and *instead* of older long 'method' extension;
-        ## the old message is stilled *printed* via singularityMessage()
-        ##
-        ## exactfit is now *passed* to result instead of coded into 'message':
-        ans$singularity <-
-            list(kind = "on.hyperplane", exactCode = mcd$exactfit,
-                 p = p, count = mcd$kount, coeff = mcd$coeff[1,])
+	if(raw.only) {
+	    ans$raw.only <- TRUE
+	} else {
+	    ## no longer relevant:
+	    ##      if(mcd$exactfit == -1)
+	    ##      stop("The program allows for at most ", mcd$kount, " observations.")
+	    ##      if(mcd$exactfit == -2)
+	    ##      stop("The program allows for at most ", mcd$kount, " variables.")
+	    if(!(mcd$exactfit %in% c(1,2)))
+		stop("Unexpected 'exactfit' code ", mcd$exactfit, ". Please report!")
+	    ## new (2007-01) and *instead* of older long 'method' extension;
+	    ## the old message is still *printed* via singularityMessage()
+	    ##
+	    ## exactfit is now *passed* to result instead of coded into 'message':
+	    ans$singularity <-
+		list(kind = "on.hyperplane", exactCode = mcd$exactfit,
+		     p = p, count = mcd$kount, coeff = mcd$coeff[1,])
+	}
         ans$alpha <- alpha
         ans$quan <- h
-        ans$raw.cov <- mcd$initcovariance
-        ans$raw.center <- as.vector(mcd$initmean)
         if(!is.null(nms <- dimn[[2]])) {
             names(ans$raw.center) <- nms
             dimnames(ans$raw.cov) <- list(nms,nms)
@@ -300,29 +296,24 @@ covMcd <- function(x,
 
       } ## end exact fit <==>  (mcd$exactfit != 0)
 
-      else { ## exactfit == 0 : have general position ------------------------
+      else { ## have general position (exactfit == 0) : ------------------------
 
-        ## FIXME: here we assume that mcd$initcovariance is not singular
-        ## ----- but it is for data(mortality, package = "riv") !
+        ## FIXME? here, we assume that mcd$initcovariance is not singular:
         mah <- mahalanobis(x, mcd$initmean, mcd$initcovariance, tol = tolSolve)
-        mcd$weights <- weights <- as.numeric(mah < quantiel)
+        weights <- wgtFUN(mah)
         sum.w <- sum(weights)
+        ans <- c(ans, cov.wt(x, wt = weights, cor=cor))
+        ## simple check for singularity, much cheaper than determinant() below:
+        sing.rewt <- any(apply(ans$cov == 0, 2, all))
 
         ## Compute and apply the consistency correction factor for
         ## the reweighted cov
-        if(sum.w == n) {
-            cdelta.rew <- 1
-            correct.rew <- 1
+        if(!sing.rewt && sum.w != n) {
+	    cdelta.rew <- MCDcons(p, sum.w/n) ## VT::19.3.2007
+	    correct.rew <- if(use.correction) MCDcnp2.rew(p, n, alpha) else 1.
+	    cnp2 <- c(cdelta.rew, correct.rew)
+	    ans$cov <- ans$cov * cdelta.rew * correct.rew
         }
-        else {
-            cdelta.rew <- MCDcons(p, sum.w/n) ## VT::19.3.2007
-            correct.rew <- if(use.correction) MCDcnp2.rew(p, n, alpha) else 1.
-            cnp2 <- c(cdelta.rew, correct.rew)
-        }
-
-        ans <- c(ans, cov.wt(x, wt = weights, cor))
-        ## ans$cov <- sum.w/(sum.w - 1) * ans$cov
-        ans$cov <- ans$cov * cdelta.rew * correct.rew
 
         ##vt:: add also the best found subsample to the result list
         ans$best <- sort(as.vector(mcd$best))
@@ -340,21 +331,21 @@ covMcd <- function(x,
         ans$raw.mah <- mahalanobis(x, ans$raw.center, ans$raw.cov, tol = tolSolve)
 
         ## Check if the reweighted scatter matrix is singular.
-        if( - (determinant(ans$cov, logarithm = TRUE)$modulus[1] - 0)/p > 50) {
-            ans$singularity <- list(kind = "reweighted.MCD")
-            if(trace) cat("The reweighted MCD scatter matrix is singular.\n")
+        if(sing.rewt ||  - (determinant(ans$cov, logarithm = TRUE)$modulus[1] - 0)/p > logdet.Lrg) {
+	    ans$singularity <- list(kind = paste0("reweighted.MCD",
+				    if(sing.rewt)"(zero col.)"))
             ans$mah <- ans$raw.mah
         }
         else {
             mah <- mahalanobis(x, ans$center, ans$cov, tol = tolSolve)
             ans$mah <- mah
-            weights <- as.numeric(mah < quantiel)
+            weights <- wgtFUN(mah)
         }
       } ## end{ not exact fit }
 
     } ## end{ p >= 2 }
 
-    ans$mcd.wt <- rep(NA, length(ok))
+    ans$mcd.wt <- rep.int(NA, length(ok))
     ans$mcd.wt[ok] <- weights
     if(length(dimn[[1]]))
         names(ans$mcd.wt) <- dimn[[1]]
@@ -369,12 +360,12 @@ covMcd <- function(x,
     ans$raw.cnp2 <- raw.cnp2
     ans$cnp2 <- cnp2
     class(ans) <- "mcd"
-    ## even when not 'trace': say if we have singularity!
+    ## warn if we have a singularity:
     if(is.list(ans$singularity))
-        cat(strwrap(singularityMsg(ans$singularity, ans$n.obs)), sep ="\n")
-
-    return(ans)
-}
+	warning(strwrap(singularityMsg(ans$singularity, ans$n.obs)))
+    ## return
+    ans
+} ## {covMcd}
 
 singularityMsg <- function(singList, n.obs)
 {
@@ -685,8 +676,8 @@ MCDcnp2.rew <- function(p, n, alpha)
              exactfit  = integer(1), # output indicator: 0: ok; 1: ..., 2: ..
              coeff     = matrix(double(5 * p), nrow = 5, ncol = p), ## plane
              kount     = integer(1),
-             adjustcov = double(p * p), ## << never used -- FIXME
-             integer(1), ## << 'seed' no longer used -- FIXME
+             adjustcov = double(p * p), ## used in ltsReg() !
+             ## integer(1), ## << 'seed' no longer used
              temp   = integer(n),
              index1 = integer(n),
              index2 = integer(n),

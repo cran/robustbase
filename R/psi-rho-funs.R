@@ -191,12 +191,8 @@ setMethod("chgDefaults", signature("psi_func"),
 setMethod("show", signature("psi_func"),
           function(object) cat(.sprintPsiFunc(object), "\n"))
 
-## ## As advised by "[Rd] Define S4 methods for 'plot'":
-## if (!isGeneric("plot"))
-##     setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
-
-## moved here from inst/xtraR/plot-psiFun.R
-plot.psiFun <- function(x, m.psi, psi, par, shortMain = FALSE,
+## moved here from inst/xtraR/plot-psiFun.R; called  plot.psiFun  originally
+matplotPsi <- function(x, m.psi, psi, par, main = "full",
 			col = c("black", "red3", "blue3", "dark green"),
 			leg.loc = "right", lty = 1, ...) {
     ## Original Author: Martin Maechler, Date: 13 Aug 2010, 10:17
@@ -211,12 +207,15 @@ plot.psiFun <- function(x, m.psi, psi, par, shortMain = FALSE,
     }
     fExprs <- fExprs[map]
     ## ... title
-    elist <- list(FF = if(shortMain) fExprs[[2]] else fExprs,
-		  PSI = psi, PPP = paste(formatC(par), collapse=","))
-    tit <- if(shortMain)
-	substitute(FF ~ "etc, with"  ~ psi*"-type" == PSI(PPP), elist)
-    else
-	substitute(FF ~~ ~~ " with "~~ psi*"-type" == PSI(PPP), elist)
+    if(is.character(main)) {
+	shortMain <- (main == "short")
+	elist <- list(FF = if(shortMain) fExprs[[2]] else fExprs,
+		      PSI = psi, PPP = paste(formatC(par), collapse=","))
+	tit <- if(shortMain)
+	    substitute(FF ~ "etc, with"  ~ psi*"-type" == PSI(PPP), elist)
+	else
+	    substitute(FF ~~ ~~ " with "~~ psi*"-type" == PSI(PPP), elist)
+    } else tit <- NULL
     ## plot
     matplot(x, m.psi, col=col, lty=lty, type="l", main = tit,
 	    ylab = quote(f(x)), xlab = quote(x), ...)
@@ -228,18 +227,26 @@ plot.psiFun <- function(x, m.psi, psi, par, shortMain = FALSE,
 
 setMethod("plot", signature(x = "psi_func"),
 	  function(x, y, which = c("rho", "psi", "Dpsi", "wgt", "Dwgt"),
-		   shortMain = FALSE,
+		   main = "full",
 		   col = c("black", "red3", "blue3", "dark green", "light green"),
 		   leg.loc = "right", ...) {
 	      ## x: psi_func object
 	      ## y: points to plot at (x-Axis in plot)
 	      which <- match.arg(which, several.ok = TRUE)
 	      if(missing(y)) y <- seq(-5, 10, length=1501)
+              ## For backcompatibility:
+              if(!is.null(sm <- list(...)$shortMain)) {
+                  if(!missing(main))
+                      stop("You cannot specify both 'main' and the deprecated 'shortMain'")
+                  warning("'shortMain' is deprecated and will get defunct.\n",
+                          "Use 'main = \"short\"' instead of 'shortMain = TRUE'")
+                  if(sm) main <- "short"
+              }
 	      tmp <- lapply(which, function(name) slot(x, name)(y))
 	      m.psi <- do.call(cbind, tmp)
 	      colnames(m.psi) <- which
-	      plot.psiFun(y, m.psi, x@name, unlist(formals(x@rho)[-1]),
-			  shortMain, col, leg.loc, ...)
+	      matplotPsi(y, m.psi, x@name, unlist(formals(x@rho)[-1]),
+                         main=main, col=col, leg.loc=leg.loc, ...)
 	  })
 
 ##-------- TODO: Rather right short  vignette with these formulae
@@ -278,10 +285,10 @@ if(FALSE) { ## Checking  PhiI() visually:
         curve(PhiI(x, j=j), -4, 10, col=cols[1], main = bquote(j == .(j)))
         if(j == j.max %/% 2)
             legend("right", c("PhiI()", "integrate(..)"),
-                   col=cols, lwd = c(1,3), bty="n")
+                   col=cols, lwd = c(1,3), lty = c(1,3), inset = 1/40)
         I <- sapply(tt, function(t)
                     integrate(function(u) u^j * dnorm(u), -Inf, t)$value)
-        lines(tt, I, col= cols[2], lwd=3)
+        lines(tt, I, col= cols[2], lwd=3, lty = 3)
     }
     par(oo$old.par)
 

@@ -1,8 +1,7 @@
 
-R version 2.15.2 (2012-10-26) -- "Trick or Treat"
-Copyright (C) 2012 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
-Platform: x86_64-w64-mingw32/x64 (64-bit)
+R version 3.0.1 (2013-05-16) -- "Good Sport"
+Copyright (C) 2013 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin10.8.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -76,7 +75,7 @@ Loading required package: robustbase
 
 Call:
 lmrob(formula = y ~ x1 * x2 + x3 + x4 + x5, data = data)
-
+ \--> method = "MM"
 Coefficients:
 (Intercept)          x1b          x1c          x2B          x2C           x3  
     0.43807      0.59683      0.03444      0.20121      0.17886     -0.13200  
@@ -87,7 +86,7 @@ Coefficients:
 
 Call:
 lmrob(formula = y ~ x1 * x2 + x3 + x4 + x5, data = data)
-
+ \--> method = "MM"
 Residuals:
      Min       1Q   Median       3Q      Max 
 -1.45843 -0.35555  0.02458  0.36512  1.02964 
@@ -121,8 +120,8 @@ tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
            200              0           1000              0           2000 
-          psi   subsampling        method           cov 
-   "bisquare" "nonsingular"          "MM" ".vcov.avar1" 
+          psi   subsampling           cov 
+   "bisquare" "nonsingular" ".vcov.avar1" 
 seed : int(0) 
 > confint(rm1)
                  2.5 %    97.5 %
@@ -375,7 +374,7 @@ attr(,"eigen")$vectors
 
 Call:
 lmrob(formula = y ~ x1 * x2 + x3 + x4 + x5, data = data, init = "M-S")
-
+ \--> method = "M-SM"
 Coefficients:
 (Intercept)          x1b          x1c          x2B          x2C           x3  
     0.43584      0.59961      0.03464      0.20054      0.18774     -0.13954  
@@ -384,12 +383,12 @@ Coefficients:
 
 Warning message:
 In lmrob.M.S(x, y, control, mf) :
-  Skipping design matrix equilibration (dgeequ): row 12 is exactly zero.
+   Skipping design matrix equilibration (DGEEQU): row 12 is exactly zero.
 > lmrob(y ~ x1*x2 + x3 + x4 + x5, data, init=lmrob.lar)
 
 Call:
 lmrob(formula = y ~ x1 * x2 + x3 + x4 + x5, data = data, init = lmrob.lar)
-
+ \--> method = "lM"
 Coefficients:
 (Intercept)          x1b          x1c          x2B          x2C           x3  
   0.5611306    0.4443386    0.0001844    0.5303030   -0.2517937    0.2365411  
@@ -403,7 +402,7 @@ Coefficients:
 
 Call:
 lmrob(formula = y ~ 1 + x1 + x2 + offset(os), data = data, weights = w)
-
+ \--> method = "MM"
 Coefficients:
 (Intercept)           x1           x2  
       3.641           NA           NA  
@@ -412,7 +411,7 @@ Coefficients:
 
 Call:
 lmrob(formula = y ~ 1 + x1 + x2 + offset(os), data = data, weights = w)
-
+ \--> method = "MM"
 Weighted Residuals:
      Min       1Q   Median       3Q      Max 
 -3.64119 -1.81100 -0.04729  2.00931  4.35881 
@@ -423,14 +422,13 @@ Coefficients: (2 not defined because of singularities)
 x1                NA         NA      NA       NA   
 x2                NA         NA      NA       NA   
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 3.244 
 Convergence in 8 IRWLS iterations
 
 Robustness weights: 
-     1      2      3      4      5      6      7      8      9     10 
-0.9089 0.8885 0.9700 0.9768 0.9982 0.9989 0.9920 0.9524 0.9518 0.8423 
+ [1] 0.9089 0.8885 0.9700 0.9768 0.9982 0.9989 0.9920 0.9524 0.9518 0.8423
 Algorithmic parameters: 
 tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
@@ -438,14 +436,14 @@ tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
            200              0           1000              0           2000 
-          psi   subsampling        method           cov 
-   "bisquare" "nonsingular"          "MM" ".vcov.avar1" 
+          psi   subsampling           cov 
+   "bisquare" "nonsingular" ".vcov.avar1" 
 seed : int(0) 
 > (m6 <- lmrob(y ~ 0+x1+x2+offset(os), data, weights=w))
 
 Call:
 lmrob(formula = y ~ 0 + x1 + x2 + offset(os), data = data, weights = w)
-
+ \--> method = "MM"
 Coefficients:
 x1  x2  
 NA  NA  
@@ -454,7 +452,7 @@ NA  NA
 
 Call:
 lmrob(formula = y ~ 0 + x1 + x2 + offset(os), data = data, weights = w)
-
+ \--> method = "MM"
 Weighted Residuals:
    Min     1Q Median     3Q    Max 
 -3.828 -1.371  1.086  3.543  6.000 
@@ -469,6 +467,14 @@ Convergence in 0 IRWLS iterations
 
 Robustness weights: 
  [1] NA NA NA NA NA NA NA NA NA NA
+Algorithmic parameters: 
+tuning.psi    rel.tol  solve.tol 
+ 4.6850610  0.0000001  0.0000001 
+        max.it    maxit.scale      trace.lev     compute.rd fast.s.large.n 
+            50            200              0              0           2000 
+          psi           cov 
+   "bisquare" ".vcov.avar1" 
+seed : int(0) 
 > 
 > sc5 <- summary(cm5 <- lm(y ~ 1+x1+x2+offset(os), data, weights=w))
 > sc6 <- summary(cm6 <- lm(y ~ 0+x1+x2+offset(os), data, weights=w))
@@ -482,4 +488,4 @@ Robustness weights:
 > 
 > proc.time()
    user  system elapsed 
-   0.56    0.06    0.60 
+  0.605   0.032   0.626 

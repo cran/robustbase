@@ -100,13 +100,30 @@ splitFrame <- function(mf, x = model.matrix(mt, mf),
 lmrob.M.S <- function(x, y, control, mf, split) {
     if (missing(split))
         split <- splitFrame(mf, x, control$split.type)
+    if (ncol(split$x1) == 0) {
+      warning("No categorical variables found in model. Reverting to S-estimator.")
+      return(lmrob.S(x, y, control))
+    }
+    if (ncol(split$x2) == 0) {
+        warning("No continuous variables found in model. Reverting to L1-estimator.")
+        return(lmrob.lar(x, y, control))
+    }
+    ## this is the same as in lmrob.S():
+    if (length(seed <- control$seed) > 0) {
+        if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
+            seed.keep <- get(".Random.seed", envir = .GlobalEnv,
+                             inherits = FALSE)
+            on.exit(assign(".Random.seed", seed.keep, envir = .GlobalEnv))
+        }
+        assign(".Random.seed", seed, envir = .GlobalEnv) ## why not set.seed(seed)
+    }
     x1 <- split$x1
     x2 <- split$x2
     storage.mode(x1) <- "double"
     storage.mode(x2) <- "double"
     storage.mode(y) <- "double"
     c.chi <- lmrob.conv.cc(control$psi, control$tuning.chi)
-
+    traceLev <- as.integer(control$trace.lev)
     z <- .C(R_lmrob_M_S,
 	    x1,
 	    x2,
@@ -121,21 +138,22 @@ lmrob.M.S <- function(x, y, control, mf, split) {
             b1=double(ncol(x1)),
             b2=double(ncol(x2)),
             tuning_chi=as.double(c.chi),
-	    ipsi = as.integer(lmrob.psi2ipsi(control$psi)),
+	    ipsi = .psi2ipsi(control$psi),
             bb=as.double(control$bb),
             K_m_s=as.integer(control$k.m_s),
             max_k=as.integer(control$k.max),
             rel_tol=as.double(control$rel.tol),
 	    inv_tol=as.double(control$solve.tol),
-            converged=logical(1),
-            trace_lev=as.integer(control$trace.lev),
+            converged = logical(1),
+            trace_lev = traceLev,
             orthogonalize=TRUE,
             subsample=TRUE,
             descent=TRUE,
             mts=as.integer(control$mts),
             ss=.convSs(control$subsampling)
-            )[c("b1","b2", "res","scale")]
+            )[c("b1","b2", "res","scale", "converged")]
 
+    conv <- z$converged
     ## coefficients
     idx <- split$x1.idx
     cf <- numeric(length(idx))
@@ -145,5 +163,6 @@ lmrob.M.S <- function(x, y, control, mf, split) {
     control$method <- 'M-S'
     list(coefficients = cf, scale = z$scale, residuals = z$res,
          rweights = lmrob.rweights(z$res, z$scale, control$tuning.chi, control$psi),
-         control = control)
+         ## ../src/lmrob.c : m_s_descent() notes that convergence is *not* guaranteed
+	 converged = TRUE, descent.conv = conv, control = control)
 }

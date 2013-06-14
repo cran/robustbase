@@ -49,9 +49,9 @@ i. <- -c(2, 15) # <- drop 'call' and 'iter' components
 stopifnot(all.equal(nlr2[i.], nlr2.[i.], tol = 2e-5),
           all.equal(nlr3[i.], nlr3.[i.], tol = 1e-4),
           ## The redescending psi() give some exact 0 weights :
-          identical(which(abs(nlr2$w.r) < 1e-9), c(1L, 10 :12)),
-          identical(which(abs(nlr3$w.r) < 1e-9), c(1L, 10L,12L))
-          )
+	  identical(which(abs(nlr2$rweights) < 1e-9), c(1L, 10 :12)),
+	  identical(which(abs(nlr3$rweights) < 1e-9), c(1L, 10L,12L))
+	  )
 
 psiFHa <- robustbase:::psi.hampel
 

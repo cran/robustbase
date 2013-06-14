@@ -87,26 +87,26 @@ ltsReg.formula <- function(formula, data, subset, weights, na.action,
     fit
 }
 
-ltsReg.default <-
-    function (x, y,
-	      intercept = TRUE,
-	      alpha = 1/2,
-	      nsamp = 500,
-	      adjust = FALSE,
-	      mcd = TRUE,
-	      qr.out = FALSE,
-	      yname = NULL,
-	      seed = NULL,
-          trace = FALSE,
-	      use.correction = TRUE,
-	      control,
-	      ...)
+ltsReg.default <- function (x, y, intercept = TRUE,
+        alpha = control$ alpha,
+        nsamp = control$ nsamp,
+	adjust = control$ adjust,
+	mcd = TRUE,
+	qr.out = FALSE,
+	yname = NULL,
+        seed  = control$ seed,
+        trace = control$ trace,
+	use.correction = control$ use.correction,
+        wgtFUN = control$ wgtFUN,
+	control = rrcov.control(),
+	...)
 {
     ##	 Analyze and validate the input parameters ...
 
     ## if a control object was supplied, take the option parameters from it,
     ## but if single parameters were passed (not defaults) they will override the
     ## control object.
+### MM: FIXME: this sucks ('control' may contain *some* but not all parts!):
     if(!missing(control)) {
 	defCtrl <- rrcov.control()	# default control
 	if(is.null(alpha) && control$alpha != defCtrl$alpha)
@@ -119,6 +119,9 @@ ltsReg.default <-
 	if(adjust == defCtrl$adjust)
 	    adjust <- control$adjust
     }
+    ## For back compatibility, as some new args did not exist pre 2013-04,
+    ## and callers of covMcd() may use a "too small"  'control' list:
+    if(missing(wgtFUN)) getDefCtrl("wgtFUN")
 
     if(length(seed) > 0) {
 	if(exists(".Random.seed", envir=.GlobalEnv, inherits=FALSE))  {
@@ -128,18 +131,25 @@ ltsReg.default <-
 	assign(".Random.seed", seed, envir=.GlobalEnv)
     }
 
-    if(alpha < 1/2)
-	stop("alpha is out of range!")
-    if(alpha > 1)
-	stop("alpha is greater than 1")
+    if(alpha < 1/2 || alpha > 1)
+	stop("alpha not inside [1/2, 1]")
 
-    quantiel <- qnorm(0.9875)
+    ## quantiel <- qnorm(0.9875)
+    if(is.character(wgtFUN)) {
+	switch(wgtFUN,
+	       "01.original" = {
+		   cW <- qnorm(0.9875)
+		   wgtFUN <- function(r) as.numeric(abs(r) <= cW)
+	       },
+	       stop("unknown 'wgtFUN' specification: ", wgtFUN))
+    } else if(!is.function(wgtFUN))
+	stop("'wgtFUN' must be a function or a string specifying one")
 
     ## vt::03.02.2006 - raw.cnp2 and cnp2 are vectors of size 2 and  will
     ##	 contain the correction factors (concistency and finite sample)
     ##	 for the raw and reweighted estimates respectively. Set them initially to 1.
     ##	 If use.correction is set to FALSE (default=TRUE), the finite sample correction
-    ##	 factor will bot be used (neither for the raw estimates nor for the reweighted)
+    ##	 factor will not be used (neither for the raw estimates nor for the reweighted)
     raw.cnp2 <- rep(1,2)
     cnp2 <- rep(1,2)
 
@@ -226,33 +236,30 @@ ltsReg.default <-
 	ans <- list(method = "Univariate location and scale estimation.",
 		    best = NULL, # xbest,
 		    coefficients = center,
-		    raw.coefficients = center,
 		    alpha = alpha,
 		    quan  = h,
-		    raw.resid = resid/scale)
-    ans$raw.weights <- rep(NA, length(na.y))
-	if(abs(scale) < 1e-07)
-    {
+		    raw.coefficients = center,
+		    raw.resid = resid/scale,
+		    raw.weights = rep.int(NA, length(na.y)))
+	if(abs(scale) < 1e-07) {
 	    ans$raw.weights[ok] <- weights <- as.numeric(abs(resid) < 1e-07)
 	    ans$scale <- ans$raw.scale <- 0
 	    ans$crit <- 0
+	    ans$method <- paste(ans$method,
+				"More than half of the data are equal!",sep="\n")
 	}
-	else
-    {
+	else {
 	    ans$raw.scale <- scale
-	    ans$raw.weights[ok] <- weights <- as.numeric(abs(resid/scale) <= quantiel)
+	    ans$raw.weights[ok] <- weights <- wgtFUN(resid/scale)
+            sum.w <- sum(weights)
 	    reweighting <- cov.wt(as.matrix(y), wt = weights)
 	    ans$coefficients <- reweighting$center
-	    ans$scale <- sqrt(sum(weights)/(sum(weights) - 1) * reweighting$cov)
+	    ans$scale <- sqrt(sum.w/(sum.w - 1) * reweighting$cov)
 	    resid <- y - ans$coefficients
 	    ans$crit <- sum(sort((y - center)^2, partial = h)[1:h])
-	    if (sum(weights) == n) {
-		cdelta.rew <- 1
-		correct.rew <- 1
-	    }
-	    else {
-		qdelta.rew <- qchisq(sum(weights)/n, 1)
-		cdeltainvers.rew <- pgamma(qdelta.rew/2, 1/2 + 1)/(sum(weights)/n)
+	    if (sum.w != n) {
+		qdelta.rew <- qchisq(sum.w/n, 1)
+		cdeltainvers.rew <- pgamma(qdelta.rew/2, 1/2 + 1)/(sum.w/n)
 		cdelta.rew <- sqrt(1/cdeltainvers.rew)
 		correct.rew <-
 		    if(use.correction)
@@ -260,10 +267,8 @@ ltsReg.default <-
 		cnp2 <- c(cdelta.rew, correct.rew)
 		ans$scale <- ans$scale * cdelta.rew * correct.rew
 	    }
-	    weights <- as.numeric(abs(resid/ans$scale) <= quantiel)
+	    weights <- wgtFUN(resid/ans$scale)
 	}
-	if (abs(scale) < 1e-07)
-	    ans$method <- paste(ans$method, "\nMore than half of the data are equal!")
 	fitted <- ans$coefficients
 	ans$resid <- resid/ans$scale
 	ans$rsquared <- 0
@@ -287,14 +292,12 @@ ltsReg.default <-
 
 	## VT:: 26.12.2004
 	## Reorder the coefficients so that the intercept is at the beginning ..
-	## Skip this if p == 1 (i.e. p=1 and intercept=FALSE).
 	getCoef <- ## simple wrapper (because of above "intercept last")
 	    if(p > 1 && intercept)
 		 function(cf) cf[c(p, 1:(p - 1))]
 	    else function(cf) cf
 
-	ans <- list(alpha = alpha)
-    ans$raw.weights <- rep(NA, length(na.y))
+	ans <- list(alpha = alpha, raw.weights = rep.int(NA, length(na.y)))
 
 	if(alpha == 1) { ## alpha == 1 -----------------------
 	    ## old, suboptimal: z <- lsfit(x, y, intercept = FALSE)
@@ -319,7 +322,7 @@ ltsReg.default <-
 	    else {
 		ans$raw.scale <- s0
 		ans$raw.resid <- resid / s0
-		ans$raw.weights[ok] <- weights <- as.numeric(abs(ans$raw.resid) <= quantiel)
+		ans$raw.weights[ok] <- weights <- wgtFUN(ans$raw.resid)
 		sum.w <- sum(weights)
 		## old, suboptimal: z <- lsfit(x, y, wt = weights, intercept = FALSE)
 		z <- lm.wfit(x, y, w = weights)
@@ -328,16 +331,13 @@ ltsReg.default <-
 
 		fitted <- x %*% z$coef
 		ans$scale <- sqrt(sum(weights * resid^2)/(sum.w - 1))
-		if (sum.w == n) {
-		    cdelta.rew <- 1
-		}
-		else {
+		if (sum.w != n) {
 		    qn.w <- qnorm((sum.w + n)/(2 * n))
 		    cdelta.rew <- 1/sqrt(1 - (2 * n)/(sum.w/qn.w) * dnorm(qn.w))
 		    ans$scale <- ans$scale * cdelta.rew
 		}
 		ans$resid <- resid/ans$scale
-		weights <- as.numeric(abs(ans$resid) <= quantiel)
+		weights <- wgtFUN(ans$resid)
 	    }
 
 	    names(ans$coefficients) <- getCoef(xn)
@@ -393,7 +393,7 @@ ltsReg.default <-
 	    else {
 		ans$raw.scale <- s0
 		ans$raw.resid <- resid/ans$raw.scale
-		ans$raw.weights[ok] <- weights <- as.numeric(abs(resid/s0) <= quantiel)
+		ans$raw.weights[ok] <- weights <- wgtFUN(resid/s0)
 		sum.w <- sum(weights)
 
 		## old, suboptimal: z1 <- lsfit(x, y, wt = weights, intercept = FALSE)
@@ -419,7 +419,7 @@ ltsReg.default <-
 		    ans$scale <- ans$scale * cdelta.rew * correct.rew
 		}
 		ans$resid <- resid/ans$scale
-		weights <- as.numeric(abs(ans$resid) <= quantiel)
+		weights <- wgtFUN(ans$resid)
 	    }
 	    ## unneeded: names(ans$coefficients) <- names(ans$raw.coefficients)
 	    ans$crit <- z$objfct
@@ -452,7 +452,7 @@ ltsReg.default <-
 		ans$RD <- "singularity"
 	    }
 	    else {
-		ans$RD <- rep(NA, length(na.y))
+		ans$RD <- rep.int(NA, length(na.y))
 		ans$RD[ok] <- sqrt(mahalanobis(X, mcd$center, mcd$cov))
 		names(ans$RD) <- rownames
 	    }
@@ -460,11 +460,11 @@ ltsReg.default <-
 
     } ## end { nontrivial 'x' }
 
-    ans$lts.wt <- rep(NA, length(na.y))
+    ans$lts.wt <- rep.int(NA, length(na.y))
     ans$lts.wt[ok] <- weights
-    ans$residuals <- rep(NA, length(na.y))
+    ans$residuals <- rep.int(NA, length(na.y))
     ans$residuals[ok] <- resid
-    ans$fitted.values <- rep(NA, length(na.y))
+    ans$fitted.values <- rep.int(NA, length(na.y))
     ans$fitted.values[ok] <- fitted
 
     names(ans$fitted.values) <- names(ans$residuals) <- names(ans$lts.wt) <-
@@ -630,6 +630,7 @@ print.summary.lts <-
 
 ### --- Namespace hidden (but parsed once and for all) : -------------
 
+##' Compute Finite Sample Correction Factor for the "raw" LTSreg() scale
 LTScnp2 <- function(p, intercept = intercept, n, alpha)
 {
     stopifnot(0.5 <= alpha, alpha <= 1)
@@ -695,6 +696,7 @@ LTScnp2 <- function(p, intercept = intercept, n, alpha)
     return(1/fp.alpha.n)
 } ## LTScnp2
 
+##' Compute Finite Sample Correction Factor for the  REWeighted LTSreg() scale
 LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
 {
     stopifnot(0.5 <= alpha, alpha <= 1)
@@ -810,44 +812,17 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
     ## y <- as.matrix(y)
     ## xy <- matrix(0, ncol = p + 1, nrow = n)
     xy <- cbind(x, y)
-    ## xy <- as.matrix(xy)
-    storage.mode(xy) <- "double"
-
+    storage.mode(xy) <- "double" # {keeping dim(.)}
     storage.mode(n) <- "integer"
-    storage.mode(p) <- "integer"
+    storage.mode(p) <- "integer" ; p1 <- p+1L # integer
     storage.mode(h.alph) <- "integer"
 
     ##	 Allocate temporary storage for the fortran implementation
 
-    datt <- matrix(0., ncol = p + 1, nrow = n)
-
     temp <- index1 <- index2 <- integer(n)
 
     weights <- aw2 <- aw <- residu <- yy <-
-	nmahad <- ndist <- am <- am2 <- slutn <-
-	    double(n)
-
-    jmiss <- integer(p+1)	##	 integer jmiss(nvad)	  --> p+1
-
-    xmed <- double(p+1)		##	 double	 xmed(nvad)	  --> p+1
-    xmad <- double(p+1)		##	 double	 xmad(nvad)
-    a	 <- double(p+1)		##	 double	    a(nvad)
-    da	 <- double(p+1)		##	 double	   da(nvad)
-
-    h <- matrix(0., p, p+1)	##	 double	 h(nvar,nvad)		p*(p+1)
-    hvec <- double(p*(p+1))	##	 double	 hvec(nvar*nvad)	p*(p+1)
-    c <- matrix(0., p, p+1)	##	 double	 c(nvar,nvad)		p*(p+1)
-
-    cstock <- matrix(0., 10, p*p)##	 double	 cstock(10,nvar*nvar)	10*p*p
-    mstock <- matrix(0., 10, p) ##	 double	 mstock(10,nvar)	10*p
-    c1stock <- matrix(0., km10, p*p)##	 double	 c1stock(km10,nvar*nvar)  km10*p*p
-    m1stock <- matrix(0., km10, p)##	 double	 m1stock(km10,nvar)	km10*p
-
-    dath <- matrix(0., nmaxi, p+1)##	 double	 dath(nmaxi,nvad)	nmaxi*(p+1)
-
-    sd <- double(p)		##	 double	 sd(nvar)		p
-    means <- double(p)		##	 double	 means(nvar)		p
-    bmeans <- double(p)		##	 double	 means(nvar)		p
+	nmahad <- ndist <- am <- am2 <- slutn <- double(n)
 
     .Fortran(rfltsreg,
 	     xy = xy,
@@ -856,13 +831,13 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
 	     h.alph,
 	     nsamp,
 
-	     inbest = rep.int(as.integer(10000), h.alph),
-	     objfct = as.double(0),
+	     inbest = rep.int(10000L, h.alph),
+	     objfct = 0.,# double
 
 	     intercept = as.integer(intercept),
 	     intadjust = as.integer(adjust),
-	     nvad = as.integer(p + 1),
-	     datt,
+	     nvad = as.integer(p1),
+	     datt = matrix(0., ncol = p1, nrow = n),
 	     integer(1),## << 'seed' no longer used -- FIXME
 	     weights,
 	     temp,
@@ -875,10 +850,26 @@ LTScnp2.rew <- function(p, intercept = intercept, n, alpha)
 	     nmahad,
 	     ndist,
 	     am, am2,
-	     slutn, jmiss,
-             xmed, xmad, a, da, h, hvec, c,
-             cstock, mstock, c1stock, m1stock,
-             dath, sd,
-	     means, bmeans,
+	     slutn,
+             jmiss = integer(p1),	##	 integer jmiss(nvad)	  --> p+1
+             xmed = double(p1),		##	 double	 xmed(nvad)	  --> p+1
+             xmad = double(p1),		##	 double	 xmad(nvad)
+             a	 = double(p1),		##	 double	    a(nvad)
+             da	 = double(p1),		##	 double	   da(nvad)
+
+             h = matrix(0., p, p1),	##	 double	 h(nvar,nvad)		p*(p+1)
+             hvec = double(p*(p1)),	##	 double	 hvec(nvar*nvad)	p*(p+1)
+             c = matrix(0., p, p1),	##	 double	 c(nvar,nvad)		p*(p+1)
+
+             cstock = matrix(0., 10, p*p),##	 double	 cstock(10,nvar*nvar)	10*p*p
+             mstock = matrix(0., 10, p), ##	 double	 mstock(10,nvar)	10*p
+             c1stock =matrix(0., km10, p*p),##	 double	 c1stock(km10,nvar*nvar)  km10*p*p
+             m1stock =matrix(0., km10, p),##	 double	 m1stock(km10,nvar)	km10*p
+
+             dath  = matrix(0., nmaxi, p1),##	 double	 dath(nmaxi,nvad)	nmaxi*(p+1)
+             sd    = double(p),		##	 double	 sd(nvar)		p
+             means = double(p),		##	 double	 means(nvar)		p
+             bmeans= double(p),		##	 double	 means(nvar)		p
+
          i.trace= as.integer(trace))[ c("inbest", "objfct") ]
 }

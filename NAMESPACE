@@ -3,7 +3,8 @@ useDynLib(robustbase, .registration=TRUE)
 
 importFrom("graphics", plot)# < more ?
 importFrom("stats", alias, anova, case.names, coef, confint, cov,
-           dummy.coef, family, fitted, fivenum, logLik, nobs,
+           dummy.coef, family, fitted, fivenum,
+           lm.fit, logLik, nobs,
            model.frame, predict, residuals, terms, vcov,
            variable.names, weights,
            ## would like to import even more *.lm methods, as we wrap them,
@@ -11,6 +12,8 @@ importFrom("stats", alias, anova, case.names, coef, confint, cov,
            residuals.lm, model.matrix.lm
            )
 ## ^^^^ MASS has a bit more; take it as example
+if(getRversion() >= "3.1.0")
+importFrom("stats", .lm.fit)
 
 importFrom("utils", globalVariables)
 
@@ -40,7 +43,8 @@ export(Sn, Qn, Qn.old,
        psiFunc, huberPsi, hampelPsi,
 ## Not yet:
 ##     tukeyPsi, # = biweight / bisquare
-       tukeyChi, tukeyPsi1, # <- used by lmrob.*()
+       tukeyChi, tukeyPsi1, # TODO deprecate: see ./TODO
+       Mpsi, Mchi, Mwgt, MrhoInf, .Mpsi, .Mchi, .Mwgt, .MrhoInf,
 
        lmrob, lmrob.fit,
        lmrob.fit.MM, lmrob..M..fit, lmrob..D..fit,
@@ -54,8 +58,10 @@ export(Sn, Qn, Qn.old,
        adjOutlyingness,
 
        glmrob,
-       nlrob,
-       glmrobMqle.control
+       nlrob
+       , glmrobMqle.control, glmrobBY.control, glmrobMT.control
+       , BYlogreg ## R/BYlogreg.R FIXME: add to glmrob() and "deprecate"
+       ## , glmrobMT ## R/MTestimador2.R
        )
 
 
@@ -85,7 +91,9 @@ S3method(model.matrix, lmrob)
 S3method(nobs, lmrob)
 S3method(residuals, lmrob)
 S3method(variable.names, lmrob)
+S3method(weights, glmrob)
 S3method(weights, lmrob)
+S3method(weights, nlrob, weights.lmrob)# use the same as "lmrob"
 
 S3method(formula, nlrob)
 S3method(fitted, nlrob)

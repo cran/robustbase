@@ -61,17 +61,18 @@ stopifnot(identical(unname(m0$scale), m1$scale))
 
 ##  robustness weights: are
 r.s <- with(m1, residuals/scale) # scaled residuals
-m1.wts <- robustbase:::tukeyPsi1(r.s, cc = 1.6) / r.s
+m1.wts <- Mpsi(r.s, cc = 1.6, psi="tukey") / r.s
 summarizeRobWeights(m1.wts)
 ##--> outliers 1,3,4,13,21
 which(m0$lts.wt == 0) # 1,3,4,21 but not 13
-
+\dontshow{stopifnot(which(m0$lts.wt == 0) == c(1,3,4,21))
+}
 ## Add M-step to SMD-estimate
 m2 <- lmrob(stack.loss ~ ., data = stackloss, method = 'SMD')
 m3 <- lmrob..M..fit(obj = m2)
 
 ## Simple function that allows custom initial estimates
-## (Deprecated use init argument to lmrob() instead.)
+## (Deprecated use init argument to lmrob() instead.) %% MM: why deprecated?
 lmrob.custom <- function(x, y, beta.initial, scale, terms) {
   ## initialize object
   obj <- list(control = lmrob.control("KS2011"),

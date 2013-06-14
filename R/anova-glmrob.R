@@ -112,6 +112,7 @@ anovaGlmrobPair <- function(obj1, obj2, test)
         matM11 <- matM[mod0,mod0]
         matM12 <- matM[mod0,H0ind]
         matM22 <- matM[H0ind, H0ind]
+### FIXME: solve()!
         matM22.1 <- matM22 - crossprod(matM12, solve(matM11) %*% matM12)
         Dquasi.dev <- nrow(X) * c(H0coef %*% matM22.1 %*% H0coef)
       }

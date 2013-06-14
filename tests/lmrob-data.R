@@ -9,8 +9,8 @@ summary(m0.sali  <- lmrob(Y ~ . , data = salinity))
 ## -> X2 is not needed
 (m1.sali  <- lmrob(Y ~ X1 + X3, data = salinity))
 (A2 <- anova(m0.sali, m1.sali)) # the same as before
-stopifnot(all.equal(A1$Pr[2], A2$Pr[2], tol=1e-14))
-
+stopifnot(all.equal(A1[2,"Pr(>chisq)"],
+		    A2[2,"Pr(>chisq)"], tol=1e-14))
 anova(m0.sali, m1.sali, test = "Deviance")
 ## whereas 'X3' is highly significant:
 m2 <- update(m0.sali, ~ . -X3)

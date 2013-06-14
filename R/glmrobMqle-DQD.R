@@ -16,7 +16,7 @@ glmrobMqleDiffQuasiDevB <- function(mu, mu0, y, ni, w.x, phi, tcc)
 	residP <- (y-pr)*sqrt(ni/Vmu)
 
 	## First part: nui
-	nui <- pmax(-tcc, pmin(tcc, residP))
+	nui <- pmax.int(-tcc, pmin.int(tcc, residP))
 
 	## Second part: Enui
 	H <- floor(u - tcc*sqrt(ni*Vmu))
@@ -60,7 +60,7 @@ glmrobMqleDiffQuasiDevPois <- function(mu, mu0, y, ni, w.x, phi, tcc)
 	residP <- (y-u)/sqrt(Vmu)
 
 	## First part: nui
-	nui <- pmax(-tcc, pmin(tcc, residP))
+	nui <- pmax.int(-tcc, pmin.int(tcc, residP))
 
 	## Second part: Enui
 	H <- floor(u - tcc*sqrt(Vmu))
@@ -98,7 +98,7 @@ glmrobMqleDiffQuasiDevGamma <- function(mu, mu0, y, ni, w.x, phi, tcc,
 	## First part: nui
 	sV <- s.ph * u ## = sqrt(dispersion * Gamma()$variance)
 	residP <- (y-u)/sV
-	nui <- pmax(-tcc, pmin(tcc, residP))
+	nui <- pmax.int(-tcc, pmin.int(tcc, residP))
 
 	## Second part: Enui
         ## what follows is similar to glmrob.Mqle.Epsipois except a
@@ -118,7 +118,7 @@ glmrobMqleDiffQuasiDevGamma <- function(mu, mu0, y, ni, w.x, phi, tcc,
 	## First part: nui
 	sV <- sqrt(phi) * u ## = sqrt(dispersion * Gamma()$variance)
 	residP <- (y-u)/sV
-	nui <- pmax(-tcc, pmin(tcc, residP))
+	nui <- pmax.int(-tcc, pmin.int(tcc, residP))
         (nui  / sV)
     }
     f.cnui2 <- function(u, y, ni, phi, tcc)
@@ -142,6 +142,7 @@ glmrobMqleDiffQuasiDevGamma <- function(mu, mu0, y, ni, w.x, phi, tcc,
 
     nobs <- length(mu)
     stopifnot(nobs > 0)
+    variant <- match.arg(variant)
     ## robust quasi-deviance
     if(variant == "V1") {
         QMi <- numeric(nobs)
@@ -151,7 +152,7 @@ glmrobMqleDiffQuasiDevGamma <- function(mu, mu0, y, ni, w.x, phi, tcc,
                                 lower = mu[i], upper = mu0[i])$value
         -2*sum(QMi*w.x)
 
-    } else {
+    } else { ## "Eva1" or "Andreas1";  Using two terms
         QMi1 <- QMi2 <- numeric(nobs)
         for(i in 1:nobs)
             QMi1[i] <- integrate(f.cnui1, y = y[i], ni = ni[i], phi=phi, tcc = tcc,
@@ -164,7 +165,7 @@ glmrobMqleDiffQuasiDevGamma <- function(mu, mu0, y, ni, w.x, phi, tcc,
             -2*(sum(QMi1)-sum(QMi2)/nobs)
         } else if (variant == "Andreas1") { ## Andreas' interpretation of (4) and (5)
             -2*(sum(QMi1)-sum(QMi2))
-        } else stop("invalid 'variant'")
+        } else stop("invalid 'variant': ", variant)
     }
 }
 

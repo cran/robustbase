@@ -30,7 +30,6 @@
 /* --> int64_t ; if people don't have the above, they can forget about it.. */
 /* #include "int64.h" */
 
-#include <R.h>
 #include <Rmath.h> /* -> <math.h> and much more */
 
 /* Interface routines to be called via .C() : */
