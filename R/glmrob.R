@@ -56,7 +56,11 @@ function (formula, family, data, weights, subset,
 
     if(is.null(control)) # -> use e.g., glmrobMqle.control()
 	control <- get(paste0("glmrob", meth., ".control"))(...)
-    weights.on.x <- match.arg(weights.on.x)
+    if(missing(weights.on.x) || is.character(weights.on.x))
+        weights.on.x <- match.arg(weights.on.x)
+    else if(!(is.function(weights.on.x) || is.list(weights.on.x) ||
+              (is.numeric(weights.on.x) && length(weights.on.x) == NROW(Y))))
+        stop("'weights.on.x' must be a string, function, list or numeric n-vector")
     if(!is.null(start) && !is.numeric(start)) {
 	## initialization methods
 	if(!is.character(start))

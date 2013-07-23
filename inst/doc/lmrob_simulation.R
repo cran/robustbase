@@ -48,7 +48,7 @@ dd <- data.frame(X1 = c(0.0707996949791054, 0.0347546309449992,
                    0.262270854360470, 1.24686336241,
                    0.386112727548389))
 
-## get path
+## get path (= ../inst/doc/ in source pkg)
 robustDoc <- system.file('doc', package='robustbase')
 ## load functions
 source(file.path(robustDoc, 'simulation.functions.R'))

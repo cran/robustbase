@@ -79,9 +79,10 @@ lmrob.control(setting, seed = NULL, nResample = 500,
     no tracing.}
   \item{mts}{maximum number of samples to try in subsampling
     algorithm.}
-  \item{subsampling}{type of subsampling to be used, \code{simple} for simple
-    subsampling (default prior to version 0.9), \code{nonsingular} for
-    nonsingular subsampling. See \code{\link{lmrob.S}}.}
+  \item{subsampling}{type of subsampling to be used, a string:
+    \code{"simple"} for simple subsampling (default prior to version 0.9),
+    \code{"nonsingular"} for nonsingular subsampling.  See also
+    \code{\link{lmrob.S}}.}
   \item{compute.rd}{logical indicating if robust distances (based on
     the MCD robust covariance estimator \code{\link{covMcd}}) are to be
     computed for the robust diagnostic plots.  This may take some

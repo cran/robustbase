@@ -1,7 +1,7 @@
 ## Functions to plot and check psi-functions
 ## used in ../../tests/lmrob-psifns.R,
 ##	   ../../tests/psi-rho-etc.R
-##     and ../doc/psi_functions.Rnw  vignette
+##     and ../../vignettes/psi_functions.Rnw  vignette
 
 
 ## Original Author of functions: Martin Maechler, Date: 13 Aug 2010, 10:17

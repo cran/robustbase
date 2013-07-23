@@ -56,8 +56,10 @@ glmrob(formula, family, data, weights, subset, na.action,
     method.  The details of method specification are given below.}
 
   \item{weights.on.x}{
-    character string (can be abbreviated) specifying how points
-    (potential outliers) in x-space are downweighted.  If \code{"hat"},
+    a character string (can be abbreviated), a \code{\link{function}} or
+    \code{\link{list}} (see below), or a numeric vector of length
+    \code{n}, specifying how points (potential outliers) in x-space are
+    downweighted.  If \code{"hat"},
     weights on the design of the form \eqn{\sqrt{1-h_{ii}}} are used,
     where \eqn{h_{ii}} are the diagonal elements of the hat matrix.  If
     \code{"robCov"}, weights based on the robust Mahalanobis distance of the
@@ -65,8 +67,17 @@ glmrob(formula, family, data, weights, subset, na.action,
     matrix and the centre is estimated by \code{\link[MASS]{cov.rob}}
     from the package \pkg{MASS}.\cr
     Similarly,  if \code{"covMcd"}, robust weights are computed using
-    \code{\link{covMcd}}.  The default is \code{"none"}.}
+    \code{\link{covMcd}}.  The default is \code{"none"}.
 
+    If \code{weights.on.x} is a \code{\link{function}}, it is called
+    with arguments \code{(X, intercept)} and must return an n-vector of
+    non-negative weights.
+
+    If it is a \code{\link{list}}, it must be of length one, and as
+    element contain a function much like \code{\link{covMcd}()} or
+    \code{\link[MASS]{cov.rob}()} (package \pkg{MASS}), which computes
+    multivariate location and \dQuote{scatter} of a data matrix \code{X}.
+  }
   \item{control}{a list of parameters for controlling the fitting process.
     See the documentation for \code{\link{glmrobMqle.control}} for
     details.}
@@ -109,6 +120,13 @@ glmrob(formula, family, data, weights, subset, na.action,
 
   \code{weights.on.x= "robCov"} makes sense if all explanatory variables
   are continuous.
+
+  In the cases,where \code{weights.on.x} is \code{"covMcd"} or
+  \code{"robCov"}, or list with a \dQuote{robCov} function, the
+  mahalanobis distances \code{D^2} are computed with respect to the
+  covariance (location and scatter) estimate, and the weights are
+  \code{1/sqrt(1+ pmax.int(0, 8*(D2 - p)/sqrt(2*p)))},
+  where \code{D2 = D^2} and \code{p = ncol(X)}.
 }
 
 \value{

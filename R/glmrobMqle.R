@@ -16,18 +16,29 @@ robXweights <- function(wts, X, intercept=TRUE) {
     nobs <- d[1]
     if(d[2]) { ## X has >= 1 column, and hence there *are* coefficients in the end
         if(is.character(wts)){
-            switch(wts,
-                   "none" = rep.int(1, nobs),
-                   "hat" = wts_HiiDist(X)^2, # = (1 - Hii)^2
-                   "robCov" = wts_RobDist(X, intercept, covFun = MASS::cov.rob),
-                                        # ARu said 'method="mcd" was worse'
-                   "covMcd" = wts_RobDist(X, intercept, covFun = covMcd),
-                   stop("Weighting method", sQuote(wts),
-                        " is not implemented"))
-        }
-        else{
+	    switch(wts,
+		   "none" = rep.int(1, nobs),
+		   "hat" = wts_HiiDist(X)^2, # = (1 - Hii)^2
+		   "robCov" = wts_RobDist(X, intercept, covFun = MASS::cov.rob),
+		   ## MCD is currently problematic: many singular subsamples
+		   "covMcd" = wts_RobDist(X, intercept, covFun = covMcd),
+		   stop("Weighting method", sQuote(wts),
+			" is not implemented"))
+	}
+	## (new; 2013-07-05; -> robustbase 0.9-9)
+	else if(is.list(wts)) {
+	    if(length(wts) == 1 && is.function(covF <- wts[[1]]))
+		wts_RobDist(X, intercept, covFun = covF)
+	    else stop("if a list, weights.on.x must contain a covariance function such as covMcd()")
+	}
+	else if(is.function(wts)) {
+	    wts(X, intercept)
+	}
+	else {
 	    if(!is.numeric(wts) || length(wts) != nobs)
-		stop(gettextf("wts needs %d none-negative values", nobs))
+		## FIXME: "when not a string, a list, or a function, then ..."
+		stop(gettextf("weights.on.x needs %d none-negative values",
+			      nobs))
             if(any(wts) < 0)
                 stop("All weights.on.x must be none negative")
         }
@@ -292,8 +303,10 @@ wts_HiiDist <- function(X) {
     (1-Hii)
 }
 
-##' "weights.on.x": Compute robustness weights depending on the design 'X'
-##'   only, using robust mahalanobis distances
+##' Compute robustness weights depending on the design 'X' only,
+##' using robust(ified) Mahalanobis distances.
+##' This is an auxiliary function for robXweights() activated typically by
+##' weights.on.x = "..." from regression functions
 ##' @title Compute Robust Weights based on Robustified Mahalanobis - Distances
 ##' @param X n x p  numeric matrix
 ##' @param intercept logical; should be true iff  X[,1] is a column with the intercept
@@ -314,8 +327,8 @@ wts_RobDist <- function(X, intercept, covFun)
 	S <- Xrc$cov + tcrossprod(Xrc$center)
 	mahalanobis(X, center = rep.int(0,ncol(X)), cov = S)
     }
-    ncoef <- ncol(X) ## E[chi^2_p] = p
-    1/sqrt(1+ pmax.int(0, 8*(D2 - ncoef)/sqrt(2*ncoef)))
+    p <- ncol(X) ## E[chi^2_p] = p
+    1/sqrt(1+ pmax.int(0, 8*(D2 - p)/sqrt(2*p)))
 }
 
 

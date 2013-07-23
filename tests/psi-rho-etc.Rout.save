@@ -1,5 +1,5 @@
 
-R version 3.0.1 Patched (2013-05-24 r62794) -- "Good Sport"
+R Under development (unstable) (2013-07-22 r63380) -- "Unsuffered Consequences"
 Copyright (C) 2013 The R Foundation for Statistical Computing
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
@@ -160,8 +160,8 @@ Loading required package: robustbase
 0.9632396 0.9632396 
 > chkP(aeff.P(hampelPsi, k = c(2,   4, 8), tol=1e-10),# fails with tol=1e-11
 +      tol = 1e-4)
-      int      form 
-0.9896089 0.9896790 
+     int     form 
+0.989679 0.989679 
 > 
 > ## Now works too:
 > chkP(bp.P(hampelPsi))
@@ -186,4 +186,4 @@ Loading required package: robustbase
 > 
 > proc.time()
    user  system elapsed 
-  0.744   0.032   0.772 
+  0.661   0.046   0.827 

@@ -187,6 +187,8 @@ residuals.nlrob <- function (object, type = c("response", "working", "pearson"),
 }
 
 
+vcov.nlrob <- function (object, ...) object$cov
+
 summary.nlrob <- function (object, correlation = FALSE, symbolic.cor = FALSE, ...)
 {
     w <- object$w ## weights * rweights, scaled such that sum(w)=1

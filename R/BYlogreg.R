@@ -240,7 +240,7 @@ glmrobBY <- function(X, y,
     kmax    <- if(is.null(cc <- control$maxit  )) 1e3 else cc
     maxhalf <- if(is.null(cc <- control$maxhalf))  10 else cc
     if(!identical(weights.on.x, "none"))
-        stop("'weights.on.x' = ", weights.on.x," is not implemented")
+        stop("'weights.on.x' = ", format(weights.on.x)," is not implemented")
     ## w.x <- robXweights(weights.on.x, X=X, intercept=intercept)
     ##
     ## MM: all(?) the  BY3() functions below would need to work with weights...

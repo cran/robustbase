@@ -131,7 +131,7 @@ sumaConPesos <- function(beta,x,y,w, cw, m.approx) {
 
 beta0IniCP <- function(x,y,cw,w, m.approx, nsubm, trace.lev = 1)
 {
-    ## computes  the initial estmate usng subsamplng with concentration step
+    ## computes  the initial estimate using subsampling with concentration step
     stopifnot(is.matrix(x), (nsubm <- as.integer(nsubm)) >= 1)
     p <- ncol(x)
     n <- nrow(x)

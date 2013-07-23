@@ -1,22 +1,22 @@
 Package: robustbase
-Version: 0.9-8
-Date: 2013-06-14
+Version: 0.9-9
+Date: 2013-07-23
 Title: Basic Robust Statistics
-Author: Original code by many authors, notably Peter Rousseeuw and
-        Christophe Croux, see file 'Copyrights'; Valentin Todorov
-        <valentin.todorov@chello.at>, Andreas Ruckstuhl
-        <andreas.ruckstuhl@zhaw.ch>, Matias Salibian-Barrera
-        <matias@stat.ubc.ca>, Tobias Verbeke
-        <tobias.verbeke@openanalytics.eu>, Manuel Koller
-        <mkoller@ispm.unibe.ch>, Martin Maechler
+Author: Original code by many authors, notably
+	Peter Rousseeuw and Christophe Croux, see file 'Copyrights';
+	Valentin Todorov <valentin.todorov@chello.at>,
+	Andreas Ruckstuhl <andreas.ruckstuhl@zhaw.ch>,
+	Matias Salibian-Barrera <matias@stat.ubc.ca>,
+	Tobias Verbeke <tobias.verbeke@openanalytics.eu>,
+	Manuel Koller <mkoller@ispm.unibe.ch>,
+	Martin Maechler
 Maintainer: Martin Maechler <maechler@stat.math.ethz.ch>
 URL: http://robustbase.r-forge.r-project.org/
 Description: "Essential" Robust Statistics.  The goal is to provide
-        tools allowing to analyze data with robust methods.  This
-        includes regression methodology including model selections and
-        multivariate statistics where we strive to cover the book
-        "Robust Statistics, Theory and Methods" by Maronna, Martin and
-        Yohai; Wiley 2006.
+ tools allowing to analyze data with robust methods.  This includes
+ regression methodology including model selections and multivariate
+ statistics where we strive to cover the book "Robust Statistics,
+ Theory and Methods" by Maronna, Martin and Yohai; Wiley 2006.
 Depends: R (>= 2.15.1), stats, graphics, methods
 Imports: stats, graphics, utils
 Suggests: grid, MASS, lattice, boot, cluster, Matrix, robust,
@@ -24,7 +24,7 @@ Suggests: grid, MASS, lattice, boot, cluster, Matrix, robust,
         sfsmisc, catdata
 LazyData: yes
 License: GPL (>= 2)
-Packaged: 2013-06-14 20:19:07 UTC; maechler
+Packaged: 2013-07-23 14:04:52 UTC; maechler
 NeedsCompilation: yes
 Repository: CRAN
-Date/Publication: 2013-06-15 11:46:43
+Date/Publication: 2013-07-23 17:37:02

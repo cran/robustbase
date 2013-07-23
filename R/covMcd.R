@@ -58,6 +58,7 @@ covMcd <- function(x,
     ## For back compatibility, as some new args did not exist pre 2013-04,
     ## and callers of covMcd() may use a "too small"  'control' list:
     if(missing(wgtFUN)) getDefCtrl("wgtFUN")
+    if(is.null (nmini)) getDefCtrl("nmini")
 
     ##   vt::03.02.2006 - added options "best" and "exact" for nsamp
     ##   nsamp will be further analized in the wrapper .fastmcd()

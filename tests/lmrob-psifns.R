@@ -131,21 +131,29 @@ set.seed(7)
 summary(mp6 <- update(mp0, psi = 'hampel'))
 
 set.seed(8)
-ctrl <- lmrob.control(psi = 'ggw', tuning.psi = c(-.3, 1.4, 0.95, NA),
+ctr7 <- lmrob.control(psi = 'ggw', tuning.psi = c(-.3, 1.4, 0.95, NA),
                       tuning.chi = c(-0.3, 1.4, NA, 0.5))
-ctrl$tuning.psi ## -> "constants"
-ctrl$tuning.chi
-summary(mp7 <-lmrob(Y ~ ., data = aircraft, control = ctrl))
+ctr7$tuning.psi ## -> "constants"
+ctr7$tuning.chi
+summary(mp7 <-lmrob(Y ~ ., data = aircraft, control = ctr7))
 
 set.seed(9)
 summary(mp8 <- update(mp0, psi = 'lqq'))
 
 set.seed(10)
-ctrl <- lmrob.control(psi = 'lqq', tuning.psi = c(-.3, 1.4, 0.95, NA),
-                      tuning.chi = c(-0.3, 1.4, NA, 0.5))
-ctrl$tuning.psi
-ctrl$tuning.chi
-summary(mp7 <-lmrob(Y ~ ., data = aircraft, control = ctrl))
+ctr9 <- lmrob.control(psi = 'lqq', tuning.psi = c(ctr7$tuning.psi),
+                      tuning.chi = c(ctr7$tuning.chi))
+ctr9$tuning.psi
+ctr9$tuning.chi
+## Confirm these constants above (against the ones we got earlier)
+## by recomputing them using higher accuracy :
+(tpsi. <- robustbase:::lmrob.lqq.findc(ctr9$tuning.psi, rel.tol=1e-11, tol=1e-8))
+(tchi. <- robustbase:::lmrob.lqq.findc(ctr9$tuning.chi, rel.tol=1e-11, tol=1e-8))
+(tol4 <- .Machine$double.eps^.25)
+stopifnot(all.equal(attr(ctr9$tuning.psi, "constants"), tpsi., tol=tol4),
+	  all.equal(attr(ctr9$tuning.chi, "constants"), tchi., tol=tol4))
+
+summary(mp9 <-lmrob(Y ~ ., data = aircraft, control = ctr9))
 
 
 cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''

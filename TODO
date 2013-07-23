@@ -50,6 +50,7 @@ o  Psi/Rho/Chi/Wgt Functions
        ---------------- the (a,b,c) tuning parameters
 
 
+
 o  New  lmrob() "M-S" etc features:
 
    - Function names with "." (which are exported) are frowned upon
@@ -126,6 +127,10 @@ o glmrob(*, weights.on.x = "robCov")  uses  MASS::cov.rob(),
   HOWEVER: Need something better when 'X' has (binary!) factors!
   "hat" +- works, but needs more work
 
+o We now allow  weights.on.x  to be an arbitrary general  wts(X, intercept)
+  function _or_ a list containing a  robMcd()-like function.
+  Definitely need *testing* this situation!
+
 o glmrob(<Gamma>):  anova() has  three variants: "V1", "Eva1", "Andreas1"
    --> ./R/glmrobMqle-DQD.R
    - gives warning every time {-> easy to fix}
@@ -161,7 +166,11 @@ o add1() and/or drop1() would be nice
 o  residuals( nlrob(), type = "...") should provide types
    	      "as in the litterature"
 
+o  Add method = "..." : the more robust methods "tau", "CM" and "MTL"
+   Eduardo Conceicao
+
 ------
+
 
 o Add data sets from the MMY-book -- mostly done {do we have *all* ?}
 

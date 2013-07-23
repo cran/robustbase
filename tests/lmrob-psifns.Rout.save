@@ -1,5 +1,5 @@
 
-R Under development (unstable) (2013-05-30 r62840) -- "Unsuffered Consequences"
+R version 3.0.1 Patched (2013-07-22 r63380) -- "Good Sport"
 Copyright (C) 2013 The R Foundation for Statistical Computing
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
@@ -59,7 +59,7 @@ Type 'q()' to quit R.
 +                   lmrob.control(psi = "ggw", tuning.psi = cc)$tuning.psi)
 + )
 > cat('Time for constants computation of tuning.psi: ', st,'\n')
-Time for constants computation of tuning.psi:  0.29 0.001 0.294 0 0 
+Time for constants computation of tuning.psi:  0.236 0.002 0.243 0 0 
 > cGct <- t(sapply(cG.cnst, attr, "constants"))[,-1]
 > colnames(cGct) <- c("a","b","c", "rhoInf")
 > signif(cGct, 4)
@@ -470,20 +470,20 @@ fast.s.large.n
 seed : int(0) 
 > 
 > set.seed(8)
-> ctrl <- lmrob.control(psi = 'ggw', tuning.psi = c(-.3, 1.4, 0.95, NA),
+> ctr7 <- lmrob.control(psi = 'ggw', tuning.psi = c(-.3, 1.4, 0.95, NA),
 +                       tuning.chi = c(-0.3, 1.4, NA, 0.5))
-> ctrl$tuning.psi ## -> "constants"
+> ctr7$tuning.psi ## -> "constants"
 [1] -0.30  1.40  0.95    NA
 attr(,"constants")
 [1] 0.0000000 2.0011562 1.4000000 0.4125717 5.6874488
-> ctrl$tuning.chi
+> ctr7$tuning.chi
 [1] -0.3  1.4   NA  0.5
 attr(,"constants")
 [1] 0.00000000 0.24044569 1.40000000 0.09081713 0.27558437
-> summary(mp7 <-lmrob(Y ~ ., data = aircraft, control = ctrl))
+> summary(mp7 <-lmrob(Y ~ ., data = aircraft, control = ctr7))
 
 Call:
-lmrob(formula = Y ~ ., data = aircraft, control = ctrl)
+lmrob(formula = Y ~ ., data = aircraft, control = ctr7)
  \--> method = "S"
 Residuals:
     Min      1Q  Median      3Q     Max 
@@ -564,32 +564,43 @@ fast.s.large.n
 seed : int(0) 
 > 
 > set.seed(10)
-> ctrl <- lmrob.control(psi = 'lqq', tuning.psi = c(-.3, 1.4, 0.95, NA),
-+                       tuning.chi = c(-0.3, 1.4, NA, 0.5))
-> ctrl$tuning.psi
+> ctr9 <- lmrob.control(psi = 'lqq', tuning.psi = c(ctr7$tuning.psi),
++                       tuning.chi = c(ctr7$tuning.chi))
+> ctr9$tuning.psi
 [1] -0.30  1.40  0.95    NA
 attr(,"constants")
-[1] 1.3018031 0.9298593 1.3000000
-> ctrl$tuning.chi
+[1] 1.3007171 0.9290836 1.3000000
+> ctr9$tuning.chi
 [1] -0.3  1.4   NA  0.5
 attr(,"constants")
 [1] 0.2763568 0.1973977 1.3000000
-> summary(mp7 <-lmrob(Y ~ ., data = aircraft, control = ctrl))
+> ## Confirm these constants above (against the ones we got earlier)
+> ## by recomputing them using higher accuracy :
+> (tpsi. <- robustbase:::lmrob.lqq.findc(ctr9$tuning.psi, rel.tol=1e-11, tol=1e-8))
+[1] 1.3007495 0.9291068 1.3000000
+> (tchi. <- robustbase:::lmrob.lqq.findc(ctr9$tuning.chi, rel.tol=1e-11, tol=1e-8))
+[1] 0.2763425 0.1973875 1.3000000
+> (tol4 <- .Machine$double.eps^.25)
+[1] 0.0001220703
+> stopifnot(all.equal(attr(ctr9$tuning.psi, "constants"), tpsi., tol=tol4),
++ 	  all.equal(attr(ctr9$tuning.chi, "constants"), tchi., tol=tol4))
+> 
+> summary(mp9 <-lmrob(Y ~ ., data = aircraft, control = ctr9))
 
 Call:
-lmrob(formula = Y ~ ., data = aircraft, control = ctrl)
+lmrob(formula = Y ~ ., data = aircraft, control = ctr9)
  \--> method = "MM"
 Residuals:
      Min       1Q   Median       3Q      Max 
--10.4131  -2.6546  -0.4163   3.7992  38.6135 
+-10.4061  -2.6517  -0.4156   3.7945  38.6444 
 
 Coefficients:
               Estimate Std. Error t value Pr(>|t|)   
-(Intercept)  3.4885376 12.9467703   0.269  0.79065   
-X1          -3.2959306  0.9474381  -3.479  0.00268 **
-X2           1.8969101  0.9908611   1.914  0.07160 . 
-X3           0.0022811  0.0014320   1.593  0.12860   
-X4          -0.0011575  0.0008954  -1.293  0.21246   
+(Intercept)  3.5003005 12.9625206   0.270  0.79021   
+X1          -3.2953770  0.9467913  -3.481  0.00267 **
+X2           1.8957842  0.9928099   1.910  0.07227 . 
+X3           0.0022793  0.0014340   1.589  0.12936   
+X4          -0.0011563  0.0008966  -1.290  0.21347   
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -599,7 +610,7 @@ Convergence in 33 IRWLS iterations
 Robustness weights: 
  17 weights are ~= 1. The remaining 6 ones are
       3       4      12      16      17      22 
-0.97705 0.99845 0.82593 0.78812 0.91316 0.06876 
+0.97698 0.99840 0.82584 0.78662 0.91318 0.06838 
 Algorithmic parameters: 
 tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1 
    -3.0e-01     1.4e+00          NA     5.0e-01     5.0e-01    -3.0e-01 
@@ -615,8 +626,8 @@ seed : int(0)
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  5.412 0.133 5.68 0.001 0.003 
+Time elapsed:  4.404 0.096 4.692 0.002 0 
 > 
 > proc.time()
    user  system elapsed 
-  5.413   0.136   5.680 
+  4.406   0.096   4.692 

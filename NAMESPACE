@@ -128,6 +128,7 @@ S3method(summary, nlrob)
 
 S3method(vcov, glmrob)
 S3method(vcov, lmrob)
+S3method(vcov, nlrob)
 ##not there: S3method(print, summary.mcd)
 
 ## S4 Generics {only those defined in this package}:

@@ -28,7 +28,7 @@ lmrob.S(x, y, control, trace.lev = control$trace.lev, mf = NULL)
   categorical and mixed continuous-categorical data.
 
   One can revert to the old subsampling scheme by setting the parameter
-  \code{subsampling} in \code{control} to \code{simple}.
+  \code{subsampling} in \code{control} to \code{"simple"}.
 }
 \value{
   A list with components
