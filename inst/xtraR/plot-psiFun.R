@@ -3,6 +3,7 @@
 ##	   ../../tests/psi-rho-etc.R
 ##     and ../../vignettes/psi_functions.Rnw  vignette
 
+source(system.file("xtraR/ex-funs.R", package = "robustbase", mustWork=TRUE))
 
 ## Original Author of functions: Martin Maechler, Date: 13 Aug 2010, 10:17
 
@@ -19,10 +20,6 @@ p.psiFun2 <- function(x, psi, par, main="short", ...)
 ## for psi_func class objects: simply use plot() method.
 
 mids <- function(x) (x[-1]+x[-length(x)])/2
-
-identical3 <- function(x,y,z)	  identical(x,y) && identical (y,z)
-identical4 <- function(a,b,c,d)   identical(a,b) && identical3(b,c,d)
-identical5 <- function(a,b,c,d,e) identical(a,b) && identical4(b,c,d,e)
 
 ##' @title Check consistency of psi/chi/wgt/.. functions
 ##' @param m.psi matrix as from p.psiFun()

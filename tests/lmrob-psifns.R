@@ -12,8 +12,8 @@ psiGGW <- function(x, a,b,c) {
            x,
            ifelse((ea <- -((ax-c)^b)/(2*a)) < -708.4, 0, x * exp(ea)))
 }
-stopifnot(all.equal(Mpsi  (5:9, cc=c(0,a=1/8,b=2,c=1/8,NA), "GGW"),
-		    psiGGW(5:9,	       a=1/8,b=2,c=1/8), tol = 1e-13))
+assert.EQ(Mpsi  (5:9, cc=c(0,a=1/8,b=2,c=1/8,NA), "GGW"),
+          psiGGW(5:9,	       a=1/8,b=2,c=1/8), tol = 1e-13)
 
 
 ## Check that psi(<empty>)  |->  <empty>  works; ditto for +-Inf, NA,..
@@ -45,8 +45,8 @@ cat('Time for constants computation of tuning.psi: ', st,'\n')
 cGct <- t(sapply(cG.cnst, attr, "constants"))[,-1]
 colnames(cGct) <- c("a","b","c", "rhoInf")
 signif(cGct, 4)
-stopifnot(all.equal(sapply(cG.cnst, function(cc) MrhoInf(cc, "ggw")),
-                    cGct[,"rhoInf"]))
+assert.EQ(sapply(cG.cnst, function(cc) MrhoInf(cc, "ggw")),
+          cGct[,"rhoInf"], tol = 1e-8)
 
 
 ## Do these checks for a *list* of (c.par, psi) combinations:
@@ -150,10 +150,21 @@ ctr9$tuning.chi
 (tpsi. <- robustbase:::lmrob.lqq.findc(ctr9$tuning.psi, rel.tol=1e-11, tol=1e-8))
 (tchi. <- robustbase:::lmrob.lqq.findc(ctr9$tuning.chi, rel.tol=1e-11, tol=1e-8))
 (tol4 <- .Machine$double.eps^.25)
-stopifnot(all.equal(attr(ctr9$tuning.psi, "constants"), tpsi., tol=tol4),
-	  all.equal(attr(ctr9$tuning.chi, "constants"), tchi., tol=tol4))
 
-summary(mp9 <-lmrob(Y ~ ., data = aircraft, control = ctr9))
+Rver <- getRversion()
+if(FALSE) {## eventually:
+    integr.bug <- "2.12.0" <= Rver && Rver <= "3.0.1"
+} else { ## needed for R-3.0.1 patched
+    integr.bug <- ("2.12.0" <= Rver && Rver < "3.0.1") ||
+        (Rver == "3.0.1" && as.numeric(R.version[["svn rev"]]) < 63315)
+}
+integr.bug
+if(integr.bug) tol4 <- 8*tol4
+
+assert.EQ(attr(ctr9$tuning.psi, "constants"), tpsi., tol=tol4, giveRE=TRUE)
+assert.EQ(attr(ctr9$tuning.chi, "constants"), tchi., tol=tol4, giveRE=TRUE)
+
+summary(mp9 <- lmrob(Y ~ ., data = aircraft, control = ctr9))
 
 
 cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''

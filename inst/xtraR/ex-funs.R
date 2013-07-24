@@ -65,6 +65,9 @@ is.all.equal <- function(x,y, tol = 2e-7, scale = 1) {
     is.logical(r <- all.equal(x,y, tol = tol, scale = scale)) && r
 }
 
+identical3 <- function(x,y,z)	  identical(x,y) && identical (y,z)
+identical4 <- function(a,b,c,d)   identical(a,b) && identical3(b,c,d)
+identical5 <- function(a,b,c,d,e) identical(a,b) && identical4(b,c,d,e)
 
 ## Newer versions of
 ##	system.file("test-tools-1.R", package="Matrix")
