@@ -17,7 +17,7 @@ for(n in 1:100) {
     cat(sprintf(" --> mc(rlnorm(%d)) = %.6f\n", n, mcval))
 }
 
-allEQ <- function(x,y) all.equal(x,y, tol = 1e-12)
+allEQ <- function(x,y) all.equal(x,y, tolerance = 1e-12)
 
 x3 <- c(-2, rep(-1,4), rep(0,6), 2, 2, 2:4)
 mcNaive(x3,"h.use") # 1/3

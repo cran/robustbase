@@ -770,68 +770,37 @@ double wgt(double x, const double c[], int ipsi)
    this can NOT be scaled to rho(Inf)=1 : */
 double rho_huber(double x, const double c[])
 {
-    return (fabs(x) <= c[0]) ? x*x : c[0]*(2*fabs(x) - c[0]);
+    return (fabs(x) <= c[0]) ? x*x*0.5 : c[0]*(fabs(x) - c[0]/2);
 }
 
 double psi_huber(double x, const double c[])
 {
-/*
- * Huber's psi = rho'()
- */
-    return (fabs(x) <= c[0]) ? x*x : c[0]*(2*fabs(x) - c[0]);
-
-    if (fabs(x) > (*c))
-	return(2*0.);
-    else {
-	double a = x / (*c),
-	    u = 1. - a*a;
-	return( x * u * u );
-    }
+// Huber's psi = rho'()
+    return (x <= -c[0]) ? -c[0] : ((x < c[0]) ? x : c[0]);
 }
 
 double psip_huber(double x, const double c[])
 {
-/*
- * Second derivative of Huber's loss function
- */
-    if (fabs(x) > (*c))
-	return(0.);
-    else {
-	x /= *c;
-	double x2 = x*x;
-	return( (1. - x2) * (1 - 5 * x2));
-    }
+// psi' = rho'' : Second derivative of Huber's loss function
+    return (fabs(x) >= c[0]) ? 0. : 1.;
 }
 
 double psi2_huber(double x, const double c[])
 {
-/** 3rd derivative of Huber's loss function rho()
- *= 2nd derivative of psi() :
- */
-    if (fabs(x) >= c[0]) // psi''()  *is* discontinuous at x = c[0]: use "middle" value there:
-	return (fabs(x) == c[0]) ? 4*x/c[0] : 0.;
-    else {
-	x /= c[0];
-	double x2 = x*x;
-	return 4*x/c[0] * (5 * x2 - 3.);
-    }
+// psi'' = rho''' : Third derivative of Huber's loss function
+    return 0;
+// FIXME? return NaN when  |x| == c ?? -- then also for psi2_hmpl()
 }
 
 double wgt_huber(double x, const double c[])
 {
 /*
- * Weights for Huber's loss function
+ * Weights for Huber's loss function w(x) = psi(x)/x
  */
-    if( fabs(x) > *c )
-	return(0.);
-    else {
-	double a = x / (*c);
-	a = (1. - a)*(1. + a);
-	return( a * a );
-    }
+    return (fabs(x) >= c[0]) ? c[0]/fabs(x) : 1.;
 }
 
-//--- Biweight = Bisqaure = Tukey's Biweight ...
+//--- Biweight = Bisquare = Tukey's Biweight ...
 //--- --------------------------------------
 
 double rho_biwgt(double x, const double c[])

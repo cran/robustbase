@@ -12,6 +12,8 @@
 
 #include <Rmath.h>
 /* -> fmax2(.,.) */
+#include <R_ext/Utils.h>
+
 
 /* Interface routines to be called via .C() and those from API : */
 #include "robustbase.h"
@@ -87,7 +89,8 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
     /* else : median is not at the border ------------------- */
 
     if(trace_lev)
-	Rprintf("Median = %g (not at the border)\n", -xmed);
+	Rprintf("mc_C_d(z[1:%d], trace_lev=%d): Median = %g (not at the border)\n", 
+		n, trace_lev, -xmed);
 
     int i,j;
     /* center x[] wrt median --> such that then  median( x[1:n] ) == 0 */
@@ -101,24 +104,26 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 	x[i] /= xden;
     xmed /= xden;
     if(trace_lev >= 2)
-	Rprintf(" x[] is rescaled (* 1/s) with s = %g\n", -xden);
+	Rprintf(" x[] has been rescaled (* 1/s) with s = %g\n", -xden);
 
     j = 1;
-    while (x[j] > eps[0] * (eps[0] + fabs(xmed)) && j <= n) { /* test relative to xmed */
+    double x_eps = eps[0] * (eps[0] + fabs(xmed));
+    while (x[j] > x_eps && j <= n) { /* test relative to xmed */
 	/* x1[j] = x[j]; */
 	j++;
     }
-    if(trace_lev >= 3)
-	Rprintf("   x1[] := {x | x_j > eps}         has %d entries\n", j-1);
+    if(trace_lev >= 2)
+	Rprintf("   x1[] := {x | x_j > x_eps = %g}    has %d (='j-1') entries\n", 
+		x_eps, j-1);
     i = 1;
     double *x2 = x+j-1; /* pointer -- corresponding to  x2[i] = x[j]; */
-    while (x[j] > -eps[0] * (eps[0] + fabs(xmed)) && j <= n) { /* test relative to xmed */
+    while (x[j] > -x_eps && j <= n) { /* test relative to xmed */
 	/* x1[j] = x[j]; */
         /* x2[i] = x[j]; */
         j++;
         i++;
     }
-    /* now  x1[] := {x | x_j > -eps}  also include the median (0) */
+    /* now  x1[] := {x | x_j > -eps}  also includes the median (0) */
     if(trace_lev >= 2)
         Rprintf("'median-x' {x | -eps < x_i <= eps} has %d (= 'k') entries\n",
 		i-1);
@@ -126,9 +131,12 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
     /* conceptually,  x2[] := {x | x_j <= eps}   (which includes the median 0) */
 	h2 = i + (n-j);// == size of x2[] == maximal size of whimed() arrays
 
+    if(trace_lev)
+	Rprintf("  now allocating 2+5 work arrays of size (1+) h2=%d each:\n", h2);
     /* work arrays for whimed_i() :  allocate *once* only !! */
     double *acand  = (double *) R_alloc(h2, sizeof(double)),
 	   *a_srt  = (double *) R_alloc(h2, sizeof(double));
+
     int    *iw_cand= (int *)	R_alloc(h2, sizeof(int)),
     /* work arrays for the fast-median-of-table algorithm:
      *  currently still with  1-indexing */
@@ -148,8 +156,8 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 		h1,h2, (double)nr, (double)knew);
 
     double trial = -2./* -Wall */;
-    double *work   = (double *) R_alloc(n, sizeof(double));
-    int	   *weight = (int *)	R_alloc(n, sizeof(int));
+    double *work= (double *) R_alloc(n, sizeof(double));
+    int	   *iwt = (int *)    R_alloc(n, sizeof(int));
     Rboolean IsFound = FALSE;
     int nl = 0,
 	neq = 0;
@@ -164,34 +172,40 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
      */
     while (!IsFound && (nr-nl+neq > n) && it < iter[0])
     {
-	int sum_p, sum_q;
+	int64_t sum_p, sum_q;
 	it++;
 	j = 0;
 	for (i = 1; i <= h2; i++)
 	    if (left[i] <= right[i]) {
-		int k;
-		weight[j] = right[i] - left[i]+1;
-		k = left[i] + (weight[j]/2);
+		iwt[j] = right[i] - left[i]+1;
+		int k = left[i] + (iwt[j]/2);
 		work[j] = h_kern(x[k], x2[i], k, i, h1+1, eps[1]);
 		j++;
 	    }
 	if(trace_lev >= 4) {
-	    Rprintf(" before whimed(): work[0:(%d-1)], weight[] :\n", j);
-	    for(i=0; i < j; i++) Rprintf(" %8g", work  [i]); Rprintf("\n");
-	    for(i=0; i < j; i++) Rprintf(" %8d", weight[i]); Rprintf("\n");
+	    Rprintf(" before whimed(): work and iwt, each [0:(%d-1)]:\n", j);
+	    if(j >= 100) {
+		for(i=0; i < 90; i++) Rprintf(" %8g", work[i]); Rprintf("\n  ... ");
+		for(i=j-4; i < j; i++)Rprintf(" %8g", work[i]); Rprintf("\n");
+		for(i=0; i < 90; i++) Rprintf(" %8d", iwt [i]); Rprintf("\n  ... ");
+		for(i=j-4; i < j; i++)Rprintf(" %8d", iwt [i]); Rprintf("\n");
+	    } else { // j <= 99
+		for(i=0; i < j; i++) Rprintf(" %8g", work[i]); Rprintf("\n");
+		for(i=0; i < j; i++) Rprintf(" %8d", iwt [i]); Rprintf("\n");
+	    }
 	}
-	trial = whimed_i(work, weight, j, acand, a_srt, iw_cand);
+	trial = whimed_i(work, iwt, j, acand, a_srt, iw_cand);
 	double eps_trial = eps[0] * (eps[0] + fabs(trial));
 	if(trace_lev >= 3)
-	    Rprintf("%4s it=%2d, whimed(n=%3d)= %8g ", " ", it, j, trial);
+	    Rprintf("%2s it=%2d, whimed(*, n=%6d)= %8g ", " ", it, j, trial);
 
 	j = 1;
 	for (i = h2; i >= 1; i--) {
 	    while (j <= h1 && h_kern(x[j],x2[i],j,i,h1+1,eps[1]) - trial > eps_trial) {
 		// while (j <= h1 && h_kern(x[j],x2[i],j,i,h1+1,eps[1]) > trial) {
 		if (trace_lev >= 5)
-		    Rprintf("\nj=%3d, i=%3d, x[j]=%g, x2[i]=%g, h=%g", j, i,
-			    x[j], x2[i],
+		    Rprintf("\nj=%3d, i=%3d, x[j]=%g, x2[i]=%g, h=%g", 
+			    j, i, x[j], x2[i],
 			    h_kern(x[j],x2[i],j,i,h1+1,eps[1]));
 		j++;
 	    }
@@ -214,13 +228,15 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 
 	if(trace_lev >= 3) {
 	    if (trace_lev == 3)
-		Rprintf("sum_(p,q)= (%d,%d)", sum_p, sum_q);
+		Rprintf("sum_(p,q)= (%.0f,%.0f)", (double)sum_p, (double)sum_q);
 	    else { /* trace_lev >= 4 */
-		Rprintf("\n%3s p[]:", "");
-		for(i = 1; i <= h2; i++) Rprintf(" %2d", p[i]);
-		Rprintf(" sum= %3d\n%3s q[]:", sum_p, "");
-		for(i = 1; i <= h2; i++) Rprintf(" %2d", q[i]);
-		Rprintf(" sum= %3d\n", sum_q);
+		Rprintf("\n%3s p[1:%d]:", "", h2);
+		Rboolean lrg = h2 >= 100; 
+		int i_m = lrg ? 95 : h2;
+		for(i = 1; i <= i_m; i++) Rprintf(" %2d", p[i]); if(lrg) Rprintf(" ...");
+		Rprintf(" sum=%4.0f\n%3s q[1:%d]:", (double)sum_p, "", h2);
+		for(i = 1; i <= i_m; i++) Rprintf(" %2d", q[i]); if(lrg) Rprintf(" ...");
+		Rprintf(" sum=%4.0f\n", (double)sum_q);
 	    }
 	}
 
@@ -248,6 +264,7 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 		nl = sum_q;
 	    }
 	}
+	R_CheckUserInterrupt();
 
     } /* end while loop */
 

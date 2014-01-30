@@ -1,7 +1,6 @@
 
-R version 2.15.0 Patched (2012-05-24 r59442) -- "Easter Beagle"
-Copyright (C) 2012 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
+R version 3.0.2 Patched (2014-01-26 r64896) -- "Frisbee Sailing"
+Copyright (C) 2014 The R Foundation for Statistical Computing
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -903,7 +902,7 @@ Error in solve.default(cov, ...) :
   system is computationally singular: reciprocal condition number = 4.85293e-11
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  1.487 0.08 1.71 0 0.007 
+Time elapsed:  2.103 0.107 2.338 0 0.003 
 > 
 > ## "large" examples using different algo branches {seg.fault in version 0.4-4}:
 > set.seed(1)
@@ -944,7 +943,7 @@ Robust Estimate of Covariance:
 [3,]      7.31   238  9862.80
 > 
 > cat('Time elapsed: ', proc.time(),'\n')
-Time elapsed:  1.6 0.081 1.825 0 0.007 
+Time elapsed:  2.303 0.107 2.54 0 0.003 
 > 
 > 
 > ## Now, some small sample cases:
@@ -1024,7 +1023,7 @@ List of 18
  - attr(*, "class")= chr "mcd"
 > mcc <- MASS::cov.mcd(X)
 > stopifnot(cc$best == mcc$best,
-+           all.equal(cc$center, mcc$center, tol = 1e-10),
++           all.equal(cc$center, mcc$center, tolerance = 1e-10),
 +           all.equal(c(mcc$cov / cc$raw.cov), rep(0.673549282206, 3*3)))
 > 
 > ## p = 4 -- 6 x 4 & 7 x 4  [ n < 2 p  ! ]
@@ -1076,7 +1075,7 @@ List of 18
  - attr(*, "class")= chr "mcd"
 > mcc <- MASS::cov.mcd(X)
 > stopifnot(cc$best == mcc$best,
-+           all.equal(cc$center, mcc$center, tol = 1e-10),
++           all.equal(cc$center, mcc$center, tolerance = 1e-10),
 +           all.equal(c(mcc$cov / cc$raw.cov), rep(0.7782486992881, p*p)))
 > n <- 6
 > X <- X[1:n,]
@@ -1100,20 +1099,20 @@ In covMcd(X, use.correction = FALSE) :
   n < 2 * p, i.e., possibly too small sample size
 > mcc <- MASS::cov.mcd(X)
 > stopifnot(cc$best == mcc$best,
-+           all.equal(cc$center, mcc$center, tol = 1e-10),
++           all.equal(cc$center, mcc$center, tolerance = 1e-10),
 +           all.equal(c(mcc$cov / cc$raw.cov), rep(0.7528695976179, p*p)))
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  1.679 0.082 1.905 0 0.007 
+Time elapsed:  2.482 0.111 2.725 0 0.003 
 > 
 > ## nsamp = "exact" -- here for p=7
 > coleman.x <- data.matrix(coleman[, 1:6])
 > cat('Time : ', system.time(CcX <- covMcd(coleman.x, nsamp="exact")),
 +     "\n")# ~ 3 sec. on a fast 2003 machine (Intel Xeon 2400 MHz)
-Time :  1.007 0.001 1.011 0 0 
+Time :  1.724 0.002 1.733 0 0 
 > stopifnot(all.equal(CcX$best,
-+                     c(2, 5:9, 11,13, 14:16, 19:20), tol=0))
++                     c(2, 5:9, 11,13, 14:16, 19:20), tolerance=0))
 > 
 > proc.time()
    user  system elapsed 
-  2.721   0.090   2.952 
+  4.276   0.117   4.530 

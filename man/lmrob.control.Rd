@@ -2,7 +2,11 @@
 \title{Tuning Parameters for lmrob() and Auxiliaries}
 \encoding{utf8}
 \alias{lmrob.control}
-\alias{lmrob.control.sfs}
+\alias{lmrob.control}
+\alias{.Mchi.tuning.default}
+\alias{.Mpsi.tuning.default}
+\alias{.Mchi.tuning.defaults}
+\alias{.Mpsi.tuning.defaults}
 \description{
   Tuning parameters for \code{\link{lmrob}}, the MM-type regression
   estimator and the associated S-, M- and D-estimators.  Using
@@ -18,10 +22,14 @@ lmrob.control(setting, seed = NULL, nResample = 500,
               refine.tol = 1e-7, rel.tol = 1e-7, solve.tol = 1e-7,
               trace.lev = 0,
               mts = 1000, subsampling = c("nonsingular", "simple"),
-              compute.rd = FALSE, method = 'MM',
-              psi = c('bisquare', 'lqq', 'welsh', 'optimal', 'hampel', 'ggw'),
+              compute.rd = FALSE, method = "MM", psi = "bisquare",
               numpoints = 10, cov = NULL,
               split.type = c("f", "fi", "fii"), fast.s.large.n = 2000, ...)
+
+.Mchi.tuning.defaults
+.Mchi.tuning.default(psi)
+.Mpsi.tuning.defaults
+.Mpsi.tuning.default(psi)
 }
 \arguments{
   \item{setting}{a string specifying alternative default values.  Leave
@@ -110,18 +118,34 @@ lmrob.control(setting, seed = NULL, nResample = 500,
     components to the result.}
 }
 \value{
-  a named \code{\link{list}} with over twenty components, corresponding
-  to the arguments, where \code{tuning.psi} and \code{tuning.chi} are
-  typically computed, see above.
+  \code{.Mchi.tuning.default(psi)} and \code{.Mpsi.tuning.default(psi)}
+  return a short \code{\link{numeric}} vector of tuning constants which
+  are defaults for the corresponding psi-function, see the \emph{Details}.
+  They are based on the named \code{\link{list}}s
+  \code{.Mchi.tuning.defaults} and \code{.Mpsi.tuning.defaults},
+  respectively.
+
+  \code{lmrob.control()} returns a named \code{\link{list}} with over
+  twenty components, corresponding to the arguments, where
+  \code{tuning.psi} and \code{tuning.chi} are typically computed, as
+  \code{.Mpsi.tuning.default(psi)} or \code{.Mchi.tuning.default(psi)},
+  respectively.
 }
 \details{The option \code{setting="KS2011"} alters the default
   arguments.  They are changed to \code{method = 'SMDM', psi = 'lqq',
     max.it = 500, k.max = 2000, cov = '.vcov.w'}.  The defaults of all
   the remaining arguments are not changed.
 
-  By default, \code{tuning.chi} and \code{tuning.psi} are set to
+  By default, and in \code{.Mpsi.tuning.default()} and \code{.Mchi.tuning.default()},
+  \code{tuning.chi} and \code{tuning.psi} are set to
   yield an MM-estimate with break-down point \eqn{0.5} and efficiency of
-  \eqn{95\%}  at the normal. They are:
+  95\% at the normal.
+
+  To get these defaults, e.g., \code{.Mpsi.tuning.default(psi)} is
+  equivalent to but more efficient than the formerly widely used
+  \code{lmrob.control(psi = psi)$tuning.psi}.
+
+  These defaults are:
   \tabular{rll}{
     \code{psi} \tab \code{tuning.chi} \tab \code{tuning.psi} \cr
     \code{bisquare} \tab \code{1.54764} \tab \code{4.685061} \cr
@@ -135,22 +159,22 @@ lmrob.control(setting, seed = NULL, nResample = 500,
     \code{c(1.5, 3.5, 8)*0.9014}
   }
   The values for the tuning constant for the \code{ggw} psi function are
-  hard coded. The constants vector has four elements: minimal slope, b
+  hard coded.  The constants vector has four elements: minimal slope, b
   (controlling the bend at the maximum of the curve), efficiency,
-  break-down point. Use \code{NA} for an unspecified value, see examples
+  break-down point.  Use \code{NA} for an unspecified value, see examples
   in the tables.
 
-  The constants for the \code{hampel} psi function are chosen to have a
-  redescending slope of \eqn{-1/3}. Constants for a slope of \eqn{-1/2}
+  The constants for the \code{"hampel"} psi function are chosen to have a
+  redescending slope of \eqn{-1/3}.  Constants for a slope of \eqn{-1/2}
   would be
   \tabular{rll}{
     \code{psi} \tab \code{tuning.chi} \tab \code{tuning.psi} \cr
-    \code{hampel} \tab \code{c(2, 4, 8) * 0.1981319} \tab
+    \code{"hampel"} \tab \code{c(2, 4, 8) * 0.1981319} \tab
     \code{c(2, 4, 8) * 0.690794}
   }
 
-  Alternative coefficients for an efficiency of \eqn{85\%} at the normal
-  are given in the table below.
+  Alternative coefficients for an efficiency of 85\%
+  at the normal are given in the table below.
   \tabular{rl}{
     \code{psi} \tab \code{tuning.psi} \cr
     \code{bisquare} \tab \code{3.443689} \cr
@@ -162,9 +186,9 @@ lmrob.control(setting, seed = NULL, nResample = 500,
   }
 }
 \references{
-  Koller, M. and Stahel, W.A. (2011), Sharpening Wald-type inference in
-  robust regression for small samples, \emph{Computational Statistics &
-  Data Analysis} \bold{55}(8), 2504--2515.
+  Koller, M. and Stahel, W.A. (2011)
+  Sharpening Wald-type inference in robust regression for small samples.
+  \emph{Computational Statistics & Data Analysis} \bold{55}(8), 2504--2515.
 }
 \author{ Matias Salibian-Barrera, Martin Maechler and Manuel Koller}
 \seealso{ \code{\link{lmrob}}, also for references and examples.
@@ -182,6 +206,11 @@ lmrob(y0 ~ 0+gr)
 
 ## Use  Koller & Stahel(2011)'s recommendation but a larger  'max.it':
 str(ctrl <- lmrob.control("KS2011", max.it = 1000))
+
+str(.Mpsi.tuning.defaults)
+stopifnot(identical(.Mpsi.tuning.defaults,
+                   sapply(names(.Mpsi.tuning.defaults),
+                          .Mpsi.tuning.default)))
 }
 \keyword{robust}
 \keyword{regression}

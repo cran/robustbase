@@ -22,7 +22,7 @@ summary(mC)
 stopifnot(
 all.equal(unname(coef(mC)),
 	  c(30.50232, -1.666147, 0.08425381, 0.6677366, 1.167777, -4.136569),
-	  tol = 2e-7)# 6.112 e-8 (32-b)
+	  tolerance = 2e-7)# 6.112 e-8 (32-b)
 )
 dput(signif(unname(coef(mC)), 7))
 ## 64b(0.2-0): c(30.50232, -1.666147, 0.08425381, 0.6677366, 1.167777, -4.136569)
@@ -111,9 +111,9 @@ dput(signif(100 * (sd <- unname(coef(sm4)[, "Std. Error"])), 7))
 ## both for 32 and 64 bit
 
 stopifnot(
-	  all.equal(cf, c(-0.05108914, 1.00597115, 1.00320052, 0.98332632), tol= 7e-7)
+	  all.equal(cf, c(-0.05108914, 1.00597115, 1.00320052, 0.98332632), tolerance= 7e-7)
 	  , # ... e-7	 needed on 64b
-	  all.equal(100*sd,c(2.2138147, 0.2864678, 2.2023182, 2.1808862),tol= 7e-7)
+	  all.equal(100*sd,c(2.2138147, 0.2864678, 2.2023182, 2.1808862),tolerance= 7e-7)
 	  ) # 1.334 e-7	 needed on 64b
 
 cat('Time elapsed: ', proc.time(),'\n') # "stats"

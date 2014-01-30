@@ -1,8 +1,14 @@
 nlrob <-
-    function (formula, data, start, weights = NULL, na.action = na.fail,
-	      psi = psi.huber, test.vec = c("resid", "coef", "w"),
-	      maxit = 20, acc = 1e-06, algorithm = "default",
-	      control = nls.control(), trace = FALSE, ...)
+    function (formula, data, start, lower, upper,
+              weights = NULL, na.action = na.fail,
+	      method = c("M", "MM", "tau", "CM", "mtl"),
+	      psi = .Mwgt.psi1("huber", cc=1.345),
+	      test.vec = c("resid", "coef", "w"),
+	      maxit = 20, tol = 1e-06, acc,
+	      algorithm = "default", doCov = FALSE,
+	      control = if(method == "M") nls.control() else
+			nlrob.control(method, optArgs = list(trace=trace), ...),
+              trace = FALSE, ...)
 {
     ## Purpose:
     ##	Robust fitting of nonlinear regression models. The fitting is
@@ -11,28 +17,74 @@ nlrob <-
     ##
     ## --> see the help file,  ?nlrob  (or ../man/nlrob.Rd in the source)
     ## -------------------------------------------------------------------------
-
+    
     ##- some checks
-    mf <- call <- match.call() # << and more as in nls()  ['mf': FIXME or drop]
+    call <- match.call() # << and more as in nls()
     formula <- as.formula(formula)
     if (length(formula) != 3)
 	stop("'formula' should be a formula of the type 'y  ~ f(x, alpha)'")
-    test.vec <- match.arg(test.vec)
-    varNames <- all.vars(formula)
+    ## Had 'acc'; now use 'tol' which is more universal; 'acc' should work for a while
+    if(!missing(acc) && is.numeric(acc)) {
+        if(!missing(tol)) stop("specifying both 'acc' and 'tol' is invalid")
+        tol <- acc
+        message("The argument 'acc' has been renamed to 'tol'; do adapt your code.")
+    }
+    method <- match.arg(method)
     dataName <- substitute(data)
-    data <- as.data.frame(data)
+    dataCl <- attr(attr(call, "terms"), "dataClasses")
+    
+    if(method != "M") { 
+      if(!is.null(weights))
+          stop("specifying 'weights' is not yet supported for method ", method)
+      if(!missing(start))
+	  warning("Starting values will not be used for method ", method)
+      force(control)
+      fixAns <- function(mod) {
+          mod$call <- call # the nlrob() one, not nlrob.<foo>()
+          mod$data <- dataName
+          mod$dataClasses <- dataCl
+          mod
+      }
+      switch(method,
+	     "MM" = {
+		 return(fixAns(nlrob.MM (formula, data, lower=lower, upper=upper,
+					 tol=tol, ctrl= control)))
+	     },
+	     "tau" = {
+		 return(fixAns(nlrob.tau(formula, data, lower=lower, upper=upper,
+					 tol=tol, ctrl= control)))
+	     },
+	     "CM"	 = {
+		 return(fixAns(nlrob.CM (formula, data, lower=lower, upper=upper,
+					 tol=tol, ctrl= control)))
+	     },
+	     "mtl" = {
+		 return(fixAns(nlrob.mtl(formula, data, lower=lower, upper=upper,
+					 tol=tol, ctrl= control)))
+	     })
+    }
 
-    ## FIXME:  nls() allows  a missing 'start';	 we don't :
-    if (length(pnames <- names(start)) != length(start))
-	stop("'start' must be fully named (list or numeric vector)")
+    ## else: method == "M", original method, the only one based on 'nls' :
+    varNames <- all.vars(formula)
+    obsNames <- rownames(data <- as.data.frame(data))
+    data <- as.list(data)# to be used as such
+    test.vec <- match.arg(test.vec)
+    if(missing(lower)) lower <- -Inf
+    if(missing(upper)) upper <- +Inf
+    ## FIXME:  nls() allows  a missing 'start'; we don't :
+    if(length(pnames <- names(start)) != length(start))
+        stop("'start' must be fully named (list or numeric vector)")
     if (!((is.list(start) && all(sapply(start, is.numeric))) ||
-	  (is.vector(start) && is.numeric(start)))
-	|| any(is.na(match(pnames, varNames))))
-	stop("'start' must be a list or numeric vector named with parameters in 'formula'")
-    if ("w" %in% varNames || "w" %in% pnames || "w" %in% names(data))
-	stop("Do not use 'w' as a variable name or as a parameter name")
+	  (is.vector(start) && is.numeric(start))))
+	stop("'start' must be a named list or numeric vector")
+    if(any(is.na(match(pnames, varNames))))
+	stop("parameter names must appear in 'formula'")
+    nm <- "._nlrob.w"
+    if (nm %in% c(varNames, pnames, names(data)))
+	stop(gettextf("Do not use '%s' as a variable name or as a parameter name",
+		      nm), domain=NA)
     if (!is.null(weights)) {
-	if (length(weights) != nrow(data))
+	if (length(weights) != nobs)
 	    stop("'length(weights)' must equal the number of observations")
 	if (any(weights < 0) || any(is.na(weights)))
 	    stop("'weights' must be nonnegative and not contain NAs")
@@ -46,18 +98,18 @@ nlrob <-
 
     ##- initialize testvec  and update formula with robust weights
     coef <- start
-    fit <- eval(formula[[3]], c(as.list(data), start))
-    y <- eval(formula[[2]], as.list(data))
+    fit <- eval(formula[[3]], c(data, start))
+    y <- eval(formula[[2]], data)
     nobs <- length(y)
     resid <- y - fit
-    w <- rep.int(1, nrow(data))
+    w <- rep.int(1, nobs)
     if (!is.null(weights))
 	w <- w * weights
     ##- robust loop (IWLS)
     converged <- FALSE
     status <- "converged"
     method.exit <- FALSE
-    for (iiter in 1:maxit) {
+    for (iiter in seq_len(maxit)) {
 	if (trace)
 	    cat("robust iteration", iiter, "\n")
 	previous <- get(test.vec)
@@ -70,15 +122,24 @@ nlrob <-
 	    ## -----   Scale <- min(abs(resid)[resid != 0])
 	}
 	else {
-	    w <- psi(resid/Scale, ...)
+	    w <- psi(resid/Scale)
 	    if (!is.null(weights))
 		w <- w * weights
-	    data$..nlrob.w <- w ## use a variable name the user "will not" use
-	    ..nlrob.w <- NULL # FIXME workaround for codetools
+	    data$._nlrob.w <- w ## use a variable name the user "will not" use
+	    ._nlrob.w <- NULL # workaround for codetools "bug"
+            ## Case distinction against "wrong warning" as long as
+            ## we don't require R > 3.0.2:
+	    if(identical(lower, -Inf) && identical(upper, Inf))
 	    out <- nls(formula, data = data, start = start,
-                       algorithm = algorithm, trace = trace,
-                       weights = ..nlrob.w,
-                       na.action = na.action, control = control)
+		       algorithm = algorithm, trace = trace,
+		       weights = ._nlrob.w,
+		       na.action = na.action, control = control)
+	    else
+	    out <- nls(formula, data = data, start = start,
+		       algorithm = algorithm, trace = trace,
+		       lower=lower, upper=upper,
+		       weights = ._nlrob.w,
+		       na.action = na.action, control = control)
 
 	    ## same sequence as in start! Ok for test.vec:
 	    coef <- coefficients(out)
@@ -86,13 +147,15 @@ nlrob <-
             resid <- residuals(out)
 	    convi <- irls.delta(previous, get(test.vec))
 	}
-	converged <- convi <= acc
+	converged <- convi <= tol
 	if (converged)
 	    break
     }
 
-    if(!converged && !method.exit)
+    if(!converged || method.exit) {
 	warning(status <- paste("failed to converge in", maxit, "steps"))
+        if(method.exit) converged <- FALSE
+    }
 
     if(!is.null(weights)) { ## or just   out$weights  ??
 	tmp <- weights != 0
@@ -100,33 +163,49 @@ nlrob <-
     }
 
     ## --- Estimated asymptotic covariance of the robust estimator
-    if (!converged && !method.exit) {
-	asCov <- NA
-    } else {
+    rw <- psi(resid/Scale)
+    asCov <- if(!converged || !doCov) NA else { ## compare with .vcov.m() below
 	AtWAinv <- chol2inv(out$m$Rmat())
 	dimnames(AtWAinv) <- list(names(coef), names(coef))
-	tau <- (mean(psi(resid/Scale, ...)^2) /
-		(mean(psi(resid/Scale, deriv=TRUE, ...))^2))
+	tau <- mean(rw^2) / mean(psi(resid/Scale, d=TRUE))^2
 	asCov <- AtWAinv * Scale^2 * tau
     }
 
     ## returned object:	 ==  out$m$fitted()  [FIXME?]
-    fit <- eval(formula[[3]], c(as.list(data), coef))
-    names(fit) <- rownames(data)
+    fit <- eval(formula[[3]], c(data, coef))
+    names(fit) <- obsNames
     structure(class = c("nlrob", "nls"),
 	      list(m = out$m, call = call, formula = formula,
 		   new.formula = formula, nobs = nobs,
 		   coefficients = coef,
 		   working.residuals = as.vector(resid),
 		   fitted.values = fit, residuals = y - fit,
-		   Scale = Scale, w = w, rweights = psi(resid/Scale, ...),
+		   Scale = Scale, w = w, rweights = rw,
 		   cov=asCov, status = status, iter=iiter,
-		   psi = psi, data = dataName,
-		   dataClasses = attr(attr(mf, "terms"), "dataClasses")))
+		   psi = psi, data = dataName, dataClasses = dataCl,
+		   control = control))
 }
+
+.vcov.m <- function(m, nms.coef, psi, Scale, resid, res.sc = resid/Scale) {
+    AtWAinv <- chol2inv(m$Rmat())
+    stopifnot(length(Scale) == 1, Scale >= 0,
+              is.character(nms.coef), length(nms.coef) == nrow(AtWAinv))
+    dimnames(AtWAinv) <- list(nms.coef, nms.coef)
+    rw <- psi(res.sc)
+    tau <- mean(rw^2) / mean(psi(res.sc, d=TRUE))^2
+    asCov <- AtWAinv * Scale^2 * tau
+}
+
 
 ## The 'nls' method is *not* correct
 formula.nlrob <- function(x, ...) x$formula
+
+sigma.nlrob <- function(object, ...)
+    if(!is.null(s <- object$Scale)) s else object$coefficients[["sigma"]]
+
+estimethod <- function(object, ...) UseMethod("estimethod")
+estimethod.nlrob <- function(object, ...)
+    if(is.list(object$m) && inherits(object, "nls")) "M" else object$ctrl$method
 
 fitted.nlrob <- function (object, ...)
 {
@@ -187,7 +266,14 @@ residuals.nlrob <- function (object, type = c("response", "working", "pearson"),
 }
 
 
-vcov.nlrob <- function (object, ...) object$cov
+vcov.nlrob <- function (object, ...) {
+    if(!is.na(cv <- object$cov)) cv
+    else {
+        sc <- object$Scale
+        .vcov.m(object$m, names(coef(object)), psi=object$psi, Scale= sc,
+                res.sc = object$working.residuals / sc)
+    }
+}
 
 summary.nlrob <- function (object, correlation = FALSE, symbolic.cor = FALSE, ...)
 {
@@ -198,18 +284,23 @@ summary.nlrob <- function (object, correlation = FALSE, symbolic.cor = FALSE, ..
     rdf <- n - p
     ans <- object[c("formula", "residuals", "Scale", "w", "rweights", "cov",
 		    "call", "status", "iter", "control")]
+    conv <- ans$status == "converged"
+    sc   <- ans$Scale
+    if(is.na(ans[["cov"]]) && conv)
+	ans$cov <- .vcov.m(object$m, names(param), psi=object$psi, Scale= sc,
+			   res.sc = object$working.residuals / sc)
     ans$df <- c(p, rdf)
     cf <-
-	if(ans$status == "converged") {
-	    se <- sqrt(diag(object$cov))
+	if(conv) {
+	    se <- sqrt(diag(ans$cov))
 	    tval <- param/se
 	    cbind(param, se, tval, 2 * pt(abs(tval), rdf, lower.tail = FALSE))
 	} else cbind(param, NA, NA, NA)
     dimnames(cf) <- list(names(param),
 			 c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
     ans$coefficients <- cf
-    if(correlation && rdf > 0 && ans$status == "converged") {
-	ans$correlation <- object$cov / outer(se, se)
+    if(correlation && rdf > 0 && conv) {
+	ans$correlation <- ans$cov / outer(se, se)
 	ans$symbolic.cor <- symbolic.cor
     }
     class(ans) <- "summary.nlrob"

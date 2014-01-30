@@ -85,9 +85,9 @@ stopifnot(is.infinite(kr1 <- kappa(rm1)), kr1 == kappa(cm1), # = +Inf both
 ## plot(rm1, which=1) ## plot.lmrob() fails "singular covariance" .. FIXME!
 par(mfrow=c(2,2))
 plot(rm1, which=2:4)
-stopifnot(all.equal(predict(rm1), predict(rm1c), tol=1e-15),
+stopifnot(all.equal(predict(rm1), predict(rm1c), tolerance=1e-15),
           all.equal(predict(rm1,  se.fit=TRUE, interval="confidence"),
-		    predict(rm1c, se.fit=TRUE, interval="confidence"), tol=1e-15))
+		    predict(rm1c, se.fit=TRUE, interval="confidence"), tolerance=1e-15))
 predict(rm1, type="terms", se.fit=TRUE, interval="confidence")
 #proj(rm1) ## fails "FIXME"
 residuals(rm1)
@@ -98,13 +98,13 @@ residuals(rm1)
 set.seed(12); sc <- simulate(cm1, 64)
 set.seed(12); rc <- simulate(rm1, 64)
 
-stopifnot(all.equal(sqrt(diag(V1)), coef(summary(rm1))[,"Std. Error"], tol=1e-15),
-	  all.equal(sc, rc, tol = 0.08),# dimension *and* approx. values (no NA)
+stopifnot(all.equal(sqrt(diag(V1)), coef(summary(rm1))[,"Std. Error"], tolerance=1e-15),
+	  all.equal(sc, rc, tolerance = 0.08),# dimension *and* approx. values (no NA)
 	  identical(variable.names(rm1), variable.names(cm1)),
-	  all.equal(residuals(rm1), residuals(cm1), tol = 0.05),# incl. names
-	  all.equal(rstudent (rm1), rstudent (cm1), tol = 0.06),
+	  all.equal(residuals(rm1), residuals(cm1), tolerance = 0.05),# incl. names
+	  all.equal(rstudent (rm1), rstudent (cm1), tolerance = 0.06),
 	  identical(dimnames(rm1), dimnames(cm1)),
-	  all.equal(dummy.coef(rm1), dummy.coef(cm1), tol= .5)) ## check mostly structure
+	  all.equal(dummy.coef(rm1), dummy.coef(cm1), tolerance= .5)) ## check mostly structure
 
 ## other helper functions
 stopifnot(identical(case.names(rm1), case.names(cm1)),
@@ -128,9 +128,9 @@ data <- data.frame(y=1:10,x1=0,x2=0,os=2,w=c(0.5, 1))
 sc5 <- summary(cm5 <- lm(y ~ 1+x1+x2+offset(os), data, weights=w))
 sc6 <- summary(cm6 <- lm(y ~ 0+x1+x2+offset(os), data, weights=w))
 
-stopifnot(all.equal(coef(m5), coef(cm5), tol = 0.01),
+stopifnot(all.equal(coef(m5), coef(cm5), tolerance = 0.01),
           identical(coef(m6), coef(cm6)),
-          all.equal(coef(sm5), coef(sc5), tol = 0.05),
+          all.equal(coef(sm5), coef(sc5), tolerance = 0.05),
           identical(coef(sm6), coef(sc6)),
           identical(sm5$df, sc5$df),
           identical(sm6$df, sc6$df))

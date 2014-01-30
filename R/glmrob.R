@@ -14,11 +14,11 @@ function (formula, family, data, weights, subset,
     fami <- family$family
     if(is.null(fami))
 	stop(gettextf("'%s' is not a valid family (see ?family)",
-		      as.character(call[["family"]])))
+		      as.character(call[["family"]])), domain=NA)
 
     if (!(fami %in% c("binomial", "poisson", "Gamma", "gaussian"))) {
 	stop(gettextf("Robust GLM fitting not yet implemented for family %s",
-			  fami))
+			  fami), domain=NA)
     }
     if (missing(data))
 	data <- environment(formula)
@@ -47,7 +47,7 @@ function (formula, family, data, weights, subset,
 	stop("'weights' must be non-negative")
     if (!is.null(offset) && length(offset) != NROW(Y))
 	stop(gettextf("Number of offsets is %d, should rather equal %d (number of observations)",
-		      length(offset), NROW(Y)))
+		      length(offset), NROW(Y)), domain=NA)
     method <- match.arg(method)
     meth. <- if(method == "WBY") "BY" else method
 ### FIXME: the whole 'control' should be changed to "copy"  lmrob() and lmrob.control()
@@ -87,7 +87,7 @@ function (formula, family, data, weights, subset,
                       if(fami != "binomial")
                           stop(gettextf(
 			"method='%s' is only applicable for binomial family, but family=\"\"",
-                              method, fami))
+                              method, fami), domain=NA)
                       ### FIXME: use glmrobBY(..) with these arguments, including 'weights'
                       glmrobBY(X=X, y=Y, weights=weights, start=start,
                                method=method, ## == "BY" / "WBY"

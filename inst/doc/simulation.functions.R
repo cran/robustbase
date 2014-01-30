@@ -210,8 +210,8 @@ f.procedures2str <- function(procs)
       psi <- lproc$args$psi
       ## test if tuning.psi is the default one
       if (!is.null(lproc$args$tuning.psi) &&
-          isTRUE(all.equal(lproc$args$tuning.psi, f.lmrob.control(psi = psi)$tuning.psi)))
-        psi <- paste(psi,lproc$args$tuning.psi)
+	  isTRUE(all.equal(lproc$args$tuning.psi, .Mpsi.tuning.default(psi))))
+	psi <- paste(psi, lproc$args$tuning.psi)
     }
     D.type <- switch(lproc$estname,
                      lmrob.u =,

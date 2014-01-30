@@ -4,7 +4,8 @@
 \title{Summarizing Robust Fits of Nonlinear Regression Models }
 \description{
   \code{summary} method for objects of class \code{"nlrob"}, i.e.,
-  \code{\link{nlrob}()} results.
+  \code{\link{nlrob}()} results.  Currently it only works for
+  \code{nlrob(*, method="M")}.
 }
 \usage{
 \method{summary}{nlrob}(object, correlation = FALSE, symbolic.cor = FALSE, ...)

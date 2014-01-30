@@ -83,7 +83,7 @@ ctrl$k.max <- 1
 mC <- m_s_descent      (x1, x2, y, ctrl, mss2$b1, mss2$b2, mss2$scale+10)
 mR <- m_s_descent_Ronly(x1, x2, y, ctrl, mss2$b1, mss2$b2, mss2$scale+10)
 nm <- c("b1","b2", "scale", "res")
-stopifnot(all.equal(mC[nm], mR[nm], check.attr = FALSE, tol=5e-15))
+stopifnot(all.equal(mC[nm], mR[nm], check.attributes = FALSE, tolerance=5e-15))
 
 ## control$k.m_s <- 100
 res3 <- vector("list", 100)
@@ -108,7 +108,7 @@ control$trace.lev <- 3
 set.seed(1003)
 fMS <- lmrob.M.S(x, y, control, fmS$model)
 resid <- drop(y - x %*% fMS$coef)
-stopifnot(all.equal(resid, fMS$resid, check.attr=FALSE))
+stopifnot(all.equal(resid, fMS$resid, check.attributes=FALSE))
 
 ## Test direct call to lmrob
 ## 1. trace_lev output:

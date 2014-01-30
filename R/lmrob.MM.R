@@ -1,3 +1,60 @@
+## The "regularized" psi-function names:
+## .R: the redescending ones:
+.Mpsi.R.names <- c('bisquare', 'lqq', 'welsh', 'optimal', 'hampel', 'ggw')
+## .M: the monotone ones:
+.Mpsi.M.names <- c('huber')
+## Note: there could be more: non-redescending, non-monotone {such as Cauchy score}
+.Mpsi.names <- c(R= .Mpsi.R.names, M= .Mpsi.M.names)
+
+
+##' This allows synonyms as "Tukey" *and* partial matches such as "opt" :
+.regularize.Mpsi <- function(psi, redescending = TRUE) {
+    stopifnot(is.character(psi), length(psi) == 1)
+    psi <- tolower(psi)
+    psi <- switch(psi,
+		  'tukey'= , 'biweight'= "bisquare",
+		  ## otherwise keep
+		  psi)
+    nms <- if(redescending) .Mpsi.R.names else .Mpsi.names
+    if (is.na(i <- pmatch(psi, nms)))
+        stop(gettextf("'psi' should be one of %s", paste(dQuote(nms),
+            collapse = ", ")), domain = NA)
+    nms[i]
+}
+
+.Mpsi.tuning.defaults <- list(
+    'huber' = 1.345
+    , 'bisquare' = 4.685061
+    , 'welsh' = 2.11
+    , 'ggw' = c(-0.5, 1.5, .95, NA) ## min slope, b, eff, bp
+    , 'lqq' = c(-0.5, 1.5, .95, NA) ## min slope, b, eff, bp
+    , 'optimal' = 1.060158
+    , 'hampel' = c(1.5, 3.5, 8) * 0.9016085 ## a, b, r
+    )
+.Mpsi.tuning.default <- function(psi) {
+    if(is.null(p <- .Mpsi.tuning.defaults[[psi]]))
+        stop(gettextf("invalid 'psi'=%s; possibly use .regularize.Mpsi(%s)",
+                      psi, "psi, redescending=FALSE"), domain=NA)
+    p
+}
+
+.Mchi.tuning.defaults <- list(
+    ## Here, psi must be redescending! -> 'huber' not possible
+    'bisquare' = 1.54764
+    , 'welsh' = 0.5773502
+    , 'ggw' = c(-0.5, 1.5, NA, .5) ## min slope, b, eff, bp
+    , 'lqq' = c(-0.5, 1.5, NA, .5) ## min slope, b, eff, bp
+    , 'optimal' = 0.4047
+    , 'hampel' = c(1.5, 3.5, 8) * 0.2119163 ## a, b, r
+    )
+.Mchi.tuning.default <- function(psi) {
+    if(is.null(p <- .Mchi.tuning.defaults[[psi]]))
+	stop(gettextf("invalid 'psi'=%s; possibly use .regularize.Mpsi(%s)",
+		      psi, "psi"), domain=NA)
+    p
+}
+
+
 lmrob.control <-
     function(setting, seed = NULL, nResample = 500,
 	     tuning.chi = NULL, bb = 0.5,
@@ -12,52 +69,43 @@ lmrob.control <-
 	     subsampling = c("nonsingular", "simple"),
 	     compute.rd = FALSE,
 	     method = 'MM',
-	     psi = c('bisquare', 'lqq', 'welsh', 'optimal', 'hampel', 'ggw'),
+	     psi = 'bisquare',
 	     numpoints = 10, cov = NULL,
 	     split.type = c("f", "fi", "fii"),
 	     fast.s.large.n = 2000,
              ...)
 {
+    p.ok <- missing(psi) # if(p.ok) psi does not need regularization
     if (!missing(setting)) {
         if (setting == 'KS2011') {
             if (missing(method)) method <- 'SMDM'
-            if (missing(psi)) psi <- 'lqq'
+	    psi <- if(p.ok) 'lqq' else .regularize.Mpsi(psi) ; p.ok <- TRUE
             if (missing(max.it)) max.it <- 500
             if (missing(k.max)) k.max <- 2000
             if (missing(cov) || is.null(cov)) cov <- '.vcov.w'
         } else {
             warning("Unknown setting '", setting, "'. Using defaults.")
-            psi <- match.arg(psi)
         }
     } else {
-        psi <- if (missing(psi) && grepl('D', method)) 'lqq' else match.arg(psi)
+	if(p.ok && grepl('D', method)) psi <- 'lqq'
 	if (missing(cov) || is.null(cov))
 	    cov <- if(method %in% c('SM', 'MM')) ".vcov.avar1" else ".vcov.w"
     }
+    if(!p.ok) psi <- .regularize.Mpsi(psi)
     subsampling <- match.arg(subsampling)
 
-    if (missing(tuning.chi) || is.null(tuning.chi))
-        tuning.chi <- switch(psi,
-                             'bisquare' = 1.54764,
-                             'welsh' = 0.5773502,
-                             'ggw' = c(-0.5, 1.5, NA, .5), ## min slope, b, eff, bp
-                             'lqq' = c(-0.5, 1.5, NA, .5), ## min slope, b, eff, bp
-                             'optimal' = 0.4047,
-                             'hampel' = c(1.5, 3.5, 8) * 0.2119163) ## a, b, r
-    if (missing(tuning.psi) || is.null(tuning.psi))
-        tuning.psi <- switch(psi,
-                             'bisquare' = 4.685061,
-                             'welsh' = 2.11,
-                             'ggw' = c(-0.5, 1.5, .95, NA), ## min slope, b, eff, bp
-                             'lqq' = c(-0.5, 1.5, .95, NA), ## min slope, b, eff, bp
-                             'optimal' = 1.060158,
-                             'hampel' = c(1.5, 3.5, 8) * 0.9016085) ## a, b, r
+    ## in ggw, lqq:  if tuning.{psi|chi}  are non-standard, calculate coefficients:
+    compute.const <- (psi %in% c('ggw', 'lqq'))
 
-    ## in ggw, lqq:  tuning.psi, *.chi  are non-standard, calculate coefficients:
-    if (psi %in% c('ggw', 'lqq')) {
-        tuning.psi <- lmrob.const(tuning.psi, psi)
-        tuning.chi <- lmrob.const(tuning.chi, psi)
-    }
+    if(is.null(tuning.chi))
+	tuning.chi <- .Mchi.tuning.default(psi)
+    else if(compute.const)
+	tuning.chi <- .psi.const(tuning.chi, psi)
+
+    if(is.null(tuning.psi))
+	tuning.psi <- .Mpsi.tuning.default(psi)
+    else if(compute.const)
+	tuning.psi <- .psi.const(tuning.psi, psi)
 
     c(list(seed = as.integer(seed), nResample=nResample, psi=psi,
            tuning.chi=tuning.chi, bb=bb, tuning.psi=tuning.psi,
@@ -72,9 +120,13 @@ lmrob.control <-
       list(...))
 }
 
-##' @title Modify lmrob control list to contain only parameters that were actually used
-##' @param control a list, typically the 'control' componenent of a \code{\link{lmrob}()} call,
-##'   or the result of  \code{\link{lmrob.control}()}
+##' Modify a \code{\link{lmrob.control}} list to contain only parameters that
+##' were actually used.  Currently used for \code{\link{print}()}ing of lmrob
+##' objects.
+##'
+##' @title Minimize lmrob control to non-redundant parts
+##' @param control a list, typically the 'control' component of a
+##' \code{\link{lmrob}()} call, or the result of  \code{\link{lmrob.control}()}.
 ##' @return list: the (typically) modified \code{control}
 ##' @author Martin Maechler {from Manuel's original code}
 lmrob.control.neededOnly <- function(control) {
@@ -268,16 +320,19 @@ globalVariables("r", add=TRUE) ## below and in other lmrob.E() expressions
         corrfact <-
             if (psi == 'ggw') {
                 if (isTRUE(all.equal(c.psi, c(-.5, 1.0, 0.95, NA)))) 1.052619
-                else if (isTRUE(all.equal(c.psi, c(-.5, 1.5, 0.95, NA)))) 1.052581
+                else if (isTRUE(all.equal(c.psi, c(-.5, 1.5, 0.95, NA)))) 1.0525888644
                 else if (isTRUE(all.equal(c.psi, c(-.5, 1.5, 0.85, NA)))) 1.176464
                 else if (isTRUE(all.equal(c.psi, c(-.5, 1.5, 0.85, NA)))) 1.176479
-                else lmrob.E(psi(r)^2, obj=obj) / lmrob.E(psi(r,1), obj=obj)^2
-            } else if (isTRUE(all.equal(c.psi, lmrob.control(psi = psi)$tuning.psi))) {
+                else lmrob.E(psi(r)^2, ctrl) / lmrob.E(psi(r,1), ctrl)^2
+            } else if (isTRUE(all.equal(c.psi, .Mpsi.tuning.default(psi)))) {
                 switch(psi,
-                       bisquare = 1.052632, welsh = 1.052670, optimal = 1.052642,
-                       hampel = 1.05265, lwg = 1.052628,
+                       bisquare = 1.0526317574,
+                       welsh    = 1.0526704649,
+                       optimal  = 1.0526419204,
+                       hampel   = 1.0526016980,
+                       lqq      = 1.0526365291,
                        stop(':.vcov.w: unsupported psi function'))
-            } else lmrob.E(psi(r)^2, obj=obj) / lmrob.E(psi(r,1), obj=obj)^2
+            } else lmrob.E(psi(r)^2, ctrl) / lmrob.E(psi(r,1), ctrl)^2
         varcorr <- 1
     } else { ## empirical, approx or hybrid correction factor
 	rstand <- if (cov.resid == 'initial') {
@@ -318,13 +373,13 @@ globalVariables("r", add=TRUE) ## below and in other lmrob.E() expressions
                 else if (isTRUE(all.equal(c.psi, c(-.5, 1.5, 0.95, NA)))) 0.6817983
                 else if (isTRUE(all.equal(c.psi, c(-.5, 1.0, 0.85, NA)))) 0.4811596
                 else if (isTRUE(all.equal(c.psi, c(-.5, 1.5, 0.85, NA)))) 0.411581
-                else lmrob.E(psi(r, 1), obj=obj)^2
+                else lmrob.E(psi(r, 1), ctrl)^2
             } else if (isTRUE(all.equal(c.psi, lmrob.control(psi = psi)$tuning.psi)))
                 switch(psi,
                        bisquare = 0.5742327, welsh = 0.5445068, optimal = 0.8598825,
                        hampel = 0.6775217, lqq = 0.6883393,
                        stop(':.vcov.w: unsupported psi function'))
-            else lmrob.E(psi(r,1), obj=obj)^2
+            else lmrob.E(psi(r,1), ctrl)^2
         }
         corrfact <- mean(r.psi^2)/mpp2 * hcorr
     }
@@ -440,7 +495,7 @@ globalVariables("r", add=TRUE) ## below and in other lmrob.E() expressions
 lmrob..M..fit <- function (x=obj$x, y=obj$y, beta.initial=obj$coef,
                            scale=obj$scale, control=obj$control, obj)
 {
-    c.psi <- lmrob.conv.cc(control$psi, control$tuning.psi)
+    c.psi <- .psi.conv.cc(control$psi, control$tuning.psi)
     ipsi <- .psi2ipsi(control$psi)
     stopifnot(is.matrix(x))
     n <- nrow(x)
@@ -546,7 +601,7 @@ lmrob.S <- function (x, y, control, trace.lev = control$trace.lev, mf = NULL)
     }
 
     bb <- as.double(control$bb)
-    c.chi <- lmrob.conv.cc(control$psi, control$tuning.chi)
+    c.chi <- .psi.conv.cc(control$psi, control$tuning.chi)
     best.r <- as.integer(control$best.r.s)
     stopifnot(length(c.chi) > 0, c.chi >= 0, length(bb) > 0,
               length(best.r) > 0, best.r >= 1, length(y) == n, n > 0)
@@ -612,7 +667,7 @@ lmrob..D..fit <- function(obj, x=obj$x, control = obj$control)
     r <- obj$residuals
     psi <- control$psi
     if (is.null(psi)) stop('lmrob..D..fit: parameter psi is not defined')
-    c.psi <- lmrob.conv.cc(psi, if (control$method %in% c('S', 'SD'))
+    c.psi <- .psi.conv.cc(psi, if (control$method %in% c('S', 'SD'))
                            control$tuning.chi else control$tuning.psi)
     if (!is.numeric(c.psi)) stop('lmrob..D..fit: parameter tuning.psi is not numeric')
 
@@ -821,29 +876,32 @@ lmrob.leverages <- function(x, w = rep(1, NROW(x)), wqr = qr(sqrt(w) * x))
     rowSums(qr.Q(wqr)^2)
 }
 
+##' psi |--> ipsi \in \{0,1,...6} : integer codes used in C
 .psi2ipsi <- function(psi)
 {
-    switch(casefold(psi),
-           'huber' = 0L,
-           'tukey' = , 'biweight' = , 'bisquare' = 1L,
-           'welsh' = 2L,
-           'optimal' = 3L,
-           'hampel' = 4L,
-           'ggw' = 5L,
-           'lqq' = 6L,
-           stop("unknown psi function ", psi))
+    psi <- .regularize.Mpsi(psi, redescending=FALSE)
+    i <- match(psi, c(
+	'huber', 'bisquare', 'welsh', 'optimal',
+	## 0	    1	        2	 3
+	'hampel', 'ggw', 'lqq'
+	## 4	    5	   6
+	))
+    if(is.na(i)) stop("internal logic error in psi() function name: ", psi,
+		      "  Please report!")
+    i - 1L
 }
 
 ##' Given psi() fn (as string), possibly convert the tuning-constant vector cc
 ##' such that it "fits" to psi()
-lmrob.conv.cc <- function(psi, cc)
+.psi.conv.cc <- function(psi, cc)
 {
     if (!is.character(psi) || length(psi) != 1)
         stop("argument 'psi' must be a string (denoting a psi function)")
     if(!is.numeric(cc))
         stop("tuning constant 'cc' is not numeric")
 
-    switch(casefold(psi),
+    ## "FIXME": For (ggw, lqq) this is much related to  .psi.const() below
+    switch(tolower(psi),
            'ggw' = {
                ## Input: 4 parameters, (minimal slope, b, efficiency, breakdown point)
                ## Output 'k': either k in {1:6} or  k = c(0, k[2:5])
@@ -892,7 +950,7 @@ lmrob.conv.cc <- function(psi, cc)
 ##' @author Manuel Kohler and Martin Maechler
 lmrob.ggw.mxs <- function(a, b, c, ...) {
     ipsi <- .psi2ipsi('ggw')
-    ccc <- c(0, a, b, c, 1) ## == lmrob.conv.cc('ggw', cc=c(0, a, b, c, 1))
+    ccc <- c(0, a, b, c, 1) ## == .psi.conv.cc('ggw', cc=c(0, a, b, c, 1))
     optimize(.Mpsi, c(c, max(a+b+2*c, 0.5)), ccc=ccc, ipsi=ipsi,
 	     deriv = 1, ...)
 }
@@ -925,7 +983,7 @@ lmrob.ggw.bp <- function(a, b, c, ...) { ## calculate kappa
     lmrob.E(.Mchi(r, ccc, ipsi), use.integrate = TRUE)
 }
 
-lmrob.ggw.findc <- function(ms, b, eff = NA, bp = NA) {
+.psi.ggw.findc <- function(ms, b, eff = NA, bp = NA) {
     ## find c by eff for bp
     c <- if (!is.na(eff)) {
         if (!is.na(bp))
@@ -951,7 +1009,7 @@ lmrob.ggw.findc <- function(ms, b, eff = NA, bp = NA) {
 
 lmrob.efficiency <-  function(psi, cc, ...) {
     ipsi <- .psi2ipsi(psi)
-    ccc <- lmrob.conv.cc(psi, cc=cc)
+    ccc <- .psi.conv.cc(psi, cc=cc)
 
     integrate(function(x) .Mpsi(x, ccc=ccc, ipsi=ipsi, deriv=1)*dnorm(x),
 	      -Inf, Inf, ...)$value^2 /
@@ -973,7 +1031,7 @@ lmrob.bp <- function(psi, cc, ...)
 ##' @param maxiter maximal number of iterations for uniroot()
 ##' @return constants for c function: c(b*c, c, s = 1 - min_slope)
 ##' @author Manuel Koller and Martin Maechler
-lmrob.lqq.findc <-
+.psi.lqq.findc <-
     function(cc, interval = c(0.1, 4),
              subdivisions = 100L,
              rel.tol = .Machine$double.eps^0.25, abs.tol = rel.tol,
@@ -998,11 +1056,14 @@ lmrob.lqq.findc <-
     c. <- tryCatch(uniroot(t.fun, interval=interval, tol=tol, maxiter=maxiter)$root,
 		   error=function(e)e)
     if (inherits(c., 'error'))
-        stop('lmrob.lqq.findc: unable to find constants for psi function')
+        stop('.psi.lqq.findc: unable to find constants for psi function')
     else c(cc[2]*c., c., 1-cc[1])
 }
 
-lmrob.const <- function(cc, psi)
+##' For ("ggw", "lqq"), if  cc is not one of the predefined ones,
+##'
+##' compute the tuning constants numerically, from the given specs (eff / bp):
+.psi.const <- function(cc, psi)
 {
     switch(psi,
            "ggw" = { ## only calculate for non-standard coefficients
@@ -1013,13 +1074,13 @@ lmrob.const <- function(cc, psi)
                      isTRUE(all.equal(cc, c(-.5, 1.5, 0.85, NA))) ||
                      isTRUE(all.equal(cc, c(-.5, 1.5, NA, 0.5))))) {
 		   attr(cc, 'constants') <-
-			lmrob.ggw.findc(ms=cc[1], b=cc[2], eff=cc[3], bp=cc[4])
+			.psi.ggw.findc(ms=cc[1], b=cc[2], eff=cc[3], bp=cc[4])
                }
            },
            "lqq" = { ## only calculate for non-standard coefficients
                if (!(isTRUE(all.equal(cc, c(-.5, 1.5, 0.95, NA))) ||
                      isTRUE(all.equal(cc, c(-.5, 1.5, NA, 0.5))))) {
-                   attr(cc, 'constants') <- lmrob.lqq.findc(cc)
+                   attr(cc, 'constants') <- .psi.lqq.findc(cc)
                }
            },
            stop("method for psi function ",psi, " not implemented"))
@@ -1027,21 +1088,22 @@ lmrob.const <- function(cc, psi)
 }
 
 Mpsi <- function(x, cc, psi, deriv=0)
-    .Call(R_psifun, x, lmrob.conv.cc(psi, cc), .psi2ipsi(psi), deriv)
+    .Call(R_psifun, x, .psi.conv.cc(psi, cc), .psi2ipsi(psi), deriv)
 .Mpsi <- function(x, ccc, ipsi, deriv=0) .Call(R_psifun, x, ccc, ipsi, deriv)
 
 Mchi <- function(x, cc, psi, deriv=0)
-    .Call(R_chifun, x, lmrob.conv.cc(psi, cc), .psi2ipsi(psi), deriv)
+    .Call(R_chifun, x, .psi.conv.cc(psi, cc), .psi2ipsi(psi), deriv)
 .Mchi <- function(x, ccc, ipsi, deriv=0) .Call(R_chifun, x, ccc, ipsi, deriv)
 
 Mwgt <- function(x, cc, psi)
-    .Call(R_wgtfun, x, lmrob.conv.cc(psi, cc), .psi2ipsi(psi))
+    .Call(R_wgtfun, x, .psi.conv.cc(psi, cc), .psi2ipsi(psi))
 .Mwgt <- function(x, ccc, ipsi) .Call(R_wgtfun, x, ccc, ipsi)
 
 ## only for nlrob() -- and to use instead of MASS:::psi.huber etc:
-.M.w.psi1 <- function(psi, cc) { ## returns a *function* a la  psi.huber()
+## returns a *function* a la  psi.huber() :
+.Mwgt.psi1 <- function(psi, cc = .Mpsi.tuning.default(psi)) {
     ipsi <- .psi2ipsi(psi)
-    ccc <- lmrob.conv.cc(psi, cc)
+    ccc <- .psi.conv.cc(psi, cc)
     ## return function *closure* :
     function(x, deriv = 0)
     if(deriv) .Mpsi(x, ccc, ipsi, deriv=deriv) else .Mwgt(x, ccc, ipsi)
@@ -1049,7 +1111,7 @@ Mwgt <- function(x, cc, psi)
 
 ##' The normalizing constant for  rho(.) <--> rho~(.)
 MrhoInf <- function(cc, psi) {
-    cc <- lmrob.conv.cc(psi, cc)
+    cc <- .psi.conv.cc(psi, cc)
     .Call(R_rho_inf, cc, .psi2ipsi(psi))
 }
 .MrhoInf <- function(ccc, ipsi) .Call(R_rho_inf, ccc, ipsi)

@@ -47,6 +47,9 @@ lmrob.S(x, y, control, trace.lev = control$trace.lev, mf = NULL)
 }
 \seealso{\code{\link{lmrob}}, also for references.
 }
+\author{ Matias Salibian-Barrera and Manuel Koller (and Martin Maechler
+  for minor details)
+}
 \examples{
 set.seed(33)
 x1 <- sort(rnorm(30)); x2 <- sort(rnorm(30)); x3 <- sort(rnorm(30))
@@ -61,11 +64,9 @@ set.seed(12)
 m.lmS <- lmrob.S(x=X1, y=y,
                     control = lmrob.control(nRes = 20), trace.lev=1)
 m.lmS[c("coefficients","scale")]
-all.equal(m.lmS$coef, 10 * (1:4), tol = 0.005, check.attributes = FALSE)
-stopifnot(all.equal(m.lmS$coef, 10 * (1:4),
-                    tol = 0.005, check.attributes = FALSE),
-          all.equal(m.lmS$scale, 1/10, tol = 0.09))
+all.equal(unname(m.lmS$coef), 10 * (1:4), tolerance = 0.005)
+stopifnot(all.equal(unname(m.lmS$coef), 10 * (1:4), tolerance = 0.005),
+          all.equal(m.lmS$scale, 1/10, tolerance = 0.09))
 }
-\author{ Matias Salibian-Barrera and Manuel Koller (and Martin Maechler for minor details) }
 \keyword{robust}
 \keyword{regression}

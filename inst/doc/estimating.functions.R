@@ -543,7 +543,7 @@ lmrob.dscale <- function(r, control,
   w <- Mwgt(r, control$tuning.psi, control$psi)
   scale <- sqrt(sum(w * r^2) / kappa / sum(tau^2*w))
   psi <- control$psi
-  c.psi <- robustbase:::lmrob.conv.cc(psi, control$tuning.psi)
+  c.psi <- robustbase:::.psi.conv.cc(psi, control$tuning.psi)
   ret <- .C("R_find_D_scale",
             r = as.double(r),
             kappa = as.double(kappa),
@@ -576,14 +576,15 @@ sd.trim <- function(x, trim=0, na.rm=FALSE, ...)
     stop("'trim' must be numeric of length one")
   n <- length(x)
   if(trim > 0 && n > 0) {
-     if(is.complex(x)) stop("trimmed sd are not defined for complex data")
-     if(trim >= 0.5) return(0)
-     lo <- floor(n * trim) + 1
-     hi <- n + 1 - lo
-     x <- sort.int(x, partial = unique(c(lo, hi)))[lo:hi]
+    if(is.complex(x)) stop("trimmed sd are not defined for complex data")
+    if(trim >= 0.5) return(0)
+    lo <- floor(n * trim) + 1
+    hi <- n + 1 - lo
+    x <- sort.int(x, partial = unique(c(lo, hi)))[lo:hi]
   }
-  corr <- if (trim > 0 && trim < 0.5) {
-    sqrt((1-2*trim-sqrt(2/pi)*qnorm(1-trim)*exp(-1*qnorm(1-trim)^2/2))/(1-2*trim))
+  corr <- if (0 < trim && trim < 0.5) {
+    z <- qnorm(trim, lower.tail=FALSE)# = Phi^{-1}(1 - tr)
+    sqrt(1 - 2/(1-2*trim) *z*dnorm(z))
   } else 1
 
   sd(x)/corr

@@ -82,7 +82,7 @@ SS <- replicate(10000, vapply(huberM(rnorm(400), se=TRUE), as.double, 1.))
 ) # ~ 12.2 seconds
 rbind(mean(SS["SE",]), sd(SS["mu",]))# both ~ 0.0508
 stopifnot(all.equal(mean(SS["SE",]),
-                    sd ( SS["mu",]), tol= 0.002))
+                    sd ( SS["mu",]), tolerance= 0.002))
 }
 }
 \keyword{univar}

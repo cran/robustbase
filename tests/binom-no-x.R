@@ -13,7 +13,8 @@ gg <- glm(y ~ 1, family = "binomial")
 Inf. <- 1e5 # FIXME (note that much larger values *deteriorate* slightly!)
 rg.Inf <- glmrob(y ~ 1, family = "binomial", tcc= Inf.)
 stopifnot(all.equal(unname(cfK[1:2]),
-                    unname(unlist(coef(summary(rg.Inf))[1:2])), tol = 1e-7))# 4.09e-8
+		    unname(unlist(coef(summary(rg.Inf))[1:2])),
+		    tolerance = 1e-7))# 4.09e-8
 
 rg.0 <- glmrob(y ~ 1, family = "binomial")
 summary(rg.0)

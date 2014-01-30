@@ -266,8 +266,8 @@ lst <- lapply(estlist$procedures, function(x) {
                     lmrob.control(psi=x$args$psi)$tuning.psi else
                     x$args$tuning.psi,3)))
 })
-lst <- unique(lst)
-lst <- lst[sapply(lst, function(x) !is.null(x[[1]]))]
+lst <- unique(lst) ## because of rounding, down from 21 to 5 !
+lst <- lst[sapply(lst, function(x) !is.null(x[[1]]))] # 5 --> 4 
 ## convert to table
 tbl <- do.call(rbind, lst)
 tbl[,2:3] <- apply(tbl[,2:3], 1:2, function(x) {

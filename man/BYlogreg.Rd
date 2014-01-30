@@ -96,7 +96,7 @@ head(cbind(vX, vY))# 'X' does include the intercept
 vWBY <- BYlogreg(x0 = vX, y = vY, addIntercept=FALSE) # as 'vX' has it already
 v.BY <- BYlogreg(x0 = vX, y = vY, addIntercept=FALSE, initwml=FALSE)
 ## they are relatively close:
-stopifnot( all.equal(vWBY, v.BY, tol = 2e-4) )
+stopifnot( all.equal(vWBY, v.BY, tolerance = 2e-4) )
 }
 \keyword{robust}
 \keyword{regression}

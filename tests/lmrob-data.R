@@ -10,7 +10,7 @@ summary(m0.sali  <- lmrob(Y ~ . , data = salinity))
 (m1.sali  <- lmrob(Y ~ X1 + X3, data = salinity))
 (A2 <- anova(m0.sali, m1.sali)) # the same as before
 stopifnot(all.equal(A1[2,"Pr(>chisq)"],
-		    A2[2,"Pr(>chisq)"], tol=1e-14))
+		    A2[2,"Pr(>chisq)"], tolerance=1e-14))
 anova(m0.sali, m1.sali, test = "Deviance")
 ## whereas 'X3' is highly significant:
 m2 <- update(m0.sali, ~ . -X3)
@@ -18,7 +18,7 @@ m2 <- update(m0.sali, ~ . -X3)
 (A4 <- anova(m0.sali, m2, test = "Deviance"))
 cX3 <- c(Estimate = -0.627327396, `Std. Error` = 0.15844971,
          `t value` = -3.9591577, `Pr(>|t|)` = 0.000584156)
-stopifnot(all.equal(cX3, coef(summary(m0.sali))["X3",], tol = 1e-6))
+stopifnot(all.equal(cX3, coef(summary(m0.sali))["X3",], tolerance = 1e-6))
 
 
 ##  example(lmrob)

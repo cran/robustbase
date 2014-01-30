@@ -105,7 +105,10 @@ anova(Efit3, Efit2, test = "Wald")
 
 anova(Efit3, Efit2, test = "QD")
 
-anova(Efit3, Efit2, test = "QDapprox")
+## trivial intercept-only-model:
+E0 <- update(Efit3, . ~ 1)
+anova(E0, Efit3, Efit2, test = "QDapprox")
+%% failed in robustbase <= 2013-11-27
 }
 \keyword{robust}
 \keyword{models}

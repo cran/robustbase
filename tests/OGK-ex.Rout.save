@@ -23,11 +23,11 @@ Type 'q()' to quit R.
 > rub1 <- covOGK(ruspini, 1, scaleTau2, covGK, hard.rejection, consistency=FALSE)
 > rub2 <- covOGK(ruspini, 2, scaleTau2, covGK, hard.rejection, consistency=FALSE)
 > 
-> AE <- function(x,y) all.equal(x,y, tol = 2e-15)
+> AE <- function(x,y) all.equal(x,y, tolerance = 2e-15)
 > ## The following test is already fulfilled by Kjell Konis'  original code:
 > stopifnot(AE(c(rub1$wcov)[c(1,3:4)],
 +              c(917.99893333333, 94.9232, 2340.319288888888)),
-+           all.equal(rub1$wcov, rub2$wcov, tol=0)
++           all.equal(rub1$wcov, rub2$wcov, tolerance=0)
 +           ,
 +           AE(c(rub1$cov)[c(1,3:4)],
 +              c(923.5774514441657, 91.5385216376565, 2342.4556232436971))

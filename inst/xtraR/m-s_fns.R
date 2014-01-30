@@ -78,7 +78,7 @@ m_s_descent <- function(x1, x2, y, control, b1, b2, scale) {
 }
 
 find_scale <- function(r, s0, n, p, control) {
-    c.chi <- robustbase:::lmrob.conv.cc(control$psi, control$tuning.chi)
+    c.chi <- robustbase:::.psi.conv.cc(control$psi, control$tuning.chi)
 
     b <- .C(robustbase:::R_lmrob_S,
             x = double(1),

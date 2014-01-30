@@ -73,7 +73,7 @@ adjbox.formula <- function (formula, data = NULL, ..., subset, na.action = NULL)
 	m$data <- as.data.frame(data)
     m$... <- NULL
     m$na.action <- na.action # force use of default for this method
-    require(stats, quietly = TRUE)
+    ## require(stats, quietly = TRUE): model.frame
     m[[1]] <- as.name("model.frame")
     mf <- eval(m, parent.frame())
     response <- attr(attr(mf, "terms"), "response")

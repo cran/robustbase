@@ -14,6 +14,8 @@
 \newcommand{\abs}[1]{\left| #1 \right|}
 \DeclareMathOperator{\sign}{sign}
 \newcommand{\R}{\mathbb{R}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand*{\pkg}[1]{\texttt{#1}}
 \newtheorem{definition}{Definition}
 %% The following is R's share/texmf/Rd.sty
 \usepackage{color}
@@ -80,13 +82,14 @@ e.g., for the M-estimator defining the median.
 A \emph{$\rho$-function} can be represented by the following % definite
 integral of a $\psi$-function,
 \begin{equation}\label{def.rho}
-  \rho(x) = \int_0^x \psi(x) dx\;,
+  \rho(x) = \int_0^x \psi(u) du\;,
 \end{equation}
 which entails that $\rho(0) = 0$ and $\rho$ is an even function.
 \end{definition}
 
 A $\psi$-function is called \emph{redescending} if $\psi(x) = 0$ for
-all $x \ge x_r$ for $x_r < \infty$.  Corresponding to a redescending
+all $x \ge x_r$ for $x_r < \infty$, and $x_r$ is often called
+\emph{rejection point}.  Corresponding to a redescending
 $\psi$-function, we define the function $\tilde\rho$, a version of $\rho$
 standardized such as to attain maximum value one.  Formally,
 \begin{equation}
@@ -95,7 +98,18 @@ standardized such as to attain maximum value one.  Formally,
 \end{equation}
 Note that $\rho(\infty) = \rho(x_r) \equiv \rho(x) \ \forall \abs{x} >= x_r$.
 $\tilde\rho$ is a $\rho$-function as defined in
-\citet{MarRMY06} and has been called $\chi$ function in other contexts.
+\citet{MarRMY06} and has been called $\chi$ function in other contexts. For
+example, in package \pkg{robustbase}, \code{Mchi(x, *)} computes
+$\tilde\rho(x)$, whereas \code{Mpsi(x, *, deriv=-1)} computes $\rho(x)$,
+both according to the above definitions.
+
+Note that this definition does require a finite rejection point $x_r$. Consequently,
+e.g., the score function $s(x) = -f'(x)/f(x)$ for the Cauchy ($= t_1$)
+distribution, which is $s(x) = 2x/(1+x^2)$ and hence non-monotone and ``re
+descends'' to 0 for $x\to \pm\infty$, and $\psi_C(x) := s(x)/2$ also
+fulfills ${\psi_C}'(0) = 1$, but it has $x_r=\infty$ and hence $\psi_C()$
+is \emph{not} a redescending $psi$-function in our sense.
+%%
 %% --> ../../TODO  section  'Psi/Rho/Chi/Wgt Functions'
 %%     ~~~~~~~~~~
 %%
@@ -159,7 +173,7 @@ $x_r = \sup\{t; \psi(t) > 0\} < \infty$.
 From \texttt{lmrob}, the psi functions are available via
 \texttt{lmrob.control},
 <<lmrob-psi, echo=TRUE,fig=FALSE>>=
-formals(lmrob.control) $ psi
+names(.Mpsi.tuning.defaults)
 @ %$
 and their $\psi$, $\rho$, $\psi'$, and weight function $w(x) := \psi(x)/x$,
 are all computed efficiently via C code, and are defined and visualized in
@@ -178,7 +192,13 @@ with derivative ${\tilde\rho_k}'(x) = 6\psi_k(x) / k^2$ where,
 \end{equation*}
 The constant $k$ for $95\%$ efficiency of the regression estimator is
 $4.685$ and the constant for a breakdown point of $0.5$ of the
-S-estimator is $1.548$.
+S-estimator is $1.548$.  Note that the \emph{exact} default tuning constants
+for M- and MM- estimation in \pkg{robustbase} are available via \code{.Mpsi.tuning.default()}
+and \code{.Mchi.tuning.default()}, respectively, e.g., here,
+<<tuning-defaults, echo=TRUE,fig=FALSE>>=
+print(c(k.M = .Mpsi.tuning.default("bisquare"),
+        k.S = .Mchi.tuning.default("bisquare")), digits = 10)
+@ 
 
 \begin{figure}[h]
   \centering
@@ -222,8 +242,10 @@ Here however, we restrict ourselves to $a = 1.5 k$, $b = 3.5 k$, and $r = 8k$,
 hence a redescending slope of $-\frac 1 3$, and vary $k$ to get the desired
 efficiency or breakdown point.
 
-The constant $k$ for $95\%$ efficiency of the regression estimator is $0.9016$ and
-the one for a breakdown point of $0.5$ of the S-estimator is $0.212$.
+The constant $k$ for $95\%$ efficiency of the regression estimator is
+$0.902$ (0.9016085, to be exact) and the one for a breakdown point of $0.5$
+of the S-estimator is $0.212$ (i.e., 0.2119163). 
+%% --> ../R/lmrob.MM.R,  .Mpsi.tuning.defaults .Mchi.tuning.defaults
 
 \begin{figure}[h]
   \centering

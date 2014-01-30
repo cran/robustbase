@@ -246,7 +246,7 @@ chk.s <- function(...) {
 
 
 ##' Robust Mahalanobis Distances
-##' internal function, used in lmrob() and maybe plot.lmrob()
+##' internal function, used in lmrob() and plot.lmrob()
 robMD <- function(x, intercept, ...) {
     if(intercept == 1) x <- x[, -1, drop=FALSE]
     if(ncol(x) >= 1) {
@@ -278,8 +278,12 @@ alias.lmrob <- function(object, ...) {
 }
 
 
-case.names.lmrob <- function(object, ...) {
-    stats:::case.names.lm(object, ...)
+## R (3.1.0)-devel copy of case.names.lm() ...../R/src/library/stats/R/lm.R
+case.names.lmrob <- function(object, full = FALSE, ...)
+{
+    w <- weights(object)
+    dn <- names(residuals(object))
+    if(full || is.null(w)) dn else dn[w!=0]
 }
 
 ## coef(<lmrob>): no own method ==> using  coef.default(OO) == OO$coefficients
@@ -287,31 +291,34 @@ case.names.lmrob <- function(object, ...) {
 
 ## use confint.lm instead of confint.default
 ## mainly to get t instead of normal quantiles
-confint.lmrob <- function(object, ...) {
-    stats:::confint.lm(object, ...)
-}
+## Either imported from 'stats' or then copy-paste-defined in ./zzz.R :
+confint.lmrob <- confint.lm
+dummy.coef.lmrob <- dummy.coef.lm
 
-dummy.coef.lmrob <- function(object, ...) {
-    stats:::dummy.coef.lm(object, ...)
-}
 
-family.lmrob <- function(object, ...) {
-    stats:::family.lm(object, ...)
-}
+family.lmrob <- function(object, ...) gaussian() ## == stats:::family.lm
+
 
 ## fitted.default works for "lmrob"
 
 kappa.lmrob <- function(z, ...) kappa.lm(z, ...)
 
-## labels.lm uses qr.lm internally, but here
-## this should not make a difference
-## FIXME: rank 0 fits?
-labels.lmrob <- function(object, ...) {
-    stats:::labels.lm(object, ...)
+## instead of  stats:::qr.lm()
+qrLmr <- function(x) {
+    if(!is.list(r <- x$qr))
+        stop("lmrob object does not have a proper 'qr' component. Rank zero?")
+    r
 }
 
-## This seems to work - via lm
-model.matrix.lmrob <- function (object, ...) model.matrix.lm(object, ...)
+## Basically the same as  stats:::labels.lm -- FIXME: rank 0 fits?
+labels.lmrob <- function(object, ...) {
+    tl <- attr(object$terms, "term.labels")
+    asgn <- object$assign[qrLmr(object)$pivot[seq_len(object$rank)]]
+    tl[unique(asgn)]
+}
+
+## Works via lm's method [which is still exported]:
+model.matrix.lmrob <- model.matrix.lm
 
 ## identical to stats:::nobs.lm {but that is hidden .. and small to copy}:
 nobs.lmrob <- function(object, ...)
@@ -523,10 +530,13 @@ summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...
 }
 
 
-variable.names.lmrob <- function(object, ...) {
-    stats:::variable.names.lm(object, ...)
+## R (3.1.0)-devel copy of variable.names.lm() ...../R/src/library/stats/R/lm.R
+variable.names.lmrob <- function(object, full = FALSE, ...)
+{
+    if(full) dimnames(qrLmr(object)$qr)[[2L]]
+    else if(object$rank) dimnames(qrLmr(object)$qr)[[2L]][seq_len(object$rank)]
+    else character()
 }
-
 
 vcov.lmrob <- function (object, cov=object$control$cov, ...) {
   if (!is.null(object$cov) && identical(cov, object$control$cov))
@@ -539,6 +549,7 @@ vcov.lmrob <- function (object, cov=object$control$cov, ...) {
   }
 }
 
+sigma.lmrob <- function(object, ...) object$scale
 
 weights.lmrob <- function(object, type = c("prior", "robustness"), ...) {
     type <- match.arg(type)

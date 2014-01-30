@@ -1,11 +1,12 @@
 \name{internals}
-\alias{internals}
-
 \title{Internal Functions}
+\alias{internals}
+\alias{robMD}
+%
 %% MM: This page is not *needed*, since all the functions are namespace-hidden
 %% --  OTOH, it shows what we might want to export {and then document}
 \description{
-  These functions are for internal use only or not yet documented.
+  These functions are for internal use or not yet documented.
 }
 \usage{
 %% for glmrob
@@ -29,13 +30,16 @@ glmrobMqleDiffQuasiDevPois(mu, mu0, y, ni, w.x, phi, tcc)
 %                test.vec = "resid", wt.method = "inv.var")
 
 
-%% for modsel.* aka anova.glmrob():
-psi.bisquare(u, c = 4.685, deriv = 0, rho = FALSE)
-psi.hampel(u, a = 2, b = 4, c = 8, deriv = 0, rho = FALSE)
-psi.huber(u, k = 1.345, deriv = 0, rho = FALSE)
+%% For modsel.* aka anova.glmrob(); later for nlrob() only;
+%% eliminated, 2013-07-26 {for robustbase 0.9-11}, MM :
+%% psi.bisquare(u, c = 4.685, deriv = 0, rho = FALSE)
+%% psi.hampel(u, a = 2, b = 4, c = 8, deriv = 0, rho = FALSE)
+%% psi.huber(u, k = 1.345, deriv = 0, rho = FALSE)
+
+robMD(x, intercept, ...)
 }
 
-\author{Andreas Ruckstuhl}
+\author{Andreas Ruckstuhl and Martin Maechler}
 
 \keyword{internal}
 

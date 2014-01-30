@@ -23,7 +23,7 @@ test_rsquared <- function() {
     y1 <- c(1, 1, 1, 1, 1, 1, 1, 1, 1, 3.5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5)
     ll1 <- ltsReg(x1,y1, alpha = 0.8)
     ## print() ing is platform-dependent, since only ~= 0
-    stopifnot(all.equal(unname(coef(ll1)), c(1,0), tol=1e-12),
+    stopifnot(all.equal(unname(coef(ll1)), c(1,0), tolerance=1e-12),
               ll1$scale < 1e-14)
     print(ltsReg(y1,x1, alpha = 0.8))
     print(ltsReg(y1,x1, alpha = 0.8, intercept = FALSE))

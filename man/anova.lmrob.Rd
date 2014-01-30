@@ -6,7 +6,8 @@
   for one or more linear regression models fitted by \code{\link{lmrob}}.
 }
 \usage{
-\method{anova}{lmrob}(object, \dots, test = c("Wald", "Deviance"))
+\method{anova}{lmrob}(object, \dots, test = c("Wald", "Deviance"),
+      verbose = getOption("verbose"))
 }
 \arguments{
   \item{object, \dots}{objects of class \code{"lmrob"}, typically
@@ -18,6 +19,7 @@
     Can be one of \code{"Wald"} or \code{"Deviance"},
     with partial matching allowed, for specifying a \code{"Wald"}-type
     test or \code{"Deviance"}-type test.}
+  \item{verbose}{logical; if true some informative messages are printed.}
 }
 \details{
   Specifying a single object gives a sequential analysis of a robust
@@ -70,6 +72,9 @@ anova(m0.sali, m1.sali, test = "Deviance")
 m2 <- update(m0.sali, ~ . -X3)
 anova(m0.sali, m2)
 anova(m0.sali, m2,  test = "Deviance")
+## Global test [often not interesting]:
+anova(m0.sali, update(m0.sali, . ~ 1), test = "Wald")
+anova(m0.sali, update(m0.sali, . ~ 1), test = "Deviance")
 
 if(require("MPV")) { ## Montgomery, Peck & Vining  datasets
   Jet <- table.b13

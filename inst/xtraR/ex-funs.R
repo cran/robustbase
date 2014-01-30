@@ -62,7 +62,7 @@ Sn0R  <- function(x) {
 is.all.equal <- function(x,y, tol = 2e-7, scale = 1) {
     ## scale = x: ensures `relative error' in all cases
     ## scale = 1: ensures `absolute error' in all cases
-    is.logical(r <- all.equal(x,y, tol = tol, scale = scale)) && r
+    is.logical(r <- all.equal(x,y, tolerance = tol, scale = scale)) && r
 }
 
 identical3 <- function(x,y,z)	  identical(x,y) && identical (y,z)
@@ -78,11 +78,11 @@ assert.EQ <- function(target, current, tol = if(show) 0 else 1e-15,
     ## Purpose: check equality *and* show non-equality
     ## ----------------------------------------------------------------------
     ## show: if TRUE, return (and hence typically print) all.equal(...)
-    T <- isTRUE(ae <- all.equal(target, current, tol = tol, ...))
+    T <- isTRUE(ae <- all.equal(target, current, tolerance = tol, ...))
     if(show)
 	return(ae)
     else if(giveRE && T) { ## don't show if stop() later:
-	ae0 <- if(tol == 0) ae else all.equal(target, current, tol = 0, ...)
+	ae0 <- if(tol == 0) ae else all.equal(target, current, tolerance = 0, ...)
 	if(!isTRUE(ae0)) cat(ae0,"\n")
     }
     if(!T) stop("all.equal() |-> ", paste(ae, collapse=sprintf("%-19s","\n")))

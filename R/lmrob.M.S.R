@@ -122,7 +122,7 @@ lmrob.M.S <- function(x, y, control, mf, split) {
     storage.mode(x1) <- "double"
     storage.mode(x2) <- "double"
     storage.mode(y) <- "double"
-    c.chi <- lmrob.conv.cc(control$psi, control$tuning.chi)
+    c.chi <- .psi.conv.cc(control$psi, control$tuning.chi)
     traceLev <- as.integer(control$trace.lev)
     z <- .C(R_lmrob_M_S,
 	    x1,

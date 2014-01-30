@@ -59,7 +59,8 @@ predict.lmrob <-
     if(p < ncol(X) && !(missing(newdata) || is.null(newdata)))
 	warning("prediction from a rank-deficient fit may be misleading")
     beta <- object$coefficients
-    predictor <- drop(X[, piv, drop = FALSE] %*% beta[piv])
+    X.piv <- X[, piv, drop = FALSE]
+    predictor <- drop(X.piv %*% beta[piv])
     if (!is.null(offset))
 	predictor <- predictor + offset
 
@@ -92,9 +93,8 @@ predict.lmrob <-
     if(se.fit || interval != "none") {# *rob: whole 'then' statement is different
         df <- object$df.residual
 	res.var <- if (is.null(scale)) object$s^2  else scale^2
-	if(type != "terms"){
-             ip <- diag(X[,piv] %*% object$cov %*% t(X[,piv]))
-        } else ip <- rep.int(0, n)
+	ip <- if(type != "terms")
+	    diag(X.piv %*% object$cov %*% t(X.piv)) else rep.int(0, n)
     }
 
     if (type == "terms") { ## type == "terms" ------------

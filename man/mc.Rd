@@ -28,7 +28,7 @@ mc(x, \dots)
     sufficient.}
   \item{trace.lev}{integer specifying how much diagnostic output the
     algorithm (in C) should produce.  No output by default, most output
-    for \code{trace_lev = 3}.}
+    for \code{trace.lev = 5}.}
   \item{full.result}{logical indicating if the full return values (from
     C) should be return, as a list \code{attr(*, "mcComp")}.}
   \item{\dots}{potentially further arguments passed to other methods.}
@@ -72,7 +72,7 @@ mc(cushny) # 0.125
 
 stopifnot(mc(c(-20, -5, -2:2, 5, 20)) == 0,
           mc(x1, doReflect=FALSE) ==  -mc(-x1, doReflect=FALSE),
-          all.equal(mc(x1, doReflect=FALSE), -1/3, tol = 1e-12))
+          all.equal(mc(x1, doReflect=FALSE), -1/3, tolerance = 1e-12))
 }
 \keyword{robust}
 \keyword{univar}

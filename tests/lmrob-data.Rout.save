@@ -1,6 +1,6 @@
 
-R version 3.0.1 Patched (2013-05-24 r62794) -- "Good Sport"
-Copyright (C) 2013 The R Foundation for Statistical Computing
+R version 3.0.2 Patched (2014-01-26 r64896) -- "Frisbee Sailing"
+Copyright (C) 2014 The R Foundation for Statistical Computing
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -88,7 +88,7 @@ Largest model fitted by lmrob(), i.e. SM
 1       24                        
 2       25    1.4492  1     0.2287
 > stopifnot(all.equal(A1[2,"Pr(>chisq)"],
-+ 		    A2[2,"Pr(>chisq)"], tol=1e-14))
++ 		    A2[2,"Pr(>chisq)"], tolerance=1e-14))
 > anova(m0.sali, m1.sali, test = "Deviance")
 Robust Deviance Table
 
@@ -127,7 +127,7 @@ Largest model fitted by lmrob(), i.e. SM
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 > cX3 <- c(Estimate = -0.627327396, `Std. Error` = 0.15844971,
 +          `t value` = -3.9591577, `Pr(>|t|)` = 0.000584156)
-> stopifnot(all.equal(cX3, coef(summary(m0.sali))["X3",], tol = 1e-6))
+> stopifnot(all.equal(cX3, coef(summary(m0.sali))["X3",], tolerance = 1e-6))
 > 
 > 
 > ##  example(lmrob)
@@ -342,8 +342,8 @@ seed : int(0)
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # "stats"
-Time elapsed:  0.5 0.028 0.515 0 0 
+Time elapsed:  0.95 0.061 1.08 0 0.004 
 > 
 > proc.time()
    user  system elapsed 
-  0.500   0.028   0.515 
+  0.951   0.065   1.081 

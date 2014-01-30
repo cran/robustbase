@@ -240,7 +240,7 @@ summary(RlmST)
 vcov(RlmST)
 stopifnot(all.equal(fitted(RlmST),
                     predict(RlmST, newdata = starsCYG),
-                    tol = 1e-14))
+                    tolerance = 1e-14))
 
 ## --- init argument
 ## string

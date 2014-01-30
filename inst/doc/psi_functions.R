@@ -24,18 +24,25 @@ plot(huberPsi, x., ylim=c(-1.4, 5), leg.loc="topright", main=FALSE)
 ###################################################
 ### code chunk number 3: lmrob-psi
 ###################################################
-formals(lmrob.control) $ psi
+names(.Mpsi.tuning.defaults)
 
 
 ###################################################
-### code chunk number 4: bisquare
+### code chunk number 4: tuning-defaults
+###################################################
+print(c(k.M = .Mpsi.tuning.default("bisquare"),
+        k.S = .Mchi.tuning.default("bisquare")), digits = 10)
+
+
+###################################################
+### code chunk number 5: bisquare
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 p.psiFun(x., "biweight", par = 4.685)
 
 
 ###################################################
-### code chunk number 5: Hampel
+### code chunk number 6: Hampel
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 ## see also hampelPsi
@@ -44,28 +51,28 @@ p.psiFun(x., "Hampel", par = ## Default, but rounded:
 
 
 ###################################################
-### code chunk number 6: GGW
+### code chunk number 7: GGW
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 p.psiFun(x., "GGW", par = c(-.5,1,.95,NA))
 
 
 ###################################################
-### code chunk number 7: LQQ
+### code chunk number 8: LQQ
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 p.psiFun(x., "LQQ", par = c(-.5,1.5,.95,NA))
 
 
 ###################################################
-### code chunk number 8: optimal
+### code chunk number 9: optimal
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 p.psiFun(x., "optimal", par = 1.06, leg.loc="bottomright")
 
 
 ###################################################
-### code chunk number 9: Welsh
+### code chunk number 10: Welsh
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 p.psiFun(x., "Welsh", par = 2.11)

@@ -380,7 +380,8 @@ glmrobMT <- function(x,y, weights = NULL, start = NULL, offset = NULL,
         start <- out[[1]]
     } else { ## user provided start:
         if(!is.numeric(start) || length(start) != p)
-            stop(gettextf("'start' must be an initial estimate of beta, of length %d", p))
+	    stop(gettextf("'start' must be an initial estimate of beta, of length %d",
+			  p), domain=NA)
     }
 
     oCtrl <- list(trace = trace.lev, maxit = control$maxit,

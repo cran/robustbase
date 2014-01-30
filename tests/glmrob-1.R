@@ -35,7 +35,7 @@ allresid <- function(obj, types = c("deviance", "pearson", "working", "response"
 
 okFit <- function(obj, check.attr=FALSE, ...) {
   all.equal(obj$y, obj$fitted.values + residuals(obj, "response"),
-            check.attr=check.attr, ...)
+            check.attributes=check.attr, ...)
 }
 
 ## check validity of several methods simultaneously:

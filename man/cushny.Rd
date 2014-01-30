@@ -61,6 +61,6 @@ legend("topright", c("mean", "median"), lwd = 2,
 d.sleep <- local({ gr <- with(datasets::sleep, split(extra, group))
                    gr[[2]] - gr[[1]] })
 stopifnot(all.equal(cushny,
-                    sort(d.sleep), tol=1e-15))
+                    sort(d.sleep), tolerance=1e-15))
 }
 \keyword{datasets}

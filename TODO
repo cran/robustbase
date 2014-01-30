@@ -1,206 +1,183 @@
-TO DO
------- [MM:  grep-r -e '\(FIXME\|TODO\)'  ]
+				-*- org -*- C-c C-o follows link[MM: grep-r -e '\(FIXME\|TODO\)']
+* Before next release
+** TODO nlrob()
+*** TODO summary(nlrob(*)) fails for new methods; better error message or *work*
+*** TODO residuals( nlrob(), type = "...") should provide types "as in the literature"
+*** DONE nlrob(*, method = "...") should call methods "tau", "CM", "MTL", "MM"
+    by Eduardo Conceicao
+**** DONE shouldn't we rename jde() to jdeopt() or even jdeoptim(), jDEoptim(), or JDEoptim()
+R users already know optim() etc.. so the name seems more logical for them.
 
-o  BYlogreg()  [ R/BYlogreg.R ]
-   --> more tests in ./tests/glmrob-1.R
-   --> glm.fit() instead of glm()
-   --> vcov() instead of just std.err. {is already there}
+** TODO estimethod(): also for lmrob() and glmrob() models
+* Short Term
+** TODO nlrob(*):
+*** TODO nlrob(*, method=.) -- try at least *one* other optimizer than JDEoptim(), 
+ since we provide already most of the needed "hooks".
+*** TODO nlrob(*, method="M"): try to allow a "fixed initial sigma" (--> inference for "MM")
+** glmrob
+*** BYlogreg()  [ R/BYlogreg.R ]
+    --> more tests in ./tests/glmrob-1.R
+    --> glm.fit() instead of glm()
+    --> vcov() instead of just std.err. {is already there}
+*** glmrob(*, weights.on.x = "robCov")  uses  MASS::cov.rob(),
+   i.e. "MVE" and Andreas had a comment that "mcd" is worse.
+   "covMcd" has been available for a while; now via robXweights() in ./R/glmrobMqle.R
+   HOWEVER: Need something better when 'X' has (binary!) factors!
+   "hat" +- works, but needs more work
+*** We now allow  weights.on.x  to be an arbitrary general  wts(X, intercept)
+   function _or_ a list containing a  robMcd()-like function.
+   Definitely need *testing* this situation!
+*** glmrob(<Gamma>):  anova() has  three variants: "V1", "Eva1", "Andreas1"
+    --> ./R/glmrobMqle-DQD.R
+    - gives warning every time {-> easy to fix}
+    -  Default is "V1" is that a good idea?
 
-o  Psi/Rho/Chi/Wgt Functions
-   -------------------------
-   Our "mess":  We have quite a few "partial" collections of rho/psi functions:
+*** glmrob() needs a bit more tests in ./tests/
+            [also consider those from man/glmrob.Rd]
+    take those from Martin's old 'robGLM1' package (need more!)
+***  --> first test already shows that Martin's tests for "huberC == Inf"
+       were *not* yet moved from robGLM1 to glmrob()...
+    (in other words:  glmrob() should work
 
-   1) have the nice S4 class psi_func  + psiFunc() and .defDwgt() functions in
+*** also, ni = 0 does not work quite as it should ( ./tests/binom-ni-small.R )
 
-      ./R/psi-rho-funs.R    with explorations, ideas in
-      ~~~~~~~~~~~~~~~~~~
-      ./experi-psi-rho-funs.R
+*** obj $ df ...  maybe should be defined -- for "glm" methods to be
+   applicable  --> e.g. for predict(<glmrob>, interval="..") !
 
-   2) have "old" tukeyChi() & tukeyPsi1()  originally called from lmrob() , in
-      ./R/biweight-funs.R
-   3) psi.*(....,  rho = FALSE/TRUE)   functions from Andreas
-      should be replaced by using the new  psi_func  objects
-      ./R/psi-funs-AR.R  &  ./man/pkg-internal.Rd
-      ~~~~~~~~~~~~~~~~~  ===> Change  nlrob() slightly: allowing 'psi'
-      to be a function *or* a psiFunc:
-      --> ./R/nlrob.R+psi ./man/nlrob.Rd+psi
-      Before that we *do* need "real" checks (numbers!) for nlrob
+*** summary.glmrob() should be better documented;
+   we should decide if the current return value is fine.
 
-   4) have the C-based functions, now used from lmrob(), in
-      ./R/lmrob.MM.R
+*** Eva's code (and MM's) also computed & returned the "asymptotic efficiency"!
 
-      now called  Mpsi(), Mchi(), Mwgt() plus new MrhoInf()
-      {now exported and documented in man/M.psi.Rd }
+*** anova.glmrob(): More modularization, allowing to provide own 'test' function.
+   Test if Huber's C are different. Need theory to compare different C's and
+   same model (which includes classical vs robust).
 
-    Further files, illustrating features, differences, etc:
+*** add1() and/or drop1() would be nice
 
-	./inst/doc/psi_functions.Rnw -- with quite a few FIXME
-	 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+** TODO Psi/Rho/Chi/Wgt Functions
+    We have quite a few "partial" collections of rho/psi functions; 
+    some are "sync"ed now, some not yet::
+*** TODO 1) have the nice S4 class psi_func  + psiFunc() and .defDwgt() functions
+    in file:R/psi-rho-funs.R  with further explorations, ideas in 
+    file:misc/experi-psi-rho-funs.R
+**** TODO print/show of such psi_func should show more; at least the psi function
+**** TODO str.psi_func() should be a bit nicer than the current default str()
+**** TODO nlrob(): also allow psi to be a 'psiFunc':
+       --> ./R/nlrob.R ; consider even more *real* checks; now in tests/nlrob-tst.R
+*** DONE 2) deprecated: "old" tukeyChi() & tukeyPsi1()  originally called from lmrob() , in
+       ./R/biweight-funs.R
+*** DONE 3) psi.*(....,  rho = FALSE/TRUE)   functions from Andreas
+       ([[file:.R/psi-funs-AR.R]]) replaced by using the new  psi_func  objects
+**** DONE nlrob() changed: uses psi = .Mwgt.psi1("huber", cc=1.345) as default
+*** TODO 4) have (C-based) functions Mpsi(), Mchi(), Mwgt(), etc, used from lmrob(), 
+       in ./R/lmrob.MM.R
+**** DONE now exported and documented in man/M.psi.Rd 
+     Further files, illustrating features, differences, etc:
+	 ./vignettes/psi_functions.Rnw -- with quite a few FIXME
+	  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	 ./inst/xtraR/plot-psiFun.R	chkPsiDeriv() {and plot utils}
+	 ./tests/psi-rho-etc.R   	compute asymp.efficiency and breakdown point !
+	 ./tests/lmrob-psifns.R 	   	plot and lmrob()-test them
 
-	./inst/xtraR/plot-psiFun.R	chkPsiDeriv() {and plot utils}
-	./tests/psi-rho-etc.R   	compute asymp.efficiency and breakdown point !
-	./tests/lmrob-psifns.R 	   	plot and lmrob()-test them
+**** DONE Deprecate* the "2)", tukeyChi() etc, making them call the M.*fun():
+**** TODO provide  '1)'-i.e. psi_func  versions of them
+**** TODO Mpsi(*, "GGW") etc :  have no (??) easy way to directly specify (a,b,c) tuning pars
+**** TODO *New* Mwgt(*,  deriv=1) would correspond to Dwgt in psiFunc() which Manuel needs
+    
+* Mid Term
+** TODO New  lmrob() "M-S" etc features:
+*** Function names with "." (which are exported) are frowned upon
+      e.g.  lmrob.split()
+*** checking .vcov.avar1() and its "posdefify" options ??
+*** TODO lmrob.mar() [file:inst/doc/estimating.functions.R]: Maronna & Yohai (2010) should become part
+         ~~~~~~~~~~  of robustbase, maybe under a better name,
+    e.g. via lmrob( ... control ..) or directly.
+    It is much used in the simulations of Koller & Stahel (2011)
+*** TODO Provide "simple M" estimator [so MASS :: rlm() is entirely superseeded]
+    Consider lmrob(*,  method = "M") --> default init = "ls" (Least Sq; as MASS:::rlm.default)
+    which calls  lmrob..M..fit() which is already documented as "simple"
+    M-estimator (though the *scale* is kept fixed; i.e., no  'proposal 2').
+** covOGK():
+   The argument name 'weight.fn' is pretty ugly and the default function
+   name 'hard.rejection()' is just awful (we need a globally available
+   function as 'role model'.
+   - Could allow 'n.iter = 0' to simply compute Cov()_{ij} = rcov(X_i, X_j)
+** TODO scaleTau2():  Also do a cheap finite-sample correction [MM] !
+		 [DONE partly; but undocumented, since bound to change]
+** rrcov etc
+*** rrcov.control() __ NEEDS  name change ! ______
+    probably use  mcd.control() and lts.control()
 
-    TODO: Done: -> '32)'; Rest:
-	   .) *Deprecate* the "2)", tukeyChi() etc, making them call the M.*fun():
-	      *CARE*: tukeyPsi1(*, d = 2) is now needed asymp.cov() of glmrobMT()
-           .) provide  '1)'-i.e. psi_func  versions of them
+    or forget about *control() completely?
+    since there are only a few in each ??????/
 
-    *) Mpsi(*, "GGW") etc :  there is (??) no reasonable to directly specify
-       ---------------- the (a,b,c) tuning parameters
+*** TODO tolellipse() --> renamed to tolEllipsePlot()
+**** maybe use  cluster::ellipsoidPoints()
+**** allow other percentiles than just  97.5%
+**** maybe *return* something
 
+*** plot(mcd. ) [ R/covPlot.R ] : should show the call
+	      Default for 'ask' should be smarter: depend on
+	      prod(par("mfrow")) < #{plots} (which depends on 'classic' and p=2)
+*** ltsReg():  has  undocumented '$resid'
+	      in addition to '$residuals' and '$raw.residuals';
+	      drop it or document it !
+** More lmrob() considerations
+*** DONE more tests in	tests/
 
+*** fully implement and test the multivariate case (y = matrix with > 1 col.)
+*** src/lmrob.c :
+     does median() , MAD() instead of using R's  sort() routines
 
-o  New  lmrob() "M-S" etc features:
-
-   - Function names with "." (which are exported) are frowned upon
-     e.g.  lmrob.split()
-
-   - checking .vcov.avar1() and its "posdefify" options ??
-
-   - lmrob.mar() [ inst/doc/estimating.functions.R ]: should become part
-     ~~~~~~~~~~  of robustbase, maybe under a better name,
-      e.g. via lmrob( ... control ..) or directly.
-     It is much used in the simulations of Koller & Stahel (2011)
-
-o  Consider allowing
-   lmrob(*,  method = "M") --> default init = "ls" (Least Sq; as MASS:::rlm.default)
-   which calls  lmrob..M..fit() which is already documented as "simple"
-   M-estimator (though the *scale* is kept fixed; i.e., no  'proposal 2').
-
-
-o  inst/doc/lmrob_simulation.Rnw :
-
-  - use hyperlinks {e.g. using jss docu.class!}
-
-  - consider making parts available in (new) ./demo/lmrob...R
-
-  -  tau_i (p.5)  is not clear for  Joe Average.
+* Long Term / Maybe
+** inst/doc/lmrob_simulation.Rnw :
+*** use hyperlinks {e.g. using jss docu.class!}
+*** consider making parts available in (new) ./demo/lmrob...R
+*** tau_i (p.5)  is not clear for  Joe Average.
 
 ..........................................
 
-o  Generalizing  'wgt.himedian':  We'd want a C API on which R builds.
+** Generalizing  'wgt.himedian':  We'd want a C API on which R builds.
+    There are pure R implementations:
+     - 'weighted.median()' in limma
+    	  and I have generalized it ---> file:inst/xtraR/ex-funs.R
+     - more general code (different 'tie' strategies; weighted *quantile*s)
+       in file:/u/maechler/R/MM/STATISTICS/robust/weighted-median.R
+     - The 'Hmisc' package has wtd.quantile()
+** Miscellaneous
+*** Alternative version of covOGK() for correlation-only
+   using's Huber's correlation formula which ensures [-1,1] range
+   --> ~/R/MM/Pkg-ex/robustbase/robcorgroesser1.R
+   and ~/R/MM/STATISTICS/robust/pairwise-new.R
 
-   There are pure R implementations:
-    - 'weighted.median()' in limma
-    	 and I have generalized it ---> inst/ex-funs.R
-    - more general code (different 'tie' strategies; weighted *quantile*s)
-      in /u/maechler/R/MM/STATISTICS/robust/weighted-median.R
-    - The 'Hmisc' package has wtd.quantile()
+*** package 'riv' (author @ epfl.ch!) has 'slc()'  ~=  cov.S(.)  -- in pure R code
+   doesn't Valentin have a version too?
+   otherwise: test this, ask author for "donation" to robustbase
 
-o covOGK():
-  The argument name 'weight.fn' is pretty ugly and the default function
-  name 'hard.rejection()' is just awful (we need a globally available
-  function as 'role model'.
+*** adjOutlyingness() :
+     typo-bug is corrected; and I have made it more pretty.
+     Still a bit problematic when denominator = 0
+     Currently leave away all the c/0 = Inf and 0/0 = NaN values.
 
-  - Could allow 'n.iter = 0' to simply compute Cov()_{ij} = rcov(X_i, X_j)
+     MM: Maybe, it's the fact that the   coef = 1.5  should really depend on
+         the sample size  n   and will be too large for small n (??)
+   --> should ask Mia and maybe Guy Brys
 
-o scaleTau2():  Also do a cheap finite-sample correction [MM] !
-		[done partly; but undocumented, since bound to change]
+*** Add data sets from the MMY-book -- mostly done {do we have *all* ?}
 
---- rrcov etc ---
-
-o rrcov.control() __ NEEDS  name change ! ______
-   probably use  mcd.control() and lts.control()
-
-   or forget about *control() completely?
-   since there are only a few in each ??????/
-
-o tolellipse() --> renamed to tolEllipsePlot()
-     - maybe use  cluster::ellipsoidPoints()
-     - allow other percentiles than just  97.5%
-     - maybe *return* something
-
-o plot(mcd. ) [ R/covPlot.R ] : should show the call
-	     Default for 'ask' should be smarter: depend on
-	     prod(par("mfrow")) < #{plots} (which depends on 'classic' and p=2)
-
-o ltsReg():  has  undocumented '$resid'
-	     in addition to '$residuals' and '$raw.residuals';
-	     drop it or document it !
-
---- glmrob --
-
-o glmrob(*, weights.on.x = "robCov")  uses  MASS::cov.rob(),
-  i.e. "MVE" and Andreas had a comment that "mcd" is worse.
-  "covMcd" has been available for a while; now via robXweights() in ./R/glmrobMqle.R
-  HOWEVER: Need something better when 'X' has (binary!) factors!
-  "hat" +- works, but needs more work
-
-o We now allow  weights.on.x  to be an arbitrary general  wts(X, intercept)
-  function _or_ a list containing a  robMcd()-like function.
-  Definitely need *testing* this situation!
-
-o glmrob(<Gamma>):  anova() has  three variants: "V1", "Eva1", "Andreas1"
-   --> ./R/glmrobMqle-DQD.R
-   - gives warning every time {-> easy to fix}
-   -  Default is "V1" is that a good idea?
-
-
-o glmrob() needs a bit more tests in ./tests/
-           [also consider those from man/glmrob.Rd]
-   take those from Martin's old 'robGLM1' package (need more!)
-o  --> first test already shows that Martin's tests for "huberC == Inf"
-      were *not* yet moved from robGLM1 to glmrob()...
-   (in other words:  glmrob() should work
-
-o also, ni = 0 does not work quite as it should ( ./tests/binom-ni-small.R )
-
-o obj $ df ...  maybe should be defined -- for "glm" methods to be
-  applicable  --> e.g. for predict(<glmrob>, interval="..") !
-
-o summary.glmrob() should be better documented;
-  we should decide if the current return value is fine.
-
-o Eva's code (and MM's) also computed & returned the "asymptotic efficiency"!
-
-o anova.glmrob(): More modularization, allowing to provide own 'test' function.
-  Test if Huber's C are different. Need theory to compare different C's and
-  same model (which includes classical vs robust).
-
-o add1() and/or drop1() would be nice
-
-
---- nlrob ---
-
-o  residuals( nlrob(), type = "...") should provide types
-   	      "as in the litterature"
-
-o  Add method = "..." : the more robust methods "tau", "CM" and "MTL"
-   Eduardo Conceicao
-
-------
-
-
-o Add data sets from the MMY-book -- mostly done {do we have *all* ?}
-
-
---- lmrob --- --- --- --- ---
-
-o more tests in	tests/
-
-o fully implement and test the multivariate case (y = matrix with > 1 col.)
-
-o src/lmrob.c :
-    does median() , MAD() instead of using R's  sort() routines
-
-----
-
-o Alternative version of covOGK() for correlation-only
-  using's Huber's correlation formula which ensures [-1,1] range
-  --> ~/R/MM/Pkg-ex/robustbase/robcorgroesser1.R
-  and ~/R/MM/STATISTICS/robust/pairwise-new.R
-
-o package 'riv' (author @ epfl.ch!) has 'slc()'  ~=  cov.S(.)  -- in pure R code
-  doesn't Valentin have a version too?
-  otherwise: test this, ask author for "donation" to robustbase
-
-o adjOutlyingness() :
-    typo-bug is corrected; and I have made it more pretty.
-    Still a bit problematic when denominator = 0
-    Currently leave away all the c/0 = Inf and 0/0 = NaN values.
-
-    MM: Maybe, it's the fact that the   coef = 1.5  should really depend on
-        the sample size  n   and will be too large for small n (??)
-  --> should ask Mia and maybe Guy Brys
-
+*** Data Sets --- Valentin Todorov has several of Rousseeuw's in the 'rrov' package
+    (and promised me "the rest" when needed)
+   Don't like the *.x, *.y  sub datasets: They shouldn't be needed when use a *formula*
+   In his lts tests, he uses these "data sets from the literature":
+   (Note that 'stackloss' is already in "datasets") :
+    heart.x,heart.y,	   data(heart)
+    stars.x,stars.y,	   data(stars)
+    phosphor.x,phosphor.y, data(phosphor)
+    stack.x,stack.loss,	   data(stackloss)
+    coleman.x,coleman.y,   data(coleman)
+    salinity.x,salinity.y, data(salinity)
+    aircraft.x,aircraft.y, data(aircraft)
+    delivery.x,delivery.y, data(delivery)
+    wood.x,wood.y,	   data(wood)
+    hbk.x,hbk.y,	   data(hbk)

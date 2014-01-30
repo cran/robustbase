@@ -23,9 +23,9 @@ rg1  <- glmrob(cbind(k , ni-k ) ~ x, family = binomial)
 rg1. <- glmrob(cbind(k , ni-k ) ~ x, family = binomial,
                acc = 1e-10) # default is just 1e-4
 
-stopifnot(all.equal(unname(coef(rg1.)), c(-2.37585864, 4.902389143), tol=1e-9),
-          all.equal(coef(rg1),  coef(rg1.), tol=1e-4),
-          all.equal(vcov(rg1.), vcov(rg1), tol = 1e-4))
+stopifnot(all.equal(unname(coef(rg1.)), c(-2.37585864, 4.902389143), tolerance=1e-9),
+          all.equal(coef(rg1),  coef(rg1.), tolerance=1e-4),
+          all.equal(vcov(rg1.), vcov(rg1), tolerance = 1e-4))
 rg1$iter
 which(rg1.$w.r != 1) ## 7 of them :
 str(rg1.["family" != names(rg1.)])
@@ -37,13 +37,13 @@ rg10 <- glmrob(cbind(k , ni-k ) ~ x, family = binomial, tcc = 10)
 rgL  <- glmrob(cbind(k , ni-k ) ~ x, family = binomial, tcc = 100)
 
 no.comp <- - match(c("call", "data", "family", "control", "tcc"), names(rg10))
-stopifnot(all.equal(rg10[no.comp], rgL[no.comp], tol= 1e-14))
+stopifnot(all.equal(rg10[no.comp], rgL[no.comp], tolerance= 1e-14))
 
 vcov(rgL) # is now the same as the following:
 if(FALSE) { ## tcc=Inf fails: non-convergence / singular matrix from GOTO/Atlas3
  rgI <- glmrob(cbind(k , ni-k ) ~ x, family = binomial, tcc = Inf)
  ## tcc = Inf  still *FAILS* (!)
- stopifnot(all.equal(rgL[no.comp], rgI[no.comp], tol= 0))
+ stopifnot(all.equal(rgL[no.comp], rgI[no.comp], tolerance= 0))
  ## and is quite close to the classic one:
  (all.equal(vcov(rgI), vcov(g1)))
 }
@@ -71,13 +71,13 @@ summary(rg3$w.r)
 rg3.5 <- glmrob(cbind(k3 , n3-k3) ~ x, family = binomial, tcc = 5)
 (s3.5 <- summary(rg3.5))
 summary(rg3.5$w.r)# all 1
-stopifnot(all.equal(coef(s3)[,1:2], coef(s3.5)[,1:2], tol = 0.02))
+stopifnot(all.equal(coef(s3)[,1:2], coef(s3.5)[,1:2], tolerance = 0.02))
 
 rg3.15 <- glmrob(cbind(k3 , n3-k3) ~ x, family = binomial, tcc = 15, acc=1e-10)
 (s3.15 <- summary(rg3.15))
 
-stopifnot(all.equal(coef(s3.15)[,1:2], cfg, tol = 1e-5),# 2e-6
-          all.equal(cfg[,"Estimate"], rg3.15$coeff, tol= 1e-8) # 6.05e-10
+stopifnot(all.equal(coef(s3.15)[,1:2], cfg, tolerance = 1e-5),# 2e-6
+          all.equal(cfg[,"Estimate"], rg3.15$coeff, tolerance= 1e-8) # 6.05e-10
           )
 ##rg3.15$eff # == 1
 

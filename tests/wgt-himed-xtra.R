@@ -50,10 +50,10 @@ for(sim in 1:100) { # had '500'
     x <- rnorm(rpois(1, lam=80))# not too large the *n0R() use time!
     ##--> Sn0R() "fails" for  odd n
     stopifnot(all.equal(Sn(x, const = 1), Sn0R(x)),
-              all.equal(Qn(x, const = 1), Qn0R(x), tol = 7e-8))
+              all.equal(Qn(x, const = 1), Qn0R(x), tolerance = 7e-8))
     x <- round(x,2)
     stopifnot(all.equal(Sn(x, const = 1), Sn0R(x)),
-              all.equal(Qn(x, const = 1), Qn0R(x), tol = 7e-8))
+              all.equal(Qn(x, const = 1), Qn0R(x), tolerance = 7e-8))
     if(sim %% 50 == 0) cat(sim, "\n")
 }
 

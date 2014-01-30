@@ -66,7 +66,7 @@ set.seed(101)
 str(cc) ## best = 2 3 4 5
 mcc <- MASS::cov.mcd(X)
 stopifnot(cc$best == mcc$best,
-          all.equal(cc$center, mcc$center, tol = 1e-10),
+          all.equal(cc$center, mcc$center, tolerance = 1e-10),
           all.equal(c(mcc$cov / cc$raw.cov), rep(0.673549282206, 3*3)))
 
 ## p = 4 -- 6 x 4 & 7 x 4  [ n < 2 p  ! ]
@@ -78,14 +78,14 @@ stopifnot(dim(X) == c(n,p))
 str(cc) ## best = 1 2 4 5 6 7
 mcc <- MASS::cov.mcd(X)
 stopifnot(cc$best == mcc$best,
-          all.equal(cc$center, mcc$center, tol = 1e-10),
+          all.equal(cc$center, mcc$center, tolerance = 1e-10),
           all.equal(c(mcc$cov / cc$raw.cov), rep(0.7782486992881, p*p)))
 n <- 6
 X <- X[1:n,]
 (cc <- covMcd(X, use.correction = FALSE))
 mcc <- MASS::cov.mcd(X)
 stopifnot(cc$best == mcc$best,
-          all.equal(cc$center, mcc$center, tol = 1e-10),
+          all.equal(cc$center, mcc$center, tolerance = 1e-10),
           all.equal(c(mcc$cov / cc$raw.cov), rep(0.7528695976179, p*p)))
 
 cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
@@ -95,4 +95,4 @@ coleman.x <- data.matrix(coleman[, 1:6])
 cat('Time : ', system.time(CcX <- covMcd(coleman.x, nsamp="exact")),
     "\n")# ~ 3 sec. on a fast 2003 machine (Intel Xeon 2400 MHz)
 stopifnot(all.equal(CcX$best,
-                    c(2, 5:9, 11,13, 14:16, 19:20), tol=0))
+                    c(2, 5:9, 11,13, 14:16, 19:20), tolerance=0))

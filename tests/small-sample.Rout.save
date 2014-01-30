@@ -1,7 +1,6 @@
 
-R version 2.15.0 Patched (2012-05-24 r59442) -- "Easter Beagle"
-Copyright (C) 2012 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
+R version 3.0.2 Patched (2014-01-26 r64896) -- "Frisbee Sailing"
+Copyright (C) 2014 The R Foundation for Statistical Computing
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -168,8 +167,8 @@ Mean and its. std.err;  Quartiles of Sn(x_1 .. x_n) and Qn(...):
 > 
 > rbind("Time (CPU) used:" = summary(cpu))
                   Min. 1st Qu. Median   Mean 3rd Qu.  Max.
-Time (CPU) used: 0.199   0.242  0.287 0.3583   0.334 1.181
+Time (CPU) used: 0.284   0.321  0.385 0.4803   0.462 1.515
 > 
 > proc.time()
    user  system elapsed 
-  5.376   0.058   5.551 
+  7.506   0.077   7.725 

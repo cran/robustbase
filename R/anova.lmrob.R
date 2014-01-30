@@ -1,4 +1,4 @@
-anova.lmrob <- function(object, ..., test = c("Wald", "Deviance"))
+anova.lmrob <- function(object, ..., test = c("Wald", "Deviance"), verbose=getOption("verbose"))
 {
     dotargs <- list(...)
     named <- if (is.null(names(dotargs)))
@@ -15,16 +15,15 @@ anova.lmrob <- function(object, ..., test = c("Wald", "Deviance"))
       stop("For test = 'Deviance', the estimator chain has to end with 'M'")
     if (length(dotargs) > 0) {
 	length.tl <- function(x) length(attr(terms(x),"term.labels"))
-	isFormula <- unlist(lapply(dotargs, function(x) class(x) == "formula"))
+	isFormula <- vapply(dotargs, inherits, NA, what = "formula")
+	h <- vapply(dotargs, length.tl, 0L)
 	if(all(isFormula)) {
-	    h <- unlist(lapply(dotargs, function(x) length.tl(x)))
 	    if(any(h >= length.tl(object)))
 		stop("The first object does not contain the largest model")
 	    modform <- dotargs
 	}
 	else {
-	    ## warning("All models are refitted except the largest one")
-	    h <- unlist(lapply(dotargs, function(x) length.tl(x)))
+	    if(verbose) message("All models are refitted except the largest one")
 	    if(any(h >= length.tl(object))) {
 		h <- c(length.tl(object),h)
 		dotargs <- c(list(object), dotargs)[order(h, decreasing = TRUE)]
@@ -33,15 +32,14 @@ anova.lmrob <- function(object, ..., test = c("Wald", "Deviance"))
 		    stop("anova.lmrob() only works for 'lmrob' objects")
 		dotargs <- dotargs[-1]
 	    }
-	    modform <- lapply(dotargs, function(x) formula(x))
+	    modform <- lapply(dotargs, formula)
 	}
-	initCoef <- lapply(dotargs, function(x) coef(x))
-	return(anovaLmrobList(object, modform,	initCoef, test = test))
+	initCoef <- lapply(dotargs, coef)
+	return(anovaLmrobList(object, modform, initCoef, test = test))
     }
     ##
     ## "'Anova Table' for a single model object
-    stop("'Anova Table' for a single model object not yet implemented")
-    invisible()
+    stop("'Anova Table' for a single model not yet implemented")
 }
 
 anovaLmrobList <- function (object, modform, initCoef, test)
@@ -100,19 +98,20 @@ anovaLmrobPair <- function(FMfit, reduced.model, initCoef, test)
     H0coef <- coef(FMfit)[H0ind]
     df <- length(H0coef)
     pp <- FMfit$rank
-    if(test == "Wald") {
+    switch(test, "Wald" = {
 	t.cov <- FMfit$cov
 	t.chisq <- sum(H0coef * solve(t.cov[H0ind, H0ind], H0coef))
-	return(c(FMfit,
-		 list(anova = c(nrow(X)-pp+df, t.chisq, df,
-		      pchisq(as.vector(t.chisq), df = df, lower.tail = FALSE)))))
-    }
-    if(test == "Deviance") {
+        ## return
+	c(FMfit,
+          list(anova = c(nrow(X)-pp+df, t.chisq, df,
+               pchisq(as.vector(t.chisq), df = df, lower.tail = FALSE))))
+    },
+    "Deviance" = {
 	y <- FMfit$residuals + FMfit$fitted.values
 	s0 <- FMfit$scale
 	psi <- function(u, deriv = 0)
 	    Mpsi(u, cc = FMfit$control$tuning.psi,
-                         psi = FMfit$control$psi, deriv)
+                   psi = FMfit$control$psi, deriv)
 	iC <-
 	    if(is.null(initCoef)) {
 		res <- as.vector(y - X[,RMod] %*% FMfit$coef[RMod])
@@ -127,7 +126,7 @@ anovaLmrobPair <- function(FMfit, reduced.model, initCoef, test)
                 initCoef[idx]
             }
 
-	RMfit <- lmrob..M..fit(x = X[,RMod], y = y,
+	RMfit <- lmrob..M..fit(x = X[,RMod, drop=FALSE], y = y,
 			       beta.initial = iC, scale = s0,
 			       control = FMfit$control)
 	FMres <- as.vector(y - X[,FMod] %*% FMfit$coef[FMod])
@@ -137,11 +136,11 @@ anovaLmrobPair <- function(FMfit, reduced.model, initCoef, test)
 	tauStar <- mean(psi(FMres/s0,	deriv = 1)) /
 		   mean(psi(FMres/s0)^2, deriv = 0)
 	t.chisq <- 2*tauStar*(RM_sRho - FM_sRho)
-	##
-	return(c(RMfit,
-		 list(anova = c(nrow(X)-pp+df, t.chisq, df,
-		      pchisq(as.vector(t.chisq), df = df, lower.tail = FALSE)))))
-    }
-    stop(paste(test, "not yet implemented"))
-}
-## =======================================================================
+	## return
+	c(RMfit,
+          list(anova = c(nrow(X)-pp+df, t.chisq, df,
+               pchisq(as.vector(t.chisq), df = df, lower.tail = FALSE))))
+    },
+    stop("test ", test, " not yet implemented"))
+} ## anovaLmrobPair
+

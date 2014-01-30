@@ -4,7 +4,7 @@
 ## Follow a similar idea as  nlsModel() {in "stats"} which returns
 ##  a list of functions sharing a common {non-small!} environment
 
-## NOTA BENE:  Experiments etc are currently in ../experi-psi-rho-funs.R
+## NOTA BENE:  Experiments etc are currently in ../misc/experi-psi-rho-funs.R
 ## ---------   (FIXME: move those to ../tests/psi-rho-etc.R and the vignette
 ## ../inst/doc/psi_functions.Rnw  (and see ../inst/xtraR/plot-psiFun.R)
 
@@ -116,25 +116,36 @@ psiFunc <- function(rho,psi,wgt, Dpsi,Dwgt, Erho=NULL, Epsi2=NULL, EDpsi=NULL, n
 	Erho = new(fnctl.typ, Erho),
 	Epsi2= new(fnctl.typ, Epsi2),
 	EDpsi= new(fnctl.typ, EDpsi),
-        name = if (missing("name")) character(0) else name,
+        name = if (missing(name)) character(0) else name,
 	xtras= list(tuningP = dotsargs))
 }
 
-## generate Dwgt function
+## Generate default Dwgt function
+
+## Unfortunately, MM can't see how to make this works nicely;
+## ._.. = args should really be something like  'x, k' {no parens}:
+.defDwgt <- function(psi, Dpsi) {
+    args <- formals(Dw <- psi)# -> same formals
+    body(Dw) <- substitute({
+        y <- .X.
+        .X. <- .X.[not0 <- .X. != 0]
+        y[not0] <- ( Dpsi(._..) - psi(._..)/.X. ) / .X.
+        y
+    }, list(.X. = as.name(names(args[1])), ._.. = args))
+    environment(Dw) <- environment()
+    Dw
+}
+## so we use this "less nice" variant:
 .defDwgt <- function(psi, Dpsi) {
     nf <- names(formals(psi))
-    args <- paste(nf, collapse=",")
-    x <- nf[1]
-    fun <- paste("function(", args, ") {
-               idx <- ", x, " != 0
-               ret <- numeric(length(", x, "))
-               ", x, " <- ", x, "[idx]
-               ret[idx] <- Dpsi(", args, ")/x - psi(", args, ")/(", x, "*", x, ")
-               ret
-         }", sep = "")
-    Dwgt <- eval(parse(text=fun))
-    formals(Dwgt) <- formals(psi)
-    Dwgt
+    eval(parse(text = 
+	       gsub("_,_", paste(nf, collapse=","), 
+		    gsub("x", nf[1], "function(_,_) {
+        y <- x
+        x <- x[not0 <- x != 0]
+        y[not0] <- ( Dpsi(_,_) - psi(_,_)/x ) / x
+        y
+    }"))))
 }
 
 chgDefaults <- function(object, ...)
@@ -175,7 +186,7 @@ setMethod("chgDefaults", signature("psi_func"),
     n <- names(v)
     ## do not print a single dummy parameter "."
     if (length(n) == 1 && n == ".") v <- numeric(0)
-    name <- x@name
+    if (!length(name <- x@name)) name <- "<unnamed>"
     if (!short) name <- sprintf("%s psi function", name)
     if (length(v) >= 1) {
         if (short)

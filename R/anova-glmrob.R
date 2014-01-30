@@ -12,7 +12,7 @@ anova.glmrob <- function(object, ...,
 	    dotargs <- dotargs[!named]
 	}
     }
-    is.glmrob <- unlist(lapply(dotargs, function(x) inherits(x, "glmrob")))
+    is.glmrob <- vapply(dotargs, inherits, NA, what="glmrob")
     if(!all(is.glmrob) || !inherits(object, "glmrob"))
 	stop("anova.glmrob() only works for 'glmrob' objects")
     test <- match.arg(test)
@@ -103,17 +103,15 @@ anovaGlmrobPair <- function(obj1, obj2, test)
     t.chisq <- sum(H0coef * solve(t.cov[H0ind, H0ind], H0coef))
     statistic <- c(chisq = t.chisq)
   }
-  else
-    if(full.mfit$method=="Mqle" & (test == "QD" | test == "QDapprox")){
+  else if(full.mfit$method=="Mqle" && (test == "QD" || test == "QDapprox")) {
       matM <- full.mfit$matM
       if(test == "QDapprox") {
         ## Difference of robust quasi-deviances
         ## via the asymptotically equivalent quadratic form
-        matM11 <- matM[mod0,mod0]
-        matM12 <- matM[mod0,H0ind]
-        matM22 <- matM[H0ind, H0ind]
-### FIXME: solve()!
-        matM22.1 <- matM22 - crossprod(matM12, solve(matM11) %*% matM12)
+        matM11 <- matM[mod0,   mod0, drop=FALSE]
+        matM12 <- matM[mod0,  H0ind, drop=FALSE]
+        matM22 <- matM[H0ind, H0ind, drop=FALSE]
+        matM22.1 <- matM22 - crossprod(matM12, solve(matM11, matM12))
         Dquasi.dev <- nrow(X) * c(H0coef %*% matM22.1 %*% H0coef)
       }
       else {

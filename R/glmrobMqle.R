@@ -38,7 +38,7 @@ robXweights <- function(wts, X, intercept=TRUE) {
 	    if(!is.numeric(wts) || length(wts) != nobs)
 		## FIXME: "when not a string, a list, or a function, then ..."
 		stop(gettextf("weights.on.x needs %d none-negative values",
-			      nobs))
+			      nobs), domain=NA)
             if(any(wts) < 0)
                 stop("All weights.on.x must be none negative")
         }
@@ -147,7 +147,8 @@ glmrobMqle <-
              phiEst <- phiGammaEst
            },
            ## else
-           stop(gettextf("family '%s' not yet implemented", family$family))
+           stop(gettextf("family '%s' not yet implemented", family$family),
+                domain=NA)
 	   )
 
     sV <- NULL # FIXME workaround for codetools
@@ -317,7 +318,7 @@ wts_HiiDist <- function(X) {
 wts_RobDist <- function(X, intercept, covFun)
 {
     D2 <- if(intercept) { ## X[,] has intercept column which should not be used for rob.wts
-	X <- as.matrix(X[, -1])
+	X <- X[, -1, drop=FALSE]
 	Xrc <- covFun(X)
 	mahalanobis(X, center = Xrc$center, cov = Xrc$cov)
     }

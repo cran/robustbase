@@ -7,7 +7,7 @@
 library(robustbase)
 source(system.file("xtraR/mcnaive.R", package = "robustbase"))# mcNaive()
 
-allEQ <- function(x,y) all.equal(x,y, tol = 1e-12)
+allEQ <- function(x,y) all.equal(x,y, tolerance = 1e-12)
 ##
 c.time <- function(...) cat('Time elapsed: ', ..., '\n')
 S.time <- function(expr) c.time(system.time(expr))
@@ -48,7 +48,7 @@ for(n in 3:50) {
 	mc1 <- mc(x)
 	mc2 <- mcNaive(x, method = "simple")
 	mc3 <- mcNaive(x, method = "h.use" )
-	stopifnot(all.equal(mc1, mc3, tol = 1e-10),# 1e-12 not quite ok
+	stopifnot(all.equal(mc1, mc3, tolerance = 1e-10),# 1e-12 not quite ok
 		  mc2 == mc3)
 	cat(".")
     }
@@ -117,6 +117,13 @@ for (i in 1:10) {
     ## this would produce an error in the 6th iteration
     aa <- adjOutlyingness(x=X,ndir=250)
 }
+
+## "large n" (this did overflow sum_p, sum_q  earlier ==> had inf.loop):
+set.seed(3); x <- rnorm(2e5)
+(mx <- mc(x, trace.lev=3))
+stopifnot(print(abs(mx - -0.000772315846101988)) < 1e-15)
+					# 3.252e-19, 64b Linux
+					# 1.198e-16, 32b Windows
 
 ### Some platform info :
 local({ nms <- names(Si <- Sys.info())

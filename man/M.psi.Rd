@@ -6,6 +6,7 @@
 \alias{.Mchi}
 \alias{.Mpsi}
 \alias{.Mwgt}
+\alias{.Mwgt.psi1}
 \alias{.MrhoInf}
 \title{Psi / Chi / Wgt / Rho Functions for *M-Estimation}
 \description{
@@ -29,6 +30,8 @@ Mpsi(x, cc, psi, deriv = 0)
 Mchi(x, cc, psi, deriv = 0)
 Mwgt(x, cc, psi)
 MrhoInf(cc, psi)
+
+.Mwgt.psi1(psi, cc = .Mpsi.tuning.default(psi))
 }
 \arguments{
   \item{x}{numeric (\dQuote{abscissa} values) vector.}
@@ -59,6 +62,14 @@ MrhoInf(cc, psi)
 
   For experts, there are slightly even faster versions,
   \code{.Mpsi()}, \code{.Mwgt()}, etc.
+
+  \code{.Mwgt.psi1()} mainly a utility for \code{\link{nlrob}()},
+  returns a \emph{\code{\link{function}}} with similar semantics as
+  \code{\link[MASS]{psi.hampel}}, \code{\link[MASS]{psi.huber}}, or
+  \code{\link[MASS]{psi.bisquare}} from package \pkg{MASS}.  Namely,
+  a function with arguments \code{(x, deriv=0)}, which for
+  \code{deriv=0} computes \code{Mwgt(x, cc, psi)} and otherwise computes
+  \code{Mpsi(x, cc, psi, deriv=deriv)}.
 }
 \value{
   a numeric vector of the same length as \code{x}, with corresponding
@@ -91,6 +102,26 @@ psHa <- hampelPsi@psi(x)
 % FIXME: interesting as long as hampelPsi does not use Mpsi(... "hampel") !
 ## using Mpsi():
 Mp.Ha <- Mpsi(x, cc = ccHa, psi = "hampel")
-stopifnot(all.equal(Mp.Ha, psHa, tol = 1e-15))
+stopifnot(all.equal(Mp.Ha, psHa, tolerance = 1e-15))
+
+psi.huber <- .Mwgt.psi1("huber")
+stopifnot(identical(psi.huber, .Mwgt.psi1("huber", 1.345),
+                    ignore.env=TRUE))
+curve(psi.huber(x), -3, 5, col=2, ylim = 0:1)
+curve(psi.huber(x, deriv=1), add=TRUE, col=3)
+
+## and show that this is indeed the same as  MASS::psi.huber() :
+x <- runif(256, -2,3)
+stopifnot(all.equal(psi.huber(x), MASS::psi.huber(x)),
+          all.equal(                 psi.huber(x, deriv=1),
+                    as.numeric(MASS::psi.huber(x, deriv=1))))
+
+## and how to get  MASS::psi.hampel():
+psi.hampel <- .Mwgt.psi1("Hampel", c(2,4,8))
+x <- runif(256, -4, 10)
+stopifnot(all.equal(psi.hampel(x), MASS::psi.hampel(x)),
+          all.equal(                 psi.hampel(x, deriv=1),
+                    as.numeric(MASS::psi.hampel(x, deriv=1))))
+
 }
 \keyword{robust}

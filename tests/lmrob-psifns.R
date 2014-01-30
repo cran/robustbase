@@ -12,8 +12,8 @@ psiGGW <- function(x, a,b,c) {
            x,
            ifelse((ea <- -((ax-c)^b)/(2*a)) < -708.4, 0, x * exp(ea)))
 }
-assert.EQ(Mpsi  (5:9, cc=c(0,a=1/8,b=2,c=1/8,NA), "GGW"),
-          psiGGW(5:9,	       a=1/8,b=2,c=1/8), tol = 1e-13)
+assert.EQ(Mpsi  (5:9, cc=c(0, a=1/8,b=2,c=1/8, NA), "GGW"),
+          psiGGW(5:9,	      a=1/8,b=2,c=1/8), tol = 1e-13)
 
 
 ## Check that psi(<empty>)  |->  <empty>  works; ditto for +-Inf, NA,..
@@ -51,6 +51,8 @@ assert.EQ(sapply(cG.cnst, function(cc) MrhoInf(cc, "ggw")),
 
 ## Do these checks for a *list* of (c.par, psi) combinations:
 c.psi.list <- list(
+    list(1.345, "Huber"),
+    list(1.8,   "Huber"),
     list(cG, "GGW"),
     list(c(2,4,8), "Hampel"),
     list(c(1.5,3.5,8)*0.90, "Hampel"),
@@ -69,12 +71,32 @@ for(c.psi in c.psi.list) {
     for(FUN in list(Mpsi, Mchi, Mwgt))
 	stopifnot(identical(d0, FUN(d0, tPar, psi=psi)),
                   identical(NN, FUN(NN, tPar, psi=psi)))
-    stopifnot(identical(c(0,0,0), Mpsi(IoI, tPar,psi=psi)),
-              identical(c(1,0,1), Mchi(IoI, tPar,psi=psi)),
-              identical(c(0,1,0), Mwgt(IoI, tPar,psi=psi)))
+    stopifnot(identical(c(0,1,0), Mwgt(IoI, tPar,psi=psi)))
+    if(isPsi.redesc(psi))
+	stopifnot(identical(c(0,0,0), Mpsi(IoI, tPar,psi=psi)),
+		  identical(c(1,0,1), Mchi(IoI, tPar,psi=psi)))
+    else if(psi == "Huber") {
+	stopifnot(identical(c(-tPar,0,tPar), Mpsi(IoI, tPar,psi=psi)),
+		  identical(c(  Inf,0, Inf), Mchi(IoI, tPar,psi=psi)))
+    }
     cat("chkPsi..(): ")
-    chkPsi..(c(-5, 10), psi=psi, par=tPar)
-    cat(" [Ok]\n------------------------\n\n")
+    isHH <- psi %in% c("Huber", "Hampel") # not differentiable
+    tol <- switch(tolower(psi),
+                  "huber"=, "hampel"= c(.001, 1.0),
+                  "optimal" = .008,
+                  "ggw" = c(5e-5, 5e-3, 1e-12),
+                  "lqq" = c(1e-5, 5e-5, 1e-5, .08)) # .08 needed for bcs=c(1, 1, 1.25)
+    if(is.null(tol)) tol <- 1e-4 # default otherwise
+    cc <- chkPsi..(c(-5, 10), psi=psi, par=tPar, doD2 = !isHH, tol=tol)
+    ##    --------
+    cc. <- cc[!is.na(cc)]
+    if(is.logical(cc) && all(cc.))
+	cat(" [Ok]\n")
+    else {
+	cat(" not all Ok:\n")
+	print(cc.[cc. != "TRUE"])
+    }
+    cat("------------------------\n\n")
 }
 
 
@@ -147,8 +169,8 @@ ctr9$tuning.psi
 ctr9$tuning.chi
 ## Confirm these constants above (against the ones we got earlier)
 ## by recomputing them using higher accuracy :
-(tpsi. <- robustbase:::lmrob.lqq.findc(ctr9$tuning.psi, rel.tol=1e-11, tol=1e-8))
-(tchi. <- robustbase:::lmrob.lqq.findc(ctr9$tuning.chi, rel.tol=1e-11, tol=1e-8))
+(tpsi. <- robustbase:::.psi.lqq.findc(ctr9$tuning.psi, rel.tol=1e-11, tol=1e-8))
+(tchi. <- robustbase:::.psi.lqq.findc(ctr9$tuning.chi, rel.tol=1e-11, tol=1e-8))
 (tol4 <- .Machine$double.eps^.25)
 
 Rver <- getRversion()

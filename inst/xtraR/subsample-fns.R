@@ -1,9 +1,12 @@
+### Mainly used for source package checking in ../../tests/subsample.R
+### however, available (for reproducible research, confirmation) as
+### part of the robustbase package.
 
 ## R version of LU decomposition in subsample() in lmrob.c
 ## Modified from Golub G. H., Van Loan, C. F., Matrix Computations, 3rd edition
 LU.gaxpy <- function(A, pivot=TRUE, tol = 1e-7, verbose = FALSE)
 {
-    A <- as.matrix(A)
+    A <- as.matrix(A) ##  m x n  matrix,  n >= m >= 1
     stopifnot((n <- ncol(A)) >= (m <- nrow(A)), m >= 1)
     ## precondition:
     cf0 <- max(abs(A))
@@ -14,7 +17,7 @@ LU.gaxpy <- function(A, pivot=TRUE, tol = 1e-7, verbose = FALSE)
     U <- matrix(0, m, m)
     p <- integer(m-1) ## pivots
     idc <- 1L:n ## which columns of A are used
-    idr <- 1L:m ## how to rows of A are permuted
+    idr <- 1L:m ## how rows of A are permuted
     for(j in 1L:m) {
 	sing <- TRUE
 	while(sing) {
@@ -40,11 +43,11 @@ LU.gaxpy <- function(A, pivot=TRUE, tol = 1e-7, verbose = FALSE)
 		if (abs(v[mu]) >= tol) { ## singular: can stop here already
 		    p[j] <- mu
 		    if (pivot) {
-			tmp <- v[j]; v[j] <- v[mu]; v[mu] <- tmp
+			tmp <-   v[j];   v[j] <-   v[mu];   v[mu] <- tmp
 			tmp <- idr[j]; idr[j] <- idr[mu]; idr[mu] <- tmp
 		    }
 		    L[(j+1L):m, j] <- v[(j+1L):m]/v[j]
-		    if (pivot & j > 1) {
+		    if (pivot && j > 1) { ## swap rows   L[j,]  <->  L[mu,]
 			tmp <- L[j, rows]; L[j, rows] <- L[mu, rows]; L[mu, rows] <- tmp
 		    }
 		}
@@ -89,12 +92,34 @@ Rsubsample <- function(x, y, mts=0, tolInverse = 1e-7) {
        solve = TRUE)
 }
 
-subsample <- function(x, y=rnorm(n), compareMatrix = TRUE,
-		      lu.tol = 1e-7, lu.verbose=FALSE, tolInverse = lu.tol,
-		      eq.tol = .Machine$double.eps^0.5) {
+##' Simple version, just checking  (non)singularity conformance
+tstSubsampleSing <- function(X, y) {
+    lX <- X[sample(nrow(X)), ]
+    ## C version
+    zc <- Rsubsample(lX, y)
+    ## R version
+    zR <- LU.gaxpy(t(lX))
+    if (as.logical(zc$status)) {
+        ## singularity in C detected
+        if (!zR$singular)
+            stop("singularity in C but not in R")
+    } else {
+        ## no singularity detected
+        if (zR$singular)
+            stop("singularity in R but not in C")
+    }
+    zR$singular
+}
+
+##' Sophisticated version
+tstSubsample <- function(x, y=rnorm(n), compareMatrix = TRUE,
+                         lu.tol = 1e-7, lu.verbose=FALSE, tolInverse = lu.tol,
+                         eq.tol = .Machine$double.eps^0.5)
+{
     x0 <- x <- as.matrix(x)
     n <- nrow(x)
     p <- ncol(x)
+    if(p <= 1) stop("wrong 'x': need at least two columns for these tests")
     stopifnot(length(y) == n)
 
     z <- Rsubsample(x, y, tolInverse=tolInverse)
@@ -118,12 +143,13 @@ subsample <- function(x, y=rnorm(n), compareMatrix = TRUE,
     if (z$colequ) x <- x %*% diag(z$Dc)
 
     if (z$rowequ || z$colequ)
-        cat(sprintf("kappa before equilibration = %g, after = %g\n", kappa(x0), kappa(x)))
+	cat(sprintf("kappa before equilibration = %g, after = %g\n",
+		    kappa(x0), kappa(x)))
 
 
     LU. <- LU.gaxpy(t(x), tol=lu.tol, verbose=lu.verbose)
     ##	   --------
-    if (!isTRUE(all.equal(LU.$p, pivot, tol=0))) {
+    if (!isTRUE(all.equal(LU.$p, pivot, tolerance=0))) {
 	cat("LU.gaxpy() and Rsubsample() have different pivots:\n")
 	print(LU.$p)
 	print(pivot)
@@ -138,11 +164,11 @@ subsample <- function(x, y=rnorm(n), compareMatrix = TRUE,
     }
 
     ## compare with Matrix result
-    if (compareMatrix & z$status == 0) {
+    if (compareMatrix && z$status == 0) {
         xsub <- x[idc, ]
 	stopifnot(require("Matrix"))
 	tmp <- lu(t(xsub))
-	idx <- upper.tri(xsub, diag=TRUE)
+	## idx <- upper.tri(xsub, diag=TRUE)
 	stopifnot(all.equal(tmp@x, as.vector(z$lu), tol=eq.tol))
     }
 

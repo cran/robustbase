@@ -2,7 +2,7 @@ himed <- function(x) { n2 <- 1 + length(x) %/% 2; sort(x, partial = n2)[n2] }
 
 ## Tolerance  2e-7 {13 * higher than default  1.49e-8 }
 is.all.equal <- function(x,y, tol = 2e-7) {
-    is.logical(r <- all.equal(x,y, tol = tol)) && r }
+    is.logical(r <- all.equal(x,y, tolerance = tol)) && r }
 
 
 library(robustbase)
