@@ -280,16 +280,16 @@ globalVariables("r", add=TRUE) ## below and in other lmrob.E() expressions
     else if (!cov.resid %in% c('final','initial', 'trick'))
 	stop(":.vcov.w: cov.corrfact is not in 'final','initial', 'trick'")
     if (is.null(cov.xwx)) cov.xwx <- TRUE
-    else if (!is.logical(cov.hubercorr))
+    else if (!is.logical(cov.xwx))
 	stop(':.vcov.w: cov.xwx has to be logical')
     if (is.null(x))  x <- model.matrix(obj)
+    ## set psi and c.psi
     if (cov.resid == 'initial') {
         psi <- ctrl$psi
         c.psi <- ctrl$tuning.chi
         if (is.null(psi)) stop('parameter psi is not defined')
         if (!is.numeric(c.psi)) stop('parameter tuning.psi is not numeric')
     } else {
-        ## set psi and c.psi
         psi <- ctrl$psi
         c.psi <- if (ctrl$method %in% c('S', 'SD'))
             ctrl$tuning.chi else ctrl$tuning.psi
@@ -321,9 +321,11 @@ globalVariables("r", add=TRUE) ## below and in other lmrob.E() expressions
             if (psi == 'ggw') {
                 if (isTRUE(all.equal(c.psi, c(-.5, 1.0, 0.95, NA)))) 1.052619
                 else if (isTRUE(all.equal(c.psi, c(-.5, 1.5, 0.95, NA)))) 1.0525888644
+                else if (isTRUE(all.equal(c.psi, c(-.5, 1.0, 0.85, NA)))) 1.176479
                 else if (isTRUE(all.equal(c.psi, c(-.5, 1.5, 0.85, NA)))) 1.176464
-                else if (isTRUE(all.equal(c.psi, c(-.5, 1.5, 0.85, NA)))) 1.176479
-                else lmrob.E(psi(r)^2, ctrl) / lmrob.E(psi(r,1), ctrl)^2
+                else lmrob.E(psi(r)^2, ctrl) / lmrob.E(r*psi(r), ctrl)^2
+                ## MK: using r*psi(r) instead of psi'(r) is much more accurate
+                ##     when using Gauss-Hermite quadrature
             } else if (isTRUE(all.equal(c.psi, .Mpsi.tuning.default(psi)))) {
                 switch(psi,
                        bisquare = 1.0526317574,
@@ -332,7 +334,7 @@ globalVariables("r", add=TRUE) ## below and in other lmrob.E() expressions
                        hampel   = 1.0526016980,
                        lqq      = 1.0526365291,
                        stop(':.vcov.w: unsupported psi function'))
-            } else lmrob.E(psi(r)^2, ctrl) / lmrob.E(psi(r,1), ctrl)^2
+            } else lmrob.E(psi(r)^2, ctrl) / lmrob.E(r*psi(r), ctrl)^2 ## see above
         varcorr <- 1
     } else { ## empirical, approx or hybrid correction factor
 	rstand <- if (cov.resid == 'initial') {
@@ -373,29 +375,31 @@ globalVariables("r", add=TRUE) ## below and in other lmrob.E() expressions
                 else if (isTRUE(all.equal(c.psi, c(-.5, 1.5, 0.95, NA)))) 0.6817983
                 else if (isTRUE(all.equal(c.psi, c(-.5, 1.0, 0.85, NA)))) 0.4811596
                 else if (isTRUE(all.equal(c.psi, c(-.5, 1.5, 0.85, NA)))) 0.411581
-                else lmrob.E(psi(r, 1), ctrl)^2
+                else lmrob.E(r*psi(r), ctrl)^2 ## more accurate than psi'(r)
             } else if (isTRUE(all.equal(c.psi, lmrob.control(psi = psi)$tuning.psi)))
                 switch(psi,
                        bisquare = 0.5742327, welsh = 0.5445068, optimal = 0.8598825,
                        hampel = 0.6775217, lqq = 0.6883393,
                        stop(':.vcov.w: unsupported psi function'))
-            else lmrob.E(psi(r,1), ctrl)^2
+            else lmrob.E(r*psi(r), ctrl)^2 ## more accurate than psi'(r)
         }
         corrfact <- mean(r.psi^2)/mpp2 * hcorr
+        ## FIXME: this does not reduce to 1 for large tuning constants
     }
     ## simple sample size correction
     sscorr <- if (cov.dfcorr > 0) {
         if (cov.dfcorr == 2) varcorr ## cov.dfcorr == 2
         else if (cov.dfcorr == 3) mean(w)^2 / (1 - p / sum(w)) ## cov.dfcorr == 3
         else mean(w) * varcorr ## cov.dfcorr == 1
-    } else if (cov.dfcorr < 0) mean(w)
-    else 1 ## cov.dfcorr == -1 and == 0
+    } else if (cov.dfcorr < 0) mean(w) ## cov.dfcorr == -1 
+    else 1 ## cov.dfcorr == 0
 
     ## scale^2 * a/b2 * Huber's correction * Cinv
     cv <- scale^2 * sscorr * corrfact * cinv
     attr(cv,"weights") <- w
     attr(cv,"scale") <- scale
     attr(cv,"scorr") <- sscorr
+    attr(cv,"corrfact") <- corrfact
     cv
 }
 
@@ -855,8 +859,7 @@ lmrob.tau.fast.coefs <- function(cc, psi) {
     ## calculate asymptotic approximation of taus
     ta <- lmrob.E(psi(r)^2, ctrl, use.integrate = TRUE)
     tb <- lmrob.E(psi(r, 1), ctrl, use.integrate = TRUE)
-    tE <- lmrob.E(psi(r)*r, ctrl, use.integrate = TRUE)
-    tfact <- 2*tE/tb - ta/tb^2
+    tfact <- 2 - ta/tb^2
     taus.0 <- sqrt(1 - tfact * levs)
     ## calculate correction factor
     tcorr <- coef(lmrob(taus / taus.0 - 1 ~ levs - 1))

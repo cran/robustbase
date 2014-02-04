@@ -1,7 +1,7 @@
 
-R version 3.0.2 Patched (2014-01-26 r64896) -- "Frisbee Sailing"
+R Under development (unstable) (2014-01-26 r64896) -- "Unsuffered Consequences"
 Copyright (C) 2014 The R Foundation for Statistical Computing
-Platform: x86_64-unknown-linux-gnu (64-bit)
+Platform: x86_64-apple-darwin10.8.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -107,6 +107,7 @@ x1b:x2C     -0.86505    0.74657  -1.159    0.276
 x1c:x2C           NA         NA      NA       NA
 
 Robust residual standard error: 0.9273 
+Multiple R-squared:  0.3377,	Adjusted R-squared:  -0.251 
 Convergence in 15 IRWLS iterations
 
 Robustness weights: 
@@ -488,4 +489,4 @@ seed : int(0)
 > 
 > proc.time()
    user  system elapsed 
-  1.213   0.074   1.470 
+  0.626   0.044   0.667 

@@ -36,10 +36,10 @@ lmrob.lar <- function(x, y, control = lmrob.control(), mf = NULL)
   if (z1[5] > 1)
       stop("calculations stopped prematurely in rllarsbi\n",
            "(probably because of rounding errors).")
-  names(z1) <- c("coef", "scale","resid","iter", "status")
-  ##           c("THETA","SIGMA", "RS",  "NIT", "KODE")
+  names(z1) <- c("coefficients", "scale", "residuals", "iter", "status")
+  ##           c("THETA",        "SIGMA", "RS",        "NIT",  "KODE")
   z1$converged <- TRUE
-  length(z1$coef) <- p
+  length(z1$coefficients) <- p
   z1
 }
 

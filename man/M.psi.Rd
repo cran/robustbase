@@ -105,6 +105,7 @@ Mp.Ha <- Mpsi(x, cc = ccHa, psi = "hampel")
 stopifnot(all.equal(Mp.Ha, psHa, tolerance = 1e-15))
 
 psi.huber <- .Mwgt.psi1("huber")
+if(getRversion() >= "3.0.0")
 stopifnot(identical(psi.huber, .Mwgt.psi1("huber", 1.345),
                     ignore.env=TRUE))
 curve(psi.huber(x), -3, 5, col=2, ylim = 0:1)

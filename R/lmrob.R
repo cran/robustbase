@@ -391,6 +391,11 @@ print.summary.lmrob <-
 			 na.print="NA", ...)
 	    cat("\nRobust residual standard error:",
 		format(signif(x$scale, digits)),"\n")
+            if (!is.null(x$r.squared) && x$df[1] != attr(x$terms, "intercept")) {
+                cat("Multiple R-squared: ", formatC(x$r.squared, digits = digits))
+                cat(",\tAdjusted R-squared: ", formatC(x$adj.r.squared, digits = digits),
+                    "\n")
+            }
 	    ## FIXME: use naprint() here to list observations deleted due to missingness?
 	    correl <- x$correlation
 	    if (!is.null(correl)) {
@@ -497,7 +502,7 @@ summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...
 	est <- object$coefficients[object$qr$pivot[p1]]
 	tval <- est/se
 	ans <- object[c("call", "terms", "residuals", "scale", "rweights",
-			"converged", "iter", "control", "weights")]
+			"converged", "iter", "control")]
 	if (!is.null(ans$weights))
 	    ans$residuals <- ans$residuals * sqrt(object$weights)
 	## 'df' vector, modeled after summary.lm() : ans$df <- c(p, rdf, NCOL(Qr$qr))
@@ -509,6 +514,40 @@ summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...
 	    else
 		cbind(est, if(sigma <= 0) 0 else NA, NA, NA)
 	dimnames(ans$coefficients) <- list(names(est), cf.nms)
+        if (p != attr(ans$terms, "intercept")) {
+            df.int <- if (attr(ans$terms, "intercept")) 1L else 0L
+            ## This block is based on code by Olivier Renaud <Olivier.Renaud@unige.ch>
+            resid <- object$residuals
+            pred <- object$fitted.values
+            resp <- if (is.null(object[["y"]])) pred + resid else object$y
+            wgt <- object$rweights
+            scale.rob <- object$scale
+            ## correction E[wgt(r)] / E[psi'(r)] ( = E[wgt(r)] / E[r*psi(r)] )
+            ctrl <- object$control
+            c.psi <- ctrl$tuning.psi
+            psi <- ctrl$psi
+            correc <-
+                if (psi == 'ggw') {
+                    if (isTRUE(all.equal(c.psi, c(-.5, 1.0, 0.95, NA)))) 1.121708
+                    else if (isTRUE(all.equal(c.psi, c(-.5, 1.5, 0.95, NA)))) 1.163192
+                    else if (isTRUE(all.equal(c.psi, c(-.5, 1.0, 0.85, NA)))) 1.33517
+                    else if (isTRUE(all.equal(c.psi, c(-.5, 1.5, 0.85, NA)))) 1.395828
+                    else lmrob.E(wgt(r), ctrl) / lmrob.E(r*psi(r), ctrl)
+                } else if (isTRUE(all.equal(c.psi, .Mpsi.tuning.default(psi)))) {
+                    switch(psi,
+                           bisquare = 1.207617,
+                           welsh    = 1.224617,
+                           optimal  = 1.068939,
+                           hampel   = 1.166891,
+                           lqq      = 1.159232,
+                           stop(':summary.lmrob: unsupported psi function'))
+                } else lmrob.E(wgt(r), ctrl) / lmrob.E(r*psi(r), ctrl)
+            resp.mean <- if (df.int == 1L) sum(wgt * resp)/sum(wgt) else 0
+            yMy <- sum(wgt * (resp - resp.mean)^2)
+            rMr <- sum(wgt * resid^2)
+            ans$r.squared <- r2correc <- (yMy - rMr) / (yMy + rMr * (correc - 1))
+            ans$adj.r.squared <- 1 - (1 - r2correc) * ((n - df.int) / df)
+        } else ans$r.squared <- ans$adj.r.squared <- 0
 	ans$cov.unscaled <- object$cov
 	if(length(object$cov) > 1L)
 	    dimnames(ans$cov.unscaled) <- dimnames(ans$coefficients)[c(1,1)]
@@ -519,8 +558,8 @@ summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...
     } else { ## p = 0: "null model"
 	ans <- object
 	ans$df <- c(0L, df, length(aliased))
-	ans$coefficients <- matrix(NA, 0L, 4L)
-	dimnames(ans$coefficients) <- list(NULL, cf.nms)
+	ans$coefficients <- matrix(NA, 0L, 4L, dimnames = list(NULL, cf.nms))
+        ans$r.squared <- ans$adj.r.squared <- 0
 	ans$cov.unscaled <- object$cov
     }
     ans$aliased <- aliased # used in print method

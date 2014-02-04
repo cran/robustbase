@@ -136,6 +136,11 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
       normality of the estimated coefficients (\code{cov=".vcov.w"}) as
       described in Koller and Stahel (2011).
     }
+    \item{R-squared, coefficient of determination:}{
+      The R-squared value reported by \code{\link{summary.lmrob}} is the 
+      consistency corrected robust coefficient of determination by 
+      Renaud and Victoria-Feser (2010). 
+    }
   }%end {describe}
 }
 \value{
@@ -192,6 +197,10 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
   Maronna, R. A., and Yohai, V. J. (2000).
   Robust regression with both continuous and categorical predictors.
   \emph{Journal of Statistical Planning and Inference} \bold{89}, 197--214.
+
+  Renaud, O. and Victoria-Feser, M.-P. (2010).
+  A robust coefficient of determination for regression,
+  \emph{Journal of Statistical Planning and Inference} \bold{140}, 1852-1862.
 
   Rousseeuw, P.J. and Yohai, V.J. (1984)
   Robust regression by means of S-estimators,

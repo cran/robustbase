@@ -1,5 +1,5 @@
 
-R version 3.0.1 (2013-05-16) -- "Good Sport"
+R version 3.0.2 (2013-09-25) -- "Frisbee Sailing"
 Copyright (C) 2013 The R Foundation for Statistical Computing
 Platform: x86_64-apple-darwin10.8.0 (64-bit)
 
@@ -42,6 +42,7 @@ Acid.Conc.   -0.07354    0.07216  -1.019   0.3224
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 1.912 
+Multiple R-squared:  0.9863,	Adjusted R-squared:  0.9839 
 Convergence in IRWLS iterations
 
 Robustness weights: 
@@ -90,6 +91,7 @@ Acid.Conc.   -0.11292    0.06989  -1.616   0.1246
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 1.912 
+Multiple R-squared:  0.9593,	Adjusted R-squared:  0.9521 
 Convergence in 17 IRWLS iterations
 
 Robustness weights: 
@@ -139,6 +141,7 @@ Acid.Conc.   -0.1129     0.1163  -0.971 0.345380
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 2.651 
+Multiple R-squared:  0.9593,	Adjusted R-squared:  0.9521 
 Convergence in 17 IRWLS iterations
 
 Robustness weights: 
@@ -177,6 +180,7 @@ Acid.Conc.   -0.1129     0.1163  -0.971 0.345380
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 2.651 
+Multiple R-squared:  0.9593,	Adjusted R-squared:  0.9521 
 Convergence in 17 IRWLS iterations
 
 Robustness weights: 
@@ -226,6 +230,7 @@ Acid.Conc.   -0.1188     0.1268  -0.937 0.361693
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 2.651 
+Multiple R-squared:  0.9384,	Adjusted R-squared:  0.9275 
 Convergence in 17 IRWLS iterations
 
 Robustness weights: 
@@ -263,6 +268,7 @@ Acid.Conc.   -0.1188     0.1268  -0.937 0.361693
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 2.651 
+Multiple R-squared:  0.9384,	Adjusted R-squared:  0.9275 
 Convergence in 17 IRWLS iterations
 
 Robustness weights: 
@@ -309,4 +315,4 @@ Error in lmrob.S(model.matrix(model, NOxEmissions)[1:682, ], NOxEmissions$LNOx[1
 > 
 > proc.time()
    user  system elapsed 
-  0.643   0.051   0.679 
+  0.668   0.058   0.715 

@@ -1,7 +1,7 @@
 
-R version 3.0.2 Patched (2014-01-26 r64896) -- "Frisbee Sailing"
+R Under development (unstable) (2014-01-26 r64896) -- "Unsuffered Consequences"
 Copyright (C) 2014 The R Foundation for Statistical Computing
-Platform: x86_64-unknown-linux-gnu (64-bit)
+Platform: x86_64-apple-darwin10.8.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -40,6 +40,7 @@ X3          -0.62733    0.15845  -3.959 0.000584 ***
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 1 
+Multiple R-squared:  0.8983,	Adjusted R-squared:  0.8856 
 Convergence in 11 IRWLS iterations
 
 Robustness weights: 
@@ -154,6 +155,7 @@ motherLev   -4.13657    0.92084  -4.492 0.000507 ***
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 1.134 
+Multiple R-squared:  0.9814,	Adjusted R-squared:  0.9747 
 Convergence in 11 IRWLS iterations
 
 Robustness weights: 
@@ -200,6 +202,7 @@ log.Te        2.2532     0.7691   2.930  0.00531 **
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 0.4715 
+Multiple R-squared:  0.3737,	Adjusted R-squared:  0.3598 
 Convergence in 15 IRWLS iterations
 
 Robustness weights: 
@@ -241,6 +244,7 @@ X3          -0.05371    0.03195  -1.681   0.0971 .
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 0.7892 
+Multiple R-squared:  0.03976,	Adjusted R-squared:  -0.0008186 
 Convergence in 9 IRWLS iterations
 
 Robustness weights: 
@@ -278,6 +282,7 @@ height       -0.1372     2.1246  -0.065    0.950
 weight        0.3136     0.7346   0.427    0.679
 
 Robust residual standard error: 2.59 
+Multiple R-squared:  0.8671,	Adjusted R-squared:  0.8376 
 Convergence in 36 IRWLS iterations
 
 Robustness weights: 
@@ -322,6 +327,7 @@ Acid.Conc.   -0.11292    0.06989  -1.616   0.1246
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 1.912 
+Multiple R-squared:  0.9593,	Adjusted R-squared:  0.9521 
 Convergence in 17 IRWLS iterations
 
 Robustness weights: 
@@ -342,8 +348,8 @@ seed : int(0)
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # "stats"
-Time elapsed:  0.95 0.061 1.08 0 0.004 
+Time elapsed:  0.596 0.041 0.672 0.002 0.003 
 > 
 > proc.time()
    user  system elapsed 
-  0.951   0.065   1.081 
+  0.598   0.044   0.672 

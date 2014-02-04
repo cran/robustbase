@@ -1,7 +1,7 @@
 
-R version 3.0.1 Patched (2013-07-25 r63414) -- "Good Sport"
+R version 3.0.2 (2013-09-25) -- "Frisbee Sailing"
 Copyright (C) 2013 The R Foundation for Statistical Computing
-Platform: x86_64-unknown-linux-gnu (64-bit)
+Platform: x86_64-apple-darwin10.8.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -59,7 +59,7 @@ Type 'q()' to quit R.
 +                   lmrob.control(psi = "ggw", tuning.psi = cc)$tuning.psi)
 + )
 > cat('Time for constants computation of tuning.psi: ', st,'\n')
-Time for constants computation of tuning.psi:  0.343 0.001 0.346 0 0 
+Time for constants computation of tuning.psi:  0.219 0.001 0.221 0 0 
 > cGct <- t(sapply(cG.cnst, attr, "constants"))[,-1]
 > colnames(cGct) <- c("a","b","c", "rhoInf")
 > signif(cGct, 4)
@@ -228,6 +228,7 @@ X4          -0.0008677  0.0003699  -2.345 0.030666 *
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 5.335 
+Multiple R-squared:  0.7958,	Adjusted R-squared:  0.7504 
 Convergence in 22 IRWLS iterations
 
 Robustness weights: 
@@ -269,6 +270,7 @@ X4          -0.0005549  0.0003302  -1.681  0.11012
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 4.545 
+Multiple R-squared:  0.8159,	Adjusted R-squared:  0.775 
 Convergence in 1 IRWLS iterations
 
 Robustness weights: 
@@ -308,6 +310,7 @@ X4          -0.0008434  0.0003723  -2.265 0.036056 *
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 5.367 
+Multiple R-squared:  0.7942,	Adjusted R-squared:  0.7484 
 Convergence in 20 IRWLS iterations
 
 Robustness weights: 
@@ -351,6 +354,7 @@ X4          -0.0008941  0.0003695  -2.420 0.026346 *
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 5.408 
+Multiple R-squared:  0.7958,	Adjusted R-squared:  0.7504 
 Convergence in 18 IRWLS iterations
 
 Robustness weights: 
@@ -394,6 +398,7 @@ X4          -0.0006913  0.0003912  -1.767  0.09414 .
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 5.117 
+Multiple R-squared:  0.7832,	Adjusted R-squared:  0.7351 
 Convergence in 15 IRWLS iterations
 
 Robustness weights: 
@@ -439,6 +444,7 @@ X4          -0.0008432  0.0003471  -2.429 0.025825 *
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 5.502 
+Multiple R-squared:  0.7941,	Adjusted R-squared:  0.7484 
 Convergence in 19 IRWLS iterations
 
 Robustness weights: 
@@ -481,6 +487,7 @@ X4          -0.0008851  0.0003871  -2.287 0.034544 *
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 5.475 
+Multiple R-squared:  0.7946,	Adjusted R-squared:  0.7489 
 Convergence in 11 IRWLS iterations
 
 Robustness weights: 
@@ -575,6 +582,7 @@ X4          -0.0008188  0.0003642  -2.248 0.037346 *
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 5.319 
+Multiple R-squared:  0.7944,	Adjusted R-squared:  0.7487 
 Convergence in 19 IRWLS iterations
 
 Robustness weights: 
@@ -653,6 +661,7 @@ X4          -0.0011563  0.0008966  -1.290  0.21347
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Robust residual standard error: 6.127 
+Multiple R-squared:  0.7973,	Adjusted R-squared:  0.7523 
 Convergence in 33 IRWLS iterations
 
 Robustness weights: 
@@ -674,8 +683,8 @@ seed : int(0)
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  5.756 0.114 5.981 0.001 0.001 
+Time elapsed:  4.243 0.163 4.418 0.002 0.003 
 > 
 > proc.time()
    user  system elapsed 
-  5.757   0.115   5.981 
+  4.245   0.166   4.419 

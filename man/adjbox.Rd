@@ -146,7 +146,7 @@ adjbox(x, \dots)
 \seealso{The medcouple, \code{\link{mc}}; \code{\link{boxplot}}.
 }
 \examples{
-if(getRversion() >= "2.9.0" && require("boot")) {
+if(require("boot")) {
  ### Hubert and Vandervieren (2006), p. 10, Fig. 4.
  data(coal, package = "boot")
  coaldiff <- diff(coal$date)

@@ -45,6 +45,25 @@
   \item{cov}{covariance estimation function to use.}
   \item{\dots}{potentially more arguments passed to methods.}
 }
+\value{
+  \code{summary(object)} returns an object of S3 class
+  \code{"summary.lmrob"}, basically a \code{\link{list}} with components
+  "call", "terms", "residuals", "scale", "rweights", "converged",
+  "iter", "control" all copied from \code{object}, and further
+  components, partly for compatibility with \code{\link{summary.lm}},
+  \item{coefficients}{a \code{\link{matrix}} with columns \code{"Estimate"},
+    \code{"Std. Error"}, \code{"t value"}, and \code{"PR(>|t|)"}, where
+    "Estimate" is identical to \code{\link{coef}(object)}. Note that
+    \code{\link{coef}(<summary.obj>)} is slightly preferred to access
+    this matrix.}
+  \item{df}{degrees of freedom, in an \code{\link{lm}} compatible way.}
+  \item{sigma}{identical to \code{\link{sigma}(object)}.}
+  \item{aliased}{..}%FIXME
+  \item{cov.unscaled}{derived from \code{object$cov}.}
+  % FIXME: move the documentation about R squared *here* from ./lmrob.Rd ?
+  \item{r.squared}{Robust \dQuote{R squared} or \eqn{R^2}, see \code{\link{lmrob}}..}
+  \item{adj.r.squared}{adjusted R squared.}
+}
 \seealso{\code{\link{lmrob}}, \code{\link{predict.lmrob}},
   \code{\link{weights.lmrob}}, \code{\link{summary.lm}},
   \code{\link{print}}, \code{\link{summary}}.
