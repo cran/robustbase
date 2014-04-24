@@ -55,6 +55,10 @@ R users already know optim() etc.. so the name seems more logical for them.
 
 *** add1() and/or drop1() would be nice
 
+** TODO scaleTau2():  Also do a cheap finite-sample correction [MM] !
+   [DONE partly; but undocumented, since bound to change -->
+   file:~/R/MM/STATISTICS/robust/1d-scale.R , 1d-scale-sim.R, etc --- unfinished!!
+
 ** TODO Psi/Rho/Chi/Wgt Functions
     We have quite a few "partial" collections of rho/psi functions; 
     some are "sync"ed now, some not yet::
@@ -103,8 +107,6 @@ R users already know optim() etc.. so the name seems more logical for them.
    name 'hard.rejection()' is just awful (we need a globally available
    function as 'role model'.
    - Could allow 'n.iter = 0' to simply compute Cov()_{ij} = rcov(X_i, X_j)
-** TODO scaleTau2():  Also do a cheap finite-sample correction [MM] !
-		 [DONE partly; but undocumented, since bound to change]
 ** rrcov etc
 *** rrcov.control() __ NEEDS  name change ! ______
     probably use  mcd.control() and lts.control()

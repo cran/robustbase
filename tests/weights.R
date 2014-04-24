@@ -93,11 +93,19 @@ meths2 <- c(#"AIC",
             "variable.names",
             ##"vcov",    ## see below
             "weights")
-for (meth in meths2)
+op <- options(warn = 1)# print immediately
+for (meth in meths2) {
+    cat(meth,":")
+    .SW. <- if(meth == "weights") suppressWarnings else identity # for suppressing
+    ## No weights defined for this object. Use type="robustness" ....
     stopifnot(all.equal(do.call(meth, list(cm1)),
                         do.call(meth, list(rm1))),
               all.equal(do.call(meth, list(cm2)),
-                        do.call(meth, list(rm2))))
+		   .SW.(do.call(meth, list(rm2)))))
+
+    cat("\n")
+}
+options(op)# reverting
 
 ## further tests:
 anova(rm1, update(rm1, ~ . - x4 - x5))

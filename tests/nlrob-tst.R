@@ -21,7 +21,9 @@ stopifnot(all.equal(Y, fitted(fm1) + residuals(fm1), check.attributes=FALSE),
 	  ## robust fit :
 	  identical3(fitted(rm1), predict(rm1), predict(rm1, newdata=DNase1)),
 	  all.equal(Y, unname(fitted(rm1) + residuals(rm1))))
-assert.EQ(coef(rm1),
+assert.EQ(coef(rm1), #  print(coef(rm1), digits=12)
+	  ##	 2.35963008460	  1.49945088410	   1.04506391722  F19 Lx 64b
+	  ##	 2.35963008613	  1.49945088600	   1.04506391793  F19 Lx 32b
 	  c(Asym=2.35963008, xmid=1.49945088, scal=1.04506392), tol = 1e-8)
 assert.EQ(sqrt(diag(sm1$cov)),
 	  ## 32b 0.08626872273,     0.0902194541,      0.03503833759

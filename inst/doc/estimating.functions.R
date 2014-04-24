@@ -529,9 +529,14 @@ lmrob.mscale <- function(e, control, p = 0L) {
             n.group = as.integer(control$n.group),
             k.fast.s = as.integer(control$k.fast.s),
             k.max = as.integer(control$k.max),
+            maxit.scale = as.integer(control$maxit.scale),
             refine.tol = as.double(control$refine.tol),
+            inv.tol = as.double(control$solve.tol),
             converged = logical(1),
             trace.lev = as.integer(0),
+            mts = as.integer(control$mts),
+            ss = robustbase:::.convSs(control$subsampling),
+            fast.s.large.n = as.integer(length(e)+1),
             PACKAGE = 'robustbase')
 
   ret$scale
@@ -555,7 +560,7 @@ lmrob.dscale <- function(r, control,
             type = 3L, ## dt1 as only remaining option
             rel.tol = as.double(control$rel.tol),
             k.max = as.integer(control$k.max),
-            converged = integer(1),
+            converged = logical(1),
             PACKAGE = 'robustbase')
   ret$scale
 }

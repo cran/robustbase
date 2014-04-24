@@ -28,6 +28,7 @@
 \SweaveOpts{prefix.string=plot, eps = FALSE, pdf = TRUE, strip.white=true}
 \SweaveOpts{width=6, height=4}
 
+\usepackage[noae]{Sweave}
 \begin{document}
 \setkeys{Gin}{width=\textwidth}
 \setlength{\abovecaptionskip}{-5pt}
@@ -36,65 +37,19 @@
 ## set options
 options(width=60)
 
-## load required packages
-stopifnot(require(xtable),
-          require(robustbase))
+## number of workers to start
+## options(cores=10)
 
 ## Number of Repetitions:
 N <- 1000
 
-## default data set
-dd <- data.frame(X1 = c(0.0707996949791054, 0.0347546309449992,
-                   1.30548268152542, 0.866041511462982,
-                   0.275764343116733, 0.670798705161399,
-                   -0.549345193993536, -1.00640134962924,
-                   -1.22061169833477, -0.905619374719898,
-                   -0.678473241822565, 0.607011706444643,
-                   0.304237114526011, -2.14562816298790,
-                   2.34057395639167, 0.310752185537814,
-                   -0.972658170945796, 0.362012836241727,
-                   0.925888071796771, -0.595380245695561),
-                 X2 = c(0.119970864158429,
-                   -0.738808741221796, 5.49659158913364,
-                   3.52149647048925, 2.02079730735676,
-                   3.82735326206246, -1.24025420267206,
-                   -4.37015614526438, -5.00575484838141,
-                   -3.56682651298729, -2.82581432351811,
-                   0.0456819251791285, -0.93949674689997,
-                   -8.08282316242221, 9.76283850058346,
-                   0.866426786132133, -2.90670860898916,
-                   2.95555226542630, 4.50904028657548,
-                   -3.44910596474065),
-                 X3 = c(1.11332914932289,
-                   3.55583356836222, 10.4937363250789,
-                   0.548517298224424, 1.67062103214174,
-                   0.124224367717813, 6.86425894634543,
-                   1.14254475111985, 0.612987848127285,
-                   0.85062803777296, 0.881141283379239,
-                   0.650457856125926, 0.641015255931405,
-                   1.51667982973630, 0.764725309853834,
-                   1.61169179152476, 0.596312457754167,
-                   0.262270854360470, 1.24686336241,
-                   0.386112727548389))
-
 ## get path (= ../inst/doc/ in source pkg)
 robustDoc <- system.file('doc', package='robustbase')
-## load functions
-source(file.path(robustDoc, 'simulation.functions.R'))
-source(file.path(robustDoc, 'estimating.functions.R'))
-source(file.path(robustDoc, 'error.distributions.R'))
+robustDta <- robustDoc
 
-## set estlist and parameters
-estlist <- .estlist.confint
-## nr. of repetitions
-estlist$nrep <- N
-estlist$seed <- 13082010
-## set errors
-estlist$errs <- c(estlist$errs,
-                  list(.errs.skt.Inf.2,
-                       .errs.skt.5.2,
-                       .errs.cnorm..1.0.10,
-                       .errs.cnorm..1.4.1))
+## initialize
+source(file.path(robustDoc, 'simulation.init.R'))
+
 ## set the amount of trimming used in calculation of average results
 trim <- 0.1
 
@@ -347,9 +302,8 @@ An example design is shown in Fig.~\ref{fig:example.design}.
 \begin{figure}
 \begin{center}
 <<fig-example-design,fig=TRUE,include=FALSE,eval=FALSE,echo=FALSE>>=
-print(plotmatrix(rand_25_5) +
-      scale_x_continuous(breaks = -3:3) +
-      scale_y_continuous(breaks = -3:3))
+stopifnot(require(GGally))
+print(ggpairs(rand_25_5, axisLabels="show"))
 @
 \includegraphics{plot-fig-example-design}
 \end{center}
@@ -386,14 +340,23 @@ The covariance matrix estimate consists of three parts:
 \end{equation*}
 
 The SMD and SMDM methods of \T{lmrob} use the following defaults.
-\begin{equation*}
+\begin{equation}
+  \label{eq:gammatau}
   \hat\gamma =
-  \frac{\frac{1}{n}\sum_{i=1}^n
+  \frac{\frac{1}{n}\sum_{i=1}^n\tau_i^2
     \psi\left(\frac{r_i}{\tau_i\hat\sigma}\right)^2}
   {\frac{1}{n}\sum_{i=1}^n\psi'\left(\frac{r_i}{\tau_i\hat\sigma}\right)}
-\end{equation*}
+\end{equation}
 where $\tau_i$ is the rescaling factor used for the D-scale estimate (see
 \citet{KS2011}).
+
+\noindent\textbf{Remark: } Equation \eqref{eq:gammatau} is a corrected
+version of $\gamma$. It was changed in \texttt{robustbase} version
+\texttt{0.91} (April 2004) to ensure that the equation reduces to $1$ in
+the classical case ($\psi(x) = x$). If the former (incorrect) version is
+needed for compatibility reasons, it can be obtained by adding the argument
+\texttt{cov.corrfact = "tauold"}.
+
 \begin{equation*}
   \bld{\widehat V}_{\bld X} =
   \frac{1}{\frac{1}{n}\sum_{i=1}^n\wgt_{ii}}\bld X^T\bld W\bld X
@@ -409,16 +372,27 @@ there are no aggregate results available.)
 %% if you really want to run the simulations again.
 %% (better fail with an error than run for weeks)
 <<results=hide>>=
-aggrResultsFile <- file.path(robustDoc, "aggr_results.Rdata")
+aggrResultsFile <- file.path(robustDta, "aggr_results.Rdata")
 <<simulation-run,results=hide,eval=FALSE>>=
 if (!file.exists(aggrResultsFile)) {
   ## load packages required only for simulation
   stopifnot(require(robust),
             require(skewt),
             require(foreach))
-  registerDoSEQ()
-  ## stopifnot(require(doMC)) ## uncomment to use multicore package
-  ## registerDoMC()
+  if (!is.null(getOption("cores"))) {
+      if (getOption("cores") == 1) 
+          registerDoSEQ() ## no not use parallel processing
+      else {
+          stopifnot(require(doParallel))
+          if (.Platform$OS.type == "windows") {
+              cl <- makeCluster(getOption("cores")) 
+              clusterExport(cl, c("N", "robustDoc"))
+              clusterEvalQ(cl, slave <- TRUE)
+              clusterEvalQ(cl, source(file.path(robustDoc, 'simulation.init.R')))
+              registerDoParallel(cl)
+          } else registerDoParallel()
+      }
+  } else registerDoSEQ() ## no not use parallel processing
   for (design in c("dd", ls(pattern = 'rand_\\d+_\\d+'))) {
     print(design)
     ## set design
@@ -430,7 +404,7 @@ if (!file.exists(aggrResultsFile)) {
         f.prediction.points(estlist$design) else
       f.prediction.points(estlist$design, max.pc = 2)
 
-    filename <- file.path(robustDoc,
+    filename <- file.path(robustDta,
                           sprintf('r.test.final.%s.Rdata',design))
     if (!file.exists(filename)) {
       ## run
@@ -504,12 +478,12 @@ next section.
 
 <<simulation-aggr,results=hide,eval=FALSE,echo=FALSE>>=
 if (!file.exists(aggrResultsFile)) {
-  files <- list.files(robustDoc, pattern = 'r.test.final\\.')
+  files <- list.files(robustDta, pattern = 'r.test.final\\.')
   res <- foreach(file = files) %dopar% {
     ## get design, load r.test, initialize other stuff
     design <- substr(basename(file), 14, nchar(basename(file)) - 6)
     cat(design, ' ')
-    load(file.path(robustDoc, file))
+    load(file.path(robustDta, file))
     estlist <- attr(r.test, 'estlist')
     use.intercept <-
       if (!is.null(estlist$use.intercept)) estlist$use.intercept else TRUE
@@ -758,7 +732,9 @@ if (!file.exists(aggrResultsFile)) {
     lres
   }
   save(res, trim, file = aggrResultsFile)
-} else load(aggrResultsFile)
+  ## stop cluster
+  if (exists("cl")) stopCluster(cl)
+}
 <<simulation-aggr2,results=hide,echo=FALSE>>=
 load(aggrResultsFile)
 ## this will fail if the file is not found (for a reason)
@@ -1488,7 +1464,7 @@ u <- Vectorize(function(epsilon, ...) {
 \begin{figure}
 \begin{center}
 <<fig-max-asymptotic-bias,fig=TRUE,include=FALSE,eval=FALSE,echo=FALSE>>=
-asymptMBFile <- file.path(robustDoc, 'asymptotic.max.bias.Rdata')
+asymptMBFile <- file.path(robustDta, 'asymptotic.max.bias.Rdata')
 if (!file.exists(asymptMBFile)) {
   x <- seq(0, 0.35, length.out = 100)
   rmb <- rbind(data.frame(l=l(x, psi = 'hampel'),

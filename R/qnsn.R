@@ -30,6 +30,7 @@ Qn <- function(x, constant = 2.21914, finite.corr = missing(constant))
 	    ## n=2: E[Q_2] = E|X - Y| = sqrt(pi)/2, fc = sqrt(pi)/2/2.21914
 	    r* c(.399356, # ~= fc = 0.3993560233
                  ## These are from MM's simulation("Res3"), Nsim = 2^27 ~= 134 mio:
+                 ## ~/R/MM/Pkg-ex/robustbase/Qn-simulation.R
                  .99365, .51321, .84401, .61220,
                  .85877, .66993, .87344, .72014,
                  .88906, .75743)[n - 1L]

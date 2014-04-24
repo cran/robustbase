@@ -1,7 +1,7 @@
 
-R Under development (unstable) (2014-01-26 r64896) -- "Unsuffered Consequences"
+R version 3.1.0 Patched (2014-04-17 r65403) -- "Spring Dance"
 Copyright (C) 2014 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin10.8.0 (64-bit)
+Platform: x86_64-unknown-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -18,6 +18,7 @@ Type 'q()' to quit R.
 > require(robustbase)
 Loading required package: robustbase
 > 
+> set.seed(17)# reproducibility!
 > ## to check:
 > ## - for the empty model
 > summary(lmrob(Y ~ 0, coleman))
@@ -63,7 +64,8 @@ tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol
           psi   subsampling           cov 
    "bisquare" "nonsingular" ".vcov.avar1" 
 seed : int(0) 
-> summary(lmrob(Y ~ ., coleman))
+> writeLines(sfm <- capture.output(
++                        summary(lmrob(Y ~ ., coleman)))) # and this must be "identical":
 
 Call:
 lmrob(formula = Y ~ ., data = coleman)
@@ -102,45 +104,10 @@ tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol
           psi   subsampling           cov 
    "bisquare" "nonsingular" ".vcov.avar1" 
 seed : int(0) 
-> summary(lmrob(Y ~ ., coleman, model=FALSE, x=FALSE, y=FALSE))
-
-Call:
-lmrob(formula = Y ~ ., data = coleman, model = FALSE, x = FALSE, y = FALSE)
- \--> method = "MM"
-Residuals:
-     Min       1Q   Median       3Q      Max 
--4.16181 -0.39226  0.01611  0.55619  7.22766 
-
-Coefficients:
-            Estimate Std. Error t value Pr(>|t|)    
-(Intercept) 30.50232    6.71260   4.544 0.000459 ***
-salaryP     -1.66615    0.43129  -3.863 0.001722 ** 
-fatherWc     0.08425    0.01467   5.741 5.10e-05 ***
-sstatus      0.66774    0.03385  19.726 1.30e-11 ***
-teacherSc    1.16778    0.10983  10.632 4.35e-08 ***
-motherLev   -4.13657    0.92084  -4.492 0.000507 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Robust residual standard error: 1.134 
-Multiple R-squared:  0.9814,	Adjusted R-squared:  0.9747 
-Convergence in 11 IRWLS iterations
-
-Robustness weights: 
- observation 18 is an outlier with |weight| = 0 ( < 0.005); 
- The remaining 19 ones are summarized as
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.1491  0.9412  0.9847  0.9279  0.9947  0.9982 
-Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
-     nResample         max.it       best.r.s       k.fast.s          k.max 
-           500             50              2              1            200 
-   maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
-           200              0           1000              0           2000 
-          psi   subsampling           cov 
-   "bisquare" "nonsingular" ".vcov.avar1" 
-seed : int(0) 
+> sfm2 <- capture.output(summary(lmrob(Y ~ ., coleman, model=FALSE, x=FALSE, y=FALSE)))
+> iCall <- grep("lmrob.*coleman", sfm)# the only line that differs
+> stopifnot(sfm[-iCall] == sfm2[-iCall])
+> ## w/o intercept:
 > summary(lmrob(Y ~ . - 1, coleman, model=FALSE, x=FALSE, y=FALSE))
 
 Call:
@@ -178,6 +145,7 @@ tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol
           psi   subsampling           cov 
    "bisquare" "nonsingular" ".vcov.avar1" 
 seed : int(0) 
+> 
 > ## - when prior-weights are included
 > wts <- c(rep(0.05, 10), rep(2, 10))
 > summary(lmrob(Y ~ . - 1, coleman, model=FALSE, x=FALSE, y=FALSE,
@@ -187,9 +155,9 @@ Call:
 lmrob(formula = Y ~ . - 1, data = coleman, weights = wts, model = FALSE, 
     x = FALSE, y = FALSE)
  \--> method = "MM"
-Weighted Residuals:
+Residuals:
      Min       1Q   Median       3Q      Max 
--1.01509 -0.04288  0.04892  0.38289  9.00119 
+-4.53960 -0.03032  0.10984  1.55271  6.36480 
 
 Coefficients:
           Estimate Std. Error t value Pr(>|t|)    
@@ -220,24 +188,21 @@ tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol
           psi   subsampling           cov 
    "bisquare" "nonsingular" ".vcov.avar1" 
 seed : int(0) 
-> ## - should work for object with NA in the coefficients (done NAcoef.R)
-> ## - should work for object is NA in the observations (done NAcoef.R)
+> ## - should work for object with NA in the coefficients, and
+> ## - should work for object with NA in the observations --> both in ./NAcoef.R
 > 
 > ## check equality with lm() for classical model
-> ## FIXME: SE column of coefficients does not match (.vcov.w)
-> ##        because corrfact does not reduce to 1.
 > test <- function(formula, data,
-+                  items=c(## "coefficients", "residuals", "df", "scale",
-+                          "r.squared", "adj.r.squared"),
-+                  tolerance = 1e-4, ...) {
-+     ## FIXME: also include weights
-+     sc <- summary(lm(formula, data))
-+     sr <- summary(lmrob(formula, data,
-+                         control=lmrob.control(psi = "hampel",
-+                             tuning.psi = c(1000, 2000, 3000),
-+                             method="SMDM", ...)))
++                  items=c("coefficients", "residuals", "df", "scale",
++                          "r.squared", "adj.r.squared", "weights"),
++                  tol = 1e-4, ...)
++ {
++     lmrCtrl <- lmrob.control(psi = "hampel", tuning.psi = c(1000, 2000, 3000),
++                              method="SMDM", ...)
++     sc <- summary(lm   (formula, data))
++     sr <- summary(lmrob(formula, data, control= lmrCtrl))
 +     names(sc)[names(sc) == "sigma"] <- "scale"
-+     ret <- all.equal(sc[items], sr[items], tolerance=tolerance)
++     ret <- all.equal(sc[items], sr[items], tolerance=tol)
 +     if (!isTRUE(ret)) {
 +         print(sr)
 +         for (i in seq_along(items)) {
@@ -245,21 +210,25 @@ seed : int(0)
 +             print(sr[items[i]])
 +         }
 +         print(ret)
-+         stop("all.equal(sc[items], sr[items], tolerance = tolerance) are not all TRUE")
++         stop(sprintf("all.equal(sc[items], sr[items], tol.. = %g) are not all TRUE",
++                      tol))
 +     }
 +     ret
 + }
 > 
-> test(Y ~ 0, coleman, c(## "residuals", "df", "coefficients",
-+                        "r.squared", "adj.r.squared"))
+> set.seed(101)
+> 
+> test(Y ~ 0, coleman, c("residuals", "df", "coefficients",
++                        "r.squared", "adj.r.squared"), tol=1e-10)
 [1] TRUE
-> test(Y ~ 1, coleman)
+> test(Y ~ 1,     coleman, tol = 2e-4)
 [1] TRUE
-> test(Y ~ ., coleman)
+> test(Y ~ .,     coleman, tol = 4e-4)
 [1] TRUE
-> test(Y ~ . - 1, coleman)
+> test(Y ~ . - 1, coleman, tol = 4e-4)
 [1] TRUE
+> 
 > 
 > proc.time()
    user  system elapsed 
-  0.768   0.036   0.793 
+  0.893   0.031   0.906 

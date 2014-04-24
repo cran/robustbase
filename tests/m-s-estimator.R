@@ -1,6 +1,7 @@
 ## Test implementation of M-S estimator
 require(robustbase)
 source(system.file("xtraR/m-s_fns.R", package = "robustbase", mustWork=TRUE))
+source(system.file("xtraR/ex-funs.R", package = "robustbase", mustWork=TRUE))
 
 ## dataset with factors and continuous variables:
 data(education)
@@ -68,7 +69,7 @@ time <- system.time(for (i in seq_along(res)) {
     res[[i]] <- unlist(within(tmp, b1 <- drop(t1 + b1 - T2 %*% b2)))
 })
 cat('Time elapsed in subsampling: ', time,'\n')
-## show a summary of the results
+## show a summary of the results  {"FIXME": output is platform dependent}
 summary(res1 <- do.call(rbind, res))
 ## compare with fast S solution
 fmS <- lmrob(Y ~ Region + X1 + X2 + X3, education, init="S")
@@ -94,11 +95,14 @@ time <- system.time(for (i in seq_along(res3)) {
 })
 cat('Time elapsed in descent proc: ', time,'\n')
 
-## show a summary of the results
+## show a summary of the results   {"FIXME": output is platform dependent}
 res4 <- do.call(rbind, res3)
 summary(res4[,1:8])
 
-plot(res1[, "scale"], res4[,"scale"])
+stopifnot(all.equal( # 'test', not only plot:
+	  res1[, "scale"],   res4[,"scale"], tol = 0.03),
+	  res1[, "scale"] >= res4[,"scale"] - 1e-7 ) # 1e-7 just in case
+     plot(res1[, "scale"],   res4[,"scale"])
 abline(0,1, col=adjustcolor("gray", 0.5))
 
 ## Test lmrob.M.S
@@ -108,7 +112,7 @@ control$trace.lev <- 3
 set.seed(1003)
 fMS <- lmrob.M.S(x, y, control, fmS$model)
 resid <- drop(y - x %*% fMS$coef)
-stopifnot(all.equal(resid, fMS$resid, check.attributes=FALSE))
+assert.EQ(resid, fMS$resid, check.attributes=FALSE, tol = 1e-12)
 
 ## Test direct call to lmrob
 ## 1. trace_lev output:
@@ -166,6 +170,7 @@ stopifnot(n %% 16 == 0)
 d.AOV <- data.frame(y = round(100*rnorm(64)),
 		    A=gl(4,n/4), B=gl(2,8, n), C=gl(2,4,n))
 fm <- lmrob(y ~ A*B*C, data = d.AOV, init = "M-S", trace.lev=2)
+
 ## lmrob_M_S(n = 64, nRes = 500, (p1,p2)=(16,0), (orth,subs,desc)=(1,1,1))
 ##  Starting subsampling procedure.. Error in lmrob.M.S(x, y, control, mf) :
 ##   'Calloc' could not allocate memory (18446744073709551616 of 4 bytes)

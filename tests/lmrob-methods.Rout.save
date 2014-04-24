@@ -133,10 +133,10 @@ Residuals:
 
 Coefficients:
             Estimate Std. Error t value Pr(>|t|)    
-(Intercept) -41.5246     8.8552  -4.689 0.000211 ***
-Air.Flow      0.9388     0.1162   8.078  3.2e-07 ***
-Water.Temp    0.5796     0.3164   1.831 0.084610 .  
-Acid.Conc.   -0.1129     0.1163  -0.971 0.345380    
+(Intercept) -41.5246     8.9525  -4.638 0.000235 ***
+Air.Flow      0.9388     0.1175   7.990 3.71e-07 ***
+Water.Temp    0.5796     0.3199   1.812 0.087756 .  
+Acid.Conc.   -0.1129     0.1176  -0.960 0.350512    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -172,10 +172,10 @@ Residuals:
 
 Coefficients:
             Estimate Std. Error t value Pr(>|t|)    
-(Intercept) -41.5246     8.8552  -4.689 0.000211 ***
-Air.Flow      0.9388     0.1162   8.078  3.2e-07 ***
-Water.Temp    0.5796     0.3164   1.831 0.084610 .  
-Acid.Conc.   -0.1129     0.1163  -0.971 0.345380    
+(Intercept) -41.5246     8.9525  -4.638 0.000235 ***
+Air.Flow      0.9388     0.1175   7.990 3.71e-07 ***
+Water.Temp    0.5796     0.3199   1.812 0.087756 .  
+Acid.Conc.   -0.1129     0.1176  -0.960 0.350512    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -222,10 +222,10 @@ Residuals:
 
 Coefficients:
             Estimate Std. Error t value Pr(>|t|)    
-(Intercept) -41.9398     9.6482  -4.347 0.000438 ***
-Air.Flow      0.8747     0.1215   7.198 1.49e-06 ***
-Water.Temp    0.8099     0.3320   2.439 0.025977 *  
-Acid.Conc.   -0.1188     0.1268  -0.937 0.361693    
+(Intercept) -41.9398     9.7719  -4.292 0.000494 ***
+Air.Flow      0.8747     0.1231   7.107 1.76e-06 ***
+Water.Temp    0.8099     0.3363   2.408 0.027656 *  
+Acid.Conc.   -0.1188     0.1284  -0.926 0.367655    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -260,10 +260,10 @@ Residuals:
 
 Coefficients:
             Estimate Std. Error t value Pr(>|t|)    
-(Intercept) -41.9398     9.6482  -4.347 0.000438 ***
-Air.Flow      0.8747     0.1215   7.198 1.49e-06 ***
-Water.Temp    0.8099     0.3320   2.439 0.025977 *  
-Acid.Conc.   -0.1188     0.1268  -0.937 0.361693    
+(Intercept) -41.9398     9.7719  -4.292 0.000494 ***
+Air.Flow      0.8747     0.1231   7.107 1.76e-06 ***
+Water.Temp    0.8099     0.3363   2.408 0.027656 *  
+Acid.Conc.   -0.1188     0.1284  -0.926 0.367655    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -315,4 +315,4 @@ Error in lmrob.S(model.matrix(model, NOxEmissions)[1:682, ], NOxEmissions$LNOx[1
 > 
 > proc.time()
    user  system elapsed 
-  0.668   0.058   0.715 
+  0.730   0.062   0.785 

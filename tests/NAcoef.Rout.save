@@ -1,7 +1,7 @@
 
-R Under development (unstable) (2014-01-26 r64896) -- "Unsuffered Consequences"
+R version 3.1.0 Patched (2014-04-10 r65396) -- "Spring Dance"
 Copyright (C) 2014 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin10.8.0 (64-bit)
+Platform: i686-pc-linux-gnu (32-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -22,6 +22,7 @@ Type 'q()' to quit R.
 > require(robustbase)
 Loading required package: robustbase
 > source(system.file("test-tools-1.R", package="Matrix", mustWork=TRUE))
+Loading required package: tools
 > ##-> assertError(), etc
 > 
 > ## generate simple example data
@@ -296,7 +297,8 @@ $residual.scale
 > #rstandard(rm1)
 > #rstudent(rm1)
 > #simulate(rm1) ## just $weights needs to be changed to prior weights
-> (V1 <- vcov(rm1))
+> V1 <- vcov(rm1) # but don't show the "eigen" part {vectors may flip sign}:
+> attributes(V1) <- attributes(V1)[c("dim","dimnames", "weights")]; V1
             (Intercept)         x1b         x1c         x2B          x2C
 (Intercept)   0.2963116 -0.32142943 -0.33884229 -0.23800957 -0.328912503
 x1b          -0.3214294  0.41250140  0.36976330  0.25303831  0.361676665
@@ -324,33 +326,6 @@ attr(,"weights")
 0.7872941 0.9997996 0.9835287 0.9738515 0.9875740 0.9863317 0.9990907 0.9942882 
        25        26 
 0.9857845 0.9922695 
-attr(,"eigen")
-attr(,"eigen")$values
-[1] 2.961679771 0.807006846 0.358336719 0.122478798 0.068934329 0.040071990
-[7] 0.033950292 0.006924341 0.003652896
-
-attr(,"eigen")$vectors
-              [,1]        [,2]         [,3]        [,4]        [,5]        [,6]
- [1,]  0.268626024  0.28257661 -0.097953503 -0.14685601 -0.09887648  0.40980741
- [2,] -0.321232022 -0.29276814  0.003242812 -0.19946519 -0.51775403 -0.53932133
- [3,] -0.295100394 -0.42737140  0.254432200  0.44052522 -0.32524770  0.51692739
- [4,] -0.301657264  0.11390103  0.776375732 -0.19352578  0.38496831  0.05694141
- [5,] -0.357548769 -0.19016733 -0.273211360  0.23099955  0.60795769 -0.23595233
- [6,]  0.175867929  0.02113143  0.329806776 -0.39911818 -0.11403881 -0.19866121
- [7,] -0.006016538 -0.11954236  0.150676632  0.01690480 -0.12361063  0.03104317
- [8,]  0.594351989 -0.72180919  0.105378923 -0.09361953  0.25049726 -0.01632845
- [9,]  0.366752729  0.25866674  0.325076072  0.69672502 -0.08672758 -0.41756923
-              [,7]        [,8]        [,9]
- [1,] -0.097818170  0.79159151  0.05408096
- [2,] -0.220107191  0.37472524 -0.15328736
- [3,]  0.295640068  0.09698975 -0.04075749
- [4,] -0.253724947  0.12005727 -0.15995289
- [5,]  0.239309166  0.40951352  0.24027854
- [6,]  0.755524944  0.06301038  0.27073369
- [7,] -0.376869232 -0.07265846  0.89394142
- [8,] -0.141708922  0.08250803 -0.12634627
- [9,]  0.002525346  0.15932563 -0.01438668
-
 > set.seed(12); sc <- simulate(cm1, 64)
 > set.seed(12); rc <- simulate(rm1, 64)
 > 
@@ -413,9 +388,9 @@ Coefficients:
 Call:
 lmrob(formula = y ~ 1 + x1 + x2 + offset(os), data = data, weights = w)
  \--> method = "MM"
-Weighted Residuals:
-     Min       1Q   Median       3Q      Max 
--3.64119 -1.81100 -0.04729  2.00931  4.35881 
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-4.6412 -2.3912 -0.1412  2.1088  4.3588 
 
 Coefficients: (2 not defined because of singularities)
             Estimate Std. Error t value Pr(>|t|)   
@@ -429,7 +404,8 @@ Robust residual standard error: 3.244
 Convergence in 8 IRWLS iterations
 
 Robustness weights: 
- [1] 0.9089 0.8885 0.9700 0.9768 0.9982 0.9989 0.9920 0.9524 0.9518 0.8423
+     1      2      3      4      5      6      7      8      9     10 
+0.9089 0.8885 0.9700 0.9768 0.9982 0.9989 0.9920 0.9524 0.9518 0.8423 
 Algorithmic parameters: 
 tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
  1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
@@ -489,4 +465,4 @@ seed : int(0)
 > 
 > proc.time()
    user  system elapsed 
-  0.626   0.044   0.667 
+  0.804   0.089   0.978 

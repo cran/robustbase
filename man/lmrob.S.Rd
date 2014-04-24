@@ -62,7 +62,7 @@ X1  <- cbind(1, X.)
 (m.lm <- lm(y ~ X.))
 set.seed(12)
 m.lmS <- lmrob.S(x=X1, y=y,
-                    control = lmrob.control(nRes = 20), trace.lev=1)
+                 control = lmrob.control(nRes = 20), trace.lev=1)
 m.lmS[c("coefficients","scale")]
 all.equal(unname(m.lmS$coef), 10 * (1:4), tolerance = 0.005)
 stopifnot(all.equal(unname(m.lmS$coef), 10 * (1:4), tolerance = 0.005),

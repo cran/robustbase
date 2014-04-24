@@ -7,65 +7,19 @@
 ## set options
 options(width=60)
 
-## load required packages
-stopifnot(require(xtable),
-          require(robustbase))
+## number of workers to start
+## options(cores=10)
 
 ## Number of Repetitions:
 N <- 1000
 
-## default data set
-dd <- data.frame(X1 = c(0.0707996949791054, 0.0347546309449992,
-                   1.30548268152542, 0.866041511462982,
-                   0.275764343116733, 0.670798705161399,
-                   -0.549345193993536, -1.00640134962924,
-                   -1.22061169833477, -0.905619374719898,
-                   -0.678473241822565, 0.607011706444643,
-                   0.304237114526011, -2.14562816298790,
-                   2.34057395639167, 0.310752185537814,
-                   -0.972658170945796, 0.362012836241727,
-                   0.925888071796771, -0.595380245695561),
-                 X2 = c(0.119970864158429,
-                   -0.738808741221796, 5.49659158913364,
-                   3.52149647048925, 2.02079730735676,
-                   3.82735326206246, -1.24025420267206,
-                   -4.37015614526438, -5.00575484838141,
-                   -3.56682651298729, -2.82581432351811,
-                   0.0456819251791285, -0.93949674689997,
-                   -8.08282316242221, 9.76283850058346,
-                   0.866426786132133, -2.90670860898916,
-                   2.95555226542630, 4.50904028657548,
-                   -3.44910596474065),
-                 X3 = c(1.11332914932289,
-                   3.55583356836222, 10.4937363250789,
-                   0.548517298224424, 1.67062103214174,
-                   0.124224367717813, 6.86425894634543,
-                   1.14254475111985, 0.612987848127285,
-                   0.85062803777296, 0.881141283379239,
-                   0.650457856125926, 0.641015255931405,
-                   1.51667982973630, 0.764725309853834,
-                   1.61169179152476, 0.596312457754167,
-                   0.262270854360470, 1.24686336241,
-                   0.386112727548389))
-
 ## get path (= ../inst/doc/ in source pkg)
 robustDoc <- system.file('doc', package='robustbase')
-## load functions
-source(file.path(robustDoc, 'simulation.functions.R'))
-source(file.path(robustDoc, 'estimating.functions.R'))
-source(file.path(robustDoc, 'error.distributions.R'))
+robustDta <- robustDoc
 
-## set estlist and parameters
-estlist <- .estlist.confint
-## nr. of repetitions
-estlist$nrep <- N
-estlist$seed <- 13082010
-## set errors
-estlist$errs <- c(estlist$errs,
-                  list(.errs.skt.Inf.2,
-                       .errs.skt.5.2,
-                       .errs.cnorm..1.0.10,
-                       .errs.cnorm..1.4.1))
+## initialize
+source(file.path(robustDoc, 'simulation.init.R'))
+
 ## set the amount of trimming used in calculation of average results
 trim <- 0.1
 
@@ -199,7 +153,7 @@ print(xtable(tbl), sanitize.text.function=identity,
 
 
 ###################################################
-### code chunk number 5: lmrob_simulation.Rnw:323-343
+### code chunk number 5: lmrob_simulation.Rnw:278-298
 ###################################################
 f.gen <- function(n, p, rep, err) {
   ## get function name and parameters
@@ -226,15 +180,14 @@ for (i in 1:NROW(lsit))
 ###################################################
 ### code chunk number 6: fig-example-design (eval = FALSE)
 ###################################################
-## print(plotmatrix(rand_25_5) +
-##       scale_x_continuous(breaks = -3:3) +
-##       scale_y_continuous(breaks = -3:3))
+## stopifnot(require(GGally))
+## print(ggpairs(rand_25_5, axisLabels="show"))
 
 
 ###################################################
-### code chunk number 7: lmrob_simulation.Rnw:411-412
+### code chunk number 7: lmrob_simulation.Rnw:374-375
 ###################################################
-aggrResultsFile <- file.path(robustDoc, "aggr_results.Rdata")
+aggrResultsFile <- file.path(robustDta, "aggr_results.Rdata")
 
 
 ###################################################
@@ -245,9 +198,20 @@ aggrResultsFile <- file.path(robustDoc, "aggr_results.Rdata")
 ##   stopifnot(require(robust),
 ##             require(skewt),
 ##             require(foreach))
-##   registerDoSEQ()
-##   ## stopifnot(require(doMC)) ## uncomment to use multicore package
-##   ## registerDoMC()
+##   if (!is.null(getOption("cores"))) {
+##       if (getOption("cores") == 1) 
+##           registerDoSEQ() ## no not use parallel processing
+##       else {
+##           stopifnot(require(doParallel))
+##           if (.Platform$OS.type == "windows") {
+##               cl <- makeCluster(getOption("cores")) 
+##               clusterExport(cl, c("N", "robustDoc"))
+##               clusterEvalQ(cl, slave <- TRUE)
+##               clusterEvalQ(cl, source(file.path(robustDoc, 'simulation.init.R')))
+##               registerDoParallel(cl)
+##           } else registerDoParallel()
+##       }
+##   } else registerDoSEQ() ## no not use parallel processing
 ##   for (design in c("dd", ls(pattern = 'rand_\\d+_\\d+'))) {
 ##     print(design)
 ##     ## set design
@@ -259,7 +223,7 @@ aggrResultsFile <- file.path(robustDoc, "aggr_results.Rdata")
 ##         f.prediction.points(estlist$design) else
 ##       f.prediction.points(estlist$design, max.pc = 2)
 ## 
-##     filename <- file.path(robustDoc,
+##     filename <- file.path(robustDta,
 ##                           sprintf('r.test.final.%s.Rdata',design))
 ##     if (!file.exists(filename)) {
 ##       ## run
@@ -276,26 +240,26 @@ aggrResultsFile <- file.path(robustDoc, "aggr_results.Rdata")
 
 
 ###################################################
-### code chunk number 9: lmrob_simulation.Rnw:452-453
+### code chunk number 9: lmrob_simulation.Rnw:426-427
 ###################################################
 str(estlist, 1)
 
 
 ###################################################
-### code chunk number 10: lmrob_simulation.Rnw:458-459
+### code chunk number 10: lmrob_simulation.Rnw:432-433
 ###################################################
 estlist$errs[[1]]
 
 
 ###################################################
-### code chunk number 11: lmrob_simulation.Rnw:465-467 (eval = FALSE)
+### code chunk number 11: lmrob_simulation.Rnw:439-441 (eval = FALSE)
 ###################################################
 ## set.seed(estlist$seed)
 ## errs <- c(sapply(1:nrep, function(x) do.call(fun, c(n = nobs, args))))
 
 
 ###################################################
-### code chunk number 12: lmrob_simulation.Rnw:478-479
+### code chunk number 12: lmrob_simulation.Rnw:452-453
 ###################################################
 str(estlist$output[1:3], 2)
 
@@ -304,12 +268,12 @@ str(estlist$output[1:3], 2)
 ### code chunk number 13: simulation-aggr (eval = FALSE)
 ###################################################
 ## if (!file.exists(aggrResultsFile)) {
-##   files <- list.files(robustDoc, pattern = 'r.test.final\\.')
+##   files <- list.files(robustDta, pattern = 'r.test.final\\.')
 ##   res <- foreach(file = files) %dopar% {
 ##     ## get design, load r.test, initialize other stuff
 ##     design <- substr(basename(file), 14, nchar(basename(file)) - 6)
 ##     cat(design, ' ')
-##     load(file.path(robustDoc, file))
+##     load(file.path(robustDta, file))
 ##     estlist <- attr(r.test, 'estlist')
 ##     use.intercept <-
 ##       if (!is.null(estlist$use.intercept)) estlist$use.intercept else TRUE
@@ -558,7 +522,9 @@ str(estlist$output[1:3], 2)
 ##     lres
 ##   }
 ##   save(res, trim, file = aggrResultsFile)
-## } else load(aggrResultsFile)
+##   ## stop cluster
+##   if (exists("cl")) stopCluster(cl)
+## }
 
 
 ###################################################
@@ -983,7 +949,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 
 
 ###################################################
-### code chunk number 35: lmrob_simulation.Rnw:1430-1485
+### code chunk number 35: lmrob_simulation.Rnw:1406-1461
 ###################################################
 ## Henning (1994) eq 33:
 g <- Vectorize(function(s, theta, mu, ...) {
@@ -1045,7 +1011,7 @@ u <- Vectorize(function(epsilon, ...) {
 ###################################################
 ### code chunk number 36: fig-max-asymptotic-bias (eval = FALSE)
 ###################################################
-## asymptMBFile <- file.path(robustDoc, 'asymptotic.max.bias.Rdata')
+## asymptMBFile <- file.path(robustDta, 'asymptotic.max.bias.Rdata')
 ## if (!file.exists(asymptMBFile)) {
 ##   x <- seq(0, 0.35, length.out = 100)
 ##   rmb <- rbind(data.frame(l=l(x, psi = 'hampel'),

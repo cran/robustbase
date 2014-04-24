@@ -47,8 +47,8 @@ d.exp30 <- data.frame(x = sort( runif(30, 0, 10) ), err = rnorm(30))
 d.exp30 <- transform(d.exp30, y = Expo(x, 1, 0.2) + err)
 ## classical (starting at truth .. hmm)
 Cfit <- nls(y ~ Expo(x, a, b), data = d.exp30, start = c(a = 1, b = 0.2),
-            control = nls.control(tol = 5e-8, printEval = TRUE))
-showProc.time()
+            control = nls.control(tol = 8e-8, printEval = TRUE))
+showProc.time()#                        ---- OS X needing 6e-8
 
 ## robust
 Rfit.MM.S.bisquare <-
@@ -82,7 +82,7 @@ S.time(Rfit.mtl <- nlrob.mtl(y ~ Expo(x, a, b), data = d.exp30,
 			     upper = c(	    10,	     2,		3),
 			     NP = NP+10, # <- higher prob. to get close
                              tol = tol,
-                             trace=TRUE, details=TRUE, 
+                             trace=TRUE, details=TRUE,
                              add_to_init_pop = init_p_sigma ))
 showProc.time()
 
@@ -238,7 +238,7 @@ if(length(prblm)) {
 
 dKnd <- as.factor(vapply(mods, function(.m.)
                          as.character(getCall(.m.)[["data"]]), ""))
-table(dKnd) ## 
+table(dKnd) ##
 (iKnd <- setNames(seq_len(nlevels(dKnd)), levels(dKnd)))
 
 ## Coefficients: Some have 'sigma', some not:
@@ -298,13 +298,13 @@ if(doExtras) {## the same, with 'pnames' and unnamed 'lower':
                                      lower = 0, upper = 3))
     stopifnot(all.eq.mod(fMM, fM2, tol=1e-15))
 
-    ftau <- robustbase:::nlrob.tau(form, data = DNase1, 
+    ftau <- robustbase:::nlrob.tau(form, data = DNase1,
                                    lower= setNames(c(0,0,0), pnms), upper= 3,  trace=TRUE)
 
-    fCM  <- robustbase:::nlrob.CM (form, data = DNase1, 
+    fCM  <- robustbase:::nlrob.CM (form, data = DNase1,
                                    lower= setNames(c(0,0,0,0), psNms), upper= 3, trace=TRUE)
 
-    fmtl <- robustbase:::nlrob.mtl(form, data = DNase1, 
+    fmtl <- robustbase:::nlrob.mtl(form, data = DNase1,
                                    lower= setNames(c(0,0,0,0), psNms), upper= 3, trace=TRUE)
 
     mods <- list(MM=fMM, tau=ftau, CM=fCM, MTL=fmtl)

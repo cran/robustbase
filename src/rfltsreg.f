@@ -20,8 +20,8 @@ cc  providing the initial code of this function.
 cc
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      subroutine rfltsreg(dat,n,nvar,nhalff,krep,inbest,objfct,
-     *     intercept,intadjust,nvad,datt,iseed,
+      subroutine rfltsreg(dat,n,nvar,nhalff,krep, inbest,objfct,
+     *     intercept,intadjust,nvad,datt,
      *     weights,temp,index1,index2,aw2,aw,residu,y,nmahad,ndist,
      *     am,am2,slutn,
      *     jmiss,xmed,xmad,a,da,h,hvec,c,cstock,mstock,c1stock,
@@ -169,8 +169,8 @@ c     Tolerance for rfstatis():  |MAD| < MADeps  : <==> "problem"
 cc	nhalff=int((n+nvar+1)/2)
 
       jmin=(n/2)+1
-      jmax=max((3*n/4)+(nvar+1)/4,nhalff)
-      nquant=min(nint(real(((nhalff*1.0/n)-0.5)*40))+1,11)
+      jmax = max((3*n/4)+(nvar+1)/4, nhalff)
+      nquant=min(11, 1+ nint(40*(dble(nhalff)/n - 0.5)))
       factor=faclts(nquant)
 c unused      jbreak=rfnbreak(nhalff,n,nvar)
 c unused      jdefaul=(n+nvar+1)/2
@@ -199,7 +199,7 @@ cc
       if(krep.gt.0 .and. n.gt.(2*nmini-1)) then
         kstep=k1
         part=.true.
-        ngroup=int(n/(nmini*1.D0))
+        ngroup=int(n/dble(nmini))
         if(n.ge.(2*nmini) .and. n.le.(3*nmini-1)) then
           if(rfodd(n)) then
             mini(1)=int(n/2)
@@ -254,7 +254,7 @@ cc
 
         nhalf=int(mini(1)*percen)
         if(ngroup.gt.kmini) ngroup=kmini
-        nrep=int((krep*1.D0)/ngroup)
+        nrep=int(dble(krep)/ngroup)
         minigr=mini(1)+mini(2)+mini(3)+mini(4)+mini(5)
 cccc  CALL INTPR('>>> RFLTSREG ... minigr=',-1,iseed,1)
         call rfrdraw(subdat,n,minigr,mini,ngroup,kmini)
@@ -334,9 +334,6 @@ CDDD  CALL INTPR('>>> Start initialization ... nrep=',-1,nrep,1)
       do 44, j=1,maxmini
         subndex(j)=0
  44   continue
-      do 42,j=1,nhalff
-        inbest(j)=0
- 42   continue
 
       do 47,j=1,nvm11
  47     hvec(j)=0.D0
@@ -767,9 +764,9 @@ CDDD  CALL INTPR('>>> INTERCEPT ADJUSTMENT 2',-1,step,1)
      *           .or.fckw.lt.object).and.(final)) then
               object=fckw
               objfct=fckw
-              do 175 jjj=1,nhalf
+              do jjj=1,nhalf
                 inbest(jjj)=index2(jjj)
- 175          continue
+              end do
               call rfcovcopy(a,bmeans,nvar,1)
             endif
 

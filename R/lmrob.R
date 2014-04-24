@@ -581,6 +581,7 @@ vcov.lmrob <- function (object, cov=object$control$cov, ...) {
   if (!is.null(object$cov) && identical(cov, object$control$cov))
     return(object$cov)
   else {
+    ## cov = ..$control$cov is typically ".vcov.w" or ".vcov.avar1"
     lf.cov <- if (!is.function(cov))
       get(cov, mode = "function")
     else cov

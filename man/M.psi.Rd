@@ -34,7 +34,10 @@ MrhoInf(cc, psi)
 .Mwgt.psi1(psi, cc = .Mpsi.tuning.default(psi))
 }
 \arguments{
-  \item{x}{numeric (\dQuote{abscissa} values) vector.}
+  \item{x}{numeric (\dQuote{abscissa} values) vector, possibly with
+    \code{\link{attributes}} such as \code{\link{dim}} or
+    \code{\link{names}}, etc.  These are preserved for the
+    \code{M*()} functions (but not the \code{.M()} ones).}
   \item{cc}{numeric tuning constant, for some \code{psi} of length
     \eqn{> 1}.}
   \item{psi}{a string specifying the psi / chi / rho / wgt function;
@@ -124,5 +127,10 @@ stopifnot(all.equal(psi.hampel(x), MASS::psi.hampel(x)),
           all.equal(                 psi.hampel(x, deriv=1),
                     as.numeric(MASS::psi.hampel(x, deriv=1))))
 
+## M*() preserving attributes :
+x <- matrix(x, 32, 8, dimnames=list(paste0("r",1:32), col=letters[1:8]))
+comment(x) <- "a vector which is a matrix"
+px <- Mpsi(x, cc = ccHa, psi = "hampel")
+stopifnot(identical(attributes(x), attributes(px)))
 }
 \keyword{robust}

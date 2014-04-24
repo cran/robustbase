@@ -59,13 +59,14 @@ s_Qn(x, mu.too = FALSE, \dots)
   Rousseeuw, P.J. and Croux, C. (1993)
   Alternatives to the Median Absolute Deviation,
   \emph{Journal of the American Statistical Association} \bold{88}, 1273--1283.
+  % MM: ~/save/papers/Rousseeuw/93/R+Croux_MAD_Sn_Qn.pdf
 
   Christophe Croux and Peter J. Rousseeuw (1992)
   Time-Efficient Algorithms for Two Highly Robust Estimators of Scale,
   \emph{Computational Statistics, Vol. 1}, ed. Dodge and Whittaker,
-  Physica-Verlag Heidelberg, 411--428;\cr
-  also available from
-  \url{http://win-www.uia.ac.be/u/statis/abstract/Timeff92.htm}.
+  Physica-Verlag Heidelberg, 411--428; available via Springer Link.
+  % MM: ~/save/papers/robust-diverse/Croux-Rousseeuw-Timeff_Scale_1992.pdf
+  %% no longer \url{http://win-www.uia.ac.be/u/statis/abstract/Timeff92.htm}.
 
   About the typo in the \code{constant}:\cr
   Christophe Croux (2010)

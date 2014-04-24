@@ -1,13 +1,4 @@
-### TODOs / Questions (Martin  <-->  Eduardo):
-### -------------------------------------------
-
-## (2) argument names:
-## 5 matches for "@param .*tuning" in buffer  nlregrob.R
-##      27:##' @param tuning.chi.scale \
-##      28:##' @param tuning.psi.M     /  nlrob.MM
-##     217:##' @param tuning.chi.scale \
-##     218:##' @param tuning.chi.tau   /  nlrob.tau
-##     364:##' @param tuning.chi          nlrob.CM
+#### nlrob.<meth>() functions for  high breakdown point  nlrob() methods
 
 ## concept (and original version) from lme4/R/lmer.R
 getOptfun <- function(optimizer, needArgs = c("fn","par","lower","control"))
@@ -30,10 +21,10 @@ getOptfun <- function(optimizer, needArgs = c("fn","par","lower","control"))
 
 ##' Utility for all nlrob.<meth>():  Find how and where to get parameter
 ##' names from, also check lower, upper, and replicate if needed.
-##' 
+##'
 ##' @param lower possibly unnamed numeric vector
 ##' @param upper as \code{lower}; both will be replicated to
-##'    \code{length(pnames)} if that is specified and longer.   
+##'    \code{length(pnames)} if that is specified and longer.
 ##' @param pnames DEPRECATED possibly missing character vector
 ##' @param var.nms character vector of which 'pnames' must be a subset of.
 ##' @param envir \code{\link{environment}: the function possibly assigns
@@ -370,7 +361,7 @@ nlrob.CM <- function(formula, data, pnames, lower, upper, tol = 1e-6,
 	    fit <- eval( formula[[3L]], c(data, par) )
 	    M_scale(par[["sigma"]], y - fit)
 	}
-    } else { ## hmm, this case *really* is not CM properly 
+    } else { ## hmm, this case *really* is not CM properly
 	objective <- function(par) {
 	    fit <- eval( formula[[3L]], c(data, setNames(par, pnames)) )
 	    resid <- y - fit
@@ -446,7 +437,7 @@ nlrob.mtl <- function(formula, data, pnames, lower, upper, tol = 1e-6,
 	    h <- tp$h
 	    h*(constant + 2*log(sigma)) + sum(tp$t[1L:h]^2)
 	}
-    } else { ## hmm... this is not really MTL 
+    } else { ## hmm... this is not really MTL
 	objective <- function(par) {
 	    fit <- eval( formula[[3L]], c(data, setNames(par, pnames)) )
 	    resid <- y - fit

@@ -115,7 +115,7 @@ lmrob.control(setting, seed = NULL, nResample = 500,
     switch from ordinary \dQuote{fast S} algorithm to an efficient
     \dQuote{large n} strategy.}
   \item{...}{further arguments to be added as \code{\link{list}}
-    components to the result.}
+    components to the result, e.g., those to be used in \code{.vcov.w()}.}
 }
 \value{
   \code{.Mchi.tuning.default(psi)} and \code{.Mpsi.tuning.default(psi)}

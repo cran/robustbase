@@ -94,7 +94,8 @@ residuals(rm1)
 #rstandard(rm1)
 #rstudent(rm1)
 #simulate(rm1) ## just $weights needs to be changed to prior weights
-(V1 <- vcov(rm1))
+V1 <- vcov(rm1) # but don't show the "eigen" part {vectors may flip sign}:
+attributes(V1) <- attributes(V1)[c("dim","dimnames", "weights")]; V1
 set.seed(12); sc <- simulate(cm1, 64)
 set.seed(12); rc <- simulate(rm1, 64)
 

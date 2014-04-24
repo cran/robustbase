@@ -17,7 +17,7 @@ nlrob <-
     ##
     ## --> see the help file,  ?nlrob  (or ../man/nlrob.Rd in the source)
     ## -------------------------------------------------------------------------
-    
+
     ##- some checks
     call <- match.call() # << and more as in nls()
     formula <- as.formula(formula)
@@ -32,8 +32,8 @@ nlrob <-
     method <- match.arg(method)
     dataName <- substitute(data)
     dataCl <- attr(attr(call, "terms"), "dataClasses")
-    
-    if(method != "M") { 
+
+    if(method != "M") {
       if(!is.null(weights))
           stop("specifying 'weights' is not yet supported for method ", method)
       if(!missing(start))
@@ -163,12 +163,13 @@ nlrob <-
     }
 
     ## --- Estimated asymptotic covariance of the robust estimator
-    rw <- psi(resid/Scale)
-    asCov <- if(!converged || !doCov) NA else { ## compare with .vcov.m() below
+    rw <- psi(res.sc <- resid/Scale)
+    asCov <- if(!converged || !doCov) NA else {
+        ## a version of  .vcov.m(.) below
 	AtWAinv <- chol2inv(out$m$Rmat())
 	dimnames(AtWAinv) <- list(names(coef), names(coef))
-	tau <- mean(rw^2) / mean(psi(resid/Scale, d=TRUE))^2
-	asCov <- AtWAinv * Scale^2 * tau
+	tau <- mean(rw^2) / mean(psi(res.sc, d=TRUE))^2
+	AtWAinv * Scale^2 * tau
     }
 
     ## returned object:	 ==  out$m$fitted()  [FIXME?]
@@ -193,7 +194,7 @@ nlrob <-
     dimnames(AtWAinv) <- list(nms.coef, nms.coef)
     rw <- psi(res.sc)
     tau <- mean(rw^2) / mean(psi(res.sc, d=TRUE))^2
-    asCov <- AtWAinv * Scale^2 * tau
+    AtWAinv * Scale^2 * tau
 }
 
 

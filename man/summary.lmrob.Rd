@@ -60,9 +60,16 @@
   \item{sigma}{identical to \code{\link{sigma}(object)}.}
   \item{aliased}{..}%FIXME
   \item{cov.unscaled}{derived from \code{object$cov}.}
-  % FIXME: move the documentation about R squared *here* from ./lmrob.Rd ?
-  \item{r.squared}{Robust \dQuote{R squared} or \eqn{R^2}, see \code{\link{lmrob}}..}
-  \item{adj.r.squared}{adjusted R squared.}
+  \item{r.squared}{robust \dQuote{R squared} or
+    \eqn{R^2}, a coefficient of determination: This is the consistency corrected robust coefficient
+    of determination by Renaud and Victoria-Feser (2010).
+  }
+  \item{adj.r.squared}{an adjusted R squared, see \code{r.squared}.}
+}
+\references{
+  Renaud, O. and Victoria-Feser, M.-P. (2010).
+  A robust coefficient of determination for regression,
+  \emph{Journal of Statistical Planning and Inference} \bold{140}, 1852-1862.
 }
 \seealso{\code{\link{lmrob}}, \code{\link{predict.lmrob}},
   \code{\link{weights.lmrob}}, \code{\link{summary.lm}},
