@@ -94,8 +94,8 @@ R users already know optim() etc.. so the name seems more logical for them.
 *** Function names with "." (which are exported) are frowned upon
       e.g.  lmrob.split()
 *** checking .vcov.avar1() and its "posdefify" options ??
-*** TODO lmrob.mar() [file:inst/doc/estimating.functions.R]: Maronna & Yohai (2010) should become part
-         ~~~~~~~~~~  of robustbase, maybe under a better name,
+*** TODO lmrob.mar() [file:inst/doc/estimating.functions.R]: Maronna & Yohai (2010) should 
+         ~~~~~~~~~~  become part of robustbase, maybe under a better name,
     e.g. via lmrob( ... control ..) or directly.
     It is much used in the simulations of Koller & Stahel (2011)
 *** TODO Provide "simple M" estimator [so MASS :: rlm() is entirely superseeded]

@@ -1,6 +1,6 @@
 182b416a4157fcd0812d3a2017907926 *ChangeLog
-861e0a07487c49771f0dfb226cf22d9c *DESCRIPTION
-b4e101a79c59f758c6f7852bdd71122e *NAMESPACE
+7d807344add8463429d71b1c95b03b6a *DESCRIPTION
+70539c1d3856c0bd5bbf007642bfe08a *NAMESPACE
 d45b6715051c67975f0879d18d46db6e *R/AAA.R
 7b54d24c1f894a9702810f8da8c9f22e *R/BYlogreg.R
 af940b40353ad6f527aa9581c4fc21f9 *R/MTestimador2.R
@@ -10,7 +10,7 @@ af940b40353ad6f527aa9581c4fc21f9 *R/MTestimador2.R
 ee93a11082d203274ba07862af2236ff *R/anova-glmrob.R
 9b873ee001100b86c0fd2dd9c43bd140 *R/anova.lmrob.R
 788e9c02d286d9e41b7f9314eee308bf *R/biweight-funs.R
-37f543fe55d48ff4ae586fda93eb43ee *R/covMcd.R
+da81a41fde035eb8e9e2f7cba0029fb4 *R/covMcd.R
 f2718284372dbee0570d79a70167526c *R/covPlot.R
 a496476901f8fe68b7dea0fca12910bc *R/glmrob.R
 47e68c210ff891cecec23aa54369ec8f *R/glmrobMqle-DQD.R
@@ -31,7 +31,7 @@ a2ea84d5cb0bce24e194526150ee5fd8 *R/mc.R
 c302f6fb8c7bec7e0cccd798b33af5d7 *R/qnsn.R
 6b70126e5cb5450e9e5a8f426f5736a2 *R/rrcov.control.R
 df5aab8f6b6ac352a0df3d851ec30aff *R/tolEllipse.R
-48a52f6327ea3bb41cb392ad16fd76f1 *TODO
+557b66025a79870e2b7967f096ec163a *TODO
 de0846e38214de51fee2f6133da8862a *build/vignette.rds
 0044963db697ba5689cf01aa4665d989 *data/Animals2.rda
 ae030dea61f2f374479a49afe8077a6d *data/Animals2.tab
@@ -81,10 +81,10 @@ b6777c0c73195f28791d18862a27fe0a *inst/doc/estimating.functions.R
 2eb6dae5393fc8f1f3613ea7eacf362f *inst/doc/graphics.functions.R
 d61bad7fd88ae68f52ac5f615a8a1f30 *inst/doc/lmrob_simulation.R
 21a9fae89857c2195cabfa64d1cd6bc1 *inst/doc/lmrob_simulation.Rnw
-0bb1f88ce4edc3437e1057b43e1b1581 *inst/doc/lmrob_simulation.pdf
+d14bbb4b10eafc7df5ab784122f02cf2 *inst/doc/lmrob_simulation.pdf
 bf7e9c81de6ee9a444a5aa6de71bcbc1 *inst/doc/psi_functions.R
 b54417c3b8effef929b4babdd70aa9c8 *inst/doc/psi_functions.Rnw
-65fda36dab2c2363e4c9359f92753d6c *inst/doc/psi_functions.pdf
+c99a8533785b20e82502c39e50b37532 *inst/doc/psi_functions.pdf
 8fbff7afee995686ab14f490bfdd3bd7 *inst/doc/simulation.functions.R
 faa9ecb70de3e867cb0b0cb8f56f3074 *inst/doc/simulation.init.R
 e571b79e7316389c9251508b0a64775f *inst/external/d1k27.rda
@@ -119,7 +119,7 @@ b4749ea9cde5b14cfa5ca1bf3aa5cc77 *man/carrots.Rd
 f6fdf7b3ea0e5ec22323b63e537f078c *man/cloud.Rd
 c23ae53119648792a92415cd7d43995b *man/coleman.Rd
 09d01d64b78debb5edbf4dd793373cbf *man/condroz.Rd
-8e47bc7916efb67b25cd5ec92862b22c *man/covMcd.Rd
+c694c63cc8794b1321bc7c61c239c785 *man/covMcd.Rd
 5cf99856fcd52c766bb062890465eab9 *man/covOGK.Rd
 e68c24d50e9ad7f504e47646d010f623 *man/covPlot.Rd
 f93e463f489376785d296fedb4cc84d1 *man/cushny.Rd
@@ -233,7 +233,7 @@ d340375f3ec6911a2547e29fec0d92cf *tests/lmrob-psifns.R
 71246abca309e5fb7882aa9050bc08e1 *tests/m-s-estimator.R
 e40f442a79daf2defae4202f0fcd215b *tests/mc-etc.R
 18956908f2f5d3b632db77ed3170ad8e *tests/mc-strict.R
-bdb33ff47b02d7aafa1ca8fdfabe96d1 *tests/nlregrob-tst.R
+423500e465803504410816c6c17c4742 *tests/nlregrob-tst.R
 ffc4d4815019702f9c261d7ad75bf73b *tests/nlrob-tst.R
 4b96541019fab86c18ce257ed20460b4 *tests/plot-ex.R
 16f47cb54af0b25348d63742dd527dad *tests/poisson-ex.R
@@ -276,11 +276,11 @@ b73fa51039bddd148699d924893a1149 *vignettes/plot-fig-psi-functions.pdf
 75c96490b24314e1b746e9b9dac1a83b *vignettes/plot-fig-sdAdB2-1.pdf
 a6321d1d01112679f2d31149ab6bce73 *vignettes/plot-fig-sdscale-1.pdf
 1ee175aaa127526ea0c44a18fc12086e *vignettes/plot-fig-sdscale-all.pdf
-d3e1b69de695f3d1686a431eaf745d48 *vignettes/psi-GGW.pdf
-6519f3fdda2f8241b1b78578e5648557 *vignettes/psi-Hampel.pdf
-ec6be06b12d8cc47a30ba30965522706 *vignettes/psi-Huber.pdf
-873644b28b4c59f30739400522b1e599 *vignettes/psi-LQQ.pdf
-be73c91b1b487bd1da659926ecc8939b *vignettes/psi-Welsh.pdf
-12161d28b8f2ab367d7a3aec9d6efcb4 *vignettes/psi-bisquare.pdf
-885088a019e10f7f538c1a3e11539c53 *vignettes/psi-optimal.pdf
+85f7ebbad98f607d97e24145b36b3bde *vignettes/psi-GGW.pdf
+985c71434eff8a360d7907266127bbaf *vignettes/psi-Hampel.pdf
+f58212ac3d12f431e8d8aed2686b2039 *vignettes/psi-Huber.pdf
+063e3936e296ca206666fee7d67b1a73 *vignettes/psi-LQQ.pdf
+92ba314dfd80a660fd5227a3c5187df5 *vignettes/psi-Welsh.pdf
+781efb793b542c8dbd34290834b85403 *vignettes/psi-bisquare.pdf
+1c3f7f45a3f42ca10f95cdda15bf51ae *vignettes/psi-optimal.pdf
 b54417c3b8effef929b4babdd70aa9c8 *vignettes/psi_functions.Rnw

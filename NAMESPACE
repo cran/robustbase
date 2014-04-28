@@ -33,7 +33,8 @@ export(Sn, Qn, Qn.old,
        wgt.himedian,
 
        h.alpha.n,
-       covMcd, robMD,
+       covMcd, .MCDcons, .MCDcnp2, .MCDcnp2.rew, .MCDsingularityMsg,
+       robMD,
        ltsReg,
        tolEllipsePlot,
        ## RENAME ?!? :

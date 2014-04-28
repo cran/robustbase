@@ -2,6 +2,10 @@
 \name{covMcd}
 \alias{covMcd}
 \alias{print.mcd}
+\alias{.MCDcons}
+\alias{.MCDcnp2}
+\alias{.MCDcnp2.rew}
+\alias{.MCDsingularityMsg}
 %
 \title{Robust Location and Scatter Estimation via MCD}
 \concept{High breakdown point}
@@ -66,8 +70,9 @@ covMcd(x, cor = FALSE, raw.only = FALSE,
 
   The raw MCD estimate of location is then the average of these \eqn{h} points,
   whereas the raw MCD estimate of scatter is their covariance matrix,
-  multiplied by a consistency factor and (if \code{use.correction} is
-  true) a finite sample correction factor, to make it consistent at the
+  multiplied by a consistency factor (\code{.MCDcons(p, h/n)}) and (if
+  \code{use.correction} is true) a finite sample correction factor
+  (\code{.MCDcnp2(p, n, alpha)}), to make it consistent at the
   normal model and unbiased at small samples.  Both rescaling factors
   (consistency and finite sample) are returned in the length-2 vector
   \code{raw.cnp2}.
@@ -81,7 +86,7 @@ covMcd(x, cor = FALSE, raw.only = FALSE,
   where \code{w} are weights determined by \dQuote{outlyingness} with
   the respect to the scaled raw MCD.  Again, a consistency factor and
   (if \code{use.correction} is true) a finite sample correction factor
-  are applied.
+  (\code{.MCDcnp2.rew(p, n, alpha)})are applied.
   The reweighted covariance is typically considerably more efficient
   than the raw one, see Pison et al. (2002).
 

@@ -100,8 +100,8 @@ showProc.time()
 
 ## 40% outliers present {use different data name: seen in print(<fitted model>)
 d.exp40out <- within(d.exp30, y[15:27] <- y[15:27] + 100)
-Cfit.40out  <- nls(y ~ Expo(x, a, b), data = d.exp40out, start = c(a = 1, b = 0.2),
-                   control = nls.control(tol = 5e-8))
+Cfit.40out  <- update(Cfit, data = d.exp40out, 
+                      control = nls.control(tol = Cfit$control$tol))
 Cfit.no.out <- update(Cfit.40out, subset = -(15:27))
 
 if(doExtras) {
@@ -141,7 +141,7 @@ d.exp.Hlev <- within(d.exp40out, {
     y <- Expo(x, 1, 0.2) + err
     y[28:30] <- y[28:30] + 500
 })
-Cfit.Hlev <- update(Cfit, data = d.exp.Hlev, control = nls.control(tol = 5e-8))
+Cfit.Hlev <- update(Cfit.40out, data = d.exp.Hlev)
 Cfit.no.Hlev <- update(Cfit.Hlev, subset = -(28:30))
 showProc.time()
 
