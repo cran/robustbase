@@ -6,7 +6,8 @@ data(stackloss)
 
 ## S
 set.seed(0)
-summary(m0 <- lmrob(stack.loss ~ ., data = stackloss, method = "S"))
+summary(m0 <- lmrob(stack.loss ~ ., data = stackloss, method = "S",
+                    compute.outlier.stats = "S"))
 set.seed(0)
 m0a <- lmrob.S(m0$x, stack.loss, lmrob.control())
 
@@ -15,7 +16,8 @@ all.equal(m0[c('coefficients', 'scale', 'rweights')],
 
 ## MM
 set.seed(0)
-summary(m1 <- lmrob(stack.loss ~ ., data = stackloss, method = "MM"))
+summary(m1 <- lmrob(stack.loss ~ ., data = stackloss, method = "MM",
+                    compute.outlier.stats = "S"))
 
 set.seed(0)
 m2 <- update(m1, method = "SM")
@@ -28,7 +30,8 @@ m3 <- update(m0, method = "SM", cov = '.vcov.w')
 
 ## SMD
 set.seed(0)
-summary(m4 <- lmrob(stack.loss ~ ., data = stackloss, method = "SMD", psi = 'bisquare'))
+summary(m4 <- lmrob(stack.loss ~ ., data = stackloss, method = "SMD", psi = 'bisquare',
+                    compute.outlier.stats = "S"))
 summary(m4a <- lmrob..D..fit(m3))
 
 ## rearrange m4a and update call
@@ -40,7 +43,8 @@ all.equal(m4, m4a)
 
 ## SMDM
 set.seed(0)
-summary(m5 <- lmrob(stack.loss ~ ., data = stackloss, method = "SMDM", psi = 'bisquare'))
+summary(m5 <- lmrob(stack.loss ~ ., data = stackloss, method = "SMDM", psi = 'bisquare',
+                    compute.outlier.stats = "S"))
 summary(m5a <- lmrob..M..fit(obj=m4))
 
 ## rearrange m5a

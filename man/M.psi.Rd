@@ -81,7 +81,7 @@ MrhoInf(cc, psi)
 \references{
   See the vignette about %% \link{ .. } ????
   \dQuote{\eqn{\psi}{psi}-Functions Available in Robustbase}.
-  %% ../inst/doc/psi_functions.Rnw
+  %% ../vignettes/psi_functions.Rnw
 }
 \author{
   Manuel Koller, notably for the original C implementation;

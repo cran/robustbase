@@ -99,7 +99,7 @@ static R_CallMethodDef CallEntries[] = {
 
 
 static R_FortranMethodDef FortEntries[] = {
-    {"rffastmcd", (DL_FUNC) &F77_SUB(rffastmcd), 47},/* ./rffastmcd.f */
+    {"rffastmcd", (DL_FUNC) &F77_SUB(rffastmcd), 49},/* ./rffastmcd.f */
     {"rfltsreg",  (DL_FUNC) &F77_SUB(rfltsreg), 41}, /* ./rfltsreg.f */
     {"rllarsbi",  (DL_FUNC) &F77_SUB(rllarsbi), 18}, /* ./rllarsbi.f */
     {NULL, NULL, 0}

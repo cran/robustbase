@@ -1,4 +1,4 @@
-#### This is originally from the R package
+### This is originally from the R package
 ####
 ####  rrcov : Scalable Robust Estimators with High Breakdown Point
 ####
@@ -37,7 +37,9 @@ covMcd <- function(x,
 	   raw.only = FALSE,
            alpha = control$ alpha,
            nsamp = control$ nsamp,
-           nmini = control$ nmini,
+           nmini = control$ nmini, kmini = control$ kmini,
+           scalefn=control$scalefn, maxcsteps=control$maxcsteps,
+           initHsets = NULL, save.hsets = FALSE,
            seed  = control$ seed,
            tolSolve = control$ tolSolve, # had 1e-10 hardwired {now 1e-14 default}
            trace = control$ trace,
@@ -48,6 +50,8 @@ covMcd <- function(x,
     logdet.Lrg <- 50
     ##   Analyze and validate the input parameters ...
     if(length(seed) > 0) {
+	if(length(seed) < 3 || seed[1L] < 100)
+	    stop("invalid 'seed'. Must be compatible with .Random.seed !")
         if(exists(".Random.seed", envir=.GlobalEnv, inherits=FALSE))  {
             seed.keep <- get(".Random.seed", envir=.GlobalEnv, inherits=FALSE)
             on.exit(assign(".Random.seed", seed.keep, envir=.GlobalEnv))
@@ -57,12 +61,13 @@ covMcd <- function(x,
 
     ## For back compatibility, as some new args did not exist pre 2013-04,
     ## and callers of covMcd() may use a "too small"  'control' list:
-    if(missing(wgtFUN)) getDefCtrl("wgtFUN")
-    if(is.null (nmini)) getDefCtrl("nmini")
+    defCtrl <- if(missing(control)) control else rrcov.control()
+    if(missing(wgtFUN)) getDefCtrl("wgtFUN", defCtrl)
+    if(is.null (nmini)) getDefCtrl("nmini", defCtrl)
 
     ##   vt::03.02.2006 - added options "best" and "exact" for nsamp
     ##   nsamp will be further analized in the wrapper .fastmcd()
-    if(!missing(nsamp) && is.numeric(nsamp) && nsamp <= 0)
+    if(is.numeric(nsamp) && nsamp <= 0)
         stop("Invalid number of trials nsamp = ",nsamp, "!")
 
     if(is.data.frame(x))
@@ -72,7 +77,7 @@ covMcd <- function(x,
                     dimnames = list(names(x), deparse(substitute(x))))
 
     ## drop all rows with missing values (!!) :
-    ok <- is.finite(x %*% rep(1, ncol(x)))
+    ok <- is.finite(x %*% rep.int(1, ncol(x)))
     x <- x[ok, , drop = FALSE]
     if(!length(dx <- dim(x)))
         stop("All observations have missing values!")
@@ -96,7 +101,8 @@ covMcd <- function(x,
     ##     we should even omit the (n < 2p) warning
     if(h > n)
         stop("Sample size n  <  h(alpha; n,p) := size of \"good\" subsample")
-    else if(alpha > 1) stop("alpha must be <= 1")
+    else if(2*h < n)
+	warning("subsample size	 h < n/2  may be too small")
 
     if(is.character(wgtFUN)) {
 	switch(wgtFUN,
@@ -117,10 +123,10 @@ covMcd <- function(x,
     ##   (neither for the raw estimates nor for the reweighted ones)
     raw.cnp2 <- cnp2 <- c(1,1)
 
-    ans <- list(method = "Minimum Covariance Determinant Estimator.",
-		call = match.call())
+    ans <- list(call = match.call(), nsamp = nsamp,
+                method = sprintf("MCD(alpha=%g ==> h=%d)", alpha, h))
 
-    if(alpha == 1) { ## alpha=1: Just compute the classical estimates --------
+    if(h == n) { ## <==> alpha ~= 1 : Just compute the classical estimates --------
         mcd <- cov(x) #MM: was  cov.wt(x)$cov
         loc <- as.vector(colMeans(x))
         obj <- determinant(mcd, logarithm = TRUE)$modulus[1]
@@ -166,11 +172,10 @@ covMcd <- function(x,
             names(ans$raw.center) <- nms
             dimnames(ans$raw.cov) <- list(nms,nms)
         }
-        ans$crit <- exp(obj)
-        ans$method <-
-            paste(ans$method,
-                  "\nThe minimum covariance determinant estimates based on",
-                  n, "observations \nare equal to the classical estimates.")
+        ans$crit <- obj # was exp(obj); but log-scale is "robust" against under/overflow
+        ans$method <- paste(ans$method,
+                            "\nalpha = 1: The minimum covariance determinant estimates based on",
+                            n, "observations \nare equal to the classical estimates.")
         ans$mcd.wt <- rep.int(NA, length(ok))
         ans$mcd.wt[ok] <- weights
         if(length(dimn[[1]]))
@@ -189,7 +194,16 @@ covMcd <- function(x,
         return(ans)
     } ## end {alpha=1} --
 
-    mcd <- .fastmcd(x, h, nsamp, nmini, trace=as.integer(trace))
+    mcd <- if(nsamp == "deterministic") {
+	ans$method <- paste("Deterministic", ans$method)
+	.detmcd (x, h, hsets.init = initHsets,
+		 save.hsets=save.hsets, # full.h=full.h,
+		 scalefn=scalefn, maxcsteps=maxcsteps, trace=as.integer(trace))
+    } else {
+	ans$method <- paste0("Fast ", ans$method, "; nsamp = ", nsamp,
+			     "; (n,k)mini = (", nmini,",",kmini,")")
+	.fastmcd(x, h, nsamp, nmini, kmini, trace=as.integer(trace))
+    }
 
     ## Compute the consistency correction factor for the raw MCD
     ##  (see calfa in Croux and Haesbroeck)
@@ -199,8 +213,7 @@ covMcd <- function(x,
 
     if(p == 1) {
         ## ==> Compute univariate location and scale estimates
-        ans$method <- "Univariate location and scale estimation."
-
+	ans$method <- paste("Univariate", ans$method)
         scale <- sqrt(calpha * correct) * as.double(mcd$initcovariance)
         center <- as.double(mcd$initmean)
         if(abs(scale - 0) < 1e-07) {
@@ -214,7 +227,7 @@ covMcd <- function(x,
                 names(ans$raw.center) <- names(ans$center) <- nms
                 dimnames(ans$raw.cov) <- dimnames(ans$cov) <- list(nms,nms)
             }
-            ans$crit <- 0
+            ans$crit <- -Inf # = log(0)
             weights <- as.numeric(abs(x - center) < 1e-07) # 0 / 1
         } ## end { scale ~= 0 }
         else {
@@ -237,8 +250,8 @@ covMcd <- function(x,
                 dimnames(ans$raw.cov) <- list(nms,nms)
                 names(ans$raw.center) <- nms
             }
-            ans$crit <- 1/(h - 1) *
-                sum(sort((x - as.double(mcd$initmean))^2, partial = h)[1:h])
+	    ans$crit <- ## log(det) =
+		log(sum(sort((x - as.double(mcd$initmean))^2, partial = h)[1:h])/max(1,h-1))
             center <- ans$center
             scale <- as.vector(sqrt(ans$cov))
             weights <- wgtFUN(((x - center)/scale)^2)
@@ -249,9 +262,7 @@ covMcd <- function(x,
 
       ## Apply correction factor to the raw estimates
       ## and use them to compute weights
-      mcd$initcovariance <- calpha * correct * mcd$initcovariance
-      dim(mcd$initcovariance) <- c(p, p)
-
+      mcd$initcovariance <- matrix(calpha * correct * mcd$initcovariance, p,p)
       if(raw.only || mcd$exactfit != 0) {
         ## If not all observations are in general position, i.e. more than
         ## h observations lie on a hyperplane, the program still yields
@@ -276,15 +287,15 @@ covMcd <- function(x,
 	    ##      stop("The program allows for at most ", mcd$kount, " observations.")
 	    ##      if(mcd$exactfit == -2)
 	    ##      stop("The program allows for at most ", mcd$kount, " variables.")
-	    if(!(mcd$exactfit %in% c(1,2)))
+	    if(!(mcd$exactfit %in% c(1,2,3)))
 		stop("Unexpected 'exactfit' code ", mcd$exactfit, ". Please report!")
 	    ## new (2007-01) and *instead* of older long 'method' extension;
-	    ## the old message is still *printed* via singularityMsg()
+	    ## the old message is still *printed* via .MCDsingularityMsg()
 	    ##
 	    ## exactfit is now *passed* to result instead of coded into 'message':
 	    ans$singularity <-
 		list(kind = "on.hyperplane", exactCode = mcd$exactfit,
-		     p = p, count = mcd$kount, coeff = mcd$coeff[1,])
+		     p = p, h = h, count = mcd$kount, coeff = mcd$coeff[1,])
 	}
         ans$alpha <- alpha
         ans$quan <- h
@@ -292,10 +303,10 @@ covMcd <- function(x,
             names(ans$raw.center) <- nms
             dimnames(ans$raw.cov) <- list(nms,nms)
         }
-        ans$crit <- 0
+        ans$crit <- -Inf # = log(0)
         weights <- mcd$weights
 
-      } ## end exact fit <==>  (mcd$exactfit != 0)
+      } ## end (raw.only || exact fit)
 
       else { ## have general position (exactfit == 0) : ------------------------
 
@@ -311,7 +322,7 @@ covMcd <- function(x,
         ## the reweighted cov
         if(!sing.rewt && sum.w != n) {
 	    cdelta.rew <- .MCDcons(p, sum.w/n) ## VT::19.3.2007
-	    correct.rew <- if(use.correction).MCDcnp2.rew(p, n, alpha) else 1.
+	    correct.rew <- if(use.correction) .MCDcnp2.rew(p, n, alpha) else 1.
 	    cnp2 <- c(cdelta.rew, correct.rew)
 	    ans$cov <- cdelta.rew * correct.rew * ans$cov
         }
@@ -328,11 +339,11 @@ covMcd <- function(x,
             dimnames(ans$raw.cov) <- list(nms,nms)
         }
         ans$raw.weights <- weights
-        ans$crit <- mcd$mcdestimate
+        ans$crit <- mcd$mcdestimate # now in log scale!
         ans$raw.mah <- mahalanobis(x, ans$raw.center, ans$raw.cov, tol = tolSolve)
 
         ## Check if the reweighted scatter matrix is singular.
-        if(sing.rewt ||  - (determinant(ans$cov, logarithm = TRUE)$modulus[1] - 0)/p > logdet.Lrg) {
+        if(sing.rewt || - determinant(ans$cov, logarithm = TRUE)$modulus[1]/p > logdet.Lrg) {
 	    ans$singularity <- list(kind = paste0("reweighted.MCD",
 				    if(sing.rewt)"(zero col.)"))
             ans$mah <- ans$raw.mah
@@ -351,28 +362,30 @@ covMcd <- function(x,
     if(length(dimn[[1]]))
         names(ans$mcd.wt) <- dimn[[1]]
     ans$wt <- NULL
-    ans$X <- x
     if(length(dimn[[1]]))
-        dimnames(ans$X)[[1]] <- names(ans$mcd.wt)[ok]
+        dimnames(x)[[1]] <- names(ans$mcd.wt)[ok]
     else
-        dimnames(ans$X) <- list(seq(along = ok)[ok], NULL)
+        dimnames(x) <- list(seq(along = ok)[ok], NULL)
+    ans$X <- x
     if(trace)
         cat(ans$method, "\n")
     ans$raw.cnp2 <- raw.cnp2
     ans$cnp2 <- cnp2
+    if(nsamp == "deterministic")
+	ans <- c(ans, mcd[c("iBest","n.csteps", if(save.hsets) "initHsets")])
     class(ans) <- "mcd"
     ## warn if we have a singularity:
     if(is.list(ans$singularity))
-	warning(strwrap(singularityMsg(ans$singularity, ans$n.obs)))
+	warning(paste(strwrap(.MCDsingularityMsg(ans$singularity, ans$n.obs)), collapse="\n"),
+		domain=NA)
     ## return
     ans
 } ## {covMcd}
 
-singularityMsg <- # not exported, currently used by pkg rrcov
-## TODO(?): export
 .MCDsingularityMsg <- function(singList, n.obs)
 {
     stopifnot(is.list(singList))
+
     switch(singList$kind,
        "classical" = {
            "The classical covariance matrix is singular."
@@ -391,64 +404,68 @@ singularityMsg <- # not exported, currently used by pkg rrcov
 		     "observations (in the entire dataset of", n, "obs.)",
 		     "lying on the")
            with(singList,
-                    c(switch(exactCode,
-                             ## exactfit == 1 :
-                             "The covariance matrix of the data is singular.",
-                             ## exactfit == 2 :
-                             c("The covariance matrix has become singular during",
-                               "the iterations of the MCD algorithm.")),
+                c(switch(exactCode,
+                         ## exactfit == 1 :
+                         "The covariance matrix of the data is singular.",
+                         ## exactfit == 2 :
+                         c("The covariance matrix has become singular during",
+                           "the iterations of the MCD algorithm."),
+			 ## exactfit == 3:
+			 paste0("The ", h,
+				"-th order statistic of the absolute deviation of variable ",
+				which(singList$coeff == 1), " is zero.")),
 
-                      if(p == 2) {
-                          paste(obsMsg(count, n.obs), "line with equation ",
-                                signif(coeff[1], digits= 5), "(x_i1-m_1) +",
-                                signif(coeff[2], digits= 5), "(x_i2-m_2) = 0",
-                                "with (m_1,m_2) the mean of these observations.")
-                      }
-                      else if(p == 3) {
-                          paste(obsMsg(count, n.obs), "plane with equation ",
-                                signif(coeff[1], digits= 5), "(x_i1-m_1) +",
-                                signif(coeff[2], digits= 5), "(x_i2-m_2) +",
-                                signif(coeff[3], digits= 5), "(x_i3-m_3) = 0",
-                                "with (m_1,m_2) the mean of these observations."
-                                )
-                      }
-                      else { ##  p > 3 -----------
-                          con <- textConnection("astring", "w")
-                          dput(zapsmall(coeff), con)
-                          close(con)
-                          paste(obsMsg(count, n.obs), "hyperplane with equation ",
+                  if(p == 2) {
+                      paste(obsMsg(count, n.obs), "line with equation ",
+                            signif(coeff[1], digits= 5), "(x_i1-m_1) +",
+                            signif(coeff[2], digits= 5), "(x_i2-m_2) = 0",
+                            "with (m_1,m_2) the mean of these observations.")
+                  }
+                  else if(p == 3) {
+                      paste(obsMsg(count, n.obs), "plane with equation ",
+                            signif(coeff[1], digits= 5), "(x_i1-m_1) +",
+                            signif(coeff[2], digits= 5), "(x_i2-m_2) +",
+                            signif(coeff[3], digits= 5), "(x_i3-m_3) = 0",
+                            "with (m_1,m_2) the mean of these observations."
+                            )
+                  }
+                  else { ##  p > 3 -----------
+                      paste(obsMsg(count, n.obs), "hyperplane with equation ",
                                 "a_1*(x_i1 - m_1) + ... + a_p*(x_ip - m_p) = 0",
-                                " with (m_1,...,m_p) the mean of these observations",
-                                " and coefficients a_i from the vector   a <- ",
-                                paste(astring, collapse="\n "))
-                      }))
+                            "with (m_1, ..., m_p) the mean of these observations",
+			    "and coefficients a_i from the vector   a <- ",
+			    paste(deparse(zapsmall(coeff)), collapse="\n "))
+                  }))
        },
        ## Otherwise
        stop("illegal 'singularity$kind'")
        ) ## end{switch}
 }
 
+nobs.mcd <- function (object, ...) object$n.obs
+
 print.mcd <- function(x, digits = max(3, getOption("digits") - 3), print.gap = 2, ...)
 {
-    cat("Minimum Covariance Determinant (MCD) estimator.\n")
+    cat("Minimum Covariance Determinant (MCD) estimator approximation.\n",
+        "Method: ", x$method, "\n", sep="")
     if(!is.null(cl <- x$call)) {
-    cat("Call:\n")
-    dput(cl)
+        cat("Call:\n")
+        dput(cl)
     }
-    cat("-> Method: ", x$method, "\n")
     if(is.list(x$singularity))
-        cat(strwrap(singularityMsg(x$singularity, x$n.obs)), sep ="\n")
+        cat(strwrap(.MCDsingularityMsg(x$singularity, x$n.obs)), sep ="\n")
 
+    if(identical(x$nsamp, "deterministic"))
+	cat("iBest: ", pasteK(x$iBest), "; C-step iterations: ", pasteK(x$n.csteps),
+            "\n", sep="")
     ## VT::29.03.2007 - solve a conflict with fastmcd() in package robust -
     ##      also returning an object of class "mcd"
     xx <- NA
     if(!is.null(x$crit))
-        xx <- format(log(x$crit), digits = digits)
+	xx <- format(x$crit, digits = digits)
     else if (!is.null(x$raw.objective))
-        xx <- format(log(x$raw.objective), digits = digits)
-
-    cat("\nLog(Det.): ", xx ,"\n")
-    cat("Robust Estimate of Location:\n")
+	xx <- format(log(x$raw.objective), digits = digits)
+    cat("Log(Det.): ", xx , "\n\nRobust Estimate of Location:\n")
     print(x$center, digits = digits, print.gap = print.gap, ...)
     cat("Robust Estimate of Covariance:\n")
     print(x$cov, digits = digits, print.gap = print.gap, ...)
@@ -468,18 +485,20 @@ print.summary.mcd <-
 
     ## hmm, maybe not *such* a good idea :
     if(!is.null(x$cor)) {
-    cat("\nRobust Estimate of Correlation: \n")
-    dimnames(x$cor) <- dimnames(x$cov)
-    print(x$cor, digits = digits, print.gap = print.gap, ...)
+        cat("\nRobust Estimate of Correlation: \n")
+        dimnames(x$cor) <- dimnames(x$cov)
+        print(x$cor, digits = digits, print.gap = print.gap, ...)
     }
 
     cat("\nEigenvalues:\n")
     print(eigen(x$cov, only.values = TRUE)$values, digits = digits, ...)
 
     if(!is.null(x$mah)) {
-    cat("\nRobust Distances: \n")
-    print(as.vector(x$mah), digits = digits, ...)
+	cat("\nRobust Distances: \n")
+	print(summary(x$mah, digits = digits), digits = digits, ...)
     }
+    if(!is.null(wt <- x$mcd.wt))
+	summarizeRobWeights(wt, digits = digits)
     invisible(x)
 }
 
@@ -494,7 +513,7 @@ print.summary.mcd <-
 ##' Compute the consistency correction factor for the MCD estimate
 ##'    (see calfa in Croux and Haesbroeck)
 ##' @param p
-##' @param alpha alpha = h/n = quan/n
+##' @param alpha alpha ~= h/n = quan/n
 ##'    also use for the reweighted MCD, calling with alpha = 'sum(weights)/n'
 MCDcons <- # <- *not* exported, but currently used in pkgs rrcov, rrcovNA
 .MCDcons <- function(p, alpha)
@@ -508,7 +527,7 @@ MCDcnp2 <- # <- *not* exported, but currently used in pkg rrcovNA
 ##' Finite sample correction factor for raw MCD:
 .MCDcnp2 <- function(p, n, alpha)
 {
-    stopifnot(0.5 <= alpha, alpha <= 1)
+    stopifnot(0 <= alpha, alpha <= 1, length(alpha) == 1)
 
     if(p > 2) {
 	##				"alfaq"	        "betaq"	    "qwaarden"
@@ -555,7 +574,7 @@ MCDcnp2.rew <- # <- *not* exported, but currently used in pkg rrcovNA
 ##' Finite sample correction factor for *REW*eighted MCD
 .MCDcnp2.rew <- function(p, n, alpha)
 {
-    stopifnot(0.5 <= alpha, alpha <= 1)
+    stopifnot(0 <= alpha, alpha <= 1, length(alpha) == 1)
 
     if(p > 2) {
         ##                              "alfaq"         "betaq"        "qwaarden"
@@ -599,66 +618,59 @@ MCDcnp2.rew <- # <- *not* exported, but currently used in pkg rrcovNA
 } ## end{.MCDcnp2.rew }
 
 
-.fastmcd <- function(x, h, nsamp, nmini, trace = 0)
+.fastmcd <- function(x, h, nsamp, nmini, kmini, trace = 0)
 {
     dx <- dim(x)
     n <- dx[1]
     p <- dx[2]
 
     ##   parameters for partitioning {equal to those in Fortran !!}
-    kmini <- 5
+    ## kmini <- 5
     ## nmini <- 300
     km10 <- 10*kmini
     nmaxi <- nmini*kmini
 
     ## vt::03.02.2006 - added options "best" and "exact" for nsamp
     ##
-    nLarge <- 100000 # <-- Nov.2009; was 5000
-    if(!missing(nsamp)) {
-        if(is.numeric(nsamp) && (nsamp < 0 || nsamp == 0 && p > 1)) {
-            warning("Invalid number of trials nsamp= ", nsamp,
-                    " ! Using default.\n")
+    nLarge <- 100000 # was 5000 before Nov.2009 -- keep forever now; user can say "exact"
+    if(is.numeric(nsamp) && (nsamp < 0 || nsamp == 0 && p > 1)) {
+        nsamp <- -1
+    } else if(nsamp == "exact" || nsamp == "best") {
+        if(n > 2*nmini-1) {
+            warning("Options 'best' and 'exact' not allowed for n greater than  2*nmini-1 =",
+                    2*nmini-1,".\nUsing default.\n")
             nsamp <- -1
-        } else if(nsamp == "exact" || nsamp == "best") {
-            myk <- p + 1 ## was 'p'; but p+1 ("nsel = nvar+1") is correct
-            if(n > 2*nmini-1) {
-                ## TODO: make 'nmini' user configurable; however that
-                ##      currently needs changes to the fortran source
-                ##  and re-compilation!
-                warning("Options 'best' and 'exact' not allowed for n greater than  2*nmini-1 =",
-                        2*nmini-1,".\nUsing default.\n")
-                nsamp <- -1
-            } else {
-                nall <- choose(n, myk)
-                msg <- paste("subsets of size", myk, "out of", n)
-                if(nall > nLarge && nsamp == "best") {
-                    nsamp <- nLarge
-                    warning("'nsamp = \"best\"' allows maximally ",
-                            format(nLarge, scientific=FALSE),
-                            " subsets;\ncomputing these ", msg,
-                            immediate. = TRUE)
-                } else {   ## "exact" or ("best"  &  nall < nLarge)
-                    nsamp <- 0 ## all subsamples -> special treatment in Fortran
-                    if(nall > nLarge) {
-                        msg <- paste("Computing all", nall, msg)
-                        if(nall > 10*nLarge)
-                            warning(msg, "\n This may take a",
-                                    if(nall/nLarge > 100) " very", " long time!\n",
-                                    immediate. = TRUE)
-                        else message(msg)
-                    }
+        } else {
+	    myk <- p + 1 ## was 'p'; but p+1 ("nsel = nvar+1") is correct
+            nall <- choose(n, myk)
+            msg <- paste("subsets of size", myk, "out of", n)
+            if(nall > nLarge && nsamp == "best") {
+                nsamp <- nLarge
+                warning("'nsamp = \"best\"' allows maximally ",
+                        format(nLarge, scientific=FALSE),
+                        " subsets;\ncomputing these ", msg,
+                        immediate. = TRUE)
+            } else {   ## "exact" or ("best"  &  nall < nLarge)
+                nsamp <- 0 ## all subsamples -> special treatment in Fortran
+                if(nall > nLarge) {
+                    msg <- paste("Computing all", nall, msg)
+                    if(nall > 10*nLarge)
+                        warning(msg, "\n This may take a",
+                                if(nall/nLarge > 100) " very", " long time!\n",
+                                immediate. = TRUE)
+                    else message(msg)
                 }
             }
         }
+    }
 
-        if(!is.numeric(nsamp) || nsamp == -1) { # still not defined
-            ## set it to the default :
-            defCtrl <- rrcov.control()
-            if(!is.numeric(nsamp))
-                warning("Invalid number of trials nsamp= ",nsamp,
-                        " ! Using default nsamp= ",defCtrl$nsamp,"\n")
-            nsamp <- defCtrl$nsamp      # take the default nsamp
-        }
+    if(!is.numeric(nsamp) || nsamp == -1) { # still not defined
+        ## set it to the default :
+        nsamp.def <- rrcov.control()$nsamp
+	warning(gettextf("Invalid number of trials nsamp=%s. Using default nsamp=%d.",
+			 format(nsamp), nsamp.def),
+		domain=NA)
+        nsamp <- nsamp.def
     }
 
     if(nsamp > (mx <- .Machine$integer.max)) {
@@ -678,6 +690,7 @@ MCDcnp2.rew <- # <- *not* exported, but currently used in pkg rrcovNA
              nhalff =   as.integer(h),
              nsamp  =   as.integer(nsamp), # = 'krep'
              nmini  =   as.integer(nmini),
+	     kmini  =	as.integer(kmini),
              initcovariance = double(p * p),
              initmean       = double(p),
              best       = rep.int(as.integer(10000), h),
@@ -691,6 +704,7 @@ MCDcnp2.rew <- # <- *not* exported, but currently used in pkg rrcovNA
              temp   = integer(n),
              index1 = integer(n),
              index2 = integer(n),
+             indexx = integer(n),
              nmahad = double(n),
              ndist  = double(n),
              am     = double(n),
@@ -796,4 +810,3 @@ if(FALSE) { ## For experimentation:
     ls.str( ee <- environment(MCDcnp2s$sim.0) )
     matplot(1:21, ee$m.0, type = "o", xlab = "p - p.min + 1")
 }
-

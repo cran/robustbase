@@ -7,7 +7,7 @@
   \code{beta.initial}, this results in an MM-estimator.
 }
 \usage{
-lmrob..M..fit(x, y, beta.initial, scale, control, obj)
+lmrob..M..fit(x, y, beta.initial, scale, control, obj, mf = obj$model)
 }
 \arguments{
   \item{x}{design matrix (\eqn{n \times p}{n x p}) typically including a
@@ -23,6 +23,8 @@ lmrob..M..fit(x, y, beta.initial, scale, control, obj)
       "method")} are accessed.}
   \item{obj}{an optional \code{lmrob}-object.  If specified, this is used to
     set values for the other arguments.}
+  \item{mf}{(optional) a model frame as returned by \code{\link{model.frame}}, 
+    used only to compute outlier statistics, see \code{\link{outlierStats}}.}
 }
 \details{
   This function is used by \code{\link{lmrob.fit}} %% and *fit.M() %% << TODO

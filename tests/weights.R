@@ -82,7 +82,7 @@ meths2 <- c(#"AIC",
             #"influence",
             "kappa",
             #"logLik",
-            "model.frame",
+            #"model.frame", ## disable because of zero.weights attribute
             "nobs",
             "predict",
                                         #"proj",

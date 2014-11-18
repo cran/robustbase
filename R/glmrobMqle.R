@@ -98,7 +98,7 @@ glmrobMqle <-
 			 family = family)$coefficients
     if(any(ina <- is.na(start))) {
 	cat("initial start 'theta' has NA's; eliminating columns X[, j];",
-	    "j = ", paste(which(ina), collapse=", "),"\n")
+	    "j = ", pasteK(which(ina)),"\n")
 	theta.na <- start
 	X <- X[, !ina, drop = FALSE]
 	start <- glm.fit(x = X, y = y, weights = weights, offset = offset,
@@ -326,7 +326,7 @@ wts_RobDist <- function(X, intercept, covFun)
 	if(!is.matrix(X)) X <- as.matrix(X)
 	Xrc <- covFun(X)
 	S <- Xrc$cov + tcrossprod(Xrc$center)
-	mahalanobis(X, center = rep.int(0,ncol(X)), cov = S)
+	mahalanobis(X, center = FALSE, cov = S)
     }
     p <- ncol(X) ## E[chi^2_p] = p
     1/sqrt(1+ pmax.int(0, 8*(D2 - p)/sqrt(2*p)))

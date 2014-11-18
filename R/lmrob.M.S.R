@@ -102,7 +102,7 @@ lmrob.M.S <- function(x, y, control, mf, split) {
         split <- splitFrame(mf, x, control$split.type)
     if (ncol(split$x1) == 0) {
       warning("No categorical variables found in model. Reverting to S-estimator.")
-      return(lmrob.S(x, y, control))
+      return(lmrob.S(x, y, control, mf=mf))
     }
     if (ncol(split$x2) == 0) {
         warning("No continuous variables found in model. Reverting to L1-estimator.")
@@ -161,8 +161,11 @@ lmrob.M.S <- function(x, y, control, mf, split) {
     cf[!idx] <- z$b2
     ## set method argument in control
     control$method <- 'M-S'
-    list(coefficients = cf, scale = z$scale, residuals = z$res,
-         rweights = lmrob.rweights(z$res, z$scale, control$tuning.chi, control$psi),
-         ## ../src/lmrob.c : m_s_descent() notes that convergence is *not* guaranteed
-	 converged = TRUE, descent.conv = conv, control = control)
+    obj <- list(coefficients = cf, scale = z$scale, residuals = z$res,
+                rweights = lmrob.rweights(z$res, z$scale, control$tuning.chi, control$psi),
+                ## ../src/lmrob.c : m_s_descent() notes that convergence is *not* guaranteed
+                converged = TRUE, descent.conv = conv, control = control)
+    if (control$method %in% control$compute.outlier.stats)
+        obj$ostats <- outlierStats(obj, x, control)
+    obj
 }

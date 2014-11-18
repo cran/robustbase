@@ -29,7 +29,7 @@ glm.cr <- glmrob(y ~ X, family = "poisson", tcc = Inf.)
 
 scl <- summary(glm.cl <- glm   (Diversity ~ . , data=possumDiv, family=poisson))
 sc2 <- summary(glm.c2 <- glmrob(Diversity ~ . , data=possumDiv, family=poisson, tcc = Inf.))
-assert.EQ(coef(scl), coef(sc2), tol = 6e-6, giveRE=TRUE) # 1.369e-6
+assert.EQ(coef(scl), coef(sc2), tol = 6e-6, giveRE=TRUE) # 1.37e-6
 
 ## c = 2.0
 summary(g2 <- glmrob(Diversity ~ . , data=possumDiv, family=poisson, tcc = 2.0, trace=TRUE))
@@ -101,22 +101,32 @@ c(-0.851594294907422, -0.0107066895370536, -0.226958540075445, 0.035590662533830
 ## MM: I'm shocked how much this changes after every tweak ...
 
 (arch <- Sys.info()[["machine"]])
+.M <- .Machine; str(.M[grep("^sizeof", names(.M))]) ## differentiate long-double..
+if(arch == "x86_64" && .M$sizeof.longdouble != 16)
+    arch <- paste0(arch, "--no-long-double")
 
+dput(signif(unname(coef(m1)), 11)) ## -->
 ## Something strange going on: R CMD check is different from interactive R, here.
 ## ???? [I see that the byte compiler is not listed in sessionInfo]
 ## In any case, take the dput(.) output from the *.Rout[.fail] file
-dput(signif(unname(coef(m1)), 11)) ## -->
 beta1 <- list(i686 =
-c(-0.83715700394, 0.0085488694315, -0.16734609346, 0.040965601691, 
-  0.042387113444, 0.063146240793, 0.018632137866, -0.0062886781262, 
+c(-0.83715700394, 0.0085488694315, -0.16734609346, 0.040965601691,
+  0.042387113444, 0.063146240793, 0.018632137866, -0.0062886781262,
   0.11466679192, 0.091457894347, -0.025009954018, -0.66867971209)
 , "x86_64" =
 c(-0.83723213945, 0.0085385261915, -0.16697112315, 0.040985126003,
   0.042400738973, 0.063168847366, 0.01863253681, -0.0064477807228,
   0.11488937188, 0.091283185006, -0.025627390293, -0.66995658693)
+, "x86_64--no-long-double" =
+c(-0.83710423989, 0.0085428949874, -0.16713845989, 0.040973904414,
+  0.042391910971, 0.063159426394, 0.018629240073, -0.006362108938,
+  0.1145563969, 0.091490891317, -0.025378427464, -0.66943593439)
 )
 ## just FYI: difference 32-bit vs 64-bit:
 assert.EQ(beta1[[1]], beta1[[2]], tol = 0.002, check.attributes=FALSE, giveRE=TRUE)
+## Mean relative difference: 0.001423656 [~ 2013-12]
+assert.EQ(beta1[[2]], beta1[[3]], tol = 0.002, check.attributes=FALSE, giveRE=TRUE)
+## Mean relative difference: 0.00082849  [2014-11]
 
 assert.EQ(coef(m1), beta1[[arch]], tol = 1e-10, check.attributes=FALSE, giveRE=TRUE)
 
@@ -139,16 +149,23 @@ c(-1.204304813829, 0.02776038445201, -0.3680174045842, 0.04325746912892,
 
 dput(signif(unname(coef(m2)), 11)) ## -->
 beta2 <- list(i686 =
-c(-0.83698669149, 0.0085587296184, -0.16778044558, 0.040960021262, 
-  0.042402954975, 0.063188868629, 0.018630275088, -0.0061015509403, 
+c(-0.83698669149, 0.0085587296184, -0.16778044558, 0.040960021262,
+  0.042402954975, 0.063188868629, 0.018630275088, -0.0061015509403,
   0.11385896307, 0.090966386294, -0.02572887737, -0.66945784056)
 , "x86_64" =
 c(-0.83687097624, 0.0085341676033, -0.1674299545, 0.040968820903,
   0.042397459287, 0.063159075944, 0.018625582804, -0.0063140636571,
   0.11426134017, 0.091317308575, -0.025373078819, -0.66957444238)
+, "x86_64--no-long-double" =
+c(-0.8370370234, 0.008538975248, -0.1671607287, 0.040976013861,
+  0.042393702043, 0.06314300867, 0.018631172062, -0.0063382132536,
+  0.11445827857, 0.091409918881, -0.025308999173, -0.66935766843)
 )
 ## just FYI: difference 32-bit vs 64-bit:
 assert.EQ(beta2[[1]], beta2[[2]], tol = 0.001, check.attributes=FALSE, giveRE=TRUE)
+## Mean relative difference: 0.0009487 [2013-12 approx.]
+assert.EQ(beta2[[2]], beta2[[3]], tol = 0.001, check.attributes=FALSE, giveRE=TRUE)
+## Mean relative difference: 0.0005119 [2014-11]
 
 assert.EQ(coef(m2), beta2[[arch]], tol = 1e-10, check.attributes=FALSE, giveRE=TRUE)
 ## slight changes of algorithm often change the above by ~ 4e-4 !!!

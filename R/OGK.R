@@ -39,6 +39,20 @@
 ### Documentation -----> ../man/covOGK.Rd
 ##  =============        ================
 
+##' Compute the mahalanobis distances for *diagonal* var/cov matrix:
+##' @param x  n x p numeric data matrix
+##' @param center numeric p-vector (or length 1 - is recycled) or FALSE
+##' @param sd numeric p-vector of "standard deviations"
+##' @examples all.equal(mahalanobisD(x, FALSE,    sd),
+##'                     mahalanobis (x, rep(0,p), diag(sd^2)))
+mahalanobisD <- function(x, center, sd) {
+    ## Compute the mahalanobis distances (for diagonal cov).
+    if(!identical(center, FALSE))
+        x <- sweep(x, 2L, center, check.margin=FALSE)
+    rowSums(sweep(x, 2L, sd, '/', check.margin=FALSE)^2)
+}
+
+
 covOGK <- function(X, n.iter = 2,
 		   sigmamu,
 		   rcov = covGK, weight.fn = hard.rejection,
@@ -52,7 +66,7 @@ covOGK <- function(X, n.iter = 2,
     p <- dim(X)[2]
     if(p < 2) stop("'X' must have at least two columns")
 
-    Z <- X
+    Z <- X # as we use 'X' for the (re)weighting
     U <- diag(p)
     A <- list()
 
@@ -62,8 +76,8 @@ covOGK <- function(X, n.iter = 2,
 	## Compute the vector of standard deviations d and
 	## the covariance matrix U.
 
-	d <- apply(Z, 2, sigmamu, ...)
-	Z <- sweep(Z, 2, d, '/')
+	d <- apply(Z, 2L, sigmamu, ...)
+	Z <- sweep(Z, 2L, d, '/', check.margin=FALSE)
 
 	for(i in 2:p) { # only need lower triangle of U
 	    for(j in 1:(i - 1))
@@ -85,14 +99,11 @@ covOGK <- function(X, n.iter = 2,
 
     ## Compute the robust location and scale estimates for
     ## the transformed data.
-    sqrt.gamma <- apply(Z, 2, sigmamu, mu.too = TRUE, ...)
+    sqrt.gamma <- apply(Z, 2L, sigmamu, mu.too = TRUE, ...)
     center <- sqrt.gamma[1, ]
     sqrt.gamma <- sqrt.gamma[2, ]
 
-    ## Compute the mahalanobis distances.
-    Z <- sweep(Z, 2, center)
-    Z <- sweep(Z, 2, sqrt.gamma, '/')
-    distances <- rowSums(Z^2)
+    distances <- mahalanobisD(Z, center, sd=sqrt.gamma)
 
     ## From the inside out compute the robust location and
     ## covariance matrix estimates.  See equation (5).
@@ -121,7 +132,7 @@ covOGK <- function(X, n.iter = 2,
     ##	  -----	   (which is not uncommon) ==> detect that "fast"
 
     wcenter <- colSums(X * weights) / sweights
-    Z <- sweep(X, 2, wcenter) * sqrt(weights)
+    Z <- sweep(X, 2L, wcenter, check.margin=FALSE) * sqrt(weights)
     wcovmat <- crossprod(Z) / sweights
 
     list(center = center,

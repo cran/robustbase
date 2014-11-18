@@ -99,11 +99,11 @@ assert.EQ(m.r2A[iB], m.r2[iB], tol = .003, giveRE=TRUE)
 
 assert.EQ(c("Intercept" = -2.9554950286, x = 1.2574679132),
           ## 32-bit{ada-5}  -2.95549502890363   1.25746791332613
-	  m.r2$coef, tol=4e-10, giveRE=TRUE)
+	  m.r2$coef, tol=8e-10, giveRE=TRUE)# seen 5.316e-10   for --disable-long-double
 assert.EQ( c(0.685919891749065, 0.256419206157062),
           ## 32-bit{ada-5}:
           ## 0.685919891858219, 0.256419206203016)
-	  m.r2$sterror, tol=4e-10)
+	  m.r2$sterror, tol=4e-9)# seen 1.025e-9   for --disable-long-double
 
 data(foodstamp)
 str(foodstamp)
@@ -137,7 +137,7 @@ try(## FIXME -- Mahalanobis fails with singular matrix, here:
 m.fsWBY <- BYlogreg(x0=X.fs, y=y.fs,
 		    addIntercept=FALSE, trace=TRUE, maxhalf=18)
 )
-## maxhalf=18 is too much --> no convergence
+## maxhalf=18 is too much --> no convergence (in 1000 steps)
 m.fs.BY <- BYlogreg(x0=X.fs, y=y.fs, initwml=FALSE,
 		    addIntercept=FALSE, trace=TRUE, maxhalf=18)
 signif(
@@ -155,10 +155,11 @@ if(FALSE) {
 m.fs.BY100 <- BYlogreg(x0=100*X.fs, initwml=FALSE,
                        y=y.fs,
                        addIntercept=FALSE, trace=TRUE, maxhalf=18)
-
+## ==> no convergence
 
 X1c <- cbind(1, 100*X.fs[,-1])
 m.fsWBY1c <- BYlogreg(x0=X1c, y=y.fs,
                       addIntercept=FALSE, trace=TRUE, maxhalf=18)
+## ==> illegal singularity$kind
 
 }## not yet

@@ -6,7 +6,7 @@
 
 ## NOTA BENE:  Experiments etc are currently in ../misc/experi-psi-rho-funs.R
 ## ---------   (FIXME: move those to ../tests/psi-rho-etc.R and the vignette
-## ../inst/doc/psi_functions.Rnw  (and see ../inst/xtraR/plot-psiFun.R)
+## ../vignettes//psi_functions.Rnw  (and see ../inst/xtraR/plot-psiFun.R)
 
 ## ---> look for 'FIXME' below !!!
 ##               -------
@@ -138,8 +138,8 @@ psiFunc <- function(rho,psi,wgt, Dpsi,Dwgt, Erho=NULL, Epsi2=NULL, EDpsi=NULL, n
 ## so we use this "less nice" variant:
 .defDwgt <- function(psi, Dpsi) {
     nf <- names(formals(psi))
-    eval(parse(text = 
-	       gsub("_,_", paste(nf, collapse=","), 
+    eval(parse(text =
+	       gsub("_,_", paste(nf, collapse=","),
 		    gsub("x", nf[1], "function(_,_) {
         y <- x
         x <- x[not0 <- x != 0]
@@ -193,9 +193,7 @@ setMethod("chgDefaults", signature("psi_func"),
             paste(name, paste(n, round(v, round), sep = "=", collapse = "\n"),
                   sep = "\n")
         else
-            paste(name, " (",
-                  paste(n, round(v, round), sep = " = ", collapse = ", "), ")",
-                  sep="")
+	    paste0(name, " (", pasteK(n, round(v, round), sep = " = "), ")")
     } else name
 }
 

@@ -84,7 +84,7 @@ assert.EQ <- function(target, current, tol = if(showOnly) 0 else 1e-15,
 	return(ae)
     else if(giveRE && T) { ## don't show if stop() later:
 	ae0 <- if(tol == 0) ae else all.equal(target, current, tolerance = 0, ...)
-	if(!isTRUE(ae0)) cat(ae0,"\n")
+	if(!isTRUE(ae0)) writeLines(ae0)
     }
     if(!T) stop("all.equal() |-> ", paste(ae, collapse=sprintf("%-19s","\n")))
 }

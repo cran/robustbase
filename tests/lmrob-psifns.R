@@ -4,7 +4,7 @@ library(robustbase)
 source(system.file("xtraR/plot-psiFun.R", package = "robustbase", mustWork=TRUE))
 
 ### (1) Test the functions themselves --------------------------------
-pdf("rob-psifns.pdf")
+if(!dev.interactive(orNone=TRUE)) pdf("rob-psifns.pdf")
 
 ## Simple version, no error checking, no derivative, nothing:
 psiGGW <- function(x, a,b,c) {

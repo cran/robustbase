@@ -11,7 +11,7 @@
   The data set was used for analysing the stability of principal
   component analysis by the bootstrap method.  In the same context, but
   using high breakdown point robust PCA, these data were analysed by
-  Todorov et al.(1994).  Atkinson (1994) used these data for ilustration
+  Todorov et al. (1994).  Atkinson (1994) used these data for ilustration
   of the forward search algorithm for identifying of multiple outliers.
 }
 \usage{data(milk)}
@@ -49,6 +49,10 @@
 }
 \examples{
 data(milk)
-covMcd(milk)
+(c.milk <- covMcd(milk))
+summarizeRobWeights(c.milk $ mcd.wt)# 19..20 outliers
+umilk <- unique(milk) # dropping obs.64 (== obs.63)
+summary(cumilk <- covMcd(umilk, nsamp = "deterministic")) # 20 outliers
+%%not yet ## the best 'crit' we've seen was
 }
 \keyword{datasets}

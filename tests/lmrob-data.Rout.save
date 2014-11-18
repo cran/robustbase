@@ -1,7 +1,7 @@
 
-R Under development (unstable) (2014-01-26 r64896) -- "Unsuffered Consequences"
+R Under development (unstable) (2014-07-10 r66124) -- "Unsuffered Consequences"
 Copyright (C) 2014 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin10.8.0 (64-bit)
+Platform: x86_64-apple-darwin13.1.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -49,14 +49,20 @@ Robustness weights:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.5335  0.8269  0.9760  0.9112  0.9952  0.9989 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+       tuning.chi                bb        tuning.psi        refine.tol 
+        1.548e+00         5.000e-01         4.685e+00         1.000e-07 
+          rel.tol         solve.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-07         3.571e-03         6.083e-11 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
            200              0           1000              0           2000 
-          psi   subsampling           cov 
-   "bisquare" "nonsingular" ".vcov.avar1" 
+                  psi           subsampling                   cov 
+           "bisquare"         "nonsingular"         ".vcov.avar1" 
+compute.outlier.stats 
+                 "SM" 
 seed : int(0) 
 > (A1 <- anova(m0.sali, Y ~ X1 + X3))
 Robust Wald Test Table
@@ -164,14 +170,20 @@ Robustness weights:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.1491  0.9412  0.9847  0.9279  0.9947  0.9982 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+       tuning.chi                bb        tuning.psi        refine.tol 
+        1.548e+00         5.000e-01         4.685e+00         1.000e-07 
+          rel.tol         solve.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-07         5.000e-03         1.569e-10 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
            200              0           1000              0           2000 
-          psi   subsampling           cov 
-   "bisquare" "nonsingular" ".vcov.avar1" 
+                  psi           subsampling                   cov 
+           "bisquare"         "nonsingular"         ".vcov.avar1" 
+compute.outlier.stats 
+                 "SM" 
 seed : int(0) 
 > stopifnot(c(3,18) == which(m1$w < 0.2))
 > 
@@ -211,14 +223,20 @@ Robustness weights:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.6533  0.9171  0.9593  0.9318  0.9848  0.9986 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+       tuning.chi                bb        tuning.psi        refine.tol 
+        1.548e+00         5.000e-01         4.685e+00         1.000e-07 
+          rel.tol         solve.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-07         2.128e-03         8.404e-12 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
            200              0           1000              0           2000 
-          psi   subsampling           cov 
-   "bisquare" "nonsingular" ".vcov.avar1" 
+                  psi           subsampling                   cov 
+           "bisquare"         "nonsingular"         ".vcov.avar1" 
+compute.outlier.stats 
+                 "SM" 
 seed : int(0) 
 > stopifnot(c(11,20,30,34) == which(RlmST$w < 0.01))
 > 
@@ -254,14 +272,20 @@ Robustness weights:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.8522  0.9268  0.9624  0.9532  0.9865  0.9986 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+       tuning.chi                bb        tuning.psi        refine.tol 
+        1.548e+00         5.000e-01         4.685e+00         1.000e-07 
+          rel.tol         solve.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-07         1.333e-03         6.730e-11 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
            200              0           1000              0           2000 
-          psi   subsampling           cov 
-   "bisquare" "nonsingular" ".vcov.avar1" 
+                  psi           subsampling                   cov 
+           "bisquare"         "nonsingular"         ".vcov.avar1" 
+compute.outlier.stats 
+                 "SM" 
 seed : int(0) 
 > stopifnot(1:10 == which(m.hbk$w < 0.01))
 > 
@@ -290,17 +314,23 @@ Robustness weights:
      2      3      4      5      6      7      8      9     11 
 0.9887 0.9299 0.9608 0.9082 0.9262 0.9963 0.1134 0.9665 0.6149 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+       tuning.chi                bb        tuning.psi        refine.tol 
+        1.548e+00         5.000e-01         4.685e+00         1.000e-07 
+          rel.tol         solve.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-07         8.333e-03         1.701e-10 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
            200              0           1000              0           2000 
-          psi   subsampling           cov 
-   "bisquare" "nonsingular" ".vcov.avar1" 
+                  psi           subsampling                   cov 
+           "bisquare"         "nonsingular"         ".vcov.avar1" 
+compute.outlier.stats 
+                 "SM" 
 seed : int(0) 
 Warning message:
-In lmrob.S(x, y, control = control) :
+In lmrob.S(x, y, control = control, mf = mf) :
   find_scale() did not converge in 'maxit.scale' (= 200) iterations
 > stopifnot(8  == which(mhrt$w < 0.15),
 +           11 == which(0.61 < mhrt$w & mhrt$w < 0.62),
@@ -336,20 +366,26 @@ Robustness weights:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.1215  0.8757  0.9428  0.8721  0.9797  0.9978 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+       tuning.chi                bb        tuning.psi        refine.tol 
+        1.548e+00         5.000e-01         4.685e+00         1.000e-07 
+          rel.tol         solve.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-07         4.762e-03         1.692e-10 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
            200              0           1000              0           2000 
-          psi   subsampling           cov 
-   "bisquare" "nonsingular" ".vcov.avar1" 
+                  psi           subsampling                   cov 
+           "bisquare"         "nonsingular"         ".vcov.avar1" 
+compute.outlier.stats 
+                 "SM" 
 seed : int(0) 
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # "stats"
-Time elapsed:  0.596 0.041 0.672 0.002 0.003 
+Time elapsed:  0.431 0.026 0.451 0.002 0.003 
 > 
 > proc.time()
    user  system elapsed 
-  0.598   0.044   0.672 
+  0.433   0.029   0.451 

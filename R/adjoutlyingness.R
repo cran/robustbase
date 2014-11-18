@@ -9,18 +9,25 @@
 ### ftp://ftp.win.ua.ac.be/pub/software/agoras/newfiles/mc.tar.gz
 ### and that contains  mcrsoft/adjoutlyingness.R
 
+##_NEW_ (2014): moved from Antwerpen to Leuwen,
+## ===> http://wis.kuleuven.be/stat/robust/software
+##      has several links to 'robustbase', and S-plus code
+## http://wis.kuleuven.be/stat/robust/Programs/adjusted-boxplot/adjusted-boxplot.ssc
+## (copy in ../misc/Adjusted-boxplot.ssc
+
 ## MM [ FIXME ]:
 ## -----------
 
-## 1)   Use  *transposed*  B[] and A[] matrices   -- done
+## 1)   Use  *transposed*  B[] and A[] (now called 'E') matrices   -- DONE
 
 ## 2)   use  IQR() instead of   quantile(., .75) - quantile(., .25)
 
 ##-->  but only *after* testing original code
 ##     ^^^^^^^^^^^^^^^^^^^^^^^^
 
-adjOutlyingness <- function(x, ndir=250, clower=3, cupper=4,
-                            alpha.cutoff = 0.75, coef = 1.5, qr.tol = 1e-12)
+adjOutlyingness <- function(x, ndir=250, clower=4, cupper=3,
+                            alpha.cutoff = 0.75, coef = 1.5, qr.tol = 1e-12,
+                            only.outlyingness = FALSE)
 ## Skewness-Adjusted Outlyingness
 {
     x <- data.matrix(x)
@@ -28,28 +35,29 @@ adjOutlyingness <- function(x, ndir=250, clower=3, cupper=4,
     p <- ncol(x)
     stopifnot(n >= 1, p >= 1, is.numeric(x))
     if (p < n) {
-        i <- 1
-        it <- 0
         B <- matrix(0, p, ndir)
         E <- matrix(1, p, 1)
         x. <- unname(x) # for speed in subsequent subsetting and solve
-        maxit <- 100 * ndir
+        maxit <- as.integer(100 * ndir)
         ## ^^ original code had 'Inf', i.e. no iter.count check;
         ## often, maxit == ndir would suffice
-        while (i <= ndir  &&  (it <- it+1) < maxit) {
+	i <- 1L
+	it <- 0L
+	while (i <= ndir  &&  (it <- it+1L) < maxit) {
             P <- x.[sample(n,p), , drop=FALSE]
             if ((qrP <- qr(P, tol = qr.tol))$rank == p) {
-                B[,i] <- solve(qrP, E, tol =  qr.tol)
-                i <- i+1
+                B[,i] <- solve(qrP, E, tol = qr.tol)
+		i <- i+1L
             }
         }
         if(it == maxit)
             stop("**** sampling iterations were not sufficient. Please report")
 
         Bnorm <- sqrt(colSums(B^2))
-        ## MM: FIXME '1e-12' is not ok scale-equivariant!
-        Bnormr <- Bnorm[  Bnorm > 1e-12]
-        B      <-     B[, Bnorm > 1e-12 , drop=FALSE]
+        Nx <- mean(abs(x.)) ## so the comparison is scale-equivariant:
+        keep <- Bnorm*Nx > 1e-12
+        Bnormr <- Bnorm[  keep ]
+        B      <-     B[, keep , drop=FALSE]
 
         A <- B / rep(Bnormr, each = nrow(B))
     }
@@ -77,14 +85,15 @@ adjOutlyingness <- function(x, ndir=250, clower=3, cupper=4,
     med <- apply(Y, MARGIN = 2, median)
     Y <- Y - rep(med, each=n)
     ## MM: mc() could be made faster if we could tell it that med(..) = 0
-    tmc <- apply(Y, MARGIN = 2, mc)
+    tmc <- apply(Y, MARGIN = 2, mc) ## original Antwerpen *wrongly*: tmc <- mc(Y)
     ##                          ==
     Q3 <-  apply(Y, MARGIN = 2, quantile, 0.75)
     Q1 <-  apply(Y, MARGIN = 2, quantile, 0.25)
     IQR <- Q3-Q1
     ## NOTA BENE(MM): simplified definition of tup/tlo here and below
-    tup <- Q3 + coef*IQR*exp( cupper*tmc*(tmc >= 0) - clower*tmc*(tmc < 0))
-    tlo <- Q1 - coef*IQR*exp(-clower*tmc*(tmc >= 0) + cupper*tmc*(tmc < 0))
+    ## 2014-10-18: "flipped" sign (which Pieter Setaert (c/o Mia H) proposed, Jul.30,2014:
+    tup <- Q3 + coef*IQR*exp( cupper*tmc*(tmc >= 0) + clower*tmc*(tmc < 0))
+    tlo <- Q1 - coef*IQR*exp(-clower*tmc*(tmc >= 0) - cupper*tmc*(tmc < 0))
     ## Note: all(tlo < med & med < tup)
 
     ## Instead of the loop:
@@ -111,13 +120,19 @@ adjOutlyingness <- function(x, ndir=250, clower=3, cupper=4,
     ## even  have  0/0 -> NaN there  --> is.finite(.) below.. hmm, FIXME!
 
     adjout <- apply(tY, 2, function(x) max(x[is.finite(x)]))
-    Qadj <- quantile(adjout, probs = c(1 - alpha.cutoff, alpha.cutoff))
-    mcadjout <- mc(adjout)
-    ##          ===
-    cutoff <- Qadj[2] + coef* (Qadj[2] - Qadj[1])*
-        (if(mcadjout > 0) exp(cupper*mcadjout) else 1)
 
-    list(adjout = adjout,
-	 MCadjout = mcadjout, Qalph.adjout = Qadj, cutoff = cutoff,
-	 nonOut = (adjout <= cutoff))
+    if(only.outlyingness)
+	adjout
+    else {
+	Qadj <- quantile(adjout, probs = c(1 - alpha.cutoff, alpha.cutoff))
+	mcadjout <- mc(adjout)
+	##	    ===
+	cutoff <- Qadj[2] + coef* (Qadj[2] - Qadj[1])*
+	    (if(mcadjout > 0) exp(cupper*mcadjout) else 1)
+
+	list(adjout = adjout, iter = it,
+	     MCadjout = mcadjout, Qalph.adjout = Qadj, cutoff = cutoff,
+	     nonOut = (adjout <= cutoff))
+    }
 }
+

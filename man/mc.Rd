@@ -1,6 +1,5 @@
 \name{mc}
 \alias{mc}
-\alias{mc.default}
 \title{Medcouple, a Robust Measure of Skewness}
 \description{
   Compute the \sQuote{medcouple}, a \emph{robust} concept and estimator
@@ -9,10 +8,9 @@
   on the third moment as the classical skewness.
 }
 \usage{
-mc(x, \dots)
-\method{mc}{default}(x, na.rm = FALSE, doReflect = (length(x) <= 100),
-     eps1 = .Machine$double.eps, eps2 = .Machine$double.xmin,
-     maxit = 100, trace.lev = 0, full.result = FALSE, \dots)
+mc(x, na.rm = FALSE, doReflect = (length(x) <= 100),
+   eps1 = .Machine$double.eps, eps2 = .Machine$double.xmin,
+   maxit = 100, trace.lev = 0, full.result = FALSE)
 }
 \arguments{
   \item{x}{a numeric vector}
@@ -31,7 +29,6 @@ mc(x, \dots)
     for \code{trace.lev = 5}.}
   \item{full.result}{logical indicating if the full return values (from
     C) should be return, as a list \code{attr(*, "mcComp")}.}
-  \item{\dots}{potentially further arguments passed to other methods.}
 }
 % \details{
 %   ~~ If necessary, more details than the description above ~~
@@ -53,7 +50,6 @@ mc(x, \dots)
 
   Mia Hubert and E. Vandervieren (2006)
   An adjusted boxplot for skewed distributions.
-
 }
 \author{Guy Brys; modifications by Tobias Verbeke and bug fixes and
   extensions by Martin Maechler.

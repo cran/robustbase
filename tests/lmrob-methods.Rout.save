@@ -1,7 +1,7 @@
 
-R version 3.0.2 (2013-09-25) -- "Frisbee Sailing"
-Copyright (C) 2013 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin10.8.0 (64-bit)
+R Under development (unstable) (2014-07-10 r66124) -- "Unsuffered Consequences"
+Copyright (C) 2014 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.1.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -23,10 +23,11 @@ Type 'q()' to quit R.
 > 
 > ## S
 > set.seed(0)
-> summary(m0 <- lmrob(stack.loss ~ ., data = stackloss, method = "S"))
+> summary(m0 <- lmrob(stack.loss ~ ., data = stackloss, method = "S",
++                     compute.outlier.stats = "S"))
 
 Call:
-lmrob(formula = stack.loss ~ ., data = stackloss, method = "S")
+lmrob(formula = stack.loss ~ ., data = stackloss, method = "S", compute.outlier.stats = "S")
  \--> method = "S"
 Residuals:
      Min       1Q   Median       3Q      Max 
@@ -51,14 +52,20 @@ Robustness weights:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.4126  0.7595  0.8726  0.8270  0.9718  0.9986 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+       tuning.chi                bb        tuning.psi        refine.tol 
+        1.548e+00         5.000e-01         4.685e+00         1.000e-07 
+          rel.tol         solve.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-07         4.762e-03         1.692e-10 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
            200              0           1000              0           2000 
-          psi   subsampling           cov 
-   "bisquare" "nonsingular"     ".vcov.w" 
+                  psi           subsampling                   cov 
+           "bisquare"         "nonsingular"             ".vcov.w" 
+compute.outlier.stats 
+                  "S" 
 seed : int(0) 
 Warning message:
 In lf.cov(init, x) :
@@ -72,10 +79,11 @@ In lf.cov(init, x) :
 > 
 > ## MM
 > set.seed(0)
-> summary(m1 <- lmrob(stack.loss ~ ., data = stackloss, method = "MM"))
+> summary(m1 <- lmrob(stack.loss ~ ., data = stackloss, method = "MM",
++                     compute.outlier.stats = "S"))
 
 Call:
-lmrob(formula = stack.loss ~ ., data = stackloss, method = "MM")
+lmrob(formula = stack.loss ~ ., data = stackloss, method = "MM", compute.outlier.stats = "S")
  \--> method = "MM"
 Residuals:
       Min        1Q    Median        3Q       Max 
@@ -100,14 +108,20 @@ Robustness weights:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.1215  0.8757  0.9428  0.8721  0.9797  0.9978 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+       tuning.chi                bb        tuning.psi        refine.tol 
+        1.548e+00         5.000e-01         4.685e+00         1.000e-07 
+          rel.tol         solve.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-07         4.762e-03         1.692e-10 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
            200              0           1000              0           2000 
-          psi   subsampling           cov 
-   "bisquare" "nonsingular" ".vcov.avar1" 
+                  psi           subsampling                   cov 
+           "bisquare"         "nonsingular"         ".vcov.avar1" 
+compute.outlier.stats 
+                  "S" 
 seed : int(0) 
 > 
 > set.seed(0)
@@ -122,10 +136,12 @@ seed : int(0)
 > 
 > ## SMD
 > set.seed(0)
-> summary(m4 <- lmrob(stack.loss ~ ., data = stackloss, method = "SMD", psi = 'bisquare'))
+> summary(m4 <- lmrob(stack.loss ~ ., data = stackloss, method = "SMD", psi = 'bisquare',
++                     compute.outlier.stats = "S"))
 
 Call:
-lmrob(formula = stack.loss ~ ., data = stackloss, method = "SMD", psi = "bisquare")
+lmrob(formula = stack.loss ~ ., data = stackloss, method = "SMD", psi = "bisquare", 
+    compute.outlier.stats = "S")
  \--> method = "SMD"
 Residuals:
       Min        1Q    Median        3Q       Max 
@@ -150,21 +166,28 @@ Robustness weights:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.1215  0.8757  0.9428  0.8721  0.9797  0.9978 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+       tuning.chi                bb        tuning.psi        refine.tol 
+        1.548e+00         5.000e-01         4.685e+00         1.000e-07 
+          rel.tol         solve.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-07         4.762e-03         1.692e-10 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
            200              0           1000              0             10 
 fast.s.large.n 
           2000 
-          psi   subsampling           cov 
-   "bisquare" "nonsingular"     ".vcov.w" 
+                  psi           subsampling                   cov 
+           "bisquare"         "nonsingular"             ".vcov.w" 
+compute.outlier.stats 
+                  "S" 
 seed : int(0) 
 > summary(m4a <- lmrob..D..fit(m3))
 
 Call:
-lmrob(formula = stack.loss ~ ., data = stackloss, method = "SMD", cov = ".vcov.w")
+lmrob(formula = stack.loss ~ ., data = stackloss, method = "SMD", compute.outlier.stats = "S", 
+    cov = ".vcov.w")
  \--> method = "SMD"
 Residuals:
       Min        1Q    Median        3Q       Max 
@@ -189,16 +212,22 @@ Robustness weights:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.1215  0.8757  0.9428  0.8721  0.9797  0.9978 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+       tuning.chi                bb        tuning.psi        refine.tol 
+        1.548e+00         5.000e-01         4.685e+00         1.000e-07 
+          rel.tol         solve.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-07         4.762e-03         1.692e-10 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
            200              0           1000              0             10 
 fast.s.large.n 
           2000 
-          psi   subsampling           cov 
-   "bisquare" "nonsingular"     ".vcov.w" 
+                  psi           subsampling                   cov 
+           "bisquare"         "nonsingular"             ".vcov.w" 
+compute.outlier.stats 
+                  "S" 
 seed : int(0) 
 > 
 > ## rearrange m4a and update call
@@ -211,10 +240,12 @@ seed : int(0)
 > 
 > ## SMDM
 > set.seed(0)
-> summary(m5 <- lmrob(stack.loss ~ ., data = stackloss, method = "SMDM", psi = 'bisquare'))
+> summary(m5 <- lmrob(stack.loss ~ ., data = stackloss, method = "SMDM", psi = 'bisquare',
++                     compute.outlier.stats = "S"))
 
 Call:
-lmrob(formula = stack.loss ~ ., data = stackloss, method = "SMDM", psi = "bisquare")
+lmrob(formula = stack.loss ~ ., data = stackloss, method = "SMDM", psi = "bisquare", 
+    compute.outlier.stats = "S")
  \--> method = "SMDM"
 Residuals:
     Min      1Q  Median      3Q     Max 
@@ -238,21 +269,28 @@ Robustness weights:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.1546  0.9139  0.9597  0.8874  0.9866  0.9966 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+       tuning.chi                bb        tuning.psi        refine.tol 
+        1.548e+00         5.000e-01         4.685e+00         1.000e-07 
+          rel.tol         solve.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-07         4.762e-03         1.692e-10 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
            200              0           1000              0             10 
 fast.s.large.n 
           2000 
-          psi   subsampling           cov 
-   "bisquare" "nonsingular"     ".vcov.w" 
+                  psi           subsampling                   cov 
+           "bisquare"         "nonsingular"             ".vcov.w" 
+compute.outlier.stats 
+                  "S" 
 seed : int(0) 
 > summary(m5a <- lmrob..M..fit(obj=m4))
 
 Call:
-lmrob(formula = stack.loss ~ ., data = stackloss, method = "SMDM", psi = "bisquare")
+lmrob(formula = stack.loss ~ ., data = stackloss, method = "SMDM", psi = "bisquare", 
+    compute.outlier.stats = "S")
  \--> method = "SMDM"
 Residuals:
     Min      1Q  Median      3Q     Max 
@@ -276,16 +314,22 @@ Robustness weights:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.1546  0.9139  0.9597  0.8874  0.9866  0.9966 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+       tuning.chi                bb        tuning.psi        refine.tol 
+        1.548e+00         5.000e-01         4.685e+00         1.000e-07 
+          rel.tol         solve.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-07         4.762e-03         1.692e-10 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
            200              0           1000              0             10 
 fast.s.large.n 
           2000 
-          psi   subsampling           cov 
-   "bisquare" "nonsingular"     ".vcov.w" 
+                  psi           subsampling                   cov 
+           "bisquare"         "nonsingular"             ".vcov.w" 
+compute.outlier.stats 
+                  "S" 
 seed : int(0) 
 > 
 > ## rearrange m5a
@@ -315,4 +359,4 @@ Error in lmrob.S(model.matrix(model, NOxEmissions)[1:682, ], NOxEmissions$LNOx[1
 > 
 > proc.time()
    user  system elapsed 
-  0.730   0.062   0.785 
+  0.609   0.045   0.643 

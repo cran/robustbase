@@ -2,7 +2,7 @@
 ####  but no longer --> Have interface  via .psi2ipsi() and .C(..)
 #### FIXME: integrate these with the psi-rho objects --> ./psi-rho-funs.R
 
-## In the vignette ../inst/doc/psi_functions.Rnw, we call this
+## In the vignette ../vignettes/psi_functions.Rnw, we call this
 ##  scaled \rho  "\tilde{\rho}"
 ##- Maronna et al (2006) define their rho to be standardized
 ##-    (only if possible <==>  only if redescending psi !)

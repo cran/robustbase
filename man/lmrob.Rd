@@ -254,7 +254,7 @@ stopifnot(all.equal(fitted(RlmST),
 ## string
 set.seed(0)
 m3 <- lmrob(Y ~ ., data=coleman, init = "S")
-stopifnot(all.equal(m1[-17], m3[-17]))
+stopifnot(all.equal(m1[-18], m3[-18]))
 ## function
 initFun <- function(x, y, control, mf) {
     init.S <- lmrob.S(x, y, control)

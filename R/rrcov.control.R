@@ -19,21 +19,26 @@
 ##          1) covMcd()'s         default in ./covMcd.R
 ##          2) ltsReg.default()'s default in ./ltsReg.R
 rrcov.control <-
-    function(alpha = 1/2, nsamp = 500, nmini = 300,
+    function(alpha = 1/2, nsamp = 500, nmini = 300, kmini = 5,
              seed = NULL, tolSolve = 1e-14,
+             scalefn = "hrv2012", maxcsteps = 200,
 	     trace = FALSE, wgtFUN = "01.original",
              use.correction = identical(wgtFUN, "01.original"),
              adjust = FALSE)
 {
-    list(alpha=alpha, nsamp=nsamp, nmini=nmini, seed = as.integer(seed),
-	 tolSolve=tolSolve, trace=trace, wgtFUN=wgtFUN,
+    list(alpha=alpha, nsamp=nsamp, nmini=as.integer(nmini), kmini=as.integer(kmini),
+         seed = as.integer(seed),
+	 tolSolve=tolSolve, scalefn=scalefn, maxcsteps=as.integer(maxcsteps),
+         trace=trace, wgtFUN=wgtFUN,
 	 use.correction=use.correction, adjust=adjust)
 }
+## allow direct fast access:
+.scalefn.default <- eval(formals(rrcov.control)$scalefn)
 
 ## Only for back compatibility, as some new args did not exist pre 2013-04,
-## and callers of covMcd() may use a "too small"  'control' list:
-getDefCtrl <- function(nm) {
+## and callers of ltsReg() / covMcd() may use a "too small"  'control' list:
+getDefCtrl <- function(nm, defCtrl = rrcov.control()) {
     callerEnv <- parent.frame()
     if(is.null(get(nm, envir = callerEnv)))
-	assign(nm, rrcov.control()[[nm]], envir=callerEnv)
+	assign(nm, defCtrl[[nm]], envir=callerEnv)
 }

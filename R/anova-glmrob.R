@@ -8,7 +8,7 @@ anova.glmrob <- function(object, ...,
 	if (any(named)) {
 	    warning("the following arguments to 'anova.glmrob' are invalid and",
 		    "dropped:\n",
-		    paste(deparse(dotargs[named]), collapse = ", "))
+		    pasteK(deparse(dotargs[named])))
 	    dotargs <- dotargs[!named]
 	}
     }

@@ -189,8 +189,9 @@ C
       IERR = 0
       IF (N .EQ. 1) GO TO 1001
 C
-      DO 100 I = 2, N
-  100 E(I-1) = E(I)
+      do I = 2, N
+         E(I-1) = E(I)
+      end do
 C
       F = 0.0D0
       TST1 = 0.0D0
@@ -223,8 +224,9 @@ C     .......... FORM SHIFT ..........
          H = G - D(L)
          IF (L2 .GT. N) GO TO 145
 C
-         DO 140 I = L2, N
-  140    D(I) = D(I) - H
+         DO I = L2, N
+            D(I) = D(I) - H
+         end do
 C
   145    F = F + H
 C     .......... QL TRANSFORMATION ..........
@@ -346,8 +348,9 @@ C
       IERR = 0
       IF (N .EQ. 1) GO TO 1001
 C
-      DO 100 I = 2, N
-  100 E2(I-1) = E2(I)
+      DO I = 2, N
+         E2(I-1) = E2(I)
+      end do
 C
       F = 0.0D0
       T = 0.0D0
@@ -379,8 +382,9 @@ C     .......... FORM SHIFT ..........
          D(L) = S / (P + DSIGN(R,P))
          H = G - D(L)
 C
-         DO 140 I = L1, N
-  140    D(I) = D(I) - H
+         DO I = L1, N
+            D(I) = D(I) - H
+         end do
 C
          F = F + H
 C     .......... RATIONAL QL TRANSFORMATION ..........
@@ -445,28 +449,28 @@ C     ORTHOGONAL SIMILARITY TRANSFORMATIONS.
 C
 C     ON INPUT
 C
-C        NM MUST BE SET TO THE ROW DIMENSION OF TWO-DIMENSIONAL
-C          ARRAY PARAMETERS AS DECLARED IN THE CALLING PROGRAM
-C          DIMENSION STATEMENT.
+C     NM MUST BE SET TO THE ROW DIMENSION OF TWO-DIMENSIONAL
+C     ARRAY PARAMETERS AS DECLARED IN THE CALLING PROGRAM
+C     DIMENSION STATEMENT.
 C
-C        N IS THE ORDER OF THE MATRIX.
+C     N IS THE ORDER OF THE MATRIX.
 C
-C        A CONTAINS THE REAL SYMMETRIC INPUT MATRIX.  ONLY THE
-C          LOWER TRIANGLE OF THE MATRIX NEED BE SUPPLIED.
+C     A CONTAINS THE REAL SYMMETRIC INPUT MATRIX.  ONLY THE
+C     LOWER TRIANGLE OF THE MATRIX NEED BE SUPPLIED.
 C
 C     ON OUTPUT
 C
-C        A CONTAINS INFORMATION ABOUT THE ORTHOGONAL TRANS-
-C          FORMATIONS USED IN THE REDUCTION IN ITS STRICT LOWER
-C          TRIANGLE.  THE FULL UPPER TRIANGLE OF A IS UNALTERED.
+C     A CONTAINS INFORMATION ABOUT THE ORTHOGONAL TRANS-
+C     FORMATIONS USED IN THE REDUCTION IN ITS STRICT LOWER
+C     TRIANGLE.  THE FULL UPPER TRIANGLE OF A IS UNALTERED.
 C
-C        D CONTAINS THE DIAGONAL ELEMENTS OF THE TRIDIAGONAL MATRIX.
+C     D CONTAINS THE DIAGONAL ELEMENTS OF THE TRIDIAGONAL MATRIX.
 C
-C        E CONTAINS THE SUBDIAGONAL ELEMENTS OF THE TRIDIAGONAL
-C          MATRIX IN ITS LAST N-1 POSITIONS.  E(1) IS SET TO ZERO.
+C     E CONTAINS THE SUBDIAGONAL ELEMENTS OF THE TRIDIAGONAL
+C     MATRIX IN ITS LAST N-1 POSITIONS.  E(1) IS SET TO ZERO.
 C
-C        E2 CONTAINS THE SQUARES OF THE CORRESPONDING ELEMENTS OF E.
-C          E2 MAY COINCIDE WITH E IF THE SQUARES ARE NOT NEEDED.
+C     E2 CONTAINS THE SQUARES OF THE CORRESPONDING ELEMENTS OF E.
+C     E2 MAY COINCIDE WITH E IF THE SQUARES ARE NOT NEEDED.
 C
 C     QUESTIONS AND COMMENTS SHOULD BE DIRECTED TO BURTON S. GARBOW,
 C     MATHEMATICS AND COMPUTER SCIENCE DIV, ARGONNE NATIONAL LABORATORY
@@ -478,7 +482,7 @@ C
       DO 100 I = 1, N
          D(I) = A(N,I)
          A(N,I) = A(I,I)
-  100 CONTINUE
+ 100  CONTINUE
 C     .......... FOR I=N STEP -1 UNTIL 1 DO -- ..........
       DO 300 II = 1, N
          I = N + 1 - II
@@ -487,8 +491,9 @@ C     .......... FOR I=N STEP -1 UNTIL 1 DO -- ..........
          SCALE = 0.0D0
          IF (L .LT. 1) GO TO 130
 C     .......... SCALE ROW (ALGOL TOL THEN NOT NEEDED) ..........
-         DO 120 K = 1, L
-  120    SCALE = SCALE + DABS(D(K))
+         DO K = 1, L
+            SCALE = SCALE + DABS(D(K))
+         end do
 C
          IF (SCALE .NE. 0.0D0) GO TO 140
 C
@@ -496,16 +501,17 @@ C
             D(J) = A(L,J)
             A(L,J) = A(I,J)
             A(I,J) = 0.0D0
-  125    CONTINUE
+ 125     CONTINUE
 C
-  130    E(I) = 0.0D0
+ 130     E(I) = 0.0D0
          E2(I) = 0.0D0
          GO TO 300
 C
-  140    DO 150 K = 1, L
+ 140     continue
+         DO K = 1, L
             D(K) = D(K) / SCALE
             H = H + D(K) * D(K)
-  150    CONTINUE
+         end do
 C
          E2(I) = SCALE * SCALE * H
          F = D(L)
@@ -513,57 +519,58 @@ C
          E(I) = SCALE * G
          H = H - F * G
          D(L) = F - G
-         IF (L .EQ. 1) GO TO 285
-C     .......... FORM A*U ..........
-         DO 170 J = 1, L
-  170    E(J) = 0.0D0
+         IF (L .gt. 1) then
+C         .......... FORM A*U ..........
+            DO J = 1, L
+               E(J) = 0.0D0
+            end do
 C
-         DO 240 J = 1, L
-            F = D(J)
-            G = E(J) + A(J,J) * F
-            JP1 = J + 1
-            IF (L .LT. JP1) GO TO 220
+            DO 240 J = 1, L
+               F = D(J)
+               G = E(J) + A(J,J) * F
+               JP1 = J + 1
+               IF (L .ge. JP1) then
+                  DO K = JP1, L
+                     G = G + A(K,J) * D(K)
+                     E(K) = E(K) + A(K,J) * F
+                  end do
+               end if
+               E(J) = G
+ 240        CONTINUE
+C         .......... FORM P ..........
+            F = 0.0D0
 C
-            DO 200 K = JP1, L
-               G = G + A(K,J) * D(K)
-               E(K) = E(K) + A(K,J) * F
-  200       CONTINUE
+            DO J = 1, L
+               E(J) = E(J) / H
+               F = F + E(J) * D(J)
+            end do
 C
-  220       E(J) = G
-  240    CONTINUE
-C     .......... FORM P ..........
-         F = 0.0D0
-C
-         DO 245 J = 1, L
-            E(J) = E(J) / H
-            F = F + E(J) * D(J)
-  245    CONTINUE
-C
-         H = F / (H + H)
-C     .......... FORM Q ..........
-         DO 250 J = 1, L
-  250    E(J) = E(J) - H * D(J)
-C     .......... FORM REDUCED A ..........
-         DO 280 J = 1, L
-            F = D(J)
-            G = E(J)
-C
-            DO 260 K = J, L
-  260       A(K,J) = A(K,J) - F * E(K) - G * D(K)
-C
-  280    CONTINUE
-C
-  285    DO 290 J = 1, L
+            H = F / (H + H)
+C         .......... FORM Q ..........
+            DO J = 1, L
+               E(J) = E(J) - H * D(J)
+            end do
+C         .......... FORM REDUCED A ..........
+            DO J = 1, L
+               F = D(J)
+               G = E(J)
+               DO K = J, L
+                  A(K,J) = A(K,J) - F * E(K) - G * D(K)
+               end do
+            end do
+         end if
+c     285
+         DO J = 1, L
             F = D(J)
             D(J) = A(L,J)
             A(L,J) = A(I,J)
             A(I,J) = F * SCALE
-  290    CONTINUE
+         end do
 C
-  300 CONTINUE
-C
+ 300  CONTINUE
       RETURN
       END
+
       SUBROUTINE TRED2(NM,N,A,D,E,Z)
 C
       INTEGER I,J,K,L,N,II,NM,JP1
@@ -580,26 +587,26 @@ C     ORTHOGONAL SIMILARITY TRANSFORMATIONS.
 C
 C     ON INPUT
 C
-C        NM MUST BE SET TO THE ROW DIMENSION OF TWO-DIMENSIONAL
-C          ARRAY PARAMETERS AS DECLARED IN THE CALLING PROGRAM
-C          DIMENSION STATEMENT.
+C     NM MUST BE SET TO THE ROW DIMENSION OF TWO-DIMENSIONAL
+C     ARRAY PARAMETERS AS DECLARED IN THE CALLING PROGRAM
+C     DIMENSION STATEMENT.
 C
-C        N IS THE ORDER OF THE MATRIX.
+C     N IS THE ORDER OF THE MATRIX.
 C
-C        A CONTAINS THE REAL SYMMETRIC INPUT MATRIX.  ONLY THE
-C          LOWER TRIANGLE OF THE MATRIX NEED BE SUPPLIED.
+C     A CONTAINS THE REAL SYMMETRIC INPUT MATRIX.  ONLY THE
+C     LOWER TRIANGLE OF THE MATRIX NEED BE SUPPLIED.
 C
 C     ON OUTPUT
 C
-C        D CONTAINS THE DIAGONAL ELEMENTS OF THE TRIDIAGONAL MATRIX.
+C     D CONTAINS THE DIAGONAL ELEMENTS OF THE TRIDIAGONAL MATRIX.
 C
-C        E CONTAINS THE SUBDIAGONAL ELEMENTS OF THE TRIDIAGONAL
-C          MATRIX IN ITS LAST N-1 POSITIONS.  E(1) IS SET TO ZERO.
+C     E CONTAINS THE SUBDIAGONAL ELEMENTS OF THE TRIDIAGONAL
+C     MATRIX IN ITS LAST N-1 POSITIONS.  E(1) IS SET TO ZERO.
 C
-C        Z CONTAINS THE ORTHOGONAL TRANSFORMATION MATRIX
-C          PRODUCED IN THE REDUCTION.
+C     Z CONTAINS THE ORTHOGONAL TRANSFORMATION MATRIX
+C     PRODUCED IN THE REDUCTION.
 C
-C        A AND Z MAY COINCIDE.  IF DISTINCT, A IS UNALTERED.
+C     A AND Z MAY COINCIDE.  IF DISTINCT, A IS UNALTERED.
 C
 C     QUESTIONS AND COMMENTS SHOULD BE DIRECTED TO BURTON S. GARBOW,
 C     MATHEMATICS AND COMPUTER SCIENCE DIV, ARGONNE NATIONAL LABORATORY
@@ -608,13 +615,12 @@ C     THIS VERSION DATED AUGUST 1983.
 C
 C     ------------------------------------------------------------------
 C
-      DO 100 I = 1, N
-C
-         DO 80 J = I, N
-   80    Z(J,I) = A(J,I)
-C
+      DO I = 1, N
+         DO J = I, N
+            Z(J,I) = A(J,I)
+         end do
          D(I) = A(N,I)
-  100 CONTINUE
+      end do
 C
       IF (N .EQ. 1) GO TO 510
 C     .......... FOR I=N STEP -1 UNTIL 2 DO -- ..........
@@ -625,24 +631,27 @@ C     .......... FOR I=N STEP -1 UNTIL 2 DO -- ..........
          SCALE = 0.0D0
          IF (L .LT. 2) GO TO 130
 C     .......... SCALE ROW (ALGOL TOL THEN NOT NEEDED) ..........
-         DO 120 K = 1, L
-  120    SCALE = SCALE + DABS(D(K))
+         DO K = 1, L
+            SCALE = SCALE + DABS(D(K))
+         end do
 C
          IF (SCALE .NE. 0.0D0) GO TO 140
-  130    E(I) = D(L)
+ 130     E(I) = D(L)
 C
-         DO 135 J = 1, L
+         DO J = 1, L
             D(J) = Z(L,J)
             Z(I,J) = 0.0D0
             Z(J,I) = 0.0D0
-  135    CONTINUE
+         end do
 C
          GO TO 290
 C
-  140    DO 150 K = 1, L
+ 140     CONTINUE
+
+         DO K = 1, L
             D(K) = D(K) / SCALE
             H = H + D(K) * D(K)
-  150    CONTINUE
+         end do
 C
          F = D(L)
          G = -DSIGN(DSQRT(H),F)
@@ -650,81 +659,92 @@ C
          H = H - F * G
          D(L) = F - G
 C     .......... FORM A*U ..........
-         DO 170 J = 1, L
-  170    E(J) = 0.0D0
+         DO J = 1, L
+            E(J) = 0.0D0
+         end do
 C
          DO 240 J = 1, L
             F = D(J)
             Z(J,I) = F
             G = E(J) + Z(J,J) * F
             JP1 = J + 1
-            IF (L .LT. JP1) GO TO 220
-C
-            DO 200 K = JP1, L
-               G = G + Z(K,J) * D(K)
-               E(K) = E(K) + Z(K,J) * F
-  200       CONTINUE
-C
-  220       E(J) = G
-  240    CONTINUE
+            IF (L .ge. JP1) then
+               do K = JP1, L
+                  G = G + Z(K,J) * D(K)
+                  E(K) = E(K) + Z(K,J) * F
+               end do
+            end if
+            E(J) = G
+ 240     CONTINUE
 C     .......... FORM P ..........
          F = 0.0D0
 C
-         DO 245 J = 1, L
+         do J = 1, L
             E(J) = E(J) / H
             F = F + E(J) * D(J)
-  245    CONTINUE
+         end do
 C
          HH = F / (H + H)
 C     .......... FORM Q ..........
-         DO 250 J = 1, L
-  250    E(J) = E(J) - HH * D(J)
+         do J = 1, L
+            E(J) = E(J) - HH * D(J)
+         end do
 C     .......... FORM REDUCED A ..........
-         DO 280 J = 1, L
+         DO J = 1, L
             F = D(J)
             G = E(J)
 C
-            DO 260 K = J, L
-  260       Z(K,J) = Z(K,J) - F * E(K) - G * D(K)
+            do K = J, L
+               Z(K,J) = Z(K,J) - F * E(K) - G * D(K)
+            end do
 C
             D(J) = Z(L,J)
             Z(I,J) = 0.0D0
-  280    CONTINUE
+         end do
 C
-  290    D(I) = H
-  300 CONTINUE
+ 290     D(I) = H
+ 300  CONTINUE
+
 C     .......... ACCUMULATION OF TRANSFORMATION MATRICES ..........
-      DO 500 I = 2, N
+      do I = 2, N
          L = I - 1
          Z(N,L) = Z(L,L)
          Z(L,L) = 1.0D0
          H = D(I)
          IF (H .EQ. 0.0D0) GO TO 380
 C
-         DO 330 K = 1, L
-  330    D(K) = Z(K,I) / H
+         do  K = 1, L
+            D(K) = Z(K,I) / H
+         end do
 C
-         DO 360 J = 1, L
+         DO J = 1, L
             G = 0.0D0
 C
-            DO 340 K = 1, L
-  340       G = G + Z(K,I) * Z(K,J)
+            do K = 1, L
+               G = G + Z(K,I) * Z(K,J)
+            end do
 C
-            DO 360 K = 1, L
+            do K = 1, L
                Z(K,J) = Z(K,J) - G * D(K)
-  360    CONTINUE
+            end do
+         end do
+
+ 380     continue
+
+         do K = 1, L
+            Z(K,I) = 0.0D0
+         end do
+      end do
+
 C
-  380    DO 400 K = 1, L
-  400    Z(K,I) = 0.0D0
-C
-  500 CONTINUE
-C
-  510 DO 520 I = 1, N
+ 510  CONTINUE
+
+      DO I = 1, N
          D(I) = Z(N,I)
          Z(N,I) = 0.0D0
-  520 CONTINUE
-C
+      end do
       Z(N,N) = 1.0D0
       E(1) = 0.0D0
+
       RETURN
       END

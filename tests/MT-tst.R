@@ -16,7 +16,7 @@ if(!require("sfsmisc")) {
 (doExtras <- robustbase:::doExtras())
 
 ## Explore the espRho() function: ---------------------------------------------
-pdf("MT-E_rho.pdf")
+if(!dev.interactive(orNone=TRUE)) pdf("MT-E_rho.pdf")
 E.rho <- robustbase:::espRho
 lambdas <- ((1:10)/2)^2
 cws <- c(1, 1.5, 1.75, 2, 2.25, 3)
@@ -42,7 +42,7 @@ dev.off()
 
 
 ## Explore the m() function: ---------------------------------------------
-pdf("MT-m_rho.pdf")
+if(!dev.interactive(orNone=TRUE)) pdf("MT-m_rho.pdf")
 
 mkM <- robustbase:::mk.m_rho # itself calling splinefun(*, "monoH.FC")
 getSpline.xy <- function(splfun) {

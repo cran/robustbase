@@ -11,28 +11,28 @@ c     Here, index is the index set.
 c
       implicit none
       integer n, nsel, index(nsel)
-c     real uniran
+c     unifrnd() == R C API's  unif_rand()  --> see ./R-rng4ftn.c
       double precision unifrnd
       integer i,j, num
 c
-      do 100 i=1,nsel
-c     OLD 10      num=int(uniran(seed)*n)+1
+      do i=1,nsel
+cOLD 10  num=int(uniran(seed)*n)+1
  10      num=int(unifrnd()*n)+1
 C        if(num .gt. n) then
 C           call intpr('** rfrangen(): num > n; num=', -1, num, 1)
 C           num=n
 C        endif
          if(i.gt.1) then
-            do 50 j=1,i-1
+            do j=1,i-1
                if(index(j).eq.num) goto 10
- 50         continue
+            end do
          endif
          index(i)=num
- 100  continue
+      end do
       return
       end
-ccccc
-ccccc
+c     ---------------------------------------------------------
+
 cOLD    function uniran(seed)
 cOLD cc
 cOLD cc  Draws a random number from the uniform distribution on [0,1].
@@ -47,8 +47,8 @@ cOLD    seed=seed-quot*65536
 cOLD    uniran=float(seed)/65536.D0
 cOLD    return
 cOLD    end
-ccccc
-ccccc
+c     ---------------------------------------------------------
+
       subroutine rfgenpn(n,nsel,index)
 cc
 cc    Constructs all subsets of nsel cases out of n cases.
@@ -64,15 +64,15 @@ c while
  10   if(k.eq.1 .or. index(k).le.(n-(nsel-k))) goto 100
       k=k-1
       index(k)=index(k)+1
-      do 50 i=k+1,nsel
+      do i=k+1,nsel
          index(i)=index(i-1)+1
- 50   continue
+      end do
       goto 10
 c end{while}
  100  return
       end
-ccccc
-ccccc
+c     ---------------------------------------------------------
+
       subroutine rfshsort(a,n)
 cc
 cc  Sorts the array a of length n.
@@ -85,6 +85,7 @@ c
       integer gap, i,j, nextj
 
       gap=n
+c --- repeat
  100  gap=gap/2
       if(gap.eq.0) goto 200
       do 180 i=1,n-gap
@@ -102,23 +103,25 @@ c
          goto 120
  180  continue
       goto 100
+c     ---- --- end repeat
  200  return
       end
-ccccc
-ccccc
-      subroutine rfishsort(a,kk)
+c     ---------------------------------------------------------
+
+      subroutine rfishsort(a,n)
 cc
-cc  Sorts the integer array a of length kk.
+cc  Sorts the integer array a of length n.
 cc
       implicit none
-      integer kk, a(kk)
+      integer n, a(n)
 c
       integer t, gap, i,j, nextj
 
-      gap=kk
+      gap=n
+c --- repeat
  100  gap=gap/2
       if(gap.eq.0) goto 200
-      do 180 i=1,kk-gap
+      do 180 i=1,n-gap
          j=i
  120     if(j.lt.1) goto 180
          nextj=j+gap
@@ -133,11 +136,12 @@ c
          goto 120
  180  continue
       goto 100
+c     ---- --- end repeat
  200  return
       end
-ccccc
-ccccc
-      function replow(k)
+c     ---------------------------------------------------------
+
+      integer function replow(k)
 cc
 cc    Find out which combinations of n and p are
 cc    small enough in order to perform exaustive search
@@ -147,7 +151,7 @@ cc
 cc    k is the number of variables (p)
 cc
       implicit none
-      integer replow, k
+      integer k
 c
       integer irep(6)
       data irep/500,50,22,17,15,14/
@@ -159,8 +163,8 @@ c
       endif
       return
       end
-ccccc
-ccccc
+c     ---------------------------------------------------------
+
       integer function rfncomb(k,n)
 cc
 cc  Computes the number of combinations of k out of n.
@@ -177,10 +181,10 @@ c
       integer j
 c
       comb=dble(1.0)
-      do 10 j=1,k
+      do j=1,k
          fact=(dble(n-j+1.0))/(dble(k-j+1.0))
          comb=comb*fact
- 10   continue
+      end do
 c     Should give error now instead of integer overflow!
 c     Don't know how to get .Machine$integer.max in Fortran, portably
       if(comb .gt. 2147483647) then
@@ -192,8 +196,8 @@ c     Don't know how to get .Machine$integer.max in Fortran, portably
       rfncomb=int(comb+0.5D0)
       return
       end
-ccccc
-ccccc
+c     ---------------------------------------------------------
+
       subroutine rfcovcopy(a,b,n1,n2)
 cc
 cc  Copies matrix a to matrix b.
@@ -201,65 +205,73 @@ cc
       double precision a(n1,n2)
       double precision b(n1,n2)
 c
-      do 100 i=1,n1
-         do 90 j=1,n2
+      do i=1,n1
+         do j=1,n2
             b(i,j)=a(i,j)
- 90      continue
- 100  continue
+         end do
+      end do
       return
       end
-ccccc
-ccccc
-      function rffindq(aw,ncas,k,index)
-cc
-cc  Finds the k-th order statistic of the array aw of length ncas.
-cc
-cc MM{FIXME}: "rather" use R's C API   rPsort (double* X, int N, int K)
+c     ---------------------------------------------------------
+
+      double precision function rffindq(aw, ncas, k, index)
+c
+c     Finds the k-th order statistic of the array aw[1..ncas],
+c     sorting the array aw[.] until aw[k] is sure to contain the k-th value
+c
+c     MM{FIXME}: "rather" use R's C API   rPsort (double* X, int N, int K)
 
       implicit none
       integer ncas,k,index(ncas)
-      double precision rffindq, aw(ncas)
+      double precision aw(ncas)
 c
       double precision ax,wa
       integer i,j,l,lr,jnc
-cc
-      do 10 j=1,ncas
-         index(j)=j
- 10   continue
+c
+      do j=1,ncas
+        index(j)=j
+      end do
+c     lower (= l) and upper ( =lr ) bounds:
       l=1
       lr=ncas
-c    while(l < lr)
- 20   if(l.ge.lr) goto 90
-      ax=aw(k)
-      jnc=l
-      j=lr
 
- 30   if(jnc.gt.j) goto 80
- 40   if(aw(jnc).ge.ax) goto 50
-      jnc=jnc+1
-      goto 40
- 50   if(aw(j).le.ax) goto 60
-      j=j-1
-      goto 50
- 60   if(jnc .le. j) then
-         i=index(jnc)
-         index(jnc)=index(j)
-         index(j)=i
-         wa=aw(jnc)
-         aw(jnc)=aw(j)
-         aw(j)=wa
-         jnc=jnc+1
-         j=j-1
-      endif
-      goto 30
- 80   if(j.lt.k) l=jnc
-      if(k.lt.jnc) lr=j
-      goto 20
- 90   rffindq=aw(k)
+c--- while(l < lr)
+ 20   if(l .lt. lr) then
+         ax=aw(k)
+         jnc=l
+         j=lr
+
+c---   while(jnc < j)
+ 30      if(jnc .le. j) then
+ 40         if(aw(jnc).ge.ax) goto 50
+            jnc=jnc+1
+            goto 40
+ 50         if(aw(j).le.ax) goto 60
+            j=j-1
+            goto 50
+ 60         if(jnc .le. j) then ! swap jnc <--> j
+               i=index(jnc)
+               index(jnc)=index(j)
+               index(j)=i
+               wa=aw(jnc)
+               aw(jnc)=aw(j)
+               aw(j)=wa
+               jnc=jnc+1
+               j=j-1
+            endif
+            goto 30
+         end if
+
+         if(j.lt.k) l=jnc
+         if(k.lt.jnc) lr=j
+         goto 20
+      end if
+
+      rffindq=aw(k)
       return
       end
-ccccc
-ccccc
+c     ---------------------------------------------------------
+
       subroutine rfrdraw(a,n,ntot,mini,ngroup,kmini)
 cc
 cc  Draws ngroup nonoverlapping subdatasets out of a dataset of size n,
@@ -267,13 +279,13 @@ cc  such that the selected case numbers are uniformly distributed from 1 to n.
 cc
       implicit none
       integer n, ntot, kmini, a(2,ntot), mini(kmini), ngroup
-c
+c     unifrnd() == R C API's  unif_rand()  --> see ./R-rng4ftn.c
       double precision unifrnd
 c
       integer jndex, nrand, k,m,i,j
 cc
       jndex=0
-      do 10 k=1,ngroup
+      do k=1,ngroup
          do 20 m=1,mini(k)
 cOLD        nrand=int(uniran(seed)*(n-jndex))+1
             nrand=int(unifrnd()*(n-jndex))+1
@@ -291,35 +303,33 @@ C           endif
             else
                a(1,jndex)=nrand+jndex-1
                a(2,jndex)=k
-               do 5,i=1,jndex-1
+               do i=1,jndex-1
                   if(a(1,i).gt.nrand+i-1) then
-                     do 6, j=jndex,i+1,-1
+                     do j=jndex,i+1,-1
                         a(1,j)=a(1,j-1)
                         a(2,j)=a(2,j-1)
- 6                   continue
+                     end do
                      a(1,i)=nrand+i-1
                      a(2,i)=k
                      goto 20
 c                    ------- break
                   endif
- 5             continue
+               end do
             endif
  20      continue
- 10   continue
+      end do
       return
       end
-ccccc
-ccccc
-      function rfodd(n)
-cc
-      logical rfodd
-cc
+c     ---------------------------------------------------------
+
+      logical function rfodd(n)
+
       rfodd=.true.
       if(2*(n/2).eq.n) rfodd=.false.
       return
       end
+c     ---------------------------------------------------------
 
-ccccc
 c unused        function rfnbreak(nhalf,n,nvar)
 c unused cc
 c unused cc  Computes the breakdown value - in percent! - of the MCD estimator
@@ -334,7 +344,7 @@ c unused          rfnbreak=(n-nhalf+1)*100/n
 c unused        endif
 c unused        return
 c unused        end
-ccccc
+c     ---------------------------------------------------------
 
       subroutine rfmcduni(w,ncas,jqu,slutn,bstd,aw,aw2,factor,len)
 cc
@@ -352,16 +362,16 @@ cc
       sq=0.D0
       sqmin=0.D0
       ndup=1
-      do 5 j=1,ncas-jqu+1
+      do j=1,ncas-jqu+1
          slutn(j)=0.D0
- 5    continue
+      end do
 
-      do 20 jint=1,ncas-jqu+1
+      do jint=1,ncas-jqu+1
          aw(jint)=0.D0
-         do 10 j=1,jqu
+         do j=1,jqu
             aw(jint)=aw(jint)+w(j+jint-1)
             if (jint.eq.1) sq=sq+w(j)*w(j)
- 10      continue
+         end do
          aw2(jint)=aw(jint)*aw(jint)/jqu
          if (jint.eq.1) then
             sq=sq-aw2(jint)
@@ -383,10 +393,9 @@ cc
                endif
             endif
          endif
- 20   continue
+      end do
       slutn(1)=slutn(int((ndup+1)/2))/jqu
       bstd=factor*sqrt(sqmin/jqu)
       return
       end
-ccccc
-ccccc
+c     ---------------------------------------------------------

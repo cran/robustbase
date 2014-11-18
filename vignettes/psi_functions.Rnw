@@ -100,16 +100,30 @@ Note that $\rho(\infty) = \rho(x_r) \equiv \rho(x) \ \forall \abs{x} >= x_r$.
 $\tilde\rho$ is a $\rho$-function as defined in
 \citet{MarRMY06} and has been called $\chi$ function in other contexts. For
 example, in package \pkg{robustbase}, \code{Mchi(x, *)} computes
-$\tilde\rho(x)$, whereas \code{Mpsi(x, *, deriv=-1)} computes $\rho(x)$,
+$\tilde\rho(x)$, whereas \code{Mpsi(x, *, deriv=-1)} (``(-1)-st
+derivative'' is the primitive or antiderivative)) computes $\rho(x)$,
 both according to the above definitions.
 
+Martin: The above/below is \textbf{not} true : \texttt{"Welsh"} does \emph{not} have a finite
+rejection point, but \emph{does} have bounded $\rho$, and hence well defined
+$\rho(\infty)$, and we \emph{can} use it in \texttt{lmrob()}.
+\\ $\to$ sent E-mail Oct.~18, 2014 to Manuel and Werner, proposing to
+change the definition of ``redescending''.
+
+\paragraph{Weakly redescending $\psi$ functions}.\
 Note that this definition does require a finite rejection point $x_r$. Consequently,
 e.g., the score function $s(x) = -f'(x)/f(x)$ for the Cauchy ($= t_1$)
 distribution, which is $s(x) = 2x/(1+x^2)$ and hence non-monotone and ``re
 descends'' to 0 for $x\to \pm\infty$, and $\psi_C(x) := s(x)/2$ also
 fulfills ${\psi_C}'(0) = 1$, but it has $x_r=\infty$ and hence $\psi_C()$
-is \emph{not} a redescending $psi$-function in our sense.
-%%
+is \emph{not} a redescending $\psi$-function in our sense.
+As they appear e.g. in the MLE for $t_\nu$, we call $\psi$-functions fulfulling
+$\lim_{x\to\infty}\psi(x) = 0$  \emph{weakly redescending}.
+Note that they'd naturally fall into two sub categories, namely the one
+with a \emph{finite} $\rho$-limit, i.e. $\rho(\infty) :=
+\lim_{x\to\infty}\rho(x)$, and those, as e.g., the $t_\nu$ score functions
+above, for which $\rho(x)$ is unbounded even though $\rho' = \psi$ tends to zero.
+
 %% --> ../../TODO  section  'Psi/Rho/Chi/Wgt Functions'
 %%     ~~~~~~~~~~
 %%
@@ -117,7 +131,7 @@ is \emph{not} a redescending $psi$-function in our sense.
 
 %% FIXME: 0)  Mention our  psi_func  class // and the  C interface for "the other" functions
 %% -----      i.e., we currently have *both*  and in addition there is all
-%% the (to be *deprecated* !)  ../../R/biweight-funs.R (& ../../man/tukeyChi.Rd &../../man/tukeyPsi1.Rd)
+%% the (to be *deprecated* !)  ../R/biweight-funs.R (& ../man/tukeyChi.Rd & ../man/tukeyPsi1.Rd)
 %%
 %% FIXME: 1)  explain   plot(<psiFun>)  {the plot method of psi_func}
 
@@ -165,13 +179,18 @@ plot(huberPsi, x., ylim=c(-1.4, 5), leg.loc="topright", main=FALSE)
   \caption{Huber family of functions using tuning parameter $k = 1.345$.}
 \end{figure}
 
+%% \section{Weak Redescenders}
+%% \subsection{t_nu score functions}
+%% t_1 (=Cauchy) has been propagated as "Lorentzian merit function"
+%% regression for outlier detection
 
 \section{Redescenders}
-For the MM-estimators and their generalizations available via \texttt{lmrob()},
+For the MM-estimators and their generalizations available via
+\texttt{lmrob()} (and for some methods of \texttt{nlrob()}),
 the $\psi$-functions are all redescending, i.e., with finite ``rejection point''
 $x_r = \sup\{t; \psi(t) > 0\} < \infty$.
 From \texttt{lmrob}, the psi functions are available via
-\texttt{lmrob.control},
+\texttt{lmrob.control}, or more directly, \texttt{.Mpsi.tuning.defaults},
 <<lmrob-psi, echo=TRUE,fig=FALSE>>=
 names(.Mpsi.tuning.defaults)
 @ %$
@@ -198,7 +217,7 @@ and \code{.Mchi.tuning.default()}, respectively, e.g., here,
 <<tuning-defaults, echo=TRUE,fig=FALSE>>=
 print(c(k.M = .Mpsi.tuning.default("bisquare"),
         k.S = .Mchi.tuning.default("bisquare")), digits = 10)
-@ 
+@
 
 \begin{figure}[h]
   \centering
@@ -244,7 +263,7 @@ efficiency or breakdown point.
 
 The constant $k$ for $95\%$ efficiency of the regression estimator is
 $0.902$ (0.9016085, to be exact) and the one for a breakdown point of $0.5$
-of the S-estimator is $0.212$ (i.e., 0.2119163). 
+of the S-estimator is $0.212$ (i.e., 0.2119163).
 %% --> ../R/lmrob.MM.R,  .Mpsi.tuning.defaults .Mchi.tuning.defaults
 
 \begin{figure}[h]

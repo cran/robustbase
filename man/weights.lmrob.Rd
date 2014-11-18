@@ -23,7 +23,7 @@
   the \dQuote{weights} argument when calling \code{lmrob}. The
   \dQuote{robustness weights} are the weights assigned by the
   M-estimator of regression, \eqn{\psi(r_i/S) / (r_i/S)}. The robust
-  coefficient estimate then numerically corresponds to a weighted least
+  coefficient estimate then numericarlly corresponds to a weighted least
   squares fit using the product of both types of weights as weights.
 }
 \value{

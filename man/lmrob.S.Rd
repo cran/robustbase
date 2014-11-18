@@ -15,7 +15,8 @@ lmrob.S(x, y, control, trace.lev = control$trace.lev, mf = NULL)
   \item{trace.lev}{integer indicating if the progress of the algorithm
     should be traced (increasingly); default \code{trace.lev = 0} does
     no tracing.}
-  \item{mf}{ dummy parameter.}
+  \item{mf}{(optional) a model frame as returned by \code{\link{model.frame}}, 
+    used only to compute outlier statistics, see \code{\link{outlierStats}}.}
 }
 \details{
   This function is used by \code{\link{lmrob.fit}} and not

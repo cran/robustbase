@@ -83,7 +83,7 @@ nlrob.mtl(formula, data, pnames, lower, upper,
 }
 \author{
   Eduardo L. T. Conceicao; compatibility (to \code{\link{nlrob}})
-  tweaks and generalizations, by Martin Maechler.
+  tweaks and generalizations, inference, by Martin Maechler.
 }
 \source{
   For \code{"MTL"}:
@@ -145,8 +145,9 @@ set.seed(47)
 gMM  <- nlrob(form, data = DNase1, method = "MM",
               lower = setNames(c(0,0,0), pnms), upper = 3, trace = TRUE)
 gMM
-## and they are the same {apart from 'call' and 'ctrl'}:
-ni <- is.na(match(names(gMM), c("call","ctrl")))
+summary(gMM)
+## and they are the same {apart from 'call' and 'ctrl' and new stuff in gMM}:
+ni <- names(fMM); ni <- ni[is.na(match(ni, c("call","ctrl")))]
 stopifnot(all.equal(fMM[ni], gMM[ni]))
 \dontshow{
 if(doExtras <- robustbase:::doExtras()) {

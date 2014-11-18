@@ -7,7 +7,7 @@ anova.lmrob <- function(object, ..., test = c("Wald", "Deviance"), verbose=getOp
     if (any(named))
 	warning("the following arguments to 'anova.lmrob' are invalid and \n",
 		"dropped: ",
-		paste(deparse(dotargs[named]), collapse = ", "))
+		pasteK(deparse(dotargs[named])))
     dotargs <- dotargs[!named]
     test <- match.arg(test)
     ## method argument has to end with 'M' (req. for refitting)

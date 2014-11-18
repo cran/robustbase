@@ -6,7 +6,7 @@
   estimates like \code{SMD} or \code{SMDM}.
 }
 \usage{
-lmrob..D..fit(obj, x=obj$x, control = obj$control)
+lmrob..D..fit(obj, x=obj$x, control = obj$control, mf = obj$model)
 }
 \arguments{
   \item{obj}{\code{lmrob}-object based on which the estimate is to be
@@ -15,6 +15,8 @@ lmrob..D..fit(obj, x=obj$x, control = obj$control)
     \code{obj$x}and if this fails from \code{obj$model}.}
   \item{control}{list of control parameters, as returned
     by \code{\link{lmrob.control}}.}  
+  \item{mf}{(optional) a model frame as returned by \code{\link{model.frame}}, 
+    used only to compute outlier statistics, see \code{\link{outlierStats}}.}
 }
 \details{
   This function is used by \code{\link{lmrob.fit}} and typically not to

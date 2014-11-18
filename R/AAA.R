@@ -116,3 +116,6 @@ sigma <- function(object, ...) UseMethod("sigma")
 sigma.nls <- function(object, ...)
     ## sqrt (  sum( R_i ^ 2) / (n - p) ) :
     sqrt( deviance(object) / (nobs(object) - length(coef(object))) )
+
+## shortcut -- used often in print() etc:
+pasteK <- function(...) paste(..., collapse = ", ")

@@ -9,16 +9,18 @@ rmc <- function(x, na.rm = FALSE, ...) {
 }
 
 
-## Generic function
-mc <- function (x, ...)
-      UseMethod("mc")
+## ## Generic function
+## mc <- function (x, ...)
+##       UseMethod("mc")
 
-## Default method (for numeric vectors):
-mc.default <- function(x, na.rm = FALSE,
+## ## Default method (for numeric vectors):
+## mc.default <- function(x, na.rm = FALSE,
+mc <- function(x, na.rm = FALSE,
 		       doReflect = (length(x) <= 100),
                        eps1 = .Machine$double.eps, eps2 = .Machine$double.xmin,
-                       maxit = 100, trace.lev = 0, full.result = FALSE,
-                       ...)
+                       maxit = 100, trace.lev = 0, full.result = FALSE
+### , ...)
+               )
 {
     x <- as.numeric(x)
     ina <- is.na(x)
@@ -27,9 +29,9 @@ mc.default <- function(x, na.rm = FALSE,
     else if (any(ina))
         return(as.numeric(NA))
 
-    if(length(l.. <- list(...)))
-        stop("In mc(): invalid argument(s) : ",
-             paste(sQuote(names(l..)), collapse=","), call. = FALSE)
+    ## if(length(l.. <- list(...)))
+    ##     stop("In mc(): invalid argument(s) : ",
+    ##          paste(sQuote(names(l..)), collapse=","), call. = FALSE)
     rr <- mcComp(x, doReflect, eps1=eps1, eps2=eps2,
                  maxit=maxit, trace.lev = trace.lev)
 

@@ -1,6 +1,46 @@
+2014-10-24  Martin Maechler  <maechler@stat.math.ethz.ch>
+	and
+2014-10-19  Valentin Todorov  <valentin.todorov@chello.at>
+
+	* DESCRIPTION (Version): 0.92-1
+
+	* R/covMcd.R, detmcd.R: added Deterministic MCD as an option to covMcd
+	    		(nsamp="deterministic"), function .detMcd()
+
+	* tests/tmcdd.R: new tests, for covMcd() with nsamp="deterministic"
+
+	* tests/tmcdd.Rout.save: new tests, for covMcd() with nsamp="deterministic"
+
+	* inst/xtraR/test_MCD.R: modified to test covMcd() with nsamp="deterministic"
+
+	* NAMESPACE: export the functions r6pack() and doScale() to
+	  be used in rrcov for the deterministic S- and MM-estimates
+    
+    * src/rffastmcd and init.c, R/covMcd: fix a bug in nsamp="exact"
+
+2014-10-17  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/adjoutlyingness.R (adjOutlyingness): reverse the defaults of
+	'clower' and 'cupper' and fix +/- swap; see new note in man/adjOutlyingness.Rd
+	* man/adjOutlyingness.Rd: the wrong defaults came from *.ssc file from Antwerpen
+
+2014-06-30  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/rllarsbi.f (rlLARSbi): got rid of warnings -- and many GOTOs
+
+2014-06-11  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.92-0
+	* R/nlrob.R (.nls.get.start, nlrob): now works with indexed vector parameters
+	  -- FIXME: at ETH have testing code + example data -- unfinished!-- -- on nb-mm3 not
+
+2014-04-30  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.91-1, released to CRAN
+
 2014-04-24  Martin Maechler  <maechler@stat.math.ethz.ch>
 
-	* DESCRIPTION (Version, Date): 0.91-0, to be released
+	* DESCRIPTION (Version, Date): 0.91-0, released to CRAN
 
 2014-01-30  Martin Maechler  <maechler@stat.math.ethz.ch>
 

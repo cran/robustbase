@@ -15,7 +15,7 @@ getOptfun <- function(optimizer, needArgs = c("fn","par","lower","control"))
     if (!is.function(optfun)) stop("non-function specified as optimizer")
     if (any(is.na(match(needArgs, names(formals(optfun))))))
 	stop("optimizer function must use (at least) formal parameters ",
-	     paste(sQuote(needArgs), collapse=", "))
+	     pasteK(sQuote(needArgs)))
     optfun
 }
 
@@ -52,7 +52,6 @@ getOptfun <- function(optimizer, needArgs = c("fn","par","lower","control"))
     stopifnot(is.numeric(lower), is.numeric(upper), lower <= upper)
     pnames
 }
-
 
 nlrob.MM <-
     function(formula, data, pnames, lower, upper, tol = 1e-6,
@@ -119,11 +118,11 @@ nlrob.MM <-
 
     objective.initial <-
         switch(init,
-               "lts" = function(par) { ## 'h' is defined "global"ly
+               "lts" = function(par) { ## and (h, formula, data, pnames)
                    y.hat <- eval( formula[[3L]], c(data, setNames(par, pnames)) )
                    sum(sort.int( (y - y.hat)^2, partial = h )[1:h])
                },
-               "S" = function(par) {
+               "S" = function(par) { ## and (constant, formula, data, pnames)
                    y.hat <- eval( formula[[3L]], c(data, setNames(par, pnames)) )
                    res <- y - y.hat
                    ## Rousseeuw, Peter J., and Leroy, Annick M. (1987).
@@ -141,6 +140,8 @@ nlrob.MM <-
         y.hat <- eval( formula[[3L]], c(data, setNames(par, pnames)) )
         sum(rho2( (y - y.hat)/sigma ))
     }
+    ## => psi(.) / wgt(.) for robustness weights is
+    ##  Mpsi(x, c2, psi) or Mwgt(x, c2, psi)
 
     formula <- as.formula(formula)
     dataName <- substitute(data)
@@ -153,7 +154,7 @@ nlrob.MM <-
     }
 
     npar <- length(pnames <- .fixupArgs(lower, upper, pnames, varNames, environment()))
-    ##			      ^^^^^^^^^ -> maybe changing (lower, upper)
+    ##			      ^^^^^^^^^ -> possibly changes (lower, upper) in envir.
     y <- eval(formula[[2L]], data)
     nobs <- length(y)
     stopifnot(nobs >= npar)
@@ -161,6 +162,7 @@ nlrob.MM <-
         fnscale <- sum((y - mean(y))^2)
     ctrl$fnscale <- NULL # remove it there
     stopifnot(is.numeric(fnscale), fnscale > 0)
+    ## is used in M_scale() in any case, and in init-estim. if "S"
     constant <- c(
         switch(psi, bisquare = 1/c1,
                lqq = 1/lqqMax,
@@ -169,6 +171,7 @@ nlrob.MM <-
         if(nobs %% 2) 2/rho.inv(2/(nobs+2)) else 1/rho.inv(1/(nobs+1)))
     switch(init, lts = h <- (nobs + npar + 1)%/%2)
 
+    ## FIXME: "optimizer":
     initial <- do.call(JDEoptim, c(list(lower, upper, objective.initial,
 					tol=tol, fnscale=fnscale), ctrl$optArgs))
     names(initial$par) <- pnames
@@ -183,7 +186,8 @@ nlrob.MM <-
     M <- optim(initial$par, objective.M, sigma = sigma,
                method = "L-BFGS-B", lower = lower, upper = upper,
                control = c(list(fnscale = initial$value, parscale = initial$par),
-                           ctrl$optim.control) )
+			   ctrl$optim.control), hessian = TRUE)
+    ## 'hessian': experimental - FIXME: eliminate if unused
     coef <- setNames(M$par, pnames)
     status <-
 	if (M$convergence == 0) "converged"
@@ -199,7 +203,8 @@ nlrob.MM <-
                    crit = M$value,
                    initial = initial,
                    Scale = sigma,
-                   status = status, counts = M$counts, data = dataName, ctrl=ctrl),
+                   status = status, counts = M$counts, data = dataName,
+                   hessian = M$hessian, ctrl=ctrl),
               class = "nlrob")
 } ## nlrob.MM
 
@@ -275,7 +280,7 @@ nlrob.tau <- function(formula, data, pnames, lower, upper, tol = 1e-6,
     }
 
     npar <- length(pnames <- .fixupArgs(lower, upper, pnames, varNames, environment()))
-    ##			      ^^^^^^^^^ -> maybe changing (lower, upper)
+    ##			      ^^^^^^^^^ -> possibly changes (lower, upper) in envir.
     y <- eval(formula[[2L]], data)
     nobs <- length(y)
     stopifnot(nobs >= npar)
@@ -344,7 +349,7 @@ nlrob.CM <- function(formula, data, pnames, lower, upper, tol = 1e-6,
     }
 
     npar <- length(pnames <- .fixupArgs(lower,upper,pnames, c(varNames,"sigma"),environment()))
-    ##                        ^^^^^^^^^ -> maybe changing (lower, upper)
+    ##			      ^^^^^^^^^ -> possibly changes (lower, upper) in envir.
     if ("sigma" %in% pnames) {
 	if ("sigma" %in% varNames || "sigma" %in% names(data))
 	    stop("As \"sigma\" is in 'pnames', do not use it as variable or parameter name in 'formula'")
@@ -423,7 +428,7 @@ nlrob.mtl <- function(formula, data, pnames, lower, upper, tol = 1e-6,
     }
 
     npar <- length(pnames <- .fixupArgs(lower,upper,pnames, c(varNames,"sigma"),environment()))
-    ##                        ^^^^^^^^^ -> maybe changing (lower, upper)
+    ##			      ^^^^^^^^^ -> possibly changes (lower, upper) in envir.
     constant <- log(2*pi)
     if ("sigma" %in% pnames) {
 	if ("sigma" %in% varNames || "sigma" %in% names(data))

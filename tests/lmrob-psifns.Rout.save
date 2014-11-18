@@ -1,7 +1,7 @@
 
-R version 3.1.0 RC (2014-04-05 r65385) -- "Spring Dance"
+R Under development (unstable) (2014-07-10 r66124) -- "Unsuffered Consequences"
 Copyright (C) 2014 The R Foundation for Statistical Computing
-Platform: x86_64-unknown-linux-gnu (64-bit)
+Platform: x86_64-apple-darwin13.1.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -21,7 +21,7 @@ Type 'q()' to quit R.
 > source(system.file("xtraR/plot-psiFun.R", package = "robustbase", mustWork=TRUE))
 > 
 > ### (1) Test the functions themselves --------------------------------
-> pdf("rob-psifns.pdf")
+> if(!dev.interactive(orNone=TRUE)) pdf("rob-psifns.pdf")
 > 
 > ## Simple version, no error checking, no derivative, nothing:
 > psiGGW <- function(x, a,b,c) {
@@ -59,7 +59,7 @@ Type 'q()' to quit R.
 +                   lmrob.control(psi = "ggw", tuning.psi = cc)$tuning.psi)
 + )
 > cat('Time for constants computation of tuning.psi: ', st,'\n')
-Time for constants computation of tuning.psi:  0.215 0.001 0.218 0 0 
+Time for constants computation of tuning.psi:  0.225 0.001 0.228 0 0 
 > cGct <- t(sapply(cG.cnst, attr, "constants"))[,-1]
 > colnames(cGct) <- c("a","b","c", "rhoInf")
 > signif(cGct, 4)
@@ -237,16 +237,22 @@ Robustness weights:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.3958  0.8772  0.9738  0.9139  0.9892  0.9972 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 1.5476400  0.5000000  4.6850610  0.0000001  0.0000001  0.0000001 
+       tuning.chi                bb        tuning.psi        refine.tol 
+        1.548e+00         5.000e-01         4.685e+00         1.000e-07 
+          rel.tol         solve.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-07         4.348e-03         8.399e-08 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
            200              0           1000              0             10 
 fast.s.large.n 
           2000 
-          psi   subsampling           cov 
-   "bisquare" "nonsingular"     ".vcov.w" 
+                  psi           subsampling                   cov 
+           "bisquare"         "nonsingular"             ".vcov.w" 
+compute.outlier.stats 
+               "SMDM" 
 seed : int(0) 
 > 
 > set.seed(2)
@@ -277,16 +283,22 @@ Robustness weights:
  2 observations c(16,22) are outliers with |weight| = 0 ( < 0.0043); 
  21 weights are ~= 1.
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 0.4047000  0.5000000  1.0601580  0.0000001  0.0000001  0.0000001 
+       tuning.chi                bb        tuning.psi        refine.tol 
+        4.047e-01         5.000e-01         1.060e+00         1.000e-07 
+          rel.tol         solve.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-07         4.348e-03         8.399e-08 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
            200              0           1000              0             10 
 fast.s.large.n 
           2000 
-          psi   subsampling           cov 
-    "optimal" "nonsingular"     ".vcov.w" 
+                  psi           subsampling                   cov 
+            "optimal"         "nonsingular"             ".vcov.w" 
+compute.outlier.stats 
+               "SMDM" 
 seed : int(0) 
 > 
 > set.seed(3)
@@ -319,18 +331,24 @@ Robustness weights:
      3      4     12     16     17     19 
 0.9892 0.9891 0.8770 0.4139 0.9796 0.9839 
 Algorithmic parameters: 
-tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1 
-   -5.0e-01     1.5e+00          NA     5.0e-01     5.0e-01    -5.0e-01 
-tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol 
-    1.5e+00     9.5e-01          NA     1.0e-07     1.0e-07     1.0e-07 
+      tuning.chi1       tuning.chi2       tuning.chi3       tuning.chi4 
+       -5.000e-01         1.500e+00                NA         5.000e-01 
+               bb       tuning.psi1       tuning.psi2       tuning.psi3 
+        5.000e-01        -5.000e-01         1.500e+00         9.500e-01 
+      tuning.psi4        refine.tol           rel.tol         solve.tol 
+               NA         1.000e-07         1.000e-07         1.000e-07 
+      eps.outlier             eps.x warn.limit.reject warn.limit.meanrw 
+        4.348e-03         8.399e-08         5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
            200              0           1000              0             10 
 fast.s.large.n 
           2000 
-          psi   subsampling           cov 
-        "ggw" "nonsingular"     ".vcov.w" 
+                  psi           subsampling                   cov 
+                "ggw"         "nonsingular"             ".vcov.w" 
+compute.outlier.stats 
+               "SMDM" 
 seed : int(0) 
 > 
 > set.seed(4)
@@ -363,16 +381,22 @@ Robustness weights:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.4284  0.8583  0.9701  0.9112  0.9874  0.9985 
 Algorithmic parameters: 
-tuning.chi         bb tuning.psi refine.tol    rel.tol  solve.tol 
- 0.5773502  0.5000000  2.1100000  0.0000001  0.0000001  0.0000001 
+       tuning.chi                bb        tuning.psi        refine.tol 
+        5.774e-01         5.000e-01         2.110e+00         1.000e-07 
+          rel.tol         solve.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-07         4.348e-03         8.399e-08 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
            200              0           1000              0             10 
 fast.s.large.n 
           2000 
-          psi   subsampling           cov 
-      "welsh" "nonsingular"     ".vcov.w" 
+                  psi           subsampling                   cov 
+              "welsh"         "nonsingular"             ".vcov.w" 
+compute.outlier.stats 
+               "SMDM" 
 seed : int(0) 
 > 
 > set.seed(5)
@@ -407,18 +431,24 @@ Robustness weights:
       3       4      12      16      17      19      23 
 0.87262 0.79602 0.73029 0.06024 0.96761 0.73117 0.97769 
 Algorithmic parameters: 
-tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1 
-   -5.0e-01     1.5e+00          NA     5.0e-01     5.0e-01    -5.0e-01 
-tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol 
-    1.5e+00     8.5e-01          NA     1.0e-07     1.0e-07     1.0e-07 
+      tuning.chi1       tuning.chi2       tuning.chi3       tuning.chi4 
+       -5.000e-01         1.500e+00                NA         5.000e-01 
+               bb       tuning.psi1       tuning.psi2       tuning.psi3 
+        5.000e-01        -5.000e-01         1.500e+00         8.500e-01 
+      tuning.psi4        refine.tol           rel.tol         solve.tol 
+               NA         1.000e-07         1.000e-07         1.000e-07 
+      eps.outlier             eps.x warn.limit.reject warn.limit.meanrw 
+        4.348e-03         8.399e-08         5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
            200              0           1000              0             10 
 fast.s.large.n 
           2000 
-          psi   subsampling           cov 
-        "ggw" "nonsingular"     ".vcov.w" 
+                  psi           subsampling                   cov 
+                "ggw"         "nonsingular"             ".vcov.w" 
+compute.outlier.stats 
+               "SMDM" 
 seed : int(0) 
 > 
 > set.seed(6)
@@ -452,18 +482,24 @@ Robustness weights:
       16       22 
 0.423706 0.005042 
 Algorithmic parameters: 
-tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1 
-   -5.0e-01     1.0e+00          NA     5.0e-01     5.0e-01    -5.0e-01 
-tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol 
-    1.0e+00     9.5e-01          NA     1.0e-07     1.0e-07     1.0e-07 
+      tuning.chi1       tuning.chi2       tuning.chi3       tuning.chi4 
+       -5.000e-01         1.000e+00                NA         5.000e-01 
+               bb       tuning.psi1       tuning.psi2       tuning.psi3 
+        5.000e-01        -5.000e-01         1.000e+00         9.500e-01 
+      tuning.psi4        refine.tol           rel.tol         solve.tol 
+               NA         1.000e-07         1.000e-07         1.000e-07 
+      eps.outlier             eps.x warn.limit.reject warn.limit.meanrw 
+        4.348e-03         8.399e-08         5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
            200              0           1000              0             10 
 fast.s.large.n 
           2000 
-          psi   subsampling           cov 
-        "ggw" "nonsingular"     ".vcov.w" 
+                  psi           subsampling                   cov 
+                "ggw"         "nonsingular"             ".vcov.w" 
+compute.outlier.stats 
+               "SMDM" 
 seed : int(0) 
 > 
 > set.seed(7)
@@ -496,18 +532,24 @@ Robustness weights:
     12     16 
 0.8504 0.4975 
 Algorithmic parameters: 
-tuning.chi1 tuning.chi2 tuning.chi3          bb tuning.psi1 tuning.psi2 
-  0.3178745   0.7417071   1.6953304   0.5000000   1.3524128   3.1556298 
-tuning.psi3  refine.tol     rel.tol   solve.tol 
-  7.2128680   0.0000001   0.0000001   0.0000001 
+      tuning.chi1       tuning.chi2       tuning.chi3                bb 
+        3.179e-01         7.417e-01         1.695e+00         5.000e-01 
+      tuning.psi1       tuning.psi2       tuning.psi3        refine.tol 
+        1.352e+00         3.156e+00         7.213e+00         1.000e-07 
+          rel.tol         solve.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-07         4.348e-03         8.399e-08 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
            200              0           1000              0             10 
 fast.s.large.n 
           2000 
-          psi   subsampling           cov 
-     "hampel" "nonsingular"     ".vcov.w" 
+                  psi           subsampling                   cov 
+             "hampel"         "nonsingular"             ".vcov.w" 
+compute.outlier.stats 
+               "SMDM" 
 seed : int(0) 
 > 
 > set.seed(8)
@@ -546,19 +588,25 @@ Robustness weights:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 0.03669 0.20120 0.58410 0.52290 0.71930 0.99120 
 Algorithmic parameters: 
-tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1 
-   -3.0e-01     1.4e+00          NA     5.0e-01     5.0e-01    -3.0e-01 
-tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol 
-    1.4e+00     9.5e-01          NA     1.0e-07     1.0e-07     1.0e-07 
+      tuning.chi1       tuning.chi2       tuning.chi3       tuning.chi4 
+       -3.000e-01         1.400e+00                NA         5.000e-01 
+               bb       tuning.psi1       tuning.psi2       tuning.psi3 
+        5.000e-01        -3.000e-01         1.400e+00         9.500e-01 
+      tuning.psi4        refine.tol           rel.tol         solve.tol 
+               NA         1.000e-07         1.000e-07         1.000e-07 
+      eps.outlier             eps.x warn.limit.reject warn.limit.meanrw 
+        4.348e-03         8.399e-08         5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
            200              0           1000              0           2000 
-          psi   subsampling           cov 
-        "ggw" "nonsingular" ".vcov.avar1" 
+                  psi           subsampling                   cov 
+                "ggw"         "nonsingular"         ".vcov.avar1" 
+compute.outlier.stats 
+                 "SM" 
 seed : int(0) 
 Warning message:
-In lmrob.S(x, y, control = control) :
+In lmrob.S(x, y, control = control, mf = mf) :
   S refinements did not converge (to refine.tol=1e-07) in 200 (= k.max) steps
 > 
 > set.seed(9)
@@ -591,18 +639,24 @@ Robustness weights:
      3      4     12     16     17     19 
 0.9861 0.9842 0.8921 0.3720 0.9820 0.9782 
 Algorithmic parameters: 
-tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1 
-   -5.0e-01     1.5e+00          NA     5.0e-01     5.0e-01    -5.0e-01 
-tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol 
-    1.5e+00     9.5e-01          NA     1.0e-07     1.0e-07     1.0e-07 
+      tuning.chi1       tuning.chi2       tuning.chi3       tuning.chi4 
+       -5.000e-01         1.500e+00                NA         5.000e-01 
+               bb       tuning.psi1       tuning.psi2       tuning.psi3 
+        5.000e-01        -5.000e-01         1.500e+00         9.500e-01 
+      tuning.psi4        refine.tol           rel.tol         solve.tol 
+               NA         1.000e-07         1.000e-07         1.000e-07 
+      eps.outlier             eps.x warn.limit.reject warn.limit.meanrw 
+        4.348e-03         8.399e-08         5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
            200              0           1000              0             10 
 fast.s.large.n 
           2000 
-          psi   subsampling           cov 
-        "lqq" "nonsingular"     ".vcov.w" 
+                  psi           subsampling                   cov 
+                "lqq"         "nonsingular"             ".vcov.w" 
+compute.outlier.stats 
+               "SMDM" 
 seed : int(0) 
 > 
 > set.seed(10)
@@ -669,22 +723,28 @@ Robustness weights:
       3       4      12      16      17      22 
 0.97698 0.99840 0.82584 0.78662 0.91318 0.06838 
 Algorithmic parameters: 
-tuning.chi1 tuning.chi2 tuning.chi3 tuning.chi4          bb tuning.psi1 
-   -3.0e-01     1.4e+00          NA     5.0e-01     5.0e-01    -3.0e-01 
-tuning.psi2 tuning.psi3 tuning.psi4  refine.tol     rel.tol   solve.tol 
-    1.4e+00     9.5e-01          NA     1.0e-07     1.0e-07     1.0e-07 
+      tuning.chi1       tuning.chi2       tuning.chi3       tuning.chi4 
+       -3.000e-01         1.400e+00                NA         5.000e-01 
+               bb       tuning.psi1       tuning.psi2       tuning.psi3 
+        5.000e-01        -3.000e-01         1.400e+00         9.500e-01 
+      tuning.psi4        refine.tol           rel.tol         solve.tol 
+               NA         1.000e-07         1.000e-07         1.000e-07 
+      eps.outlier             eps.x warn.limit.reject warn.limit.meanrw 
+        4.348e-03         8.399e-08         5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
            200              0           1000              0           2000 
-          psi   subsampling           cov 
-        "lqq" "nonsingular" ".vcov.avar1" 
+                  psi           subsampling                   cov 
+                "lqq"         "nonsingular"         ".vcov.avar1" 
+compute.outlier.stats 
+                 "SM" 
 seed : int(0) 
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  3.659 0.064 3.801 0 0 
+Time elapsed:  2.471 0.134 2.607 0.002 0.003 
 > 
 > proc.time()
    user  system elapsed 
-  3.659   0.064   3.801 
+  2.473   0.137   2.607 

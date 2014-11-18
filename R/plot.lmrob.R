@@ -32,7 +32,8 @@ function (x, which = 1:5,
 		robMD(x = if(!is.null(x[['x']])) x$x else
 		      if(!is.null(x[['model']])) model.matrix(x, x$model)
 		      else stop("need 'model' or 'x' component for robust Mahalanobis distances"),
-		      intercept = attr(x$terms,"intercept"))
+		      intercept = attr(x$terms,"intercept"),
+                      wqr = x$qr)
 	    ## try to "cache" them with the object
 	    .ge <- .GlobalEnv
 	    if(identical(parent.frame(), .ge) &&

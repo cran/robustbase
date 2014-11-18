@@ -1,130 +1,143 @@
-#### Utility functions for testing covMCD()
+#### Utility functions for testing covMcd()
 #### -------------------------------------- ../tests/tmcd.R
 
-repMCD <- function(x, nrep = 1, method = c("FASTMCD","MASS"))
+## "workhorse" -- by default *passed* to and called from doMCDdata():
+domcd1 <- function(x, xname, nrep = 1,
+                   method = get("method", parent.frame()), # compromise
+                   time	 = get("time",	 parent.frame()), # compromise
+                   short = get("short",	 parent.frame()), # compromise
+                   full	 = get("full",	 parent.frame()), # compromise
+                   lname = 20)
 {
-    stopifnot(length(nrep) == 1, nrep >= 1)
-    method <- match.arg(method)
+    if(short && full)
+	stop("you should not set both 'full' and 'short' to TRUE")
+    force(xname)# => evaluate when it is a data(<>, ..) call
+    n <- dim(x)[1]
+    p <- dim(x)[2]
     if(method == "MASS") {
-	if(paste(R.version$major, R.version$minor, sep=".") < 2.3)
-	    cov.rob <- MASS::cov.rob
-	for(i in 1:nrep) MASS::cov.mcd(x)
+	mcd <- MASS::cov.mcd(x)
+	mcd$quan <- (n + p + 1) %/% 2 #default: floor((n+p+1)/2)
     }
-    else for(i in 1:nrep) covMcd(x)
-}
+    else if(method == "DetMCD") {
+	mcd <- covMcd(x, nsamp="deterministic") # trace = FALSE
+    }
+    else {
+	mcd <- covMcd(x) # trace = FALSE
+    }
+    if(full) {
+	header <- get("header", parent.frame())
+	header(time)
+    }
+    xres <- sprintf("%*s %3d %3d %3d %12.6f", lname, xname,
+		    n, p, mcd$quan, mcd$crit)
+    if(time) {
+	xtime <- system.time(repMCD(x, nrep, method))[1]/nrep
+	xres <- sprintf("%s %10.1f", xres, 1000 * xtime)
+    }
+    cat(xres, "\n")
 
-doMCDdata <- function(nrep = 1, time = nrep >= 3, short = time, full = !short,
-		   method = c("FASTMCD", "MASS"))
+    if(!short) {
+	cat("Best subsample: \n")
+	print(mcd$best)
+
+	ibad <- which(unname(mcd$mcd.wt) == 0)
+	nbad <- length(ibad)
+	cat("Outliers: ",nbad, if(nbad > 0)":", "\n")
+	if(nbad > 0)
+	    print(ibad)
+	if(full) {
+	    cat("------------- *MCD() result: --------------------------\n")
+	    print(mcd)
+	}
+	cat("--------------------------------------------------------\n")
+    }
+}## {domcd1}
+
+##' Test the function covMcd() on the literature datasets:
+##'
+##' Call covMcd() for "all" datasets in robustbase / rrcov and print:
+##'   - execution time (if time is true)
+##'   - objective function
+##'   - best subsample found (if short is false)
+##'   - outliers identified (with cutoff 0.975) (if short is false)
+##'   - estimated center and covarinance matrix if full is true)
+##'
+##' @param nrep : [integer] number of repetitions to use for estimating the
+##'                           (average) execution time
+##' @param method : [character] select a method: one of (FASTMCD, MASS)
+##' @param time : [logical] whether to evaluate the execution time
+##' @param short : [logical] whether to do short output (i.e. only the
+##'                            objective function value). If short == FALSE,
+##'                            the best subsample and the identified outliers are
+##'                            printed. See also the parameter full below
+##' @param full : [logical] whether to print the estimated cente and covariance matrix
+##' @param digits
+##' @param domcd workhorse function, to be called e.g. as
+##' @examples domcd(starsCYG, data(starsCYG), nrep)
+##' @author Valentin Todorov;  tweaks by Martin Maechler
+##' @note  Is called from ../../demo/determinMCD.R  and ../../tests/tmcd.R
+doMCDdata <- function(nrep = 1, method = c("FASTMCD", "MASS", "DetMCD"),
+                      time = nrep >= 3, short = time, full = !short,
+                      digits=5, domcd = domcd1)
 {
-    ##@bdescr
-    ## Test the function covMcd() on the literature datasets:
-    ##
-    ## Call covMcd() for "all" regression datasets available in robustbase
-    ## and print:
-    ##  - execution time (if time)
-    ##  - objective function
-    ##  - best subsample found (if not short)
-    ##  - outliers identified (with cutoff 0.975) (if not short)
-    ##  - estimated center and covariance matrix (if full)
-    ##
-    ##@edescr
-    ##
-    ##@in  nrep              : [integer] number of repetitions to use for estimating the
-    ##                                   (average) execution time
-    ##@in  time              : [boolean] whether to evaluate the execution time
-    ##@in  short             : [boolean] whether to do short output (i.e. only the
-    ##                                   objective function value). If short == FALSE,
-    ##                                   the best subsample and the identified outliers are
-    ##                                   printed. See also the parameter full below
-    ##@in  full              : [boolean] whether to print the estimated center and covariance matrix
-    ##@in  method            : [character] select a method: one of (FASTMCD, MASS)
-
-
-    domcd <- function(x, xname, nrep = 1)
-    {
-        n <- dim(x)[1]
-        p <- dim(x)[2]
-        if(method == "MASS") {
-            mcd <- MASS::cov.mcd(x)
-            quan <- as.integer(floor((n + p + 1)/2)) #default: floor((n+p+1)/2)
-        }
-        else {
-            mcd <- covMcd(x) # trace = FALSE
-            quan <- as.integer(mcd$quan)
-        }
-
-        crit <- if(method == "MASS") mcd$crit else log(mcd$crit)
-
-        xres <- sprintf("%*s %3d %3d %3d %12.6f", lname, xname, n, p, quan, crit)
-        if(time) {
-            xtime <- system.time(repMCD(x, nrep, method))[1]/nrep
-            xres <- sprintf("%s %10.1f", xres, 1000 * xtime)
-        }
-        cat(xres, "\n")
-
-        if(!short) {
-            cat("Best subsample: \n")
-            print(mcd$best)
-
-            ibad <- which(mcd$mcd.wt == 0)
-            names(ibad) <- NULL
-            nbad <- length(ibad)
-            cat("Outliers: ",nbad,"\n")
-            if(nbad > 0)
-                print(ibad)
-            if(full) {
-                cat("-------------\n")
-                print(mcd)
-            }
-            cat("--------------------------------------------------------\n")
-        }
-    }
-
-    lname <- 20
+    stopifnot(is.function(domcd), length(formals(domcd)) >= 3)
+    options(digits = digits)
     method <- match.arg(method)
 
-    if(method == "MASS" &&
-       paste(R.version$major, R.version$minor, sep=".") < 2.3)
-	cov.rob <- MASS::cov.rob
-
-    data(heart)
-    data(phosphor)
-    data(starsCYG)
-    data(stackloss)
-    data(coleman)
-    data(salinity)
-    data(wood)
-    data(hbk)
+    stopifnot(require("robustbase")) # all data() which do not specify package
 
     data(Animals, package = "MASS")
     brain <- Animals[c(1:24, 26:25, 27:28),]
-    data(milk)
-    data(bushfire)
 
-    ##    data(x1000)
-    ##    data(x5000)
+    data(list = c("fish", "pottery", "rice", "un86", "wages"), package = "rrcov")
 
     tmp <- sys.call()
     cat("\nCall: ", deparse(substitute(tmp)),"\n")
 
-    cat("Data Set               n   p  Half   LOG(obj)  Time [ms]\n")
-    cat("========================================================\n")
+    header <- function(time) { ## the string length here require 'lname <- 20' {FIXME}
+        ##            1         2
+        ##   1 3 5 7 901 3 5 7 90 2 4
+	cat("Data Set               n   p  h(alf) LOG(obj)",if(time)"  Time [ms]","\n",
+	    "=============================================",if(time)"===========","\n",
+	    sep="")
+    }
+    if(full) {
+        ## header() is called in each domcd()
+    } else ## here
+        header(time)
+    domcd(bushfire, 	data(bushfire), nrep)
     domcd(heart[, 1:2], data(heart), nrep)
-    domcd(data.matrix(subset(phosphor, select = -plant)),
-          data(phosphor), nrep)
-    domcd(starsCYG, data(starsCYG), nrep)
-    domcd(stack.x, data(stackloss), nrep)
-    domcd(data.matrix(subset(coleman, select = -Y)), data(coleman), nrep)
-    domcd(data.matrix(subset(salinity, select = -Y)), data(salinity), nrep)
-    domcd(data.matrix(subset(wood, select = -y)), data(wood), nrep)
-    domcd(data.matrix(subset(hbk,  select = -Y)), data(hbk), nrep)
+    domcd(starsCYG,	data(starsCYG), nrep)
+    domcd(stack.x,	data(stackloss), nrep)
+    domcd(data.matrix(subset(phosphor, select= -plant)),data(phosphor), nrep)
+    domcd(data.matrix(subset(coleman, select = -Y)),	data(coleman), nrep)
+    domcd(data.matrix(subset(salinity, select = -Y)),	data(salinity), nrep)
+    domcd(data.matrix(subset(wood, select = -y)),	data(wood), nrep)
+    domcd(data.matrix(subset(hbk,  select = -Y)),	data(hbk), nrep)
 
     domcd(brain, "Animals", nrep)
     domcd(milk, data(milk), nrep)
-    domcd(bushfire, data(bushfire), nrep)
+    domcd(lactic, data(lactic), nrep)
+    domcd(pension, data(pension), nrep)
+    domcd(pilot, data(pilot), nrep)
+
+    ## This is for CovMcdBig ....
+    ##    domcd(radarImage, data(radarImage), nrep)
+    ##    domcd(NOxEmissions, data(NOxEmissions), nrep)
+
+    domcd(data.matrix(subset(vaso, select = -Y)), 		data(vaso), nrep)
+    domcd(data.matrix(subset(wagnerGrowth, select = -Period)),  data(wagnerGrowth), nrep)
+
+    ## Obs 14 has missing, column 7 is categorical
+    domcd(fish[-14,-7], data(fish,    package="rrcov"), nrep)
+    domcd(pottery[,-7], data(pottery, package="rrcov"), nrep)
+    domcd(rice,         data(rice,    package="rrcov"), nrep)
+    domcd(un86,         data(un86,    package="rrcov"), nrep)
+
+    ## there are missing values
+    domcd(wages[-c(29, 31, 38),-9], data(wages, package="rrcov"), nrep)
+
     cat("========================================================\n")
-    ##    domcd(x1000$X,data(x1000), nrep)
-    ##    domcd(x5000$X,data(x5000), nrep)
 } ## {doMCDdata}
 
 if(FALSE){
@@ -190,3 +203,114 @@ mort3 <-
             116, 86.3, 103, 86.4, 109, 116, 112, 104, 108, 103, 116,
             99.3, 116, 114, 104, 105, 97, 102, 83.4, 101, 125, 117,
             118, 90.3, 108, 92.4, 106, 126, 109))
+
+###'------*Generate* data for benchmarking ----------------------------------------
+
+##' Generates a location contaminated multivariate
+##' normal sample of n observations in p dimensions
+##'    (1-eps) * N_p(0, I_p)  + eps * N_(m,I_p)
+##' where
+##'    m = (b,b,...,b)
+##' Defaults: eps=0 and b=10
+##' @title Generate n x p location contaminated MV data
+##' @param n number of observations
+##' @param p number of variables
+##' @param eps amount of contamination
+##' @param b mean of "outliers"
+gendata <- function(n,p, eps=0, b=10) {
+    if(missing(n) || missing(p))
+        stop("Please specify (n,p)")
+    if(!is.numeric(eps) || length(eps) != 1 || eps < 0 || eps >= 0.5)
+        stop("eps must be in [0,0.5)")
+    X <- matrix(rnorm(n*p), n, p)
+    nbad <- as.integer(eps * n)
+    if(nbad > 0) {
+        b <- rep(b, length = p) # recycle to p-vector
+        ## = E[.] of bad obs.
+        xind <- sample(n,nbad)
+        X[xind,] <- X[xind, , drop=FALSE] + rep(b, each=nbad)
+    }
+    list(X=X, xind=if(nbad > 0) xind)
+}
+
+##' Repeated calls to different MCD algorithms for timing purposes *only*
+repMCD <- function(x, nrep = 1, method = "FASTMCD") {
+    stopifnot(length(nrep) == 1, nrep >= 1)
+    switch(method,
+	   "FASTMCD"  = replicate(nrep, covMcd(x)),
+	   "bestMCD"  = replicate(nrep, covMcd(x, nsamp= "best")),
+	   "exactMCD" = replicate(nrep, covMcd(x, nsamp= "exact")),
+	   "DetMCD"   = replicate(nrep, covMcd(x, nsamp="deterministic")),
+	   "MASS.best" = replicate(nrep, MASS::cov.mcd(x)),# uses nsamp = "best" ==> up to 5000
+	   ## rrcov.control()$nsamp == 500 :
+	   "MASS.500"  = replicate(nrep, MASS::cov.mcd(x, nsamp = 500)),
+	   ## otherwise:
+	   stop(gettextf("Method '%s' not yet implemented", method)))
+}
+
+repMCD.meths <- function() {
+    switch.expr <- body(repMCD)[[3]]
+    m <- names(switch.expr)
+    m[m != ""]
+}
+
+if(FALSE)
+repMCD.meths()
+## [1] "FASTMCD"   "bestMCD"   "DetMCD"    "MASS.best" "MASS.500"
+
+##' calls  gendata(), repMCD()
+dogen <- function(nrep=1, eps=0.49, method = repMCD.meths(), ## "FASTMCD" is first
+                  p.set = c(2, 5, 10, 20, 30),
+                  n.set = c(100, 500, 1000, 10000, 50000),
+                  n.p.ratio = 5,
+                  seed = 1234)
+{
+    domcd <- function(x, nrep=1){
+        ## system.time() *does* gc()
+        xtime <- system.time(repMCD(x, nrep, method))[1]/nrep
+        cat(sprintf("%6d %3d %12.2f\n", dim(x)[1], dim(x)[2], xtime))
+        xtime
+    }
+
+    set.seed(seed)
+    method <- match.arg(method)
+
+    mkL <- function(ch,m) paste(ch,m,sep="=")
+    ans <- matrix(NA, length(n.set), length(p.set),
+                  dimnames = list(mkL("n",n.set), mkL("p",p.set)))
+    cat(sprintf("Method: %-12s; nrep = %d\n", method, nrep),
+        "------------------------------\n",
+        "     n   p         Time\n",
+        "=======================\n", sep="")
+    for(n in n.set) {
+        n. <- mkL("n",n)
+        for(p in p.set) {
+            if(n.p.ratio * p <= n) {
+                xx <- gendata(n, p, eps)
+                ans[n., mkL("p",p)] <- domcd(xx$X, nrep)
+            }
+        }
+    }
+
+    cat("=======================\n")
+    cat(sprintf("Total time: %11.2f\n", nrep * sum(ans, na.rm=TRUE)))
+    structure(ans, nrep = nrep, method=method)
+}## {dogen}
+
+###' ------------------ These can only be used with rrcov :: CovMcd() --------------
+
+docheck <- function(n, p, eps, ...) {
+    xx <- gendata(n,p,eps)
+    mcd <- CovMcd(xx$X, ...)
+    check(mcd, xx$xind)
+}
+
+##' check if mcd is robust w.r.t xind, i.e. check how many of xind
+##' did not get zero weight
+check <- function(mcd, xind){
+    mymatch <- xind %in% which(mcd@wt == 0)
+    length(xind) - length(which(mymatch))
+}
+
+
+

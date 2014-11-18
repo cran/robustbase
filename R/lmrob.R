@@ -75,11 +75,16 @@ lmrob <-
 		ok <- w != 0
 		nok <- !ok
 		w <- w[ok]
-		x0 <- x[!ok, , drop = FALSE]
-		x <- x[ok,  , drop = FALSE]
+		x0 <- x[nok, , drop = FALSE]
+		x  <- x[ ok, , drop = FALSE]
 		n <- nrow(x)
-		y0 <- if (ny > 1L) y[!ok, , drop = FALSE] else y[!ok]
+		y0 <- if (ny > 1L) y[nok, , drop = FALSE] else y[nok]
 		y  <- if (ny > 1L) y[ ok, , drop = FALSE] else y[ok]
+                ## add this information to model.frame as well
+                ## need it in outlierStats.R
+                ## ?? could also add this to na.action, then
+                ##    naresid() would pad these as well.
+                attr(mf, "zero.weights") <- which(nok)
 	    }
 	    wts <- sqrt(w)
 	    save.y <- y
@@ -113,11 +118,13 @@ lmrob <-
 		x <- x[,p1]
 		attr(x, "assign") <- assign[p1] ## needed for splitFrame to work
 	    }
+            if (is.function(control$eps.x))
+                control$eps.x <- control$eps.x(max(abs(x)))
 	    if (!is.null(ini <- init)) {
 		if (is.character(init)) {
 		    init <- switch(init,
 				   "M-S" = lmrob.M.S(x, y, control, mf),
-				   "S"   = lmrob.S  (x, y, control),
+				   "S"   = lmrob.S  (x, y, control, mf=mf),
 				   stop('init must be "S", "M-S", function or list'))
 		    if(ini == "M-S") { ## "M-S" sometimes reverts to "S":
 			ini <- init$control$method
@@ -147,7 +154,7 @@ lmrob <-
 		if (class(init)[1] != "lmrob.S" && control$cov == '.vcov.avar1')
 		    control$cov <- ".vcov.w"
 	    }
-	    z <- lmrob.fit(x, y, control, init=init) #-> ./lmrob.MM.R
+	    z <- lmrob.fit(x, y, control, init=init, mf = mf) #-> ./lmrob.MM.R
             if(is.character(ini) && !grepl(paste0("^", ini), control$method))
                 control$method <- paste0(ini, control$method)
 	    if (singular.fit) {
@@ -219,7 +226,7 @@ lmrob <-
     z$terms <- mt
     z$assign <- assign
     if(control$compute.rd && !is.null(x))
-	z$MD <- robMD(x, attr(mt, "intercept"))
+	z$MD <- robMD(x, attr(mt, "intercept"), wqr=z$qr)
     if (model)
 	z$model <- mf
     if (ret.x)
@@ -247,10 +254,18 @@ chk.s <- function(...) {
 
 ##' Robust Mahalanobis Distances
 ##' internal function, used in lmrob() and plot.lmrob()
-robMD <- function(x, intercept, ...) {
+robMD <- function(x, intercept, wqr, ...) {
     if(intercept == 1) x <- x[, -1, drop=FALSE]
     if(ncol(x) >= 1) {
-	rob <- covMcd(x, ...)
+	rob <- tryCatch(covMcd(x, ...),
+                        warning = function(w) structure("covMcd failed with a warning",
+                        class="try-error", condition = w),
+                        error = function(e) structure("covMcd failed with an error",
+                        class="try-error", condition = e))
+	if (inherits(rob, "try-error")) {
+            warning("Failed to compute robust Mahalanobis distances, reverting to robust leverages.")
+            return(lmrob.leverages(wqr = wqr))
+        }
 	sqrt( mahalanobis(x, rob$center, rob$cov) )
     }
 }
@@ -391,7 +406,7 @@ print.summary.lmrob <-
 			 na.print="NA", ...)
 	    cat("\nRobust residual standard error:",
 		format(signif(x$scale, digits)),"\n")
-            if (!is.null(x$r.squared) && x$df[1] != attr(x$terms, "intercept")) {
+          if (!is.null(x$r.squared) && x$df[1] != attr(x$terms, "intercept")) {
                 cat("Multiple R-squared: ", formatC(x$r.squared, digits = digits))
                 cat(",\tAdjusted R-squared: ", formatC(x$adj.r.squared, digits = digits),
                     "\n")
@@ -419,7 +434,9 @@ print.summary.lmrob <-
 	if (!is.null(rw <- x$rweights)) {
 	    if (any(zero.w <- x$weights == 0))
 		rw <- rw[!zero.w]
-	    summarizeRobWeights(rw, digits = digits, ...)
+            eps.outlier <- if (is.function(control$eps.outlier))
+                control$eps.outlier(nobs(x)) else control$eps.outlier
+	    summarizeRobWeights(rw, digits = digits, eps = eps.outlier, ...)
 	}
 
     } else cat("\nNo Coefficients\n")
@@ -485,6 +502,9 @@ qr.lmrob <- function (x, ...) {
 }
 
 residuals.lmrob <- function(object, ...) residuals.lm(object, ...)
+
+## even simpler than residuals.default():
+residuals.lmrob.S <- function(obj) obj$residuals
 
 summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...)
 {
@@ -564,6 +584,13 @@ summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...
     }
     ans$aliased <- aliased # used in print method
     ans$sigma <- sigma # 'sigma': in summary.lm() & 'fit.models' pkg
+    if (is.function(ans$control$eps.outlier))
+        ans$control$eps.outlier <- ans$control$eps.outlier(nobs(object))
+    if (is.function(ans$control$eps.x)) {
+        if (!is.null(object[['x']])) {
+            ans$control$eps.x <- ans$control$eps.x(max(abs(object[['x']])))
+        } else ans$control$eps.x <- NULL
+    }
     class(ans) <- "summary.lmrob"
     ans
 }

@@ -17,7 +17,7 @@ N <- 1000
 robustDoc <- system.file('doc', package='robustbase')
 robustDta <- robustDoc
 
-## initialize
+## initialize (packages, data, ...):
 source(file.path(robustDoc, 'simulation.init.R'))
 
 ## set the amount of trimming used in calculation of average results
@@ -153,39 +153,38 @@ print(xtable(tbl), sanitize.text.function=identity,
 
 
 ###################################################
-### code chunk number 5: lmrob_simulation.Rnw:278-298
+### code chunk number 5: lmrob_simulation.Rnw:278-297
 ###################################################
 f.gen <- function(n, p, rep, err) {
   ## get function name and parameters
   lerrfun <- f.errname(err$err)
   lerrpar <- err$args
   ## generate random predictors
-  ret <- lapply(1:rep, function(...) {
-    data.frame(matrix(do.call(lerrfun, c(n = n*p, lerrpar)), n, p))
-  })
+  ret <- replicate(rep, matrix(do.call(lerrfun, c(n = n*p, lerrpar)),
+                               n, p), simplify=FALSE)
   attr(ret[[1]], 'gen') <- f.gen
   ret
 }
 
-ratios <- c(1/20, 1/10, 1/5, 1/3, 1/2)
+ratios <- c(1/20, 1/10, 1/5, 1/3, 1/2)## p/n
 lsit <- expand.grid(n = c(25, 50, 100, 400), p = ratios)
 lsit <- within(lsit, p <- as.integer(n*p))
 .errs.normal.1 <- list(err = 'normal',
                        args = list(mean = 0, sd = 1))
 for (i in 1:NROW(lsit))
   assign(paste('rand',lsit[i,1],lsit[i,2],sep='_'),
-         f.gen(lsit[i,1], lsit[i,2], 1, .errs.normal.1)[[1]])
+         f.gen(lsit[i,1], lsit[i,2], rep = 1, err = .errs.normal.1)[[1]])
 
 
 ###################################################
 ### code chunk number 6: fig-example-design (eval = FALSE)
 ###################################################
-## stopifnot(require(GGally))
-## print(ggpairs(rand_25_5, axisLabels="show"))
+## stopifnot(require("GGally"))# ggpairs() replaces defunct ggplot2::plotmatrix()
+## print(ggpairs(rand_25_5, axisLabels="show", title = "rand_25_5: n=25, p=5"))
 
 
 ###################################################
-### code chunk number 7: lmrob_simulation.Rnw:374-375
+### code chunk number 7: lmrob_simulation.Rnw:373-374
 ###################################################
 aggrResultsFile <- file.path(robustDta, "aggr_results.Rdata")
 
@@ -240,26 +239,26 @@ aggrResultsFile <- file.path(robustDta, "aggr_results.Rdata")
 
 
 ###################################################
-### code chunk number 9: lmrob_simulation.Rnw:426-427
+### code chunk number 9: lmrob_simulation.Rnw:425-426
 ###################################################
 str(estlist, 1)
 
 
 ###################################################
-### code chunk number 10: lmrob_simulation.Rnw:432-433
+### code chunk number 10: lmrob_simulation.Rnw:431-432
 ###################################################
 estlist$errs[[1]]
 
 
 ###################################################
-### code chunk number 11: lmrob_simulation.Rnw:439-441 (eval = FALSE)
+### code chunk number 11: lmrob_simulation.Rnw:438-440 (eval = FALSE)
 ###################################################
 ## set.seed(estlist$seed)
 ## errs <- c(sapply(1:nrep, function(x) do.call(fun, c(n = nobs, args))))
 
 
 ###################################################
-### code chunk number 12: lmrob_simulation.Rnw:452-453
+### code chunk number 12: lmrob_simulation.Rnw:451-452
 ###################################################
 str(estlist$output[1:3], 2)
 
@@ -918,9 +917,15 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ### code chunk number 33: fig-pred-points (eval = FALSE)
 ###################################################
 ## pp <- f.prediction.points(dd)[1:7,]
-## tmp <- plotmatrix(pp)$data
-## tmp$label <- as.character(1:7)
-## print(plotmatrix(dd) + geom_text(data=tmp, color = 2, aes(label=label), size = 2.5))
+## ## Worked in older ggplot2 -- now  plotmatrix() is gone, to be replaced by GGally::ggpairs):
+## ## tmp <- plotmatrix(pp)$data
+## ## tmp$label <- as.character(1:7)
+## ## print(plotmatrix(dd) + geom_text(data=tmp, color = 2, aes(label=label), size = 2.5))
+## tmp <- ggpairs(pp)$data
+## tmp$label <- as.character(1:7) # and now?
+## ## ggpairs() + geom_text()  does *NOT* work {ggpairs has own class}
+## ## print(ggpairs(dd) + geom_text(data=tmp, color = 2, aes(label=label), size = 2.5))
+## ggpairs(dd) ## not at all satisfactory !! __FIXME__
 
 
 ###################################################
@@ -949,7 +954,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 
 
 ###################################################
-### code chunk number 35: lmrob_simulation.Rnw:1406-1461
+### code chunk number 35: lmrob_simulation.Rnw:1411-1466
 ###################################################
 ## Henning (1994) eq 33:
 g <- Vectorize(function(s, theta, mu, ...) {
