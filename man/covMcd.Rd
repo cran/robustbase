@@ -46,10 +46,11 @@ covMcd(x, cor = FALSE, raw.only = FALSE,
     proposed by Hubert et al. (2012) it starts from the \eqn{h} most
     central observations of \emph{six} (deterministic) estimators.
   }
-  \item{nmini, kmini}{for \eqn{n > n_0}, \eqn{n_0 := \code{nmini}}, the
-    algorithm splits the data into maximally \code{kmini} (by default 5)
-    subsets, of size approximately \code{nmini}.  When \code{nmini*kmini < n},
-    the initial search uses only a subsample of size \code{nmini*kmini}.
+  \item{nmini, kmini}{for \eqn{n \ge 2 \times n_0}{n >= 2 n_0},
+    \eqn{n_0 := \code{nmini}}, the algorithm splits the data into
+    maximally \code{kmini} (by default 5) subsets, of size
+    approximately, but at least \code{nmini}.  When \code{nmini*kmini < n},
+    the initial search uses only a \emph{subsample} of size \code{nmini*kmini}.
     %% FIXME? -- more accurately ==> ../src/rffastmcd.f
     The original algorithm had \code{nmini = 300} and \code{kmini = 5}
     hard coded.}
@@ -111,7 +112,7 @@ covMcd(x, cor = FALSE, raw.only = FALSE,
   Based on these raw MCD estimates, (unless argument \code{raw.only} is
   true), a reweighting step is performed, i.e., \code{V <- \link{cov.wt}(x,w)},
   where \code{w} are weights determined by \dQuote{outlyingness} with
-  the respect to the scaled raw MCD.  Again, a consistency factor and
+  respect to the scaled raw MCD.  Again, a consistency factor and
   (if \code{use.correction} is true) a finite sample correction factor
   (\code{.MCDcnp2.rew(p, n, alpha)}) are applied.
   The reweighted covariance is typically considerably more efficient
@@ -175,10 +176,10 @@ covMcd(x, cor = FALSE, raw.only = FALSE,
   \item{call}{the call used (see \code{\link{match.call}}).}
 }
 \references{
-  P. J. Rousseeuw and A. M. Leroy (1987)
+  Rousseeuw, P. J. and Leroy, A. M. (1987)
   \emph{Robust Regression and Outlier Detection.} Wiley.
 
-  P. J. Rousseeuw and K. van Driessen (1999)
+  Rousseeuw, P. J. and van Driessen, K. (1999)
   A fast algorithm for the minimum covariance determinant estimator.
   \emph{Technometrics} \bold{41}, 212--223.
 

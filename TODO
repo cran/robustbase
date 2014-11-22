@@ -136,6 +136,7 @@ R users already know optim() etc.. so the name seems more logical for them.
     Consider lmrob(*,  method = "M") --> default init = "ls" (Least Sq; as MASS:::rlm.default)
     which calls  lmrob..M..fit() which is already documented as "simple"
     M-estimator (though the *scale* is kept fixed; i.e., no  'proposal 2').
+** TODO covMcd(): pass k3 as argument; default=current ==> allow "formula"  k3 = k3(n,p) !!
 ** covOGK():
    The argument name 'weight.fn' is pretty ugly and the default function
    name 'hard.rejection()' is just awful (we need a globally available

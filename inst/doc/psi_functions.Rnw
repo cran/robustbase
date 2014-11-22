@@ -387,6 +387,6 @@ p.psiFun(x., "Welsh", par = 2.11)
 \end{figure}
 
 \bibliographystyle{chicago}
-\bibliography{lmrob_simulation}
+\bibliography{robustbase}
 
 \end{document}

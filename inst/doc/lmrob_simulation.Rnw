@@ -222,7 +222,7 @@ lst <- lapply(estlist$procedures, function(x) {
                     x$args$tuning.psi,3)))
 })
 lst <- unique(lst) ## because of rounding, down from 21 to 5 !
-lst <- lst[sapply(lst, function(x) !is.null(x[[1]]))] # 5 --> 4 
+lst <- lst[sapply(lst, function(x) !is.null(x[[1]]))] # 5 --> 4
 ## convert to table
 tbl <- do.call(rbind, lst)
 tbl[,2:3] <- apply(tbl[,2:3], 1:2, function(x) {
@@ -379,12 +379,12 @@ if (!file.exists(aggrResultsFile)) {
             require(skewt),
             require(foreach))
   if (!is.null(getOption("cores"))) {
-      if (getOption("cores") == 1) 
+      if (getOption("cores") == 1)
           registerDoSEQ() ## no not use parallel processing
       else {
           stopifnot(require(doParallel))
           if (.Platform$OS.type == "windows") {
-              cl <- makeCluster(getOption("cores")) 
+              cl <- makeCluster(getOption("cores"))
               clusterExport(cl, c("N", "robustDoc"))
               clusterEvalQ(cl, slave <- TRUE)
               clusterEvalQ(cl, source(file.path(robustDoc, 'simulation.init.R')))
@@ -1500,6 +1500,6 @@ print(ggplot(rmb, aes(x, l, color=psi)) +
 \end{figure}
 
 \bibliographystyle{chicago}
-\bibliography{lmrob_simulation}
+\bibliography{robustbase}
 
 \end{document}

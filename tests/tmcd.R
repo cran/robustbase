@@ -127,55 +127,71 @@ stopifnot(all.equal(CcX$best,
 )
 summary(Ccd)
 
-##  (nmini, kmini) examples:
-cat("doExtras:", doExtras <- robustbase:::doExtras(),"\n")
-if(doExtras) {
- showProc.time()
- set.seed(7) ; X1 <- gendata(10000, p=13, eps = 0.30)
- showSys.time(c1 <- covMcd(X1$X)) # 0.87 sec
- chk.covMcd <- function(ans, ind) {
-     stopifnot(inherits(ans, "mcd"))
-     ## check that all outliers were detected:
-     mod.outl <- which(ans$mcd.wt == 0)
-     outl.detected <- (ind %in% mod.outl)
-     if(!all(outl.detected)) {
-	 cat("The following outliers are *not* detected:\n")
-	 print(which(!outl.detected))
-     }
-     fp <- !(mod.outl %in% ind)
-     if(any(fp)) {
-	 cat(sprintf("False positive \"outliers\" (a few expected) %d of %d (= %.2f%%):\n",
-		     sum(fp), nobs(ans), 100*sum(fp)/nobs(ans)))
-	 print(which(fp))
-     } else cat("** No ** false positive outliers -- exceptional!\n")
- }
- ##
- chk.covMcd(c1, X1$xind)
- cat("\ncovMcd(*, kmini=12, trace=2) ...\n------\n")
- showSys.time(c2 <- covMcd(X1$X, kmini=12, trace=2))# slower..
- chk.covMcd(c2, X1$xind)
- ## Comparing:
- ii <- !(names(c1) %in% c("call", "method"))
- cat("\ncovMcd(*, nsamp=\"deterministic\")\n")
- showSys.time(cD <- covMcd(X1$X, nsamp="deterministic"))# quite slower than FASTMCD
- chk.covMcd(cD, X1$xind)
- cat("<.>$crit = log(det(.)) [minimal = best] :\n")
- print(cbind(sort(c(default = c1$crit, kmini.12 = c2$crit, determin = cD$crit))))
- i2 <- names(c1)[ii]; i2 <- i2[i2 != "nsamp"]
- ## closer coincidence if "raw.*" are dropped:
- i3 <- i2; i3 <- i3[ - grep("^raw", i3) ]
- stopifnot(all.equal(c1[ii], c2[ii], tol= 0.02),
-           all.equal(cD[i2], c1[i2], tol= 0.02),
-           all.equal(cD[i3], c1[i3], tol= 6e-4), # 4.60e-4
-           ## the 0/1 weights coincide :
-           cD$mcd.wt == c1$mcd.wt,
-           c2$mcd.wt == c1$mcd.wt)
-
-}
-
-
 
 demo(determinMCD)## ../demo/determinMCD.R
 ##   ----------- including simple "exactfit" (code = 3)
 warnings()
+
+showProc.time()
+if(!robustbase:::doExtras()) quit()
+
+## if ( doExtras ) -----------------------------------------------------------------
+## ==============
+
+##  (nmini, kmini) examples:
+set.seed(7) ; X1 <- gendata(10000, p=13, eps = 0.30)
+showSys.time(c1 <- covMcd(X1$X)) # 0.87 sec
+chk.covMcd <- function(ans, ind) {
+    stopifnot(inherits(ans, "mcd"))
+    ## check that all outliers were detected:
+    mod.outl <- which(ans$mcd.wt == 0)
+    outl.detected <- (ind %in% mod.outl)
+    if(!all(outl.detected)) {
+        cat("The following outliers are *not* detected:\n")
+        print(which(!outl.detected))
+    }
+    fp <- !(mod.outl %in% ind)
+    if(any(fp)) {
+        cat(sprintf("False positive \"outliers\" (a few expected) %d of %d (= %.2f%%):\n",
+       	     sum(fp), nobs(ans), 100*sum(fp)/nobs(ans)))
+        print(which(fp))
+    } else cat("** No ** false positive outliers -- exceptional!\n")
+}
+##
+chk.covMcd(c1, X1$xind)
+cat("\ncovMcd(*, kmini=12, trace=2) ...\n------\n")
+showSys.time(c2 <- covMcd(X1$X, kmini=12, trace=2))# slower..
+chk.covMcd(c2, X1$xind)
+## Comparing:
+ii <- !(names(c1) %in% c("call", "method"))
+cat("\ncovMcd(*, nsamp=\"deterministic\")\n")
+showSys.time(cD <- covMcd(X1$X, nsamp="deterministic"))# quite slower than FASTMCD
+chk.covMcd(cD, X1$xind)
+cat("<.>$crit = log(det(.)) [minimal = best] :\n")
+print(cbind(sort(c(default = c1$crit, kmini.12 = c2$crit, determin = cD$crit))))
+i2 <- names(c1)[ii]; i2 <- i2[i2 != "nsamp"]
+## closer coincidence if "raw.*" are dropped:
+i3 <- i2; i3 <- i3[ - grep("^raw", i3) ]
+stopifnot(all.equal(c1[ii], c2[ii], tol= 0.02),
+          all.equal(cD[i2], c1[i2], tol= 0.02),
+          all.equal(cD[i3], c1[i3], tol= 6e-4), # 4.60e-4
+          ## the 0/1 weights coincide :
+          cD$mcd.wt == c1$mcd.wt,
+          c2$mcd.wt == c1$mcd.wt)
+showProc.time()
+
+## Radarexample --- already some in  ../man/radarImage.Rd <<<-------------
+data(radarImage)
+print(d <- dim(radarImage)); n.rI <- d[1]
+## The 8 "clear" outliers (see also below)
+ii8 <- c(1548:1549, 1553:1554, 1565:1566, 1570:1571)
+set.seed(7)
+showSys.time( L1 <- lapply(0:200, function(n)
+    n+ which(0 == covMcd(unname(radarImage[(n+1L):n.rI,]), trace=2)$mcd.wt)))
+## check for covMcd() consistency:
+print(tablen <- table(vapply(L1, length, 1)))
+plot(tablen)
+print(iCommon <- Reduce(intersect, L1))
+stopifnot(ii8 %in% iCommon)
+##
 

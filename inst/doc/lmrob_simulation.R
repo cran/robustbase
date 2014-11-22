@@ -122,7 +122,7 @@ lst <- lapply(estlist$procedures, function(x) {
                     x$args$tuning.psi,3)))
 })
 lst <- unique(lst) ## because of rounding, down from 21 to 5 !
-lst <- lst[sapply(lst, function(x) !is.null(x[[1]]))] # 5 --> 4 
+lst <- lst[sapply(lst, function(x) !is.null(x[[1]]))] # 5 --> 4
 ## convert to table
 tbl <- do.call(rbind, lst)
 tbl[,2:3] <- apply(tbl[,2:3], 1:2, function(x) {
@@ -138,6 +138,7 @@ print(xtable(tbl), sanitize.text.function=identity,
 ###################################################
 ### code chunk number 4: fig-psi-functions (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## f.plot.psi <- function(x, psi) {
 ##   cc <- lmrob.control(psi = psi)$tuning.psi
 ##   data.frame(x=x, value=Mpsi(x, cc, psi), psi = psi)
@@ -179,6 +180,7 @@ for (i in 1:NROW(lsit))
 ###################################################
 ### code chunk number 6: fig-example-design (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## stopifnot(require("GGally"))# ggpairs() replaces defunct ggplot2::plotmatrix()
 ## print(ggpairs(rand_25_5, axisLabels="show", title = "rand_25_5: n=25, p=5"))
 
@@ -198,12 +200,12 @@ aggrResultsFile <- file.path(robustDta, "aggr_results.Rdata")
 ##             require(skewt),
 ##             require(foreach))
 ##   if (!is.null(getOption("cores"))) {
-##       if (getOption("cores") == 1) 
+##       if (getOption("cores") == 1)
 ##           registerDoSEQ() ## no not use parallel processing
 ##       else {
 ##           stopifnot(require(doParallel))
 ##           if (.Platform$OS.type == "windows") {
-##               cl <- makeCluster(getOption("cores")) 
+##               cl <- makeCluster(getOption("cores"))
 ##               clusterExport(cl, c("N", "robustDoc"))
 ##               clusterEvalQ(cl, slave <- TRUE)
 ##               clusterEvalQ(cl, source(file.path(robustDoc, 'simulation.init.R')))
@@ -602,6 +604,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 15: fig-meanscale (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## ## ## exp(mean(log(sigma))): this looks almost identical to mean(sigma)
 ## print(ggplot(test.3, aes(p/n, exp(meanlogsigma.1), color = Est.Scale)) +
 ##       stat_summary(aes(x=ratio), fun.y=median, geom='line') +
@@ -617,6 +620,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 16: fig-sdscale-1 (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## print(ggplot(test.3, aes(p/n, sdlogsigma.1*sqrt(n), color = Est.Scale)) +
 ##       stat_summary(aes(x=ratio), fun.y=median, geom='line') +
 ##       geom_point(aes(shape = factor(n)), alpha = alpha.n) +
@@ -633,6 +637,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 17: fig-sdscale-all (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## print(ggplot(test.4, aes(p/n, sdlogsigma.1*sqrt(n),
 ##                          color = Est.Scale)) +
 ##       stat_summary(aes(x=ratio), fun.y=median, geom='line') +
@@ -651,6 +656,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 18: fig-qscale (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## print(ggplot(tmp <- droplevels(subset(test.3, Estimator %in% c("SMD", "MMqE"))),
 ##              aes(p/n, q, color = Est.Scale)) +
 ##       stat_summary(aes(x=ratio), fun.y=median, geom='line') +
@@ -666,6 +672,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 19: fig-Mscale (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## print(ggplot(tmp <- droplevels(subset(test.3, Estimator %in% c("SMD", "MMqE"))),
 ##              aes(p/n, M/q, color = Est.Scale)) +
 ##       stat_summary(aes(x=ratio), fun.y=median, geom='line') +
@@ -680,6 +687,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 20: fig-qscale-all (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## print(ggplot(tmp <- droplevels(subset(test.1, Estimator %in% c("SMD", "MMqE") &
 ##                                 Psi == 'bisquare')),
 ##              aes(p/n, q, color = Est.Scale)) +
@@ -697,6 +705,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 21: fig-Mscale-all (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## print(ggplot(tmp <- droplevels(subset(test.1, Estimator %in% c("SMD", "MMqE") &
 ##                                 Psi == 'bisquare')),
 ##              aes(p/n, M/q, color = Est.Scale)) +
@@ -713,6 +722,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 22: fig-efficiency (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## print(ggplot(test.2, aes(p/n, efficiency.1, color = Estimator)) +
 ##       geom_point(aes(shape = factor(n)), alpha = alpha.n) +
 ##       geom_hline(yintercept = 0.95) +
@@ -727,6 +737,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 23: fig-efficiency-all (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## print(ggplot(tmp <- droplevels(subset(test.1, Error != 't1')),
 ##              aes(p/n, efficiency.1, color = Estimator)) +
 ##       geom_point(aes(shape = Error), alpha = alpha.error) +
@@ -743,6 +754,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 24: fig-AdB2-1 (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## print(ggplot(test.2, aes(p/n, AdB2.1/(1-p/n), color = Estimator)) +
 ##       geom_point(aes(shape=factor(n)), alpha = alpha.n) +
 ##       geom_point(aes(p/n, K2AdB2.1/(1-p/n)), alpha = alpha.n) +
@@ -763,6 +775,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 25: fig-sdAdB2-1 (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## print(ggplot(test.2, aes(p/n, sdAdB2.1/(1-p/n), color = Estimator)) +
 ##       geom_point(aes(shape=factor(n)), alpha = alpha.n) +
 ##       geom_point(aes((p/n), sdK2AdB2.1/(1-p/n)), alpha = alpha.n) +
@@ -782,6 +795,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 26: fig-emp-level (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## print(ggplot(test.2, aes(p/n, f.truncate(emplev_1),
 ##                          color = method.cov)) +
 ##       g.truncate.lines + g.truncate.areas +
@@ -798,6 +812,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 27: fig-lqq-level (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## print(ggplot(tmp <- droplevels(subset(test.1, Psi == 'lqq' & emplev_1 != 0)),
 ##       aes(p/n, f.truncate(emplev_1), color = method.cov)) +
 ##       g.truncate.line + g.truncate.area +
@@ -816,6 +831,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 28: fig-power-1-0_2 (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## print(ggplot(tmp <- subset(test.1, n == 25),
 ##       aes(p/n, power_1_0.2, color = method.cov)) +
 ##       geom_point(aes(shape = Error), alpha = alpha.error) +
@@ -836,6 +852,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 29: fig-power-1-0_4 (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## print(ggplot(tmp <- subset(test.1, n == 25),
 ##       aes(p/n, power_1_0.4, color = method.cov)) +
 ##       geom_point(aes(shape = Error), alpha = alpha.error) +
@@ -856,6 +873,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 30: fig-power-1-0_6 (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## print(ggplot(tmp <- subset(test.1, n == 25),
 ##       aes(p/n, power_1_0.6, color = method.cov)) +
 ##       geom_point(aes(shape = Error), alpha = alpha.error) +
@@ -876,6 +894,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 31: fig-power-1-0_8 (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## print(ggplot(tmp <- subset(test.1, n == 25),
 ##       aes(p/n, power_1_0.8, color = method.cov)) +
 ##       geom_point(aes(shape = Error), alpha = alpha.error) +
@@ -896,6 +915,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 32: fig-power-1-1 (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## print(ggplot(tmp <- subset(test.1, n == 25),
 ##       aes(p/n, power_1_1, color = method.cov)) +
 ##       geom_point(aes(shape = Error), alpha = alpha.error) +
@@ -916,6 +936,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 33: fig-pred-points (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## pp <- f.prediction.points(dd)[1:7,]
 ## ## Worked in older ggplot2 -- now  plotmatrix() is gone, to be replaced by GGally::ggpairs):
 ## ## tmp <- plotmatrix(pp)$data
@@ -931,6 +952,7 @@ test.4 <- droplevels(subset(test.1, Method != 'SMDM'))
 ###################################################
 ### code chunk number 34: fig-cpr (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## n.cprs <- names(test.fixed)[grep('cpr', names(test.fixed))]
 ## test.5 <- melt(test.fixed[,c('method.cov', 'Error', 'Psi', n.cprs)])
 ## test.5 <- within(test.5, {
@@ -1016,6 +1038,7 @@ u <- Vectorize(function(epsilon, ...) {
 ###################################################
 ### code chunk number 36: fig-max-asymptotic-bias (eval = FALSE)
 ###################################################
+getOption("SweaveHooks")[["fig"]]()
 ## asymptMBFile <- file.path(robustDta, 'asymptotic.max.bias.Rdata')
 ## if (!file.exists(asymptMBFile)) {
 ##   x <- seq(0, 0.35, length.out = 100)

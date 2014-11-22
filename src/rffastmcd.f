@@ -149,11 +149,12 @@ c
 c      The number of iteration steps in stages 1,2 and 3 can be changed
 c      by adapting the parameters k1, k2, and k3.
 
-      integer k1,k2,k3
+      integer k1,k2,k3, int_max
       parameter (k1=2)
       parameter (k2=2)
       parameter (k3=100)
-
+c int_max: easily recognized, slightly smaller than 2147483647 = .Machine$integer.max
+      parameter (int_max = 2146666666)
 c Arguments
       integer n,nvar ! (n, p)
       integer nhalff ! == quan := h(alpha) >= n/2 "n half"
@@ -162,8 +163,8 @@ c  krep := the total number of trial subsamples
 c          to be drawn when n exceeds 2*nmini;
 c          krep = 0  :<==>  "exact"  <==>  all possible subsamples
 c      was hardcoded krep := 500; now an *argument*
-      integer nmini ! the number of subdatasets   and
-      integer kmini ! their size
+      integer kmini ! the maximal number of subdatasets   and
+      integer nmini ! their minimal size
 
       double precision dat(n,nvar)
       double precision initcov(nvar*nvar), initmean(nvar)
@@ -204,7 +205,7 @@ c Functions from ./rf-common.f :
 c ------------------------------------------------------------------
 
 c Variables
-      integer i,ii,iii, ix, j,jj,jjj, jndex, k,kk,kkk,kstep,
+      integer i,ii,iii, ix, j,jj,jjj, k,kk,kkk,kstep,
      *     l,lll, m,mm,minigr,
      *     nn, ngroup,nhalf,nrep,nsel, nv_2
       double precision bstd, deti,detimin1,dist,dist2, eps,
@@ -216,37 +217,20 @@ c km10, nmaxi: now *variable* as nmini
      *     flag(10*kmini), mini(kmini),
      *     subdat(2, nmini*kmini)
       double precision mcdndex(10,2,kmini)
-c     subndex(): vector of length = maximal value of  mini(j) {j in 1:kmini} below
-c FIXME? Dependent on  kmini == 5 ??
-      integer subndex(nmini * 3 / 2)
+c     subndex: vector of indices;
+c     length(subndex) = maximal value of n_j := mini(j) {j in 1:ngroup} below; n0 := nmini
+c     mini(j) = n1 or n1+1,  where  n0 <= n1 < n_max := max_j n_j <= n1+1 <= 1+ (3 n0 - 1)/2 = (3 n0 + 1)/2
+c     ==> see vignette ../vignettes/fastMcd-kmini.Rnw
+      integer subndex((3*nmini + 1)/ 2)
       double precision med1,med2, percen, pivot,rfmahad,medi2
       logical all,part,fine,final,class
 c     -Wall (false alarm):
       all = .true.
       part= .false.
-
-c  Median of the chi-squared distribution:
-c      data chimed/0.454937,1.38629,2.36597,3.35670,4.35146,
-c     *  5.34812,6.34581,7.34412,8.34283,9.34182,10.34,11.34,12.34,
-c     *  13.34,14.34,15.34,16.34,17.34,18.34,19.34,20.34,21.34,22.34,
-c     *  23.34,24.34,25.34,26.34,27.34,28.34,29.34,30.34,31.34,32.34,
-c     *  33.34,34.34,35.34,36.34,37.34,38.34,39.34,40.34,41.34,42.34,
-c     *  43.34,44.34,45.34,46.34,47.33,48.33,49.33/
-c  The 0.975 quantile of the chi-squared distribution:
-c      data chi2/5.02389,7.37776,9.34840,11.1433,12.8325,
-c     *  14.4494,16.0128,17.5346,19.0228,20.4831,21.920,23.337,
-c     *  24.736,26.119,27.488,28.845,30.191,31.526,32.852,34.170,
-c    *  35.479,36.781,38.076,39.364,40.646,41.923,43.194,44.461,
-c     *  45.722,46.979,48.232,49.481,50.725,51.966,53.203,54.437,
-c     *  55.668,56.896,58.120,59.342,60.561,61.777,62.990,64.201,
-c     *  65.410,66.617,67.821,69.022,70.222,71.420/
-c. consistency correction now happens in R code
-c       data faclts/2.6477,2.5092,2.3826,2.2662,2.1587,
-c.     *  2.0589,1.9660,1.879,1.7973,1.7203,1.6473/
-
+c     Consistency correction now happens in R
 
       if(i_trace .ge. 2) then
-         call intpr('Entering rffastmcd(): krep = nsamp = ',-1,krep,1)
+         call pr1mcd(i_trace, n, nvar, nhalff, krep, nmini, kmini)
       endif
 
       call rndstart
@@ -327,30 +311,27 @@ cc
       fine=.false.
       final=.false.
       do i=1,nmaxi
-         subdat(1,i)=1000000
-         subdat(2,i)=1000000
+         subdat(1,i)=int_max
+         subdat(2,i)=int_max
       end do
-cc
+
 cc  Determine whether the dataset needs to be divided into subdatasets
 cc  or can be treated as a whole. The subroutine rfrdraw constructs
 cc  nonoverlapping subdatasets, with uniform distribution of the case numbers.
 cc  For small n, the number of trial subsamples is determined.
-cc
-c MM(FIXME):  The following code depends crucially on  kmini == 5
 
-      do i=1,kmini
-         mini(i)=0
-      end do
-
-c     partition the data into sub datasets?
+c     part := Shall we partition the data into sub-datasets / "groups"?
       part = (krep.gt.0 .and. n .ge. (2*nmini))
       all = .not. part
       if(part) then
+         do i=1,kmini
+            mini(i)=0
+         end do
          kstep=k1
          ngroup = n / nmini ! =: k = n % nmini (integer division)
-         if(ngroup .le. kmini) then
+         if(ngroup .lt. kmini) then
 c          we distribute n evenly into ngroup subdatasets, of size
-            mm = n / ngroup ! =: N =  n % k ==> rest r = n - k*N = n-k*mm
+            mm = n / ngroup ! =: n_0 =  n % k ==> rest r = n - k*N = n-k*n_0
 c          The rest r in {0,..,k-1} gives one extra obs. in the last r groups, i.e.,
 c          group numbers j > jj := k - r :
             ii = n - ngroup*mm ! =: r
@@ -362,8 +343,7 @@ c          group numbers j > jj := k - r :
                mini(j) = mm +1
             end do
             minigr = ngroup*mm + ii
-         else
-c             ngroup = floor(n/nmini) > kmini :
+         else !  ngroup = k := floor(n/nmini) >= kmini =: k_0 :
             ngroup = kmini
             do j=1,kmini
                mini(j)=nmini
@@ -373,11 +353,8 @@ c             ngroup = floor(n/nmini) > kmini :
 
          nhalf = int(mini(1)*percen)
          nrep = krep / ngroup ! integer division
-         if(i_trace .ge. 2) then
-            call intpr('partitioning into k groups, k = ngroup =',
-     *        -1, ngroup, 1)
-            call intpr('nrep =',-1, nrep,1)
-         endif
+         if(i_trace .ge. 2)
+     +        call prp1mcd (n,ngroup,minigr,nhalf,nrep, mini)
          call rfrdraw(subdat,n,minigr,mini,ngroup,kmini)
       else
 c  "not part" : not partitioning; either  krep == 0  or   n <= 2*nmini-1 ( = 599 by default)
@@ -387,15 +364,18 @@ c  "not part" : not partitioning; either  krep == 0  or   n <= 2*nmini-1 ( = 599
          if(krep.eq.0 .or. n.le.replow(nsel)) then
 c             use all combinations; happens iff  nsel = nvar+1 = p+1 <= 6
             nrep = rfncomb(nsel,n)
-            if(i_trace .ge. 2) then
-               call intpr('will use *all* combinations: ',-1,nrep,1)
-            endif
+            if(i_trace .ge. 2) call intpr('*all* combinations ',-1,0,0)
          else
             nrep=krep
-            all=.false.
+            all = .false.
          endif
       endif
 c     seed=iseed
+
+c     above: pr1mcd(i_trace, n, nvar, nhalff, krep, nmini, kmini)
+      if(i_trace .ge. 2) then
+         call pr2mcd(part, all, kstep, ngroup, minigr, nhalf, nrep)
+      endif
 
 cc
 cc  Some more initializations:
@@ -425,15 +405,15 @@ cc           singular intermediate MCD estimate.
 cc
       do j=1,nvar
          do k=1,10
-            mstock(k,j)=1000000.D0
+            mstock(k,j)=1234567.D0
             do kk=1,kmini
-               m1stock((kk-1)*10+k,j)=1000000.D0
+               m1stock((kk-1)*10+k,j)=1234567.D0
             end do
             do i=1,nvar
                do kk=1,kmini
-                  c1stock((kk-1)*10+k,(j-1)*nvar+i)=1000000.D0
+                  c1stock((kk-1)*10+k,(j-1)*nvar+i)=1234567.D0
                end do
-               cstock(k,(j-1)*nvar+i)=1000000.D0
+               cstock(k,(j-1)*nvar+i)=1234567.D0
             end do
          end do
          means(j)=0.D0
@@ -444,10 +424,10 @@ cc
       do j=1,n
          nmahad(j)=0.D0
          ndist(j)=0.D0
-         index1(j)=1000000
-         index2(j)=1000000
-         indexx(j)=1000000
-         temp(j)=1000000
+         index1(j)=int_max
+         index2(j)=int_max
+         indexx(j)=int_max
+         temp(j)=int_max
       end do
       do j=1,km10
          flag(j)=1
@@ -455,9 +435,8 @@ cc
 
 
  9500 continue
-cc
-cc      ********* Compute the classical estimates **************
-cc
+c==== ********* Compute the classical estimates **************
+c
       call rfcovinit(sscp1,nvar+1,nvar+1)
       do i=1,n
          do j=1,nvar
@@ -513,7 +492,6 @@ cc
       end do
 
 
-
 cc ******* Compute the MCD estimates ************** ----------------------------
 
 cc Main loop: inspects the subsamples.
@@ -522,43 +500,43 @@ cc   its covariance matrix in cova1, and its inverse in cinv1 .
 cc   The minimum covariance determinant matrix is placed in cova2,
 cc   and its inverse in cinv2.
 cc   The robust distances are placed in ndist.
-cc   In the main loop we count the total number of iteration steps
-cc   with the variable tottimes.
+cc
+c    tottimes := counting the total number of iteration steps in the main loop
 cc
 cc   The algorithm returns here twice when the dataset is divided
 cc   at the beginning of the program. According to the situation,
-cc   new initializations are made. The second stage, where the subdatasets
-cc   are merged, is indicated by the logical value fine and
-cc   the last stage, when the whole dataset is considered, by the logical
-cc   variable final. In the last stage, the number of iterations nrep
-cc   is determined according to the total number of observations
-cc   and the dimension.
-cc
+cc   new initializations are made.
+c  fine  == TRUE : <==> We are in the second stage, where the subdatasets are merged,
+c  final == TRUE : <==> We are in the last stage, when the whole dataset is considered
+c     			In the last stage, the number of iterations 'nrep'
+c                       is determined according to the total number of observations and the dimension.
       tottimes=0
- 5555 object=10.D25
 
-      if(i_trace .ge. 2) then
-         call intpr('Main loop - number of trials nrep: ',-1,nrep,1)
-      endif
+ 5555 object=10.D25
 
       if(.not. part .or. final) then
          nn=n
-      else
-c     (part .and. .not. final)
-         if (fine) then
-            nn=minigr
-         endif
+      else if (fine) then !->  part  &  fine  &  .not. final
+         nn=minigr
+      else !->  part - "phase 1" (.not. fine  & .not. final)
+         nn=-1
       endif
+      if(i_trace .ge. 2)  ! " Main loop, phase[%s]: ... "
+     1     call pr3mcd(part, fine, final, nrep, nn,
+     2                 nsel, nhalf, kstep, nmini, kmini)
 
       if(fine .or.(.not.part.and.final)) then
-         nrep=10
-         nsel=nhalf
-         kstep=k2
-         if (final) then
+         nrep = 10
+c        ----   == hardcoded
+         nsel = nhalf
+         kstep = k2
+         if (final) then ! "final": stage 3 --
             nhalf=nhalff
             ngroup=1
+c           ksteps := k3 (= 100) unless n*p is "large" where
+c	    ksteps jumps down to at most 10 <<- "discontinuous!" FIXME
             if (n*nvar .le.100000) then
-               kstep=k3
+               kstep=k3  ! = 100 ("hardcoded default")
             else if (n*nvar .gt.100000 .and. n*nvar .le.200000) then
                kstep=10
             else if (n*nvar .gt.200000 .and. n*nvar .le.300000) then
@@ -577,7 +555,7 @@ c     (part .and. .not. final)
                kstep=3
             else if (n*nvar .gt.900000 .and. n*nvar .le.1000000) then
                kstep=2
-            else
+            else ! n*p > 1e6
                kstep=1
             endif
             if (n.gt.5000) then
@@ -613,7 +591,7 @@ cc
             end do
          end do
       endif
-      if(.not.fine.and..not.final) then
+      if(.not.fine .and. .not.final) then !-- first phase
          do j=1,nvar
             do i=1,n
                am (i)=dat(i,j)
@@ -713,11 +691,11 @@ c---- For-Loop over groups  - - - - - - - - - - - - - - - - - - - - -
          if(.not.fine) kount=0
          if(part .and. .not. fine) then
             nn=mini(ii)
-            jndex=0
+            kk=0
             do j=1,minigr
                if(subdat(2,j).eq.ii) then
-                  jndex=jndex+1
-                  subndex(jndex)=subdat(1,j)
+                  kk=kk+1
+                  subndex(kk)=subdat(1,j)
                endif
             end do
             do j=1,mini(ii)
@@ -727,10 +705,7 @@ c---- For-Loop over groups  - - - - - - - - - - - - - - - - - - - - -
             end do
          endif
 
-         if(i_trace .ge. 2) then
-            call intpr(' -- group ii =',-1, ii, 1)
-            call intpr(' --       nn =',-1, nn, 1)
-         endif
+         if(i_trace .ge. 3) call prgrmcd(ii, nn, i_trace)
          do i=1,nn
             index2(i)=i
          end do
@@ -795,9 +770,7 @@ C        VT::27.10.2014 - an issue with nsamp="exact" fixed:
          do 1000 i=1,nrep
             pnsel=nsel
             tottimes=tottimes+1
-            if(i_trace .ge. 3) then
-               call intpr('in i= 1..nrep loop; i = ',-1,i,1)
-            endif
+            if(i_trace .ge. 4) call pr4mcd(i)
             call rchkusr() ! <- allow user interrupt
             deti= -1.d300
             detimin1=deti
@@ -809,7 +782,7 @@ C        VT::27.10.2014 - an issue with nsamp="exact" fixed:
                else if(all) then
                   call rfgenpn(n,nsel,indexx)
                   do ix=1,n
-                        index1(ix)=indexx(ix)
+                     index1(ix)=indexx(ix)
                   end do
                else
                   call rfrangen(n,nsel,index1)
@@ -827,7 +800,8 @@ cc  (for the third stage).
 cc
 cc  The inverse cinv1 of the covariance matrix is calculated by the
 cc  subroutine rfcovsweep, together with its determinant det.
-cc
+c
+c Repeat
  9550       call rfcovinit(sscp1,nvar+1,nvar+1)
             if(.not.fine.and.part) then
                do j=1,pnsel
@@ -848,7 +822,7 @@ cc
                call rfcovar(pnsel,nvar,sscp1,cova1,means,sd)
             endif
             if (final) then
-               if(mstock(i,1).ne.1000000.D0) then
+               if(mstock(i,1) .ne. 1234567.D0) then
                   do jj=1,nvar
                      means(jj)=mstock(i,jj)
                      do kk=1,nvar
@@ -869,7 +843,7 @@ cc
                endif
             endif
             if (fine .and. .not.final) then
-               if(m1stock((ii-1)*10+i,1).ne.1000000.D0) then
+               if(m1stock((ii-1)*10+i,1) .ne. 1234567.D0) then
                   do jj=1,nvar
                      means(jj)=m1stock((ii-1)*10+i,jj)
                      do kk=1,nvar
@@ -964,7 +938,7 @@ cc
                      call rfshsort(ndist,nn)
                      kount=nhalf
                      do kkk=nhalf+1,nn
-                        if(dabs(ndist(kkk)-0.D0).lt.10.D-8) then
+                        if(dabs(ndist(kkk)-0.D0) .lt. 10.D-8) then
                            kount=kount+1
                         endif
                      end do
@@ -988,15 +962,15 @@ C                 covariance. In case of complete enumeration, when all
 C                 p+1 subsamples are generated, the array 'index1' must
 C                 be preserved 8around label 9550).
 C
-                     if(i_trace .ge. 2) then
-                     call intpr('Singularity-extending the subsample: ',
-     *                   -1,index1,nsel)
-                     endif
+                     if(i_trace .ge. 2)
+     *                call intpr('Singularity -> extended subsample: ',
+     *                    -1,index1,nsel)
 
                      call rfishsort(index1,pnsel)
                      call prdraw(index1,pnsel, nn)
                      pnsel=pnsel+1
                      goto 9550
+c                    --------- until
                   endif
                endif
                call rfcovsweep(cinv1,nvar,j)
@@ -1023,8 +997,8 @@ cc
             end do
             dist2=rffindq(ndist,nn,nhalf,index2)
 cc
-cc  The variable kstep represents the number of iterations. They depend on
-cc  the situation of the program (k1, k2, or k3). Within each
+cc  The variable kstep represents the number of iterations of the current stage (1,2, or 3),
+cc  i.e., the situation of the program, kstep = k1, k2, or k3.  Within each
 cc  iteration the mean and covariance matrix of nhalf observations are
 cc  calculated. The nhalf smallest corresponding mahalanobis distances
 cc  determine the subset for the next iteration.
@@ -1033,9 +1007,7 @@ cc  The iteration stops when two subsequent determinants become equal.
 cc
  9555       do 400 step=1,kstep
                tottimes=tottimes+1
-               if(i_trace .ge. 3) then
-                  call intpr('in step loop, tottimes = ',-1,tottimes,1)
-               endif
+               if(i_trace .ge. 4) call pr5mcd(step, tottimes)
                call rchkusr() ! <- allow user interrupt
                call rfcovinit(sscp1,nvar+1,nvar+1)
                do j=1,nhalf
@@ -1168,6 +1140,7 @@ cc
                   endif
                   call rfcovsweep(cinv1,nvar,j)
  600           continue
+
                if(step.ge.2 .and. det.eq.detimin1) then
                   goto 5000
                endif
@@ -1200,6 +1173,7 @@ cc
                   call rfcovcopy(means,bmeans,nvar,1)
                endif
  400        continue
+            if(i_trace .ge. 4) call intpr("", -1,1,0)
 
 cc  After each iteration, it has to be checked whether the new solution
 cc  is better than some previous one and therefore needs to be stored. This
@@ -1340,9 +1314,9 @@ c---
             endif
 c     (not final)
 
- 1000    continue
+ 1000    continue !end{ i = 1..nrep }
  1111 continue
-c---- - - - - - end [ For-loop -- ii= 1, ngroup  ]  - - - - - - - - -
+c---- - - - - - end [ For (ii = 1 .. ngroup) ]  - - - - - - - - -
 
 cc  Determine whether the algorithm needs to be run again or not.
 cc
@@ -1418,10 +1392,7 @@ cc      cutoff=chi2(nvar)
 cc ******************************************************************
 
  9999 continue
-      if(i_trace .ge. 2) then
-         call intpr('Finishing rffastmcd() - tot.times: ',-1,
-     *        tottimes,1)
-      endif
+      if(i_trace .ge. 2) call pr9mcd(tottimes)
       call rndend
 C     ------ == PutRNGstate() in C
       return
@@ -1762,4 +1733,3 @@ cc
       return
       end
 ccccc
-

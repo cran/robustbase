@@ -71,7 +71,7 @@ covMcd <- function(x,
         stop("Invalid number of trials nsamp = ",nsamp, "!")
 
     if(is.data.frame(x))
-        x <- data.matrix(x)
+	x <- data.matrix(x, rownames.force=FALSE)
     else if (!is.matrix(x))
         x <- matrix(x, length(x), 1,
                     dimnames = list(names(x), deparse(substitute(x))))
@@ -627,8 +627,11 @@ MCDcnp2.rew <- # <- *not* exported, but currently used in pkg rrcovNA
     ##   parameters for partitioning {equal to those in Fortran !!}
     ## kmini <- 5
     ## nmini <- 300
+    stopifnot(length(kmini <- as.integer(kmini)) == 1, kmini >= 2L,
+              length(nmini) == 1, is.finite(nmaxi <- as.double(nmini)*kmini),
+              nmaxi * p < .Machine$integer.max)
+    nmaxi <- as.integer(nmaxi)
     km10 <- 10*kmini
-    nmaxi <- nmini*kmini
 
     ## vt::03.02.2006 - added options "best" and "exact" for nsamp
     ##
@@ -690,7 +693,7 @@ MCDcnp2.rew <- # <- *not* exported, but currently used in pkg rrcovNA
              nhalff =   as.integer(h),
              nsamp  =   as.integer(nsamp), # = 'krep'
              nmini  =   as.integer(nmini),
-	     kmini  =	as.integer(kmini),
+	     kmini  =	kmini,
              initcovariance = double(p * p),
              initmean       = double(p),
              best       = rep.int(as.integer(10000), h),
