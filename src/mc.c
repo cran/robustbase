@@ -43,9 +43,9 @@ void mc_C(double *z, int *in, double *eps, int *iter, double *out)
 
 /* MM:	The tolerance  'eps1' and 'eps2' can now be passed from R;
  *	the original code had only one 'eps' for both and hardcoded
- *	   eps =  0.0000000000001;  /.* == 1e-13 )) *./
- */
-/* MK:  eps1: for (relative) "equality" checks
+ *	   eps =  0.0000000000001;  (== 1e-13 )
+ *
+ * MK:  eps1: for (relative) "equality" checks
  *      eps2: used to check for over- and underflow, respectively
  *      therefore I suggest eps1 = DBL_EPS and eps2 = DBL_MIN
  */
@@ -59,16 +59,20 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
     int trace_lev = iter[1], it = 0;
     Rboolean converged = TRUE;
     double medc; // "the" result
+    static const double Large = DBL_MAX / 4.;
 
     if (n < 3) {
 	medc = 0.; goto Finish;
     }
-    /* copy data before sort()ing in place, also reflecting it */
-    /* NOTE: x[0] is empty --- so 1-indexing is used (MM: danger!) */
+    /* copy data before sort()ing in place, also reflecting it -- dealing with +-Inf.
+       NOTE: x[0] "empty" so we can use 1-indexing below */
     double *x  = (double *) R_alloc(n+1, sizeof(double));
     x[0] = 0;
-    for (int i = 0; i < n; i++)
-	x[i+1] = -z[i];
+    for (int i = 0; i < n; i++) {
+	double zi = z[i];
+	x[i+1] = - ((zi == R_PosInf) ? Large :
+		    (zi == R_NegInf ? -Large : zi));
+    }
 
     R_rsort(&x[1], n); /* full sort */
 
@@ -89,7 +93,7 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
     /* else : median is not at the border ------------------- */
 
     if(trace_lev)
-	Rprintf("mc_C_d(z[1:%d], trace_lev=%d): Median = %g (not at the border)\n", 
+	Rprintf("mc_C_d(z[1:%d], trace_lev=%d): Median = %g (not at the border)\n",
 		n, trace_lev, -xmed);
 
     int i,j;
@@ -113,7 +117,7 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 	j++;
     }
     if(trace_lev >= 2)
-	Rprintf("   x1[] := {x | x_j > x_eps = %g}    has %d (='j-1') entries\n", 
+	Rprintf("   x1[] := {x | x_j > x_eps = %g}    has %d (='j-1') entries\n",
 		x_eps, j-1);
     i = 1;
     double *x2 = x+j-1; /* pointer -- corresponding to  x2[i] = x[j]; */
@@ -204,7 +208,7 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 	    while (j <= h1 && h_kern(x[j],x2[i],j,i,h1+1,eps[1]) - trial > eps_trial) {
 		// while (j <= h1 && h_kern(x[j],x2[i],j,i,h1+1,eps[1]) > trial) {
 		if (trace_lev >= 5)
-		    Rprintf("\nj=%3d, i=%3d, x[j]=%g, x2[i]=%g, h=%g", 
+		    Rprintf("\nj=%3d, i=%3d, x[j]=%g, x2[i]=%g, h=%g",
 			    j, i, x[j], x2[i],
 			    h_kern(x[j],x2[i],j,i,h1+1,eps[1]));
 		j++;
@@ -231,7 +235,7 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 		Rprintf("sum_(p,q)= (%.0f,%.0f)", (double)sum_p, (double)sum_q);
 	    else { /* trace_lev >= 4 */
 		Rprintf("\n%3s p[1:%d]:", "", h2);
-		Rboolean lrg = h2 >= 100; 
+		Rboolean lrg = h2 >= 100;
 		int i_m = lrg ? 95 : h2;
 		for(i = 1; i <= i_m; i++) Rprintf(" %2d", p[i]); if(lrg) Rprintf(" ...");
 		Rprintf(" sum=%4.0f\n%3s q[1:%d]:", (double)sum_p, "", h2);

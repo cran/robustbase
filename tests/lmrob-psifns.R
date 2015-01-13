@@ -2,6 +2,7 @@
 
 library(robustbase)
 source(system.file("xtraR/plot-psiFun.R", package = "robustbase", mustWork=TRUE))
+source(system.file("test-tools-1.R",      package = "Matrix",     mustWork=TRUE))# assert.EQ
 
 ### (1) Test the functions themselves --------------------------------
 if(!dev.interactive(orNone=TRUE)) pdf("rob-psifns.pdf")

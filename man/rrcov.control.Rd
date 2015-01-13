@@ -6,11 +6,12 @@
   estimation functions.
 }
 \usage{
-rrcov.control(alpha = 1/2, nsamp = 500, nmini = 300, kmini = 5,
+rrcov.control(alpha = 1/2, method = c("covMcd", "covComed", "ltsReg"),
+              nsamp = 500, nmini = 300, kmini = 5,
               seed = NULL, tolSolve = 1e-14,
               scalefn = "hrv2012", maxcsteps = 200,
               trace = FALSE,
-              wgtFUN = "01.original",
+              wgtFUN = "01.original", beta,
               use.correction = identical(wgtFUN, "01.original"),
               adjust = FALSE)
 }
@@ -19,6 +20,9 @@ rrcov.control(alpha = 1/2, nsamp = 500, nmini = 300, kmini = 5,
     which the determinant is minimized, i.e., \code{alpha*n} observations
     are used for computing the determinant.  Allowed values are between 0.5
     and 1 and the default is 0.5. }
+  \item{method}{a string specifying the \dQuote{main} function for which
+    \code{rrcov.control()} is used.  This currently only makes a
+    difference to determine the default for \code{beta}.}
   \item{nsamp}{number of subsets used for initial estimates or \code{"best"}
     or \code{"exact"}. Default is \code{nsamp = 500}.
     If \code{nsamp="best"} exhaustive enumeration is done, as far as
@@ -44,9 +48,14 @@ rrcov.control(alpha = 1/2, nsamp = 500, nmini = 300, kmini = 5,
     intermediate results.  Default is \code{trace = FALSE}.}
   \item{wgtFUN}{a character string or \code{\link{function}}, specifying
     how the weights for the reweighting step should be computed, see
-    \code{\link{ltsReg}} or \code{\link{covMcd}}, respectively.  The
-    default, the original 1999 proposal, is specified by
-    \code{"01.original"}, as the resulting weights are 0 or 1.}
+    \code{\link{ltsReg}}, \code{\link{covMcd}} or
+    \code{\link{covComed}}, respectively.  The default is specified by
+    \code{"01.original"}, as the resulting weights are 0 or 1.  Alternative
+    string specifications need to match \code{names(.wgtFUN.covComed)} -
+    which currently is experimental.}
+  \item{beta}{a quantile, experimentally used for some of the prespecified
+    \code{wgtFUN}s, see e.g., \code{\link{.wgtFUN.covMcd}} and
+    \code{\link{.wgtFUN.covComed}}.}
   \item{use.correction}{whether to use finite sample correction factors.
     Defaults to \code{TRUE}.}
   \item{adjust}{(for \code{\link{ltsReg}()}:) whether to perform

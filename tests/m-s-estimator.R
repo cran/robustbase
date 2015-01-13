@@ -2,6 +2,7 @@
 require(robustbase)
 source(system.file("xtraR/m-s_fns.R", package = "robustbase", mustWork=TRUE))
 source(system.file("xtraR/ex-funs.R", package = "robustbase", mustWork=TRUE))
+source(system.file("test-tools-1.R",  package = "Matrix",     mustWork=TRUE))# assert.EQ
 
 ## dataset with factors and continuous variables:
 data(education)

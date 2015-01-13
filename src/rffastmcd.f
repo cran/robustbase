@@ -1331,10 +1331,11 @@ cc
 cc******** end { Main Loop } ************** --------------------------------
 
 
-      do j=1,nhalf
-         temp(j)=inbest(j)
-      end do
-      call rfishsort(temp,nhalf)
+c MM: 'temp' is thrown away in calling R code:
+c      do j=1,nhalf
+c         temp(j)=inbest(j)
+c      end do
+c      call rfishsort(temp,nhalf)
 
       do j=1,nvar
          means(j)=bmeans(j)*mad(j)+med(j)
@@ -1358,10 +1359,11 @@ cc        call rfcovmult(cova1,nvar,nvar,medi2/chimed(nvar))
 cc        call rfcovmult(cova2,nvar,nvar,medi2/chimed(nvar))
 cc        call rfcovmult(cinv2,nvar,nvar,1.D0/(medi2/chimed(nvar)))
 
-      call rfcovmult(cova1,nvar,nvar,medi2/chimed)
-      call rfcovmult(cova2,nvar,nvar,medi2/chimed)
-      call rfcovmult(cinv2,nvar,nvar,1.D0/(medi2/chimed))
-      call rfcovcopy(cova1,adcov,nvar,nvar)
+      medi2 = medi2/chimed
+      call rfcovmult(cova1, nvar,nvar, medi2)
+      call rfcovmult(cova2, nvar,nvar, medi2)
+      call rfcovmult(cinv2, nvar,nvar, 1.D0/medi2)
+      call rfcovcopy(cova1, adcov,nvar,nvar)
 cc
 cc      The MCD location is in bmeans.
 cc      The MCD scatter matrix is in cova2,
@@ -1371,9 +1373,6 @@ cc      For every observation we compute its MCD distance
 cc      and compare it to a cutoff value.
 cc
       call rfcovinit(sscp1,nvar+1,nvar+1)
-
-cc VT:: no need - the cutoff now is passed as a parameter
-cc      cutoff=chi2(nvar)
 
       do i=1,n
          do mm=1,nvar

@@ -28,7 +28,7 @@ mc(x, na.rm = FALSE, doReflect = (length(x) <= 100),
     algorithm (in C) should produce.  No output by default, most output
     for \code{trace.lev = 5}.}
   \item{full.result}{logical indicating if the full return values (from
-    C) should be return, as a list \code{attr(*, "mcComp")}.}
+    C) should be returned as a list via \code{attr(*, "mcComp")}.}
 }
 % \details{
 %   ~~ If necessary, more details than the description above ~~
@@ -39,7 +39,7 @@ mc(x, na.rm = FALSE, doReflect = (length(x) <= 100),
   \code{attr(r, "mcComp")} is a list with components
   \item{medc}{the medcouple  \eqn{mc.(x)}.}
   \item{medc2}{the medcouple \eqn{mc.(-x)} if \code{doReflect=TRUE}.}
-  \item{eps,eps2}{tolerances used.}
+  \item{eps}{tolerances used.}
   \item{iter,iter2}{number of iterations used.}
   \item{converged,converged2}{logical specifying \dQuote{convergence}.}
 }
@@ -52,7 +52,7 @@ mc(x, na.rm = FALSE, doReflect = (length(x) <= 100),
   An adjusted boxplot for skewed distributions.
 }
 \author{Guy Brys; modifications by Tobias Verbeke and bug fixes and
-  extensions by Martin Maechler.
+  extensions by Manuel Koller and Martin Maechler.
 }
 \seealso{\code{\link{Qn}} for a robust measure of scale (aka
   \dQuote{dispersion}), ....

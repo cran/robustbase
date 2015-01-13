@@ -18,8 +18,8 @@
 ### GNU General Public License for more details.
 ###
 ### You should have received a copy of the GNU General Public License
-### along with this program; if not, write to the Free Software
-### Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+### along with this program; if not, a copy is available at
+### http://www.r-project.org/Licenses/
 
 
 ltsReg <- function(x, ...) UseMethod("ltsReg")
@@ -137,6 +137,7 @@ ltsReg.default <- function (x, y, intercept = TRUE,
     if(alpha < 1/2 || alpha > 1)
 	stop("alpha not inside [1/2, 1]")
 
+    ## FIXME: change this analogously to covMcd()'s and covComedian()'s
     ## quantiel <- qnorm(0.9875)
     if(is.character(wgtFUN)) {
 	switch(wgtFUN,

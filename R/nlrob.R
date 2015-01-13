@@ -114,7 +114,7 @@ nlrob <-
     if(missing(upper)) upper <- +Inf
     updateScale <- is.null(scale)
     if(!updateScale) { ## keep initial scale fixed through iterations (e.g. for "MM")
-        if(is.numeric(scale) && length(scale) == 1 && scale > 0)
+	if(is.1num(scale) && scale > 0)
             Scale <- scale
         else
             stop("'scale' must be NULL or a positive number")

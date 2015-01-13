@@ -64,27 +64,3 @@ is.all.equal <- function(x,y, tol = 2e-7, scale = 1) {
     ## scale = x: ensures `relative error' in all cases
     is.logical(r <- all.equal(x,y, tolerance = tol, scale = scale)) && r
 }
-
-## Newer versions of
-##	system.file("test-tools-1.R", package="Matrix")
-## MM = ~/R/Pkgs/Matrix/inst/test-tools-1.R
-##	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  contain this:
-
-identical3 <- function(x,y,z)	  identical(x,y) && identical (y,z)
-identical4 <- function(a,b,c,d)   identical(a,b) && identical3(b,c,d)
-identical5 <- function(a,b,c,d,e) identical(a,b) && identical4(b,c,d,e)
-
-assert.EQ <- function(target, current, tol = if(showOnly) 0 else 1e-15,
-		      giveRE = FALSE, showOnly = FALSE, ...) {
-    ## Purpose: check equality *and* show non-equality
-    ## ----------------------------------------------------------------------
-    ## showOnly: if TRUE, return (and hence typically print) all.equal(...)
-    T <- isTRUE(ae <- all.equal(target, current, tolerance = tol, ...))
-    if(showOnly)
-	return(ae)
-    else if(giveRE && T) { ## don't show if stop() later:
-	ae0 <- if(tol == 0) ae else all.equal(target, current, tolerance = 0, ...)
-	if(!isTRUE(ae0)) writeLines(ae0)
-    }
-    if(!T) stop("all.equal() |-> ", paste(ae, collapse=sprintf("%-19s","\n")))
-}

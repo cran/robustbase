@@ -8,7 +8,11 @@
 options(width=60)
 
 ## number of workers to start
-## options(cores=10)
+if(FALSE) {## good for pkg developers
+    options(cores=  max(1, parallel::detectCores() - 2))
+} else { ## CRAN allows maximum of 2:
+    options(cores= min(2, parallel::detectCores()))
+}
 
 ## Number of Repetitions:
 N <- 1000
@@ -34,6 +38,7 @@ trunc.plot <- c(0.0185, 0.155)
 ###################################################
 ## ## load required packages for graphics
 ## stopifnot(require(ggplot2),
+##           require(GGally),# for ggpairs() which replaces ggplot2::plotmatrix()
 ##           require(grid),
 ##           require(reshape2))
 ## source(file.path(robustDoc, 'graphics.functions.R'))
@@ -154,8 +159,9 @@ getOption("SweaveHooks")[["fig"]]()
 
 
 ###################################################
-### code chunk number 5: lmrob_simulation.Rnw:278-297
+### code chunk number 5: lmrob_simulation.Rnw:283-303
 ###################################################
+
 f.gen <- function(n, p, rep, err) {
   ## get function name and parameters
   lerrfun <- f.errname(err$err)
@@ -181,12 +187,12 @@ for (i in 1:NROW(lsit))
 ### code chunk number 6: fig-example-design (eval = FALSE)
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
-## stopifnot(require("GGally"))# ggpairs() replaces defunct ggplot2::plotmatrix()
+## colnames(rand_25_5) <- paste0("X", 1:5) # workaround new (2014-12) change in GGally
 ## print(ggpairs(rand_25_5, axisLabels="show", title = "rand_25_5: n=25, p=5"))
 
 
 ###################################################
-### code chunk number 7: lmrob_simulation.Rnw:373-374
+### code chunk number 7: lmrob_simulation.Rnw:379-380
 ###################################################
 aggrResultsFile <- file.path(robustDta, "aggr_results.Rdata")
 
@@ -241,26 +247,26 @@ aggrResultsFile <- file.path(robustDta, "aggr_results.Rdata")
 
 
 ###################################################
-### code chunk number 9: lmrob_simulation.Rnw:425-426
+### code chunk number 9: lmrob_simulation.Rnw:431-432
 ###################################################
 str(estlist, 1)
 
 
 ###################################################
-### code chunk number 10: lmrob_simulation.Rnw:431-432
+### code chunk number 10: lmrob_simulation.Rnw:437-438
 ###################################################
 estlist$errs[[1]]
 
 
 ###################################################
-### code chunk number 11: lmrob_simulation.Rnw:438-440 (eval = FALSE)
+### code chunk number 11: lmrob_simulation.Rnw:444-446 (eval = FALSE)
 ###################################################
 ## set.seed(estlist$seed)
 ## errs <- c(sapply(1:nrep, function(x) do.call(fun, c(n = nobs, args))))
 
 
 ###################################################
-### code chunk number 12: lmrob_simulation.Rnw:451-452
+### code chunk number 12: lmrob_simulation.Rnw:457-458
 ###################################################
 str(estlist$output[1:3], 2)
 
@@ -976,7 +982,7 @@ getOption("SweaveHooks")[["fig"]]()
 
 
 ###################################################
-### code chunk number 35: lmrob_simulation.Rnw:1411-1466
+### code chunk number 35: lmrob_simulation.Rnw:1418-1473
 ###################################################
 ## Henning (1994) eq 33:
 g <- Vectorize(function(s, theta, mu, ...) {

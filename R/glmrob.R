@@ -216,8 +216,8 @@ print.summary.glmrob <-
 			format(unlist(x[c("null.deviance", "deviance")]),
 			       digits=max(5, digits + 1)), " on",
 			format(unlist(x[c("df.null", "df.residual")])),
-			" degrees of freedom\n"), 1, paste, collapse=" "),
-	    "\n", sep = "")
+			" degrees of freedom\n"),
+		  1L, paste, collapse=" "), "\n", sep = "")
     else
 	cat("No deviance values available \n")
     correl <- x$correlation

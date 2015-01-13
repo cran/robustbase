@@ -3,8 +3,6 @@
 ##	   ../../tests/psi-rho-etc.R
 ##     and ../../vignettes/psi_functions.Rnw  vignette
 
-source(system.file("xtraR/ex-funs.R", package = "robustbase", mustWork=TRUE))
-
 ## Original Author of functions: Martin Maechler, Date: 13 Aug 2010, 10:17
 
 p.psiFun <- function(x, psi, par, main=FALSE, ...)

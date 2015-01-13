@@ -42,7 +42,7 @@ pairs(radarImage[, 3:5], main = "radarImage (n = 1573)",
 ## Finding outliers -----------------------------------------
 
 set.seed(1)
-system.time(cc.ri <- covMcd(radarImage))# < 0.01 sec
+system.time(cc.ri <- covMcd(radarImage))# ~ 0.1 sec
 ## check for covMcd() consistency:
 iiO <- as.integer(
  c(262, 450:451, 480:481, 509, 535, 542, 597, 643, 669, 697, 803:804, 832:834,

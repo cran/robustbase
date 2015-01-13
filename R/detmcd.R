@@ -50,14 +50,15 @@
 ##' @param warn.nonconv.csteps
 ##' @param warn.wrong.obj.conv
 ##' @param trace
+##' @param names
 ##' @return
-##' @author Valentin Todorov;  tweaks by Martin Maechler
+##' @author Valentin Todorov;  many tweaks by Martin Maechler
 .detmcd <- function(x, h, hsets.init=NULL,
 		    save.hsets = missing(hsets.init), full.h = save.hsets,
 		    scalefn, maxcsteps = 200,
 		    warn.nonconv.csteps = getOption("robustbase:warn.nonconv.csteps", TRUE),
 		    warn.wrong.obj.conv = getOption("robustbase:warn.wrong.obj.conv",FALSE),
-		    trace = as.integer(trace))
+		    trace = as.integer(trace), names = TRUE)
 {
     stopifnot(length(dx <- dim(x)) == 2, h == as.integer(h), h >= 1)
     n <- dx[1]
@@ -114,13 +115,13 @@
         {
             if(j == 1)  {
                 obs_in_set <- hsets.init[1:h,i]     # start with the i-th initial set
-            } else {
+            } else { # now using 'svd' from last step
 		score <- (z - rep(svd$center, each=n)) %*% svd$loadings
                 mah <- mahalanobisD(score, center=FALSE, sd = sqrt(abs(svd$eigenvalues)))
                 obs_in_set <- sort.list(mah)[1:h] #, partial = 1:h not yet
             }
             ## [P,T,L,r,centerX,meanvct] = classSVD(data(obs_in_set,:));
-            svd <- classPC(z[obs_in_set, ,drop=FALSE])
+	    svd <- classPC(z[obs_in_set, ,drop=FALSE], signflip=FALSE)
             obj <- sum(log(svd$eigenvalues))
 
 	    if(svd$rank < p) { ## FIXME --> return exact fit property rather than stop() ??
@@ -173,7 +174,7 @@
     }
     ## reweighting <- FALSE # it happens in covMcd()
     ## if(reweighting) {
-    ##     svd <- classPC(z[bestset, ])    # [P,T,L,r,centerX,meanvct] = classSVD(data(bestset,:));
+    ##     svd <- classPC(z[bestset, ], signflip=FALSE)    # [P,T,L,r,centerX,meanvct] = classSVD(data(bestset,:));
     ##     mah <- mahalanobisD((z - rep(svd$center, each=n)) %*% svd$loadings,
     ##                        FALSE, sqrt(abs(svd$eigenvalues)))
     ##     sortmah <- sort(mah)
@@ -184,8 +185,11 @@
 
     ## We express the results in the original units [restoring var.names]:
     raw.cov <- initcov * tcrossprod(z.scale)
-    dimnames(raw.cov) <- list(vnms, vnms)
-    raw.center <- setNames(initmean * z.scale + z.center, vnms)
+    raw.center <- initmean * z.scale + z.center
+    if(names) {
+	dimnames(raw.cov) <- list(vnms, vnms)
+	names(raw.center) <- vnms
+    }
     raw.objective <- bestobj + 2*sum(log(z.scale)) # log(det = obj.best * prod(z.scale)^2)
     ## raw.mah <- mahalanobis(x, raw.center, raw.cov, tol=1E-14)
     ## medi2 <- median(raw.mah)
@@ -283,21 +287,15 @@ doScale <- function (x, center, scale)
     ## return
     list(x=x, center=center, scale=scale)
 }
-##'  Compute six initial (robust) estimators of location scale,
-##'  for each of them compute the distances and take the h (>= n/2)
-##'  observations with smallest dik. Then compute the statistical
-##'  distances based on these h0 observations. Return the indexes
-##'  of the observations sorted in accending order.
-##'
-##' @title
-##' @param x
-##' @param h
-##' @param hsets.init
-##' @param full.h
-##' @param scaled
-##' @param scalefn
-##' @return
-r6pack <- function(x, h, hsets.init, full.h, scaled=TRUE,
+
+##' @title Robust Distance based observation orderings based on robust "Six pack"
+##' @param x  n x p data matrix
+##' @param h  integer
+##' @param full.h full (length n) ordering or only the first h?
+##' @param scaled is 'x' is already scaled?  otherwise, apply doScale(x, median, scalefn)
+##' @param scalefn function to compute a robust univariate scale.
+##' @return a h' x 6 matrix of indices from 1:n; if(full.h) h' = n else h' = h
+r6pack <- function(x, h, full.h, scaled=TRUE,
                    scalefn = rrcov.control()$scalefn)
 {
     ## As the considered initial estimators Sk may have very
@@ -314,7 +312,7 @@ r6pack <- function(x, h, hsets.init, full.h, scaled=TRUE,
         lambda <- doScale(data %*% P, center=median, scale=scalefn)$scale
         sqrtcov    <- P %*% (lambda * t(P)) ## == P %*% diag(lambda) %*% t(P)
         sqrtinvcov <- P %*% (t(P) / lambda) ## == P %*% diag(1/lambda) %*% t(P)
-        estloc <- apply(data %*% sqrtinvcov, 2L, median) %*% sqrtcov
+	estloc <- colMedians(data %*% sqrtinvcov) %*% sqrtcov
         centeredx <- (data - rep(estloc, each=n)) %*% P
 	sort.list(mahalanobisD(centeredx, FALSE, lambda))[1:h]# , partial = 1:h
     }
@@ -363,7 +361,7 @@ r6pack <- function(x, h, hsets.init, full.h, scaled=TRUE,
 
     ## If the data was not scaled already (scaled=FALSE), center and scale using
     ## the median and the provided function 'scalefn'.
-    if(!scaled) { ## Center and scale the data
+    if(!scaled) { ## Center and scale the data to (0, 1) - robustly
         x <- doScale(x, center=median, scale=scalefn)$x
     }
 
@@ -411,10 +409,10 @@ r6pack <- function(x, h, hsets.init, full.h, scaled=TRUE,
 
     ## Now combine the six pack :
     if(full.h) hsetsN <- matrix(integer(), n, nsets)
-    for(k in 1:nsets)
+    for(k in 1:nsets) ## sort each of the h-subsets in *increasing* Mah.distances
     {
         xk <- x[hsets[,k], , drop=FALSE]
-        svd <- classPC(xk)         # [P,T,L,r,centerX,meanvct] = classSVD(xk)
+	svd <- classPC(xk, signflip=FALSE) # [P,T,L,r,centerX,meanvct] = classSVD(xk)
         if(svd$rank < p) ## FIXME: " return("exactfit")  "
             stop('More than half of the observations lie on a hyperplane.')
         score <- (x - rep(svd$center, each=n)) %*% svd$loadings
@@ -425,5 +423,4 @@ r6pack <- function(x, h, hsets.init, full.h, scaled=TRUE,
     }
     ## return
     if(full.h) hsetsN else hsets
-
 } ## {r6pack}

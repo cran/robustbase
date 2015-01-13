@@ -119,3 +119,6 @@ sigma.nls <- function(object, ...)
 
 ## shortcut -- used often in print() etc:
 pasteK <- function(...) paste(..., collapse = ", ")
+
+## stopifnot(..) helper :
+is.1num <- function(x) is.numeric(x) && length(x) == 1L

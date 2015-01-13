@@ -1,7 +1,7 @@
 
-R Under development (unstable) (2014-07-10 r66124) -- "Unsuffered Consequences"
-Copyright (C) 2014 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin13.1.0 (64-bit)
+R version 3.1.2 Patched (2015-01-12 r67440) -- "Pumpkin Helmet"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-unknown-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -19,6 +19,8 @@ Type 'q()' to quit R.
 > 
 > library(robustbase)
 > source(system.file("xtraR/plot-psiFun.R", package = "robustbase", mustWork=TRUE))
+> source(system.file("test-tools-1.R",      package = "Matrix",     mustWork=TRUE))# assert.EQ
+Loading required package: tools
 > 
 > ### (1) Test the functions themselves --------------------------------
 > if(!dev.interactive(orNone=TRUE)) pdf("rob-psifns.pdf")
@@ -59,7 +61,7 @@ Type 'q()' to quit R.
 +                   lmrob.control(psi = "ggw", tuning.psi = cc)$tuning.psi)
 + )
 > cat('Time for constants computation of tuning.psi: ', st,'\n')
-Time for constants computation of tuning.psi:  0.225 0.001 0.228 0 0 
+Time for constants computation of tuning.psi:  0.202 0.001 0.204 0 0 
 > cGct <- t(sapply(cG.cnst, attr, "constants"))[,-1]
 > colnames(cGct) <- c("a","b","c", "rhoInf")
 > signif(cGct, 4)
@@ -743,8 +745,8 @@ seed : int(0)
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  2.471 0.134 2.607 0.002 0.003 
+Time elapsed:  2.277 0.063 2.41 0 0.003 
 > 
 > proc.time()
    user  system elapsed 
-  2.473   0.137   2.607 
+  2.277   0.066   2.410 

@@ -9,6 +9,7 @@
 ** DONE adjOutlyingness():
 *** DONE change defaults for clower & cupper (E-mail from P.Segaert).
 *** DONE But there is more: +/- swap ==> results not back compatible
+** TODO colMedians() -> ask Henrik/ <maintainer@bioconductor.org> about "License: Artistic-2.0"
 ** TODO nlrob()
 *** TODO summary(nlrob(*)) fails for new methods; better error message or *work*
 **** TODO for "MM" we are close to done; ideally want '$ rweights' (robustness weights) for all meth
@@ -20,6 +21,7 @@ R users already know optim() etc.. so the name seems more logical for them.
 * Short Term
 ** TODO estimethod(): also for lmrob() and glmrob() models
 ** TODO VT implement .detMcd() in C
+** TODO r6pack(milk, ..): *return* singularity message but do not signal an error
 ** TODO nlrob(*):
 *** TODO for the "vector parameter" biomass example in tests/nlrob-tst.R:  method = "MM"
     As we do want the formula to work ==> we *must* allow 'lower' & 'upper' as list()s

@@ -28,12 +28,13 @@ mc <- function(x, na.rm = FALSE,
         x <- x[!ina]
     else if (any(ina))
         return(as.numeric(NA))
+    ## ==> x is NA-free from here on
 
     ## if(length(l.. <- list(...)))
     ##     stop("In mc(): invalid argument(s) : ",
     ##          paste(sQuote(names(l..)), collapse=","), call. = FALSE)
     rr <- mcComp(x, doReflect, eps1=eps1, eps2=eps2,
-                 maxit=maxit, trace.lev = trace.lev)
+                 maxit=maxit, trace.lev=trace.lev)
 
     if(!(conv1 <- rr[["converged"]]) |
        (doReflect && !(conv2 <- rr[["converged2"]]))) {
@@ -53,26 +54,28 @@ mcComp <- function(x, doReflect, eps1 = 1e-13, eps2 = eps1, maxit = 1000,
 
 {
     stopifnot(is.logical(doReflect), length(doReflect) == 1,
-              is.numeric(eps1), length(eps1) == 1, eps1 >= 0,
-              is.numeric(eps2), length(eps2) == 1, eps2 >= 0,
+              is.1num(eps1), eps1 >= 0,
+              is.1num(eps2), eps2 >= 0,
               length(maxit     <- as.integer(maxit)) == 1,
               length(trace.lev <- as.integer(trace.lev)) == 1
               )
+    ## Assumption [from caller, = mc()]: 'x' has no NAs (but can have +-Inf)
     x <- as.numeric(x)
     n <- as.integer(length(x))
     eps <- as.double(c(eps1, eps2))
     c.iter <- c(maxit, trace.lev)
+    ## NAOK=TRUE: to allow  +/- Inf to be passed
     ans <- .C(mc_C, x, n,
               eps = eps, iter = c.iter,
-              medc = double(1))[c("medc", "eps", "iter")]
+              medc = double(1), NAOK=TRUE)[c("medc", "eps", "iter")]
     it <- ans[["iter"]]
     ans[["converged"]] <- it[2] == 1
     ans[["iter"]] <- it[1]
 
     if (doReflect) { ## also compute on reflected data
-        a2 <- .C(mc_C, (max(x) - x), n,
+	a2 <- .C(mc_C, -x, n,
                  eps2 = eps, iter2 = c.iter,
-                 medc2 = double(1))[c("medc2", "eps2", "iter2")]
+                 medc2 = double(1), NAOK=TRUE)[c("medc2", "iter2")]
         it <- a2[["iter2"]]
         a2[["converged2"]] <- it[2] == 1
         a2[["iter2"]] <- it[1]

@@ -6,7 +6,7 @@
 %% everywhere (without quotes but *WITH* the ",")
 
 %\VignetteIndexEntry{Simulations for Robust Regression Inference in Small Samples}
-%\VignetteDepends{robustbase, xtable, ggplot2, RColorBrewer, grid, reshape2}
+%\VignetteDepends{robustbase, xtable, ggplot2,GGally, RColorBrewer, grid, reshape2}
 
 \usepackage{amsmath}
 \usepackage{natbib}
@@ -38,7 +38,11 @@
 options(width=60)
 
 ## number of workers to start
-## options(cores=10)
+if(FALSE) {## good for pkg developers
+    options(cores=  max(1, parallel::detectCores() - 2))
+} else { ## CRAN allows maximum of 2:
+    options(cores= min(2, parallel::detectCores()))
+}
 
 ## Number of Repetitions:
 N <- 1000
@@ -60,6 +64,7 @@ trunc.plot <- c(0.0185, 0.155)
 <<graphics-setup,echo=FALSE,eval=FALSE,results=hide>>=
 ## load required packages for graphics
 stopifnot(require(ggplot2),
+          require(GGally),# for ggpairs() which replaces ggplot2::plotmatrix()
           require(grid),
           require(reshape2))
 source(file.path(robustDoc, 'graphics.functions.R'))
@@ -276,6 +281,7 @@ the ratio to the number of parameters are $p/n = 1/20, 1/10, 1/5, 1/3,
 
 The random datasets are generated using the following code.
 <<results=hide,keep.source=TRUE>>=
+
 f.gen <- function(n, p, rep, err) {
   ## get function name and parameters
   lerrfun <- f.errname(err$err)
@@ -300,8 +306,8 @@ An example design is shown in Fig.~\ref{fig:example.design}.
 
 \begin{figure}
 \begin{center}
-<<fig-example-design,fig=TRUE,include=FALSE,eval=FALSE,echo=FALSE>>=
-stopifnot(require("GGally"))# ggpairs() replaces defunct ggplot2::plotmatrix()
+<<fig-example-design, fig=TRUE, include=FALSE, eval=FALSE, echo=FALSE>>=
+colnames(rand_25_5) <- paste0("X", 1:5) # workaround new (2014-12) change in GGally
 print(ggpairs(rand_25_5, axisLabels="show", title = "rand_25_5: n=25, p=5"))
 @
 \includegraphics{plot-fig-example-design}
@@ -1344,6 +1350,7 @@ print(ggplot(tmp <- subset(test.1, n == 25),
 
 \begin{figure}
 \begin{center}
+%%                                            vvvvv  because of FIXME below
 <<fig-pred-points,fig=TRUE,include=FALSE,eval=FALSE,echo=FALSE>>=
 pp <- f.prediction.points(dd)[1:7,]
 ## Worked in older ggplot2 -- now  plotmatrix() is gone, to be replaced by GGally::ggpairs):

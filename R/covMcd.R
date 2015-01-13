@@ -7,19 +7,19 @@
 ##  I would like to thank Peter Rousseeuw and Katrien van Driessen for
 ##  providing the initial code of this function.
 
-### This program is free software; you can redistribute it and/or modify
-### it under the terms of the GNU General Public License as published by
-### the Free Software Foundation; either version 2 of the License, or
-### (at your option) any later version.
-###
-### This program is distributed in the hope that it will be useful,
-### but WITHOUT ANY WARRANTY; without even the implied warranty of
-### MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-### GNU General Public License for more details.
-###
-### You should have received a copy of the GNU General Public License
-### along with this program; if not, write to the Free Software
-### Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, a copy is available at
+## http://www.r-project.org/Licenses/
 
 ## No longer hidden in namespace :
 ## easier to explain when user-available & documented if
@@ -39,7 +39,7 @@ covMcd <- function(x,
            nsamp = control$ nsamp,
            nmini = control$ nmini, kmini = control$ kmini,
            scalefn=control$scalefn, maxcsteps=control$maxcsteps,
-           initHsets = NULL, save.hsets = FALSE,
+           initHsets = NULL, save.hsets = FALSE, names = TRUE,
            seed  = control$ seed,
            tolSolve = control$ tolSolve, # had 1e-10 hardwired {now 1e-14 default}
            trace = control$ trace,
@@ -47,7 +47,7 @@ covMcd <- function(x,
            wgtFUN = control$ wgtFUN,
            control = rrcov.control())
 {
-    logdet.Lrg <- 50
+    logdet.Lrg <- 50 ## <-- FIXME add to  rrcov.control() and then use that
     ##   Analyze and validate the input parameters ...
     if(length(seed) > 0) {
 	if(length(seed) < 3 || seed[1L] < 100)
@@ -74,15 +74,16 @@ covMcd <- function(x,
 	x <- data.matrix(x, rownames.force=FALSE)
     else if (!is.matrix(x))
         x <- matrix(x, length(x), 1,
-                    dimnames = list(names(x), deparse(substitute(x))))
+                    dimnames = if(names) list(names(x), deparse(substitute(x))))
 
+    if(!names) dimnames(x) <- NULL # (speedup)
     ## drop all rows with missing values (!!) :
     ok <- is.finite(x %*% rep.int(1, ncol(x)))
     x <- x[ok, , drop = FALSE]
     if(!length(dx <- dim(x)))
         stop("All observations have missing values!")
     n <- dx[1]; p <- dx[2]
-    dimn <- dimnames(x)
+    if(names) dimn <- dimnames(x)
     ## h(alpha) , the size of the subsamples
     h <- h.alpha.n(alpha, n, p)
     if(n <= p + 1) # ==> floor((n+p+1)/2) > n - 1  -- not Ok
@@ -105,15 +106,12 @@ covMcd <- function(x,
 	warning("subsample size	 h < n/2  may be too small")
 
     if(is.character(wgtFUN)) {
-	switch(wgtFUN,
-	       "01.original" = {
-		   cMah <- qchisq(0.975, p)
-		   wgtFUN <- function(d) as.numeric(d < cMah)
-	       },
-	       stop("unknown 'wgtFUN' specification: ", wgtFUN))
-    } else if(!is.function(wgtFUN))
-	stop("'wgtFUN' must be a function or a string specifying one")
-
+	if(is.function(mkWfun <- .wgtFUN.covMcd[[wgtFUN]]))
+            wgtFUN <- mkWfun(p=p, n=n, control)
+    }
+    if(!is.function(wgtFUN))
+	stop(gettextf("'wgtFUN' must be a function or one of the strings %s.",
+		      pasteK(paste0('"',names(.wgtFUN.covMcd),'"'))), domain=NA)
 
     ## vt::03.02.2006 - raw.cnp2 and cnp2 are vectors of size 2 and  will
     ##   contain the correction factors (concistency and finite sample)
@@ -132,11 +130,11 @@ covMcd <- function(x,
         obj <- determinant(mcd, logarithm = TRUE)$modulus[1]
         if ( -obj/p > logdet.Lrg ) {
             ans$cov <- mcd
-            dimnames(ans$cov) <- list(dimn[[2]], dimn[[2]])
+	    if(names) dimnames(ans$cov) <- list(dimn[[2]], dimn[[2]])
             if (cor)
                 ans$cor <- cov2cor(ans$cov)
             ans$center <- loc
-            if(length(dimn[[2]]))
+            if(names && length(dimn[[2]]))
                 names(ans$center) <- dimn[[2]]
             ans$n.obs <- n
             ans$singularity <- list(kind = "classical")
@@ -149,7 +147,7 @@ covMcd <- function(x,
             sum.w <- sum(weights)
             ans <- c(ans, cov.wt(x, wt = weights, cor = cor))
             ## cov.wt() -> list("cov", "center", "n.obs", ["wt", "cor"])
-            ## Consistency factor for reweighted MCD
+            ## Consistency factor for reweighted MCD -- ok for default wgtFUN only: FIXME
             if(sum.w != n) {
                 cnp2[1] <- .MCDcons(p, sum.w/n)
                 ans$cov <- ans$cov * cnp2[1]
@@ -168,7 +166,7 @@ covMcd <- function(x,
         ans$quan <- h
         ans$raw.cov <- mcd
         ans$raw.center <- loc
-        if(!is.null(nms <- dimn[[2]])) {
+        if(names && !is.null(nms <- dimn[[2]])) {
             names(ans$raw.center) <- nms
             dimnames(ans$raw.cov) <- list(nms,nms)
         }
@@ -178,27 +176,30 @@ covMcd <- function(x,
                             n, "observations \nare equal to the classical estimates.")
         ans$mcd.wt <- rep.int(NA, length(ok))
         ans$mcd.wt[ok] <- weights
-        if(length(dimn[[1]]))
+        if(names && length(dimn[[1]]))
             names(ans$mcd.wt) <- dimn[[1]]
         ans$wt <- NULL
         ans$X <- x
-        if(length(dimn[[1]]))
-            dimnames(ans$X)[[1]] <- names(ans$mcd.wt)[ok]
-        else
-            dimnames(ans$X) <- list(seq(along = ok)[ok], NULL)
+        if(names) {
+            if(length(dimn[[1]]))
+                dimnames(ans$X)[[1]] <- names(ans$mcd.wt)[ok]
+            else
+                dimnames(ans$X) <- list(seq(along = ok)[ok], NULL)
+        }
         if(trace)
             cat(ans$method, "\n")
         ans$raw.cnp2 <- raw.cnp2
         ans$cnp2 <- cnp2
         class(ans) <- "mcd"
         return(ans)
-    } ## end {alpha=1} --
+    } ## end { alpha = 1   <==>   h = n }
 
     mcd <- if(nsamp == "deterministic") {
 	ans$method <- paste("Deterministic", ans$method)
 	.detmcd (x, h, hsets.init = initHsets,
 		 save.hsets=save.hsets, # full.h=full.h,
-		 scalefn=scalefn, maxcsteps=maxcsteps, trace=as.integer(trace))
+		 scalefn=scalefn, maxcsteps=maxcsteps, trace=as.integer(trace),
+		 names=names)
     } else {
 	ans$method <- paste0("Fast ", ans$method, "; nsamp = ", nsamp,
 			     "; (n,k)mini = (", nmini,",",kmini,")")
@@ -223,7 +224,7 @@ covMcd <- function(x,
             ans$n.obs <- n
             ans$alpha <- alpha
             ans$quan <- h
-            if(!is.null(nms <- dimn[[2]][1])) {
+            if(names && !is.null(nms <- dimn[[2]][1])) {
                 names(ans$raw.center) <- names(ans$center) <- nms
                 dimnames(ans$raw.cov) <- dimnames(ans$cov) <- list(nms,nms)
             }
@@ -246,7 +247,7 @@ covMcd <- function(x,
             ans$quan <- h
             ans$raw.cov <- as.matrix(scale^2)
             ans$raw.center <- as.vector(center)
-            if(!is.null(nms <- dimn[[2]][1])) {
+            if(names && !is.null(nms <- dimn[[2]][1])) {
                 dimnames(ans$raw.cov) <- list(nms,nms)
                 names(ans$raw.center) <- nms
             }
@@ -273,7 +274,7 @@ covMcd <- function(x,
         ans$cov <- ans$raw.cov <- mcd$initcovariance
         ans$center <- ans$raw.center <- as.vector(mcd$initmean)
 
-        if(!is.null(nms <- dimn[[2]])) {
+        if(names && !is.null(nms <- dimn[[2]])) {
             dimnames(ans$cov) <- list(nms, nms)
             names(ans$center) <- nms
         }
@@ -299,7 +300,7 @@ covMcd <- function(x,
 	}
         ans$alpha <- alpha
         ans$quan <- h
-        if(!is.null(nms <- dimn[[2]])) {
+        if(names && !is.null(nms <- dimn[[2]])) {
             names(ans$raw.center) <- nms
             dimnames(ans$raw.cov) <- list(nms,nms)
         }
@@ -334,19 +335,19 @@ covMcd <- function(x,
         ans$quan <- h
         ans$raw.cov <- mcd$initcovariance
         ans$raw.center <- as.vector(mcd$initmean)
-        if(!is.null(nms <- dimn[[2]])) {
+        if(names && !is.null(nms <- dimn[[2]])) {
             names(ans$raw.center) <- nms
             dimnames(ans$raw.cov) <- list(nms,nms)
         }
         ans$raw.weights <- weights
         ans$crit <- mcd$mcdestimate # now in log scale!
-        ans$raw.mah <- mahalanobis(x, ans$raw.center, ans$raw.cov, tol = tolSolve)
-
+        ## 'mah' already computed above
+        ans$raw.mah <- mah ## mahalanobis(x, ans$raw.center, ans$raw.cov, tol = tolSolve)
         ## Check if the reweighted scatter matrix is singular.
         if(sing.rewt || - determinant(ans$cov, logarithm = TRUE)$modulus[1]/p > logdet.Lrg) {
 	    ans$singularity <- list(kind = paste0("reweighted.MCD",
 				    if(sing.rewt)"(zero col.)"))
-            ans$mah <- ans$raw.mah
+	    ans$mah <- mah
         }
         else {
             mah <- mahalanobis(x, ans$center, ans$cov, tol = tolSolve)
@@ -359,14 +360,16 @@ covMcd <- function(x,
 
     ans$mcd.wt <- rep.int(NA, length(ok))
     ans$mcd.wt[ok] <- weights
-    if(length(dimn[[1]]))
-        names(ans$mcd.wt) <- dimn[[1]]
-    ans$wt <- NULL
-    if(length(dimn[[1]]))
-        dimnames(x)[[1]] <- names(ans$mcd.wt)[ok]
-    else
-        dimnames(x) <- list(seq(along = ok)[ok], NULL)
+    if(names) {
+	if(length(dimn[[1]]))
+	    names(ans$mcd.wt) <- dimn[[1]]
+	if(length(dimn[[1]]))
+	    dimnames(x)[[1]] <- names(ans$mcd.wt)[ok]
+	else
+	    dimnames(x) <- list(seq(along = ok)[ok], NULL)
+    }
     ans$X <- x
+    ans$wt <- NULL
     if(trace)
         cat(ans$method, "\n")
     ans$raw.cnp2 <- raw.cnp2
@@ -381,6 +384,61 @@ covMcd <- function(x,
     ## return
     ans
 } ## {covMcd}
+
+smoothWgt <- function(x, c, h) {
+    ## currently drops all attributes, dim(), names(), etc
+    ## maybe add 'keep.attributes = FALSE' (and pass to C)
+    .Call(R_wgt_flex, x, c, h)
+}
+
+##' Martin Maechler's simple proposal for an *adaptive* cutoff
+##' i.e., one which does *not* reject outliers in good samples asymptotically
+.MCDadaptWgt.c <- function(n,p) {
+    eps <- 0.4 / n ^ 0.6 # => 1-eps(n=100) ~= 0.975; 1-eps(n=10) ~= 0.90
+    ## using upper tail:
+    qchisq(eps, p, lower.tail=FALSE)
+}
+
+
+## Default wgtFUN()s :
+.wgtFUN.covMcd <-
+    list("01.original" = function(p, ...) {
+	     cMah <- qchisq(0.975, p)
+	     function(d) as.numeric(d < cMah)
+	 },
+	 "01.flex" = function(p, n, control) { ## 'control$beta' instead of 0.975
+	     ## FIXME: update rrcov.control() to accept 'beta'
+	     stopifnot(is.1num(beta <- control$beta), 0 <= beta, beta <= 1)
+	     cMah <- qchisq(beta, p)
+	     function(d) as.numeric(d < cMah)
+	 },
+	 "01.adaptive" = function(p, n, ...) { ## 'beta_n' instead of 0.975
+	     cMah <- .MCDadaptWgt.c(n,p)
+	     function(d) as.numeric(d < cMah)
+	 },
+	 "sm1.orig" = function(p, n, ...) {
+	     cMah <- qchisq(0.975, p)
+	     function(d) smoothWgt(d, c = cMah, h = 1)
+	 },
+	 "sm2.orig" = function(p, n, ...) {
+	     cMah <- qchisq(0.975, p)
+	     function(d) smoothWgt(d, c = cMah, h = 2)
+	 },
+	 "sm1.adaptive" = function(p, n, ...) {
+	     cMah <- .MCDadaptWgt.c(n,p)
+	     function(d) smoothWgt(d, c = cMah, h = 1)
+	 },
+	 "sm2.adaptive" = function(p, n, ...) {
+	     cMah <- .MCDadaptWgt.c(n,p)
+	     function(d) smoothWgt(d, c = cMah, h = 2)
+	 },
+	 "smE.adaptive" = function(p, n, ...) {
+	     cMah <- .MCDadaptWgt.c(n,p)
+	     ## TODO: find "theory" for h = f(cMah), or better c=f1(n,p); h=f2(n,p)
+	     function(d) smoothWgt(d, c = cMah, h = max(2, cMah/4))
+	 }
+	 )
+
 
 .MCDsingularityMsg <- function(singList, n.obs)
 {
@@ -628,7 +686,7 @@ MCDcnp2.rew <- # <- *not* exported, but currently used in pkg rrcovNA
     ## kmini <- 5
     ## nmini <- 300
     stopifnot(length(kmini <- as.integer(kmini)) == 1, kmini >= 2L,
-              length(nmini) == 1, is.finite(nmaxi <- as.double(nmini)*kmini),
+              is.1num(nmini), is.finite(nmaxi <- as.double(nmini)*kmini),
               nmaxi * p < .Machine$integer.max)
     nmaxi <- as.integer(nmaxi)
     km10 <- 10*kmini
@@ -684,7 +742,7 @@ MCDcnp2.rew <- # <- *not* exported, but currently used in pkg rrcovNA
 
     ##   Allocate temporary storage for the Fortran implementation,
     ##   directly in the .Fortran() call.
-    ##    (if we used C, we'd rather allocate there, and be quite faster!)
+    ##    (if we used C + .Call() we would allocate all there, and be quite faster!)
 
     .Fortran(rffastmcd,
              x = if(is.double(x)) x else as.double(x),

@@ -19,11 +19,11 @@
 ## -----------
 
 ## 1)   Use  *transposed*  B[] and A[] (now called 'E') matrices   -- DONE
-
 ## 2)   use  IQR() instead of   quantile(., .75) - quantile(., .25)
 
 ##-->  but only *after* testing original code
 ##     ^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 adjOutlyingness <- function(x, ndir=250, clower=4, cupper=3,
                             alpha.cutoff = 0.75, coef = 1.5, qr.tol = 1e-12,
@@ -68,7 +68,7 @@ adjOutlyingness <- function(x, ndir=250, clower=4, cupper=3,
         ##    nrich1=n*(n-1)/2;
         ##    ndirect=min(250,nrich1);
         ##    true = (ndirect == nrich1);
-        ##    B=extradir(x,ndir,seed,true); %n*ri
+        ##    B=extradir(x,ndir,seed,true); % n*ri
         ##      ======== % Calculates ndirect directions through
         ##               % two random choosen data points from data
         ##    for i=1:size(B,1)
@@ -82,19 +82,24 @@ adjOutlyingness <- function(x, ndir=250, clower=4, cupper=3,
     Y <- x %*% A # (n x p) %*% (p, ndir) == (n x ndir)
 
     ## Compute and sweep out the median
-    med <- apply(Y, MARGIN = 2, median)
+    med <- colMedians(Y)
     Y <- Y - rep(med, each=n)
-    ## MM: mc() could be made faster if we could tell it that med(..) = 0
-    tmc <- apply(Y, MARGIN = 2, mc) ## original Antwerpen *wrongly*: tmc <- mc(Y)
-    ##                          ==
-    Q3 <-  apply(Y, MARGIN = 2, quantile, 0.75)
-    Q1 <-  apply(Y, MARGIN = 2, quantile, 0.25)
-    IQR <- Q3-Q1
+    ## central :<==> non-adjusted  <==> "classical" outlyingness
+    central <- clower == 0 && cupper == 0
+    if(!central)
+        ## MM: mc() could be made faster if we could tell it that med(..) = 0
+        tmc <- apply(Y, 2, mc) ## original Antwerpen *wrongly*: tmc <- mc(Y)
+    ##                     ==
+    Q13 <- apply(Y, 2, quantile, c(.25, .75), names=FALSE)
+    Q1 <- Q13[1L,]; Q3 <- Q13[2L,]
+    IQR <- Q3 - Q1
     ## NOTA BENE(MM): simplified definition of tup/tlo here and below
     ## 2014-10-18: "flipped" sign (which Pieter Setaert (c/o Mia H) proposed, Jul.30,2014:
-    tup <- Q3 + coef*IQR*exp( cupper*tmc*(tmc >= 0) + clower*tmc*(tmc < 0))
-    tlo <- Q1 - coef*IQR*exp(-clower*tmc*(tmc >= 0) - cupper*tmc*(tmc < 0))
-    ## Note: all(tlo < med & med < tup)
+    tup <- Q3 + coef*
+	(if(central) IQR else IQR*exp( cupper*tmc*(tmc >= 0) + clower*tmc*(tmc < 0)))
+    tlo <- Q1 - coef*
+	(if(central) IQR else IQR*exp(-clower*tmc*(tmc >= 0) - cupper*tmc*(tmc < 0)))
+    ## Note: all(tlo < med & med < tup) # where med = 0
 
     ## Instead of the loop:
     ##  for (i in 1:ndir) {
@@ -111,23 +116,23 @@ adjOutlyingness <- function(x, ndir=250, clower=4, cupper=3,
     tlo <- -apply(Ylo, 2, min) # = -min{ Y[i,] ; Y[i,] > tlo[i] }
 
     tY <- t(Y)
-    Ypos <- (tY >= 0) ## note that all column-wise medians are 0
+    ## Note: column-wise medians are all 0 : "x_i > m" <==> y > 0
     ## Note: this loop is pretty fast
-    for (j in 1:n)
-        tY[, j] <- abs(tY[,j]) / (Ypos[,j]*tup + (1 - Ypos[,j])*tlo)
-    ## FIXME -- what if denominator is 0 ? happens often in small samples
-    ##	 e.g in  set.seed(3); adjOutlyingness(longley)
-    ## even  have  0/0 -> NaN there  --> is.finite(.) below.. hmm, FIXME!
-
+    for (j in 1:n) { # when y = (X-med) = 0  ==> adjout = 0 rather than
+	## 0 / 0 --> NaN; e.g, in  set.seed(3); adjOutlyingness(longley)
+	non0 <- 0 != (y <- tY[,j]); y <- y[non0]; I <- (y > 0)
+	tY[non0, j] <- abs(y) / (I*tup[non0] + (1 - I)*tlo[non0])
+    }
+    ## We get +Inf above for "small n"; e.g. set.seed(11); adjOutlyingness(longley)
     adjout <- apply(tY, 2, function(x) max(x[is.finite(x)]))
 
     if(only.outlyingness)
 	adjout
     else {
 	Qadj <- quantile(adjout, probs = c(1 - alpha.cutoff, alpha.cutoff))
-	mcadjout <- mc(adjout)
-	##	    ===
-	cutoff <- Qadj[2] + coef* (Qadj[2] - Qadj[1])*
+	mcadjout <- if(cupper != 0) mc(adjout) else 0
+	##			    ===
+	cutoff <- Qadj[2] + coef * (Qadj[2] - Qadj[1]) *
 	    (if(mcadjout > 0) exp(cupper*mcadjout) else 1)
 
 	list(adjout = adjout, iter = it,

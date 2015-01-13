@@ -1,6 +1,7 @@
 stopifnot(require("robustbase"))
 ## testing functions:
-source(system.file("xtraR/ex-funs.R", package = "robustbase"))
+source(system.file("test-tools-1.R",  package = "Matrix", mustWork=TRUE))# assert.EQ
+
 c.time <- function(...) cat('Time elapsed: ', ..., '\n')
 S.time <- function(expr) c.time(system.time(expr))
 showProc.time <- local({ ## function + 'pct' variable

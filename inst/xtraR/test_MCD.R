@@ -3,6 +3,7 @@
 
 ## "workhorse" -- by default *passed* to and called from doMCDdata():
 domcd1 <- function(x, xname, nrep = 1,
+                   ## These are all got from doMCDdata() [yuck!]
                    method = get("method", parent.frame()), # compromise
                    time	 = get("time",	 parent.frame()), # compromise
                    short = get("short",	 parent.frame()), # compromise
@@ -82,7 +83,7 @@ doMCDdata <- function(nrep = 1, method = c("FASTMCD", "MASS", "DetMCD"),
 {
     stopifnot(is.function(domcd), length(formals(domcd)) >= 3)
     options(digits = digits)
-    method <- match.arg(method)
+    method <- match.arg(method) # *is* then accessed from domcd(.)
 
     stopifnot(require("robustbase")) # all data() which do not specify package
 

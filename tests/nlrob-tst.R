@@ -1,6 +1,6 @@
 library(robustbase)
 
-source(system.file("xtraR/ex-funs.R", package = "robustbase"))
+source(system.file("test-tools-1.R",  package = "Matrix", mustWork=TRUE))
 ## -> assert.EQ(), identical3(), ..
 
 DNase1 <- DNase[ DNase$Run == 1, ]

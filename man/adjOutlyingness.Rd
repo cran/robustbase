@@ -1,6 +1,6 @@
 \name{adjOutlyingness}
 \alias{adjOutlyingness}
-\title{Compute Skewness-adjusted Multivariate Outlyingness}
+\title{Compute (Skewness-adjusted) Multivariate Outlyingness}
 \newcommand{\CRANpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
 \description{
   For an \eqn{n \times p}{n * p} data matrix (or data frame) \code{x},
@@ -19,8 +19,10 @@ adjOutlyingness(x, ndir = 250, clower = 4, cupper = 3,
   \item{ndir}{positive integer specifying the number of directions that
     should be searched.}
   \item{clower, cupper}{the constant to be used for the lower and upper
-    tails, in order to transform the data towards symmetry.}
-  %%% MM: How can I modify it to the  *NON*-adjusted case ?
+    tails, in order to transform the data towards symmetry.  You can set
+    \code{clower = 0, cupper = 0} to get the \emph{non}-adjusted,
+    i.e., classical (\dQuote{central} or \dQuote{symmetric})
+    outlyingness.  In that case, \code{\link{mc}()} is not used.}
   \item{alpha.cutoff}{number in (0,1) specifying the quantiles
     \eqn{(\alpha, 1-\alpha)} which determine the \dQuote{outlier}
     cutoff.  The default, using quartiles, corresponds to the definition
@@ -126,6 +128,13 @@ if(interactive()) {
   }
 }
 
+## "Central" outlyingness: *not* calling mc()  anymore, since 2014-12-11:
+trace(mc)
+out <- capture.output(
+  oo <- adjOutlyingness(hbk, clower=0, cupper=0)
+)
+untrace(mc)
+stopifnot(length(out) == 0)
 }
 \keyword{robust}
 \keyword{multivariate}

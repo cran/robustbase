@@ -349,6 +349,10 @@ The optimal $\psi$ function as given by \citet[Section~5.9.1]{MarRMY06},
 where $\varphi$ is the standard normal density, $c$ is a constant and $t_+ :=
 \max(t, 0)$ denotes the positive part of $t$.
 
+Note that the \pkg{robustbase} implementation uses rational approximations
+originating from the \pkg{robust} package's implementation.
+That approximation also avoids an anomaly for small
+
 The constant for $95\%$ efficiency of the regression estimator is $1.060$ and
 the constant for a breakdown point of $0.5$ of the S-estimator is
 $0.405$.
