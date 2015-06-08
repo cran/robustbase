@@ -39,7 +39,7 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
 
   \item{method}{string specifying the estimator-chain. \code{MM}
     is interpreted as \code{SM}.  See \emph{Details}, notably the
-    currently recommended \code{setting = "KS2011"}.}
+    currently recommended \code{setting = "KS2014"}.}
 
   \item{model, x, y}{logicals.  If \code{TRUE} the corresponding
     components of the fit (the model frame, the model matrix, the
@@ -77,8 +77,8 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
 
       The argument \code{setting} of \code{\link{lmrob.control}} is provided
       to set alternative defaults as suggested in Koller and Stahel (2011)
-      (use \code{setting="KS2011"}).  For details, see
-      \code{\link{lmrob.control}}.
+      (use \code{setting="KS2011"}, or its extension
+      \code{setting="KS2014"}).  For details, see \code{\link{lmrob.control}}.
     }
     \item{Initial Estimator \code{init}:}{
       The initial estimator may be specified using the argument

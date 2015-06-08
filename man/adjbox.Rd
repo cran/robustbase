@@ -126,17 +126,14 @@ adjbox(x, \dots)
   \item{names}{a vector of names for the groups.}
 }
 \references{
-  Vandervieren, E., Hubert, M. (2004)
-  An adjusted boxplot for skewed distributions, in:
-  Antoch, J., ed. (2004).
-  \emph{Proceedings in Computational Statistics} 2004;
-  Heidelberg: Springer-Verlag, 1933--1940.
+%% Hubert, M. and Vandervieren, E. (2006)
+%% \emph{An Adjusted Boxplot for Skewed Distributions},
+%% Technical Report TR-06-11, KU Leuven, Section of Statistics, Leuven.
+%% \url{http://wis.kuleuven.be/stat/robust/Papers/TR0611.pdf}
 
-  Hubert, M. and Vandervieren, E. (2006)
-  \emph{An Adjusted Boxplot for Skewed Distributions},
-  Technical Report TR-06-11, KU Leuven, Section of Statistics, Leuven.
-  \cr
-  \url{http://wis.kuleuven.be/stat/robust/Papers/TR0611.pdf}
+  Hubert, M. and Vandervieren, E. (2008).
+  An adjusted boxplot for skewed distributions,
+  \emph{Computational Statistics and Data Analysis} \bold{52}, 5186--5201.
 }
 \author{ R Core Development Team, slightly adapted by Tobias Verbeke }
 \note{ The code and documentation only slightly modifies the code of

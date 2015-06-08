@@ -110,12 +110,15 @@ doExtras <- function() {
         identical("true", unname(Sys.getenv("R_PKG_CHECKING_doExtras")))
 }
 
-sigma <- function(object, ...) UseMethod("sigma")
+if(getRversion() < "3.3") {
+    sigma <- function(object, ...) UseMethod("sigma")
 
-## For completeness, and when comparing with nlrob() results:
-sigma.nls <- function(object, ...)
-    ## sqrt (  sum( R_i ^ 2) / (n - p) ) :
-    sqrt( deviance(object) / (nobs(object) - length(coef(object))) )
+    ## For completeness, and when comparing with nlrob() results:
+    sigma.nls <- function(object, ...)
+	## sqrt (  sum( R_i ^ 2) / (n - p) ) :
+	sqrt( deviance(object) / (nobs(object) - length(coef(object))) )
+}
+
 
 ## shortcut -- used often in print() etc:
 pasteK <- function(...) paste(..., collapse = ", ")

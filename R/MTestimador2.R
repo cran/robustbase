@@ -206,15 +206,16 @@ betaExacto <- function(x,y)
         return(rep(NA_real_, p))
     }
     ## else --  glm() succeeded
-    if(FALSE) { ## original; MM finds it unneeded
-        beta. <- fitE $ coefficients
-        sinNas <- na.exclude(beta.)
-        long <- length(sinNas)
-        lugaresNas <- na.action(sinNas)[1:(p-long)]
-        beta.SinNas <- beta.
-        beta.SinNas[lugaresNas] <- 0
-        beta.SinNas
-    }
+
+    ## if_needed_--  MM finds it unneeded
+    ## beta. <- fitE $ coefficients
+    ## sinNas <- na.exclude(beta.)
+    ## long <- length(sinNas)
+    ## lugaresNas <- na.action(sinNas)[1:(p-long)]
+    ## beta.SinNas <- beta.
+    ## beta.SinNas[lugaresNas] <- 0
+    ## beta.SinNas
+
     fitE $ coefficients
 }
 

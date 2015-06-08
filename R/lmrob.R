@@ -81,7 +81,7 @@ lmrob <-
 		y0 <- if (ny > 1L) y[nok, , drop = FALSE] else y[nok]
 		y  <- if (ny > 1L) y[ ok, , drop = FALSE] else y[ok]
                 ## add this information to model.frame as well
-                ## need it in outlierStats.R
+                ## need it in outlierStats()
                 ## ?? could also add this to na.action, then
                 ##    naresid() would pad these as well.
                 attr(mf, "zero.weights") <- which(nok)

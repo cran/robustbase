@@ -28,12 +28,7 @@
   Comparing rules for truncating hospital length of stay;
   \emph{Casemix Quarterly} \bold{2}, n. 1.
 
-% identical in ./adjbox.Rd :
-  Hubert, M. and Vandervieren, E. (2006)
-  \emph{An Adjusted Boxplot for Skewed Distributions},
-  Technical Report TR-06-11, KU Leuven, Section of Statistics, Leuven.
-  \cr
-  \url{http://wis.kuleuven.be/stat/robust/Papers/TR0611.pdf}
+  See also those for \code{\link{adjbox}}.
 }
 \examples{
  summary(los) # quite skewed, with median(.) = 8

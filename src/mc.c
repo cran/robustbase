@@ -112,7 +112,7 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 
     j = 1;
     double x_eps = eps[0] * (eps[0] + fabs(xmed));
-    while (x[j] > x_eps && j <= n) { /* test relative to xmed */
+    while (j <= n && x[j] > x_eps) { /* test relative to xmed */
 	/* x1[j] = x[j]; */
 	j++;
     }
@@ -121,7 +121,7 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 		x_eps, j-1);
     i = 1;
     double *x2 = x+j-1; /* pointer -- corresponding to  x2[i] = x[j]; */
-    while (x[j] > -x_eps && j <= n) { /* test relative to xmed */
+    while (j <= n && x[j] > -x_eps) { /* test relative to xmed */
 	/* x1[j] = x[j]; */
         /* x2[i] = x[j]; */
         j++;

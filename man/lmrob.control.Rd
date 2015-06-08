@@ -165,7 +165,7 @@ lmrob.control(setting, seed = NULL, nResample = 500,
   The option \code{setting="KS2014"} builds upon \code{setting="KS2011"}.
   More arguments are changed to \code{best.r.s = 20, k.fast.s = 2,
   nResample = 1000}.  This setting should produce more stable estimates
-  for designs with factors.
+  for designs with \code{\link{factor}}s.
 
   By default, and in \code{.Mpsi.tuning.default()} and \code{.Mchi.tuning.default()},
   \code{tuning.chi} and \code{tuning.psi} are set to yield an

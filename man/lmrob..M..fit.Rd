@@ -23,7 +23,7 @@ lmrob..M..fit(x, y, beta.initial, scale, control, obj, mf = obj$model)
       "method")} are accessed.}
   \item{obj}{an optional \code{lmrob}-object.  If specified, this is used to
     set values for the other arguments.}
-  \item{mf}{(optional) a model frame as returned by \code{\link{model.frame}}, 
+  \item{mf}{(optional) a model frame as returned by \code{\link{model.frame}},
     used only to compute outlier statistics, see \code{\link{outlierStats}}.}
 }
 \details{
@@ -74,7 +74,7 @@ m2 <- lmrob(stack.loss ~ ., data = stackloss, method = 'SMD')
 m3 <- lmrob..M..fit(obj = m2)
 
 ## Simple function that allows custom initial estimates
-## (Deprecated use init argument to lmrob() instead.) %% MM: why deprecated?
+## (Deprecated; use init argument to lmrob() instead.) %% MM: why deprecated?
 lmrob.custom <- function(x, y, beta.initial, scale, terms) {
   ## initialize object
   obj <- list(control = lmrob.control("KS2011"),

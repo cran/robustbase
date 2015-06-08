@@ -821,7 +821,7 @@ lmrob.tau <- function(obj, x=obj$x, control = obj$control, h, fast = TRUE)
     ## kappa
     kappa <- if(is.null(obj$kappa)) lmrob.kappa(obj, control) else obj$kappa
     ## local variables
-    n <- length(h)
+    ## n <- length(h)
     ## set psi and cpsi
     psi <- control$psi
     if (is.null(psi)) stop('parameter psi is not defined')
@@ -833,11 +833,11 @@ lmrob.tau <- function(obj, x=obj$x, control = obj$control, h, fast = TRUE)
     ## constant for stderr of u_{-i} part and other constants
     inta <- function(r) .Mpsi(r, cpsi, ipsi)^2          * dnorm(r)
     intb <- function(r) .Mpsi(r, cpsi, ipsi, deriv = 1) * dnorm(r)
-    intc <- function(r) .Mpsi(r, cpsi, ipsi) * r        * dnorm(r)
+    ## intc <- function(r) .Mpsi(r, cpsi, ipsi) * r        * dnorm(r)
                                         # changed from psi/e to psi*e
     ta <- integrate(inta, -Inf,Inf)$value
     tb <- integrate(intb, -Inf,Inf)$value
-    tE <- integrate(intc, -Inf,Inf)$value
+    ## tE <- integrate(intc, -Inf,Inf)$value
 
     ## calculate tau for unique h
     hu <- unique(h)
@@ -1002,8 +1002,7 @@ lmrob.ggw.finda <- function(ms, b, c, ...) ## find a constant
 lmrob.ggw.ac <- function(a, b, c) ## calculate asymptotic efficiency
 {
     ipsi <- .psi2ipsi('ggw')
-    abc <- c(0, a, b, c)
-    ccc <- c(abc, 1)
+    ccc <- c(0, a, b, c, 1)
     lmrob.E(.Mpsi(r, ccc, ipsi, deriv=1), use.integrate = TRUE)^2 /
     lmrob.E(.Mpsi(r, ccc, ipsi) ^2,       use.integrate = TRUE)
 }
@@ -1011,9 +1010,8 @@ lmrob.ggw.ac <- function(a, b, c) ## calculate asymptotic efficiency
 lmrob.ggw.bp <- function(a, b, c, ...) { ## calculate kappa
     ipsi <- .psi2ipsi('ggw')
     abc <- c(0, a, b, c)
-    ccc <- c(abc, 1)
-    ccc[[5]] <- nc <- integrate(.Mpsi, 0, Inf, ccc=ccc, ipsi=ipsi, ...)$value
-    lmrob.E(.Mchi(r, ccc, ipsi), use.integrate = TRUE)
+    nc <- integrate(.Mpsi, 0, Inf, ccc = c(abc, 1), ipsi=ipsi, ...)$value
+    lmrob.E(.Mchi(r, ccc = c(abc, nc), ipsi), use.integrate = TRUE)
 }
 
 .psi.ggw.findc <- function(ms, b, eff = NA, bp = NA) {
@@ -1026,7 +1024,7 @@ lmrob.ggw.bp <- function(a, b, c, ...) { ## calculate kappa
                 c(0.15, if (b > 1.61) 1.4 else 1.9))$root
     } else {
         if (is.na(bp))
-            stop('Error: neither breakdown point nor efficiency specified')
+	    stop("neither breakdown point 'bp' nor efficiency 'eff' specified")
         ## find c by bp
         uniroot(function(x) lmrob.ggw.bp(lmrob.ggw.finda(ms, b, x), b, x) - bp,
                 c(0.08, if (ms < -0.4) 0.6 else 0.4))$root
@@ -1116,7 +1114,7 @@ lmrob.bp <- function(psi, cc, ...)
                    attr(cc, 'constants') <- .psi.lqq.findc(cc)
                }
            },
-           stop("method for psi function ",psi, " not implemented"))
+           stop("method for psi function ", psi, " not implemented"))
     cc
 }
 
@@ -1260,35 +1258,38 @@ outlierStats <- function(object, x = object$x,
     ##    ^^^^^^^^^^^^^^^ not weights(..., type="robustness") as we
     ##                    don't want naresid() padding here.
     if (is.function(epsw)) epsw <- epsw(nobs(object))
-    if (!is.numeric(epsw) | length(epsw) != 1)
-        stop("'epsw' needs to be numeric(1) or a functon of nobs(object) with a numeric(1) return value.")
+    if (!is.numeric(epsw) || length(epsw) != 1)
+        stop("'epsw' must be numeric(1) or a function of nobs(obj.) which returns a numeric(1)")
     rj <- abs(rw) < epsw
     if (NROW(x) != length(rw))
-        stop("number of rows in 'x' and length of 'object$rweights' must be the same.")
+        stop("number of rows in 'x' and length of 'object$rweights' must be the same")
     if (is.function(epsx)) epsx <- epsx(max(abs(x)))
-    if (!is.numeric(epsx) | length(epsx) != 1)
-        stop("'epsx' needs to be numeric(1) or a functon of max(abs(object$x)) with a numeric(1) return value.")
+    if (!is.numeric(epsx) || length(epsx) != 1)
+        stop("'epsx' must be numeric(1) or a function of max(abs(x)) which returns a numeric(1)")
     xnz <- abs(x) > epsx
-    
+
     cc <- function(idx) {
-        nnz <- sum(idx)
+        nnz <- sum(idx) ## <- if this is zero, 'Ratio' and 'Mean.RobWeight' will be NaN
         Fr <- sum(rj[idx])
-        return(c(N.nonzero = nnz,
-                 N.rejected = Fr,
-                 Ratio = Fr / nnz,
-                 Mean.RobWeight = mean(rw[idx])))
+	c(N.nonzero = nnz,
+	  N.rejected = Fr,
+	  Ratio = Fr / nnz,
+	  Mean.RobWeight = mean(rw[idx]))
     }
-    
+
     report <- t(apply(cbind(Overall=TRUE, xnz[, colSums(xnz) < NROW(xnz)]), 2, cc))
 
-    st <- FALSE
+    shout <- FALSE # should we "shout"? -- scalar logical, never NA
     lbr <- rep.int(FALSE, nrow(report))
-    if (!is.null(warn.limit.reject))
-        st <- any(lbr <- report[, "Ratio"] >= warn.limit.reject)
-    if (!is.null(warn.limit.meanrw))
-        st <- st | any(lbr <- lbr | report[, "Mean.RobWeight"] <= warn.limit.meanrw)
-    
-    if (any(st)) {
+    if (!is.null(warn.limit.reject)) {
+	lbr <- report[, "Ratio"] >= warn.limit.reject
+	shout <- any(lbr & !is.na(lbr))
+    }
+    if (!is.null(warn.limit.meanrw)) {
+	lbr <- lbr | report[, "Mean.RobWeight"] <= warn.limit.meanrw
+	shout <- shout || any(lbr & !is.na(lbr))
+    }
+    if (shout) {
         nbr <- rownames(report)[lbr]
         attr(report, "warning") <- paste("Possible local breakdown of",
                                          paste0("'", nbr, "'", collapse=", "))

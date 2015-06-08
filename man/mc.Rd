@@ -48,8 +48,9 @@ mc(x, na.rm = FALSE, doReflect = (length(x) <= 100),
   A Robust Measure of Skewness;
   \emph{JCGS} \bold{13} (4), 996--1017.
 
-  Mia Hubert and E. Vandervieren (2006)
-  An adjusted boxplot for skewed distributions.
+  Hubert, M. and Vandervieren, E. (2008).
+  An adjusted boxplot for skewed distributions,
+  \emph{Computational Statistics and Data Analysis} \bold{52}, 5186--5201.
 }
 \author{Guy Brys; modifications by Tobias Verbeke and bug fixes and
   extensions by Manuel Koller and Martin Maechler.

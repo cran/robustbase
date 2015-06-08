@@ -1,0 +1,1032 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: robustbase 0.92-4\n"
+"POT-Creation-Date: 2015-06-03 11:16\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+
+msgid "some terms will have NAs due to the limits of the method"
+msgstr ""
+
+msgid "y is not onedimensional"
+msgstr ""
+
+msgid "Number of observations in x and y not equal"
+msgstr ""
+
+msgid "no intercept in the model"
+msgstr ""
+
+msgid "All observations have missing values!"
+msgstr ""
+
+msgid "Implosion: sigma1=%g became too small"
+msgstr ""
+
+msgid "Convergence Achieved"
+msgstr ""
+
+msgid "No convergence in"
+msgstr ""
+
+msgid "steps."
+msgstr ""
+
+msgid "maximum number of \"kstep\" iterations must be > 0"
+msgstr ""
+
+msgid "maximal number of *inner* step halvings must be > 0"
+msgstr ""
+
+msgid "value of the tuning constant c ('const') must be > 0"
+msgstr ""
+
+msgid "non-trivial prior 'weights' are not yet implemented for \"BY\""
+msgstr ""
+
+msgid "'start' cannot yet be passed to glmrobBY()"
+msgstr ""
+
+msgid "'offset' is not yet implemented for \"BY\""
+msgstr ""
+
+msgid "'weights.on.x' ="
+msgstr ""
+
+msgid "is not implemented"
+msgstr ""
+
+msgid "glm(.) {inner subsample} error:"
+msgstr ""
+
+msgid "betaExacto glm(.) error:"
+msgstr ""
+
+msgid "value of acc must be > 0"
+msgstr ""
+
+msgid "number of subsamples must be > 0"
+msgstr ""
+
+msgid "maximum number of iterations must be > 0"
+msgstr ""
+
+msgid "value of the tuning constant c (cw) must be > 0"
+msgstr ""
+
+msgid "Currently, only family 'poisson' is supported for the \"MT\" estimator"
+msgstr ""
+
+msgid "All weights must be positive"
+msgstr ""
+
+msgid "non-trivial 'offset' is not yet implemented"
+msgstr ""
+
+msgid "NAs in V(mu)"
+msgstr ""
+
+msgid "0s in V(mu)"
+msgstr ""
+
+msgid "'start' must be an initial estimate of beta, of length %d"
+msgstr ""
+
+msgid "optim(.) non-convergence:"
+msgstr ""
+
+msgid "'X' must have at least two columns"
+msgstr ""
+
+msgid "invalid first argument"
+msgstr ""
+
+msgid "'formula' missing or incorrect"
+msgstr ""
+
+msgid "'coef' must not be negative"
+msgstr ""
+
+msgid "More dimensions than observations, currently not implemented"
+msgstr ""
+
+msgid "More dimensions than observations: not yet implemented"
+msgstr ""
+
+msgid "**** sampling iterations were not sufficient. Please report"
+msgstr ""
+
+msgid "the following arguments to 'anova.glmrob' are invalid and"
+msgstr ""
+
+msgid "dropped:"
+msgstr ""
+
+msgid "anova.glmrob() only works for 'glmrob' objects"
+msgstr ""
+
+msgid "'Anova Table' for a single model object not yet implemented"
+msgstr ""
+
+msgid "Not the same response used in the fitted models"
+msgstr ""
+
+msgid "models were not all fitted to the same size of dataset"
+msgstr ""
+
+msgid "Not the same method used for fitting the models"
+msgstr ""
+
+msgid "Not the same tuning constant c used in the robust fits"
+msgstr ""
+
+msgid "Models are not nested!"
+msgstr ""
+
+msgid "Models are not strictly nested"
+msgstr ""
+
+msgid "This family is not implemented"
+msgstr ""
+
+msgid "some eigenvalues are negative"
+msgstr ""
+
+msgid "non-implemented test method:"
+msgstr ""
+
+msgid "for fitting method"
+msgstr ""
+
+msgid "the following arguments to 'anova.lmrob' are invalid and"
+msgstr ""
+
+msgid "For test = 'Deviance', the estimator chain has to end with 'M'"
+msgstr ""
+
+msgid "The first object does not contain the largest model"
+msgstr ""
+
+msgid "All models are refitted except the largest one"
+msgstr ""
+
+msgid "anova.lmrob() only works for 'lmrob' objects"
+msgstr ""
+
+msgid "'Anova Table' for a single model not yet implemented"
+msgstr ""
+
+msgid "invalid 'test'"
+msgstr ""
+
+msgid "Please fit the nested models by lmrob"
+msgstr ""
+
+msgid "NA coefs in full and reduced model do not match"
+msgstr ""
+
+msgid "test"
+msgstr ""
+
+msgid "not yet implemented"
+msgstr ""
+
+msgid "deriv must be in {0,1,2}"
+msgstr ""
+
+msgid "deriv must be in {-1,0,1,2}"
+msgstr ""
+
+msgid "'x' must be a numeric matrix"
+msgstr ""
+
+msgid "The sample size must be greater than 1 for svd"
+msgstr ""
+
+msgid "'wgtFUN' must be a function or a string specifying such a function"
+msgstr ""
+
+msgid "invalid 'seed'. Must be compatible with .Random.seed !"
+msgstr ""
+
+msgid "Invalid number of trials nsamp ="
+msgstr ""
+
+msgid "!"
+msgstr ""
+
+msgid "n <= p -- you can't be serious!"
+msgstr ""
+
+msgid "n == p+1  is too small sample size for MCD"
+msgstr ""
+
+msgid "n < 2 * p, i.e., possibly too small sample size"
+msgstr ""
+
+msgid "Sample size n  <  h(alpha; n,p) := size of \"good\" subsample"
+msgstr ""
+
+msgid "subsample size\t h < n/2  may be too small"
+msgstr ""
+
+msgid "'wgtFUN' must be a function or one of the strings %s."
+msgstr ""
+
+msgid "Unexpected 'exactfit' code"
+msgstr ""
+
+msgid ". Please report!"
+msgstr ""
+
+msgid "illegal 'singularity$kind'"
+msgstr ""
+
+msgid "Options 'best' and 'exact' not allowed for n greater than  2*nmini-1 ="
+msgstr ""
+
+msgid ".\nUsing default."
+msgstr ""
+
+msgid "'nsamp = \"best\"' allows maximally"
+msgstr ""
+
+msgid "subsets;\ncomputing these"
+msgstr ""
+
+msgid "This may take a"
+msgstr ""
+
+msgid "very"
+msgstr ""
+
+msgid "long time!"
+msgstr ""
+
+msgid "Invalid number of trials nsamp=%s. Using default nsamp=%d."
+msgstr ""
+
+msgid "nsamp > i_max := maximal integer -- not allowed;"
+msgstr ""
+
+msgid "set to i_max ="
+msgstr ""
+
+msgid "Use only with 'mcd' objects"
+msgstr ""
+
+msgid "x is not a numeric dataframe or matrix."
+msgstr ""
+
+msgid "argument 'm.cov' must have numeric components 'center' and 'cov'"
+msgstr ""
+
+msgid "Data set and provided center have different dimensions!"
+msgstr ""
+
+msgid "The covariance matrix is singular!"
+msgstr ""
+
+msgid "id.n"
+msgstr ""
+
+msgid "must be in {1,..,"
+msgstr ""
+
+msgid "}"
+msgstr ""
+
+msgid "For tolerance ellipses the dimension 'p' must be 2!"
+msgstr ""
+
+msgid "'hsets.init' must be a  h' x L  matrix (h' >= h) of observation indices"
+msgstr ""
+
+msgid "'full.h' is true, but 'hsets.init' has less than n rows"
+msgstr ""
+
+msgid "'hsets.init' must be in {1,2,...,n}; n ="
+msgstr ""
+
+msgid "More than h of the observations lie on a hyperplane."
+msgstr ""
+
+msgid "original detmcd() wrongly declared c-step convergence (obj=%g, i=%d, j=%d)"
+msgstr ""
+
+msgid "Invalid  scalefn='%s': must be function or a valid string"
+msgstr ""
+
+msgid "'%s' must be a function, numeric vector of length p, or NULL"
+msgstr ""
+
+msgid "provide better scale; must be all positive"
+msgstr ""
+
+msgid "More than half of the observations lie on a hyperplane."
+msgstr ""
+
+msgid "'%s' is not a valid family (see ?family)"
+msgstr ""
+
+msgid "Robust GLM fitting not yet implemented for family %s"
+msgstr ""
+
+msgid "'weights' must be non-negative"
+msgstr ""
+
+msgid "Number of offsets is %d, should rather equal %d (number of observations)"
+msgstr ""
+
+msgid "'weights.on.x' must be a string, function, list or numeric n-vector"
+msgstr ""
+
+msgid "'start' must be a numeric vector, NULL, or a character string"
+msgstr ""
+
+msgid "invalid 'start' string"
+msgstr ""
+
+msgid "For method 'cubif', use glmRob() from package 'robust'"
+msgstr ""
+
+msgid "method='%s' is only applicable for binomial family, but family=\"\""
+msgstr ""
+
+msgid "invalid 'method':"
+msgstr ""
+
+msgid "setting 'y = FALSE' has no longer any effect"
+msgstr ""
+
+msgid "No weights defined for this object. Use type=\"robustness\" argument to get robustness weights."
+msgstr ""
+
+msgid "need non-robust working residuals for this model type"
+msgstr ""
+
+msgid "invalid 'variant':"
+msgstr ""
+
+msgid "Weighting method"
+msgstr ""
+
+msgid "if a list, weights.on.x must contain a covariance function such as covMcd()"
+msgstr ""
+
+msgid "weights.on.x needs %d none-negative values"
+msgstr ""
+
+msgid "All weights.on.x must be none negative"
+msgstr ""
+
+msgid "'offset' not fully implemented"
+msgstr ""
+
+msgid "illegal 'family' argument"
+msgstr ""
+
+msgid "start 'theta' has still NA's .. badly singular x"
+msgstr ""
+
+msgid "Cannot find valid starting values: You need help"
+msgstr ""
+
+msgid "family '%s' not yet implemented"
+msgstr ""
+
+msgid "NAs in d(mu)/d(eta)"
+msgstr ""
+
+msgid "Non-finite coefficients at iteration"
+msgstr ""
+
+msgid "Algorithm did not converge"
+msgstr ""
+
+msgid "fitted probabilities numerically 0 or 1 occurred"
+msgstr ""
+
+msgid "fitted rates numerically 0 occurred"
+msgstr ""
+
+msgid "Only 'test.acc = \"coef\"' is currently implemented"
+msgstr ""
+
+msgid "value of the tuning constant c (tcc) must be > 0"
+msgstr ""
+
+msgid "Std.error computation not yet available for the case of 'weights'"
+msgstr ""
+
+msgid "negative scale 's'"
+msgstr ""
+
+msgid "scale 's' is zero -- returning initial 'mu'"
+msgstr ""
+
+msgid "scale MAD is zero for this sample"
+msgstr ""
+
+msgid "calculations stopped prematurely in rllarsbi"
+msgstr ""
+
+msgid "(probably because of rounding errors)."
+msgstr ""
+
+msgid "unknown split type"
+msgstr ""
+
+msgid "No categorical variables found in model. Reverting to S-estimator."
+msgstr ""
+
+msgid "No continuous variables found in model. Reverting to L1-estimator."
+msgstr ""
+
+msgid "'psi' should be one of %s"
+msgstr ""
+
+msgid "invalid 'psi'=%s; possibly use .regularize.Mpsi(%s)"
+msgstr ""
+
+msgid "Unknown setting '"
+msgstr ""
+
+msgid "'. Using defaults."
+msgstr ""
+
+msgid "Initial estimator '%s' not supported; using S-estimator instead"
+msgstr ""
+
+msgid ".vcov.avar1 can only be used when initial estimator is S; using .vcov.w instead"
+msgstr ""
+
+msgid "only M and D are steps supported after \"init\" computation"
+msgstr ""
+
+msgid "%s-step did NOT converge. Returning unconverged %s-estimate"
+msgstr ""
+
+msgid ":.vcov.w: cov.hubercorr must be logical (or NULL)"
+msgstr ""
+
+msgid ":.vcov.w: cov.corrfact must be one of"
+msgstr ""
+
+msgid ":.vcov.w: cov.dfcorr has to be one of -1:3"
+msgstr ""
+
+msgid ":.vcov.w: cov.resid must be one of"
+msgstr ""
+
+msgid ":.vcov.w: cov.xwx must be logical (or NULL)"
+msgstr ""
+
+msgid "parameter psi is not defined"
+msgstr ""
+
+msgid "parameter tuning.psi is not numeric"
+msgstr ""
+
+msgid ":.vcov.w: ignoring cov.resid == final since est != final"
+msgstr ""
+
+msgid ":.vcov.w: scale missing, using D scale"
+msgstr ""
+
+msgid "option hcorr is ignored for cov.corrfact = asympt"
+msgstr ""
+
+msgid ":.vcov.w: unsupported psi function"
+msgstr ""
+
+msgid "(tau / hybrid / tauold): tau not found in 'obj'"
+msgstr ""
+
+msgid ":.vcov.w: Caution. Some psiprime are NA"
+msgstr ""
+
+msgid ".vcov.avar1() supports only SM or MM estimates"
+msgstr ""
+
+msgid "X'WX is almost singular. Consider rather using cov = \".vcov.w\""
+msgstr ""
+
+msgid "X'WX is singular. Rather use cov = \".vcov.w\""
+msgstr ""
+
+msgid "fixing"
+msgstr ""
+
+msgid "negative eigen(["
+msgstr ""
+
+msgid "])values"
+msgstr ""
+
+msgid "invalid 'posdef.meth':"
+msgstr ""
+
+msgid "'control$n.group' must be larger than 'p' for 'large_n' algorithm"
+msgstr ""
+
+msgid "'groups * n.group' must be smaller than 'n' for 'large_n' algorithm"
+msgstr ""
+
+msgid "'control$n.group' is not much larger than 'p', probably too small"
+msgstr ""
+
+msgid "C function R_lmrob_S() exited prematurely"
+msgstr ""
+
+msgid "S-estimated scale == 0:  Probably exact fit; check your data"
+msgstr ""
+
+msgid "lmrob..D..fit: control is missing"
+msgstr ""
+
+msgid "lmrob..D..fit: prior estimator did not converge, stopping"
+msgstr ""
+
+msgid "lmrob..D..fit: robustness weights undefined"
+msgstr ""
+
+msgid "lmrob..D..fit: residuals undefined"
+msgstr ""
+
+msgid "lmrob..D..fit: parameter psi is not defined"
+msgstr ""
+
+msgid "lmrob..D..fit: parameter tuning.psi is not numeric"
+msgstr ""
+
+msgid "control is missing"
+msgstr ""
+
+msgid "'control' is missing"
+msgstr ""
+
+msgid "internal logic error in psi() function name:"
+msgstr ""
+
+msgid "Please report!"
+msgstr ""
+
+msgid "argument 'psi' must be a string (denoting a psi function)"
+msgstr ""
+
+msgid "tuning constant 'cc' is not numeric"
+msgstr ""
+
+msgid "Coefficients for"
+msgstr ""
+
+msgid "function incorrectly specified."
+msgstr ""
+
+msgid "Use c({0, } minimal slope, b, efficiency, breakdown point)"
+msgstr ""
+
+msgid "Use c(minimal slope, b, efficiency, breakdown point) or k[1:3]"
+msgstr ""
+
+msgid "Coef. for Hampel psi function not of length 3"
+msgstr ""
+
+msgid "Coef. for psi function"
+msgstr ""
+
+msgid "not of length 1"
+msgstr ""
+
+msgid "tuning constants for ggw psi: both eff and bp specified, ignoring bp"
+msgstr ""
+
+msgid "Error: neither breakdown point nor efficiency specified"
+msgstr ""
+
+msgid "tuning constants for lqq psi: both eff and bp specified, ignoring bp"
+msgstr ""
+
+msgid ".psi.lqq.findc: unable to find constants for psi function"
+msgstr ""
+
+msgid "method for psi function"
+msgstr ""
+
+msgid "not implemented"
+msgstr ""
+
+msgid "tuning parameter (chi/psi) is not numeric"
+msgstr ""
+
+msgid "need non-negative number of nodes"
+msgstr ""
+
+msgid "unknown setting for parameter ss"
+msgstr ""
+
+msgid "'epsw' must be numeric(1) or a function of nobs(obj.) which returns a numeric(1)"
+msgstr ""
+
+msgid "number of rows in 'x' and length of 'object$rweights' must be the same"
+msgstr ""
+
+msgid "'epsx' must be numeric(1) or a function of max(abs(x)) which returns a numeric(1)"
+msgstr ""
+
+msgid "Detected possible local breakdown of"
+msgstr ""
+
+msgid "-estimate in"
+msgstr ""
+
+msgid "coefficients"
+msgstr ""
+
+msgid "coefficient"
+msgstr ""
+
+msgid "'"
+msgstr ""
+
+msgid ","
+msgstr ""
+
+msgid "."
+msgstr ""
+
+msgid "KS2014"
+msgstr ""
+
+msgid "Use lmrob argument 'setting=\"KS2014\"' to avoid this problem."
+msgstr ""
+
+msgid "'weights' must be a numeric vector"
+msgstr ""
+
+msgid "number of offsets is %d, should equal %d (number of observations)"
+msgstr ""
+
+msgid "Methods argument set by method is different from method in control"
+msgstr ""
+
+msgid "Using the former, method ="
+msgstr ""
+
+msgid "incompatible dimensions"
+msgstr ""
+
+msgid "missing or negative weights not allowed"
+msgstr ""
+
+msgid "singular fit encountered"
+msgstr ""
+
+msgid "init must be \"S\", \"M-S\", function or list"
+msgstr ""
+
+msgid "Length of initial coefficients vector does not match rank of singular design matrix x"
+msgstr ""
+
+msgid "unknown init argument"
+msgstr ""
+
+msgid "arguments"
+msgstr ""
+
+msgid ")$"
+msgstr ""
+
+msgid "^list\\("
+msgstr ""
+
+msgid "are disregarded in"
+msgstr ""
+
+msgid "Failed to compute robust Mahalanobis distances, reverting to robust leverages."
+msgstr ""
+
+msgid "lmrob object does not have a proper 'qr' component. Rank zero?"
+msgstr ""
+
+msgid "lmrob object does not have a proper 'qr' component. Rank must be zero"
+msgstr ""
+
+msgid "invalid 'lmrob' object:  no terms component"
+msgstr ""
+
+msgid ":summary.lmrob: unsupported psi function"
+msgstr ""
+
+msgid "weights should not be both close to 0 and close to 1!"
+msgstr ""
+
+msgid "You should use different 'eps' and/or 'eps1'"
+msgstr ""
+
+msgid "calling predict.lm(<fake-lmrob-object>) ..."
+msgstr ""
+
+msgid "prediction from a rank-deficient fit may be misleading"
+msgstr ""
+
+msgid "Predictions on current data refer to _future_ responses"
+msgstr ""
+
+msgid "Assuming prediction variance inversely proportional to weights used for fitting"
+msgstr ""
+
+msgid "Assuming constant prediction variance even though model fit is weighted"
+msgstr ""
+
+msgid "'weights' as formula should be one-sided"
+msgstr ""
+
+msgid "Use only with 'lts' objects"
+msgstr ""
+
+msgid "Index plot of standardized residuals is not avalable if scale = 0"
+msgstr ""
+
+msgid "Standardized residuals vs Fitted values plot is not avalable if scale = 0"
+msgstr ""
+
+msgid "Diagnostic plot is not available for univar\niate location and scale estimation"
+msgstr ""
+
+msgid "Regression Diagnostic plot is not avalable if scale = 0"
+msgstr ""
+
+msgid "Regression Diagnostic plot is not avalable: option mcd=F was set in ltsReg()."
+msgstr ""
+
+msgid "The MCD covariance matrix was singular."
+msgstr ""
+
+msgid "'id.n' must be in {1,..,"
+msgstr ""
+
+msgid "alpha not inside [1/2, 1]"
+msgstr ""
+
+msgid "unknown 'wgtFUN' specification:"
+msgstr ""
+
+msgid "'wgtFUN' must be a function or a string specifying one"
+msgstr ""
+
+msgid "y is not a numeric"
+msgstr ""
+
+msgid "There is at least one constant column. Remove it and set intercept=TRUE"
+msgstr ""
+
+msgid "'qr.out = TRUE' for univariate location is disregarded"
+msgstr ""
+
+msgid "Need more than twice as many observations as variables."
+msgstr ""
+
+msgid "x is singular"
+msgstr ""
+
+msgid "no valid subsample found in LTS - set 'nsamp' or rather use lmrob.S()"
+msgstr ""
+
+msgid "NA coefficient (at %s) from \"best\" subset"
+msgstr ""
+
+msgid "Invalid number of trials nsamp="
+msgstr ""
+
+msgid "! Using default."
+msgstr ""
+
+msgid "'nsamp' options 'best' and 'exact' not allowed for n greater than"
+msgstr ""
+
+msgid ". Will use default."
+msgstr ""
+
+msgid "Maximum 5000 subsets allowed for option 'best'."
+msgstr ""
+
+msgid "Computing 5000 subsets of size"
+msgstr ""
+
+msgid "out of"
+msgstr ""
+
+msgid "mc(): not 'converged'"
+msgstr ""
+
+msgid "in"
+msgstr ""
+
+msgid "iter"
+msgstr ""
+
+msgid "iterations"
+msgstr ""
+
+msgid "*and*"
+msgstr ""
+
+msgid "'reflect part' in"
+msgstr ""
+
+msgid "iter2"
+msgstr ""
+
+msgid "optimx"
+msgstr ""
+
+msgid "package must be loaded in order to"
+msgstr ""
+
+msgid "use"
+msgstr ""
+
+msgid "optimizer=\"optimx\""
+msgstr ""
+
+msgid "couldn't find optimizer function"
+msgstr ""
+
+msgid "non-function specified as optimizer"
+msgstr ""
+
+msgid "optimizer function must use (at least) formal parameters"
+msgstr ""
+
+msgid "Either specify 'pnames' or provide 'upper' or 'lower' with names()"
+msgstr ""
+
+msgid "'pnames' must be a character vector"
+msgstr ""
+
+msgid "specifying 'pnames' is deprecated; rather 'lower' or 'upper' should have names()"
+msgstr ""
+
+msgid "parameter names must appear in 'formula'"
+msgstr ""
+
+msgid "lower must be either of length %d, or length 1"
+msgstr ""
+
+msgid "upper must be either of length %d, or length 1"
+msgstr ""
+
+msgid "'%s' must be character string or function, but is \"%s\""
+msgstr ""
+
+msgid "Psi function '%s' not supported yet"
+msgstr ""
+
+msgid "Initialization 'init = \"%s\"' not supported (yet)"
+msgstr ""
+
+msgid "unable to find constants for psi function"
+msgstr ""
+
+msgid "As \"sigma\" is in 'pnames', do not use it as variable or parameter name in 'formula'"
+msgstr ""
+
+msgid "Method"
+msgstr ""
+
+msgid "not correctly supported yet"
+msgstr ""
+
+msgid "'formula' should be a formula of the type 'y ~ f(x, alpha)'"
+msgstr ""
+
+msgid "specifying both 'acc' and 'tol' is invalid"
+msgstr ""
+
+msgid "The argument 'acc' has been renamed to 'tol'; do adapt your code."
+msgstr ""
+
+msgid "specifying 'weights' is not yet supported for method"
+msgstr ""
+
+msgid "For method = \"%s\", currently 'psi' must be specified via 'control'"
+msgstr ""
+
+msgid "'start' must be fully named (list or numeric vector)"
+msgstr ""
+
+msgid "'start' must be a named list or numeric vector"
+msgstr ""
+
+msgid "'scale' must be NULL or a positive number"
+msgstr ""
+
+msgid "Do not use '%s' as a variable name or as a parameter name"
+msgstr ""
+
+msgid "'weights' must be nonnegative and not contain NAs"
+msgstr ""
+
+msgid "could not compute scale of residuals"
+msgstr ""
+
+msgid "failed to converge in"
+msgstr ""
+
+msgid "steps"
+msgstr ""
+
+msgid "type 'pearson' is not yet implemented"
+msgstr ""
+
+msgid "invalid 'type'"
+msgstr ""
+
+msgid "'cov' must be a p x p matrix"
+msgstr ""
+
+msgid "for method='"
+msgstr ""
+
+msgid "', 'parm' must be specified as an integer"
+msgstr ""
+
+msgid "profile() method not yet implemented for \"nlrob\" objects.\n Use  method = \"Wald\"."
+msgstr ""
+
+msgid "Computing profile confidence intervals ..."
+msgstr ""
+
+msgid "\"boot\" method not yet implemented for \"nlrob\" objects.\n Use confint(*, method = \"Wald\")."
+msgstr ""
+
+msgid "Use only with 'lmrob' objects"
+msgstr ""
+
+msgid "'which' must be in 1:5"
+msgstr ""
+
+msgid "'id.n' must be in {1,..,%d}"
+msgstr ""
+
+msgid "recomputing robust Mahalanobis distances"
+msgstr ""
+
+msgid "need 'model' or 'x' component for robust Mahalanobis distances"
+msgstr ""
+
+msgid "saving the robust distances 'MD' as part of"
+msgstr ""
+
+msgid "Tolerance range must be between 0% to 100%"
+msgstr ""
+
+msgid "arguments of function '"
+msgstr ""
+
+msgid "' are ("
+msgstr ""
+
+msgid ") but should be ("
+msgstr ""
+
+msgid ")."
+msgstr ""
+
+msgid "invalid tuning parameter names:"
+msgstr ""
+
+msgid "instead of"
+msgstr ""
+
+msgid "You cannot specify both 'main' and the deprecated 'shortMain'"
+msgstr ""
+
+msgid "'shortMain' is deprecated and will get defunct."
+msgstr ""
+
+msgid "Use 'main = \"short\"' instead of 'shortMain = TRUE'"
+msgstr ""
+
+msgid "'weights' must have same length as 'x'"
+msgstr ""
+
+msgid "Dimension {= ncol(x)} must be 2!"
+msgstr ""
+
+msgid        "Initial set"
+msgid_plural "Initial sets"
+msgstr[0]    ""
+msgstr[1]    ""
+
+msgid        "For method = \"%s\", argument %s is not made use of"
+msgid_plural "For method = \"%s\", arguments %s are not made use of"
+msgstr[0]    ""
+msgstr[1]    ""

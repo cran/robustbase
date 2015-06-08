@@ -78,9 +78,9 @@ huber <- function (y, k = 1.5, tol = 1e-06)
 
 ## Originally from  /u/ftp/NDK/Source-NDK-9/R/rg2-fkt.R :
 tauHuber <- function(x, mu, k=1.5, s = mad(x), resid = (x - mu)/s) {
-  ## Purpose: Korrekturfaktor Tau für die Varianz von Huber-M-Schätzern
+  ## Purpose: Correction factor Tau for the variance of Huber-M-Estimators
   ## -------------------------------------------------------------------------
-  ## Arguments: x = Daten mu = Lokations-Punkt k = Parameter der Huber Psi-Funktion
+  ## Arguments: x = data, mu = location, k = tuning parameter of Huber Psi-function
   ## -------------------------------------------------------------------------
   ## Author: Rene Locher Update: R. Frisullo 23.4.02;  M.Maechler (as.log(); s, resid)
   inr <- abs(resid) <= k

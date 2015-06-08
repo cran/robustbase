@@ -9,7 +9,7 @@
 ** DONE adjOutlyingness():
 *** DONE change defaults for clower & cupper (E-mail from P.Segaert).
 *** DONE But there is more: +/- swap ==> results not back compatible
-** TODO colMedians() -> ask Henrik/ <maintainer@bioconductor.org> about "License: Artistic-2.0"
+** DONE colMedians() -> ask Henrik/ <maintainer@bioconductor.org> about "License: Artistic-2.0"
 ** TODO nlrob()
 *** TODO summary(nlrob(*)) fails for new methods; better error message or *work*
 **** TODO for "MM" we are close to done; ideally want '$ rweights' (robustness weights) for all meth
@@ -138,6 +138,8 @@ R users already know optim() etc.. so the name seems more logical for them.
     Consider lmrob(*,  method = "M") --> default init = "ls" (Least Sq; as MASS:::rlm.default)
     which calls  lmrob..M..fit() which is already documented as "simple"
     M-estimator (though the *scale* is kept fixed; i.e., no  'proposal 2').
+** TODO glmrob(), glmrobMqle(), etc : expression()s and eval() no longer "satisfactory",
+   e.g., see FIXME in ./R/glmrobMqle-DQD.Rq
 ** TODO covMcd(): pass k3 as argument; default=current ==> allow "formula"  k3 = k3(n,p) !!
 ** covOGK():
    The argument name 'weight.fn' is pretty ugly and the default function

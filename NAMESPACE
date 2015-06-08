@@ -29,6 +29,12 @@ importFrom("stats",
 ## ^^^^ MASS has a bit more; take it as example
 if(getRversion() >= "3.1.0")
 importFrom("stats", .lm.fit, confint.lm, dummy.coef.lm)
+if(getRversion() >= "3.3.0") {
+    importFrom("stats", sigma)
+} else {
+    export(sigma)
+    S3method(sigma, nls)
+}
 
 importFrom("utils", globalVariables, str)
 
@@ -86,7 +92,7 @@ export(Sn, Qn, Qn.old,
        , glmrobMqle.control, glmrobBY.control, glmrobMT.control
        , BYlogreg ## R/BYlogreg.R FIXME: add to glmrob() and "deprecate"
        ## , glmrobMT ## R/MTestimador2.R
-       , sigma, estimethod
+       , estimethod
        ## related to detMCD() and to be used in rrcov etc:
        , r6pack, doScale
        , rankMM, classPC, .signflip
@@ -160,7 +166,6 @@ S3method(summary, nlrob)
 
 S3method(sigma, lmrob)
 S3method(sigma, nlrob)
-S3method(sigma, nls)
 S3method(vcov, glmrob)
 S3method(vcov, lmrob)
 S3method(vcov, nlrob)

@@ -46,7 +46,9 @@ rowMedians(x, na.rm = FALSE, hasNA = TRUE, keep.names=TRUE)
 \author{Henrik Bengtsson, Harris Jaffee, Martin Maechler}
 
 \seealso{
-  See \code{\link{rowMedians}}() and \code{colMedians()} for weighted medians.
+  See \code{\link{wgt.himedian}()} for a weighted hi-median, and
+  \code{\link[matrixStats]{colWeightedMedians}()} etc from package
+  \pkg{matrixStats} for \emph{weighted} medians.\cr
   For mean estimates, see \code{rowMeans()} in \code{\link{colSums}}().
 }
 

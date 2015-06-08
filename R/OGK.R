@@ -62,8 +62,7 @@ covOGK <- function(X, n.iter = 2,
     call <- match.call()
     X <- as.matrix(X)
 
-    n <- dim(X)[1]
-    p <- dim(X)[2]
+    p <- ncol(X)
     if(p < 2) stop("'X' must have at least two columns")
 
     Z <- X # as we use 'X' for the (re)weighting

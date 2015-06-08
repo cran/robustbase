@@ -124,7 +124,7 @@ BYlogreg <- function(x0, y, initwml=TRUE, # w.x=NULL,
             warning(gettextf("Implosion: sigma1=%g became too small", sigma1))
             kstep <- kmax #-> *no* convergence
         } else {
-            gamma1 <- xistart/sigma1
+            ## gamma1 <- xistart/sigma1
             scores <- stscores/sigma1
             newobj <- mean(phiBY3(scores, y,const))
             oldobj <- newobj

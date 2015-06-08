@@ -60,10 +60,7 @@ ltsPlot <- function(x,
 	if(id.n) {
 	    n <- length(y)
 	    which <- order(ord)[(n - id.n + 1):n]
-	    if(missing(lab))
-		lab <- which
-	    else
-		lab <- lab[which]
+	    lab <- if(missing(lab)) which else lab[which]
 	    ## how to adjust the labels?
 	    ## a) adj=0.1
 	    ## b) x=x+xrange
@@ -100,18 +97,11 @@ ltsPlot <- function(x,
 	##  Normal QQ-plot of residuals:
 	##  Produces a Quantile-Quantile plot in which the vector r is plotted
 	##  against the quantiles of a standard normal distribution.
-	##
 
-	mgp = c(2.5, 1, 0) # set the margin line (in 'mex' units) for the:
-	## - axis title,
-	## - axis labels and
-	## - axis line.
-	## The default is 'c(3, 1, 0)'.
 	xlab <- "Quantiles of the standard normal distribution"
-	ylab <- "Standardized LTS residual"
-	if(classic)
-	    ylab <- "Standardized LS residual"
-
+        ylab <- if(classic)
+                    "Standardized LS residual"
+                else "Standardized LTS residual"
 	qq <- qqnorm(r, mgp = mgp, xlab = xlab, ylab = ylab, ...)
 	ll <- myqqline(r, lty = 2, ...)
 	ord <- abs(qq$y - ll$int - ll$slope * qq$x)
@@ -129,32 +119,24 @@ ltsPlot <- function(x,
 	if(scale == 0)
 	    stop("Index plot of standardized residuals is not avalable if scale = 0")
 
-	mgp = c(2.5, 1, 0) # set the margin line (in 'mex' units) for the:
-	## - axis title,
-	## - axis labels and
-	## - axis line.
-	## The default is 'c(3, 1, 0)'.
 	xlab <- "Index"
-	ylab <- "Standardized LTS residual"
-	if(classic)
-	    ylab <- "Standardized LS residual"
-
+	ylab <-
+	    if(classic)
+		"Standardized LS residual"
+	    else "Standardized LTS residual"
 	x <- 1:length(r)
 	y <- r/scale
 	ylim <- c(min(-3, min(y)), max(3, max(y)))
 
 	plot(x, y, ylim = ylim, mgp = mgp, xlab = xlab, ylab = ylab, ...)
 	label(x, y, ord = abs(y), lab, id.n, ...)
-	abline(h = -2.5, ...)
 	abline(h = 0, lty = 4, ...)
-	abline(h = 2.5, ...)
-
-	mtext("-2.5", side = 4, line = 1.2, at = -2.5, ...)
-	mtext("2.5", side = 4, line = 1.2, at = 2.5, ...)
-
+	abline(h = c(-2.5, 2.5), ...)
+	mtext(c("-2.5","2.5"), side = 4, line = 1.2, at = c(-2.5, 2.5), ...)
 	title(main = "Residuals vs Index")
     }
 
+    ##' Tukey-Anscombe Plot  (rename ?!)
     fitplot <- function(obj, classic = FALSE, lab, id.n, ...) {
 	##  Standardized residuals vs Fitted values plot:
 	##  Plot the vector r (LTS or LS residuals) against
@@ -166,34 +148,22 @@ ltsPlot <- function(x,
 	if(obj$scale == 0)
 	    stop("Standardized residuals vs Fitted values plot is not avalable if scale = 0")
 
-	mgp = c(2.5, 1, 0) # set the margin line (in 'mex' units) for the:
-	## - axis title,
-	## - axis labels and
-	## - axis line.
-	## The default is 'c(3, 1, 0)'.
-
 	##    x <- obj$X %*% as.matrix(obj$coef)
 	x <- obj$fitted.values
 	y <- obj$residuals/obj$scale
 	ylim <- c(min(-3, min(y)), max(3, max(y)))
 	yname <- names(obj$scale)
 	xlab <- paste("Fitted :", yname)
-	ylab <- "Standardized LTS residual"
-	if(classic)
-	    ylab <- "Standardized LS residual"
-
+	ylab <- if(classic)
+		    "Standardized LS residual"
+		else "Standardized LTS residual"
 	plot(x, y, ylim = ylim, mgp = mgp, xlab = xlab, ylab = ylab, ...)
 	label(x, y, ord = abs(y), lab, id.n, ...)
-	abline(h = -2.5, ...)
 	abline(h = 0, lty = 4, ...)
-	abline(h = 2.5, ...)
-
-	mtext("-2.5", side = 4, line = 1.2, at = -2.5, ...)
-	mtext("2.5", side = 4, line = 1.2, at = 2.5, ...)
-
+	abline(h = c(-2.5, 2.5), ...)
+	mtext(c("-2.5","2.5"), side = 4, line = 1.2, at = c(-2.5, 2.5), ...)
 	title(main = "Residuals vs Fitted")
-
-    }
+    } ## fitplot()
 
 
     rdiag <- function(obj, classic = FALSE, lab, id.n, ...) {
@@ -216,44 +186,36 @@ ltsPlot <- function(x,
 	if(obj$RD[1] == "singularity")
 	    stop("The MCD covariance matrix was singular.")
 
-	mgp = c(2.5, 1, 0) # set the margin line (in 'mex' units) for the:
-	## - axis title,
-	## - axis labels and
-	## - axis line.
-	## The default is 'c(3, 1, 0)'.
-
-	xlab <- "Robust distance computed by MCD"
-	ylab <- "Standardized LTS residual"
 	if(classic) {
 	    xlab <- "Mahalanobis distance"
 	    ylab <- "Standardized LS residual"
-	}
+	} else {
+            xlab <- "Robust distance computed by MCD"
+            ylab <- "Standardized LTS residual"
+        }
 
 	## VT:: 18.01.20045
 	## set id.n to the number of all outliers:
 	##  regression outliers (weight==0)+ leverage points (RD > cutoff)
 	if(missing(id.n)) {
-	    id.n <- length(unique(c(which(obj$RD > sqrt(qchisq(0.975, p))), which(obj$lts.wt == 0))))
+	    id.n <- length(unique(c(which(obj$RD > sqrt(qchisq(0.975, p))),
+                                    which(obj$lts.wt == 0))))
 	}
 
 	quant <- max(c(sqrt(qchisq(0.975, p)), 2.5))
 	x <- obj$RD
 	y <- obj$residuals/obj$scale
-	xlim <- c(0, max(quant + 0.1, max(x)))
+	## xlim <- c(0, max(quant + 0.1, max(x)))
 	ylim <- c(min(-3, min(y)), max(3, max(y)))
 
-	plot(x, y, ylim = ylim, mgp = mgp, xlab = xlab, ylab = ylab, ...)
-	ord = apply(abs(cbind(x/2.5, y/quant)), 1, max)
+	plot(x, y, ylim = ylim, mgp = mgp, xlab = xlab, ylab = ylab,
+             main = "Regression Diagnostic Plot", ...)
+	ord <- apply(abs(cbind(x/2.5, y/quant)), 1, max)
 	label(x, y, ord = ord, lab, id.n, ...)
-	abline(h = -2.5, ...)
-	abline(h = 2.5, ...)
-	abline(v = quant, ...)
+	abline(v = quant, h = c(-2.5, 2.5), ...)
+	mtext(c("-2.5","2.5"), side = 4, line = 1.2, at = c(-2.5, 2.5), ...)
 
-	mtext("-2.5", side = 4, line = 1.2, at = -2.5, ...)
-	mtext("2.5", side = 4, line = 1.2, at = 2.5,...)
-
-	title(main = "Regression Diagnostic Plot")
-    }
+    } ## rdiag()
 
     ##	parameters and preconditions
 
@@ -261,15 +223,19 @@ ltsPlot <- function(x,
     r <- residuals(x)
     n <- length(r)
 
-    id.n.default <- TRUE # if id.n is missing, it will be set to a default for
-    ## for each plot.
-    if(!missing(id.n) && !is.null(id.n)) {
-	id.n.default <- FALSE
+    id.n.missing <- missing(id.n) || is.null(id.n)
+    ## if id.n is missing, it will be set to a default for each plot.
+    if(!id.n.missing) {
 	id.n <- as.integer(id.n)
 	if(id.n < 0 || id.n > n)
 	    stop("'id.n' must be in {1,..,",n,"}")
     }
 
+    mgp <-  c(2.5, 1, 0) # set the margin line (in 'mex' units) for the:
+    ## - axis title,
+    ## - axis labels and
+    ## - axis line.
+    ## The default is 'c(3, 1, 0)'.
     if(!classic)
 	par(mfrow = c(1,1), pty = "m")
     else {
@@ -280,9 +246,9 @@ ltsPlot <- function(x,
 
 	if(x$intercept &&		# model with intercept
 	   length(dim(x$X)) == 2 &&	# X is 2-dimensional
-	   dim(x$X)[2] > 1 &&		# X has more than 1 column
-	   all(x$X[,dim(x$X)[2]] == 1)) # the last column of X is all 1s
-	    X <- x$X[,1:(dim(x$X)[2]-1)]
+	   (nc <- ncol(x$X)) > 1 &&	# X has more than 1 column
+	   all(x$X[,nc] == 1)) # the last column of X is all 1s
+	    X <- x$X[, -nc]
 	else
 	    X <- x$X
 	obj.cl <- ltsReg(X, x$Y, intercept = x$intercept, alpha = 1)
@@ -293,26 +259,24 @@ ltsPlot <- function(x,
 	on.exit(par(op))
     }
 
+    ## set id.n to the number of regression outliers (weight==0):
+    nx <- if(id.n.missing) length(which(x$lts.wt == 0)) else id.n
     if(which == "all" || which == "rqq") {
-        nx <- if(id.n.default) length(which(x$lts.wt == 0)) else id.n # set id.n to the number of regression outliers (weight==0)
-
         ##  VT::20.12.2006 - the standardized residuals are in x$resid
         ##   - no change for the other plot functions - the residuals will be standardized
         ##          inside indexplot(), fitplot(), etc
         myqqplot(x$resid, id.n = nx, ...) # normal QQ-plot of the LTS residuals
-        if(classic)
-            myqqplot(obj.cl$resid, classic = TRUE, id.n = nx, ...) # normal QQ-plot of the LS residuals
+        if(classic) # normal QQ-plot of the LS residuals
+            myqqplot(obj.cl$resid, classic = TRUE, id.n = nx, ...)
     }
 
     if(which == "all" || which == "rindex") {
-	nx <- if(id.n.default) length(which(x$lts.wt == 0)) else id.n # set id.n to the number of regression outliers (weight==0)
 	indexplot(x$residuals, x$scale, id.n = nx, ...) # index plot of the LTS residuals
-	if(classic)
-	    indexplot(obj.cl$residuals, obj.cl$scale, classic = TRUE, id.n = nx, ...) # index plot of the LS residuals
+	if(classic) # index plot of the LS residuals
+	    indexplot(obj.cl$residuals, obj.cl$scale, classic = TRUE, id.n = nx, ...)
     }
 
     if(which == "all" || which == "rfit") {
-	nx <- if(id.n.default) length(which(x$lts.wt == 0)) else id.n # set id.n to the number of regression outliers (weight==0)
 	fitplot(x, id.n = nx, ...)
 	if(classic)
 	    fitplot(obj.cl, classic = TRUE, id.n = nx, ...)
