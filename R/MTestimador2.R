@@ -144,7 +144,7 @@ beta0IniCP <- function(x,y,cw,w, m.approx, nsubm, trace.lev = 1)
                 cat(sprintf("%3d:",l))
             else cat(".", if(l %% 50 == 0) paste0(" ",l,"\n"))
         }
-        i.sub <- sample(n,p )
+        i.sub <- sample(n, p)
         estim0 <- as.vector( betaExacto(x[i.sub,], y[i.sub]) )
 	if(any(is.na(estim0))) ## do not use it
 	    next
@@ -163,6 +163,7 @@ beta0IniCP <- function(x,y,cw,w, m.approx, nsubm, trace.lev = 1)
         podador <- adev <= srt.d[half] # those smaller-equal than lo-median(.)
         xPod <- x[podador,]
         yPod <- y[podador]
+        length(xPod) + length(yPod) # codetools
 	fitE <- tryCatch(glm(yPod ~ xPod-1, family = poisson()),
 			 error = function(e)e)
         if(inherits(fitE, "error")) {
@@ -423,7 +424,8 @@ glmrobMT <- function(x,y, weights = NULL, start = NULL, offset = NULL,
          fitted.values = mu, linear.predictors = eta,
          cov = cov,
          nsubm = nsubm, "nOksub" = out[[2]],
-	 converged = (estim2$convergence == 0), iter = o.counts[[1]], optim.counts = o.counts,
+	 converged = (estim2$convergence == 0), iter = o.counts[[1]],
+         optim.counts = o.counts, optim.control = oCtrl,
 	 cw=cw,
-         weights.on.x=weights.on.x, w.x = w, w.r = w.r, optim.control = oCtrl)
+         weights.on.x=weights.on.x, w.x = w, w.r = w.r)
 }

@@ -22,7 +22,8 @@
         symbolic.cor = FALSE, \dots)
 \method{print}{summary.lmrob}(x, digits = max(3, getOption("digits") - 3),
       symbolic.cor= x$symbolic.cor,
-      signif.stars = getOption("show.signif.stars"), \dots)
+      signif.stars = getOption("show.signif.stars"),
+      showAlgo = TRUE, \dots)
 
 \method{vcov}{lmrob}(object, cov = object$control$cov, \dots)
 \method{model.matrix}{lmrob}(object, \dots)
@@ -42,7 +43,11 @@
   \item{signif.stars}{logical variable indicating
     whether to use stars to display different levels of
     significance in the individual t-tests.}
-  \item{cov}{covariance estimation function to use.}
+  \item{showAlgo}{optional \code{\link{logical}} indicating if the
+    algorithmic parameters (as mostly inside the \code{control} part)
+    should be shown.}
+  \item{cov}{covariance estimation function to use, a
+    \code{\link{function}} or \link{character} string naming the function.}
   \item{\dots}{potentially more arguments passed to methods.}
 }
 \value{
@@ -59,11 +64,10 @@
   \item{df}{degrees of freedom, in an \code{\link{lm}} compatible way.}
   \item{sigma}{identical to \code{\link{sigma}(object)}.}
   \item{aliased}{..}%FIXME
-  \item{cov.unscaled}{derived from \code{object$cov}.}
-  \item{r.squared}{robust \dQuote{R squared} or
-    \eqn{R^2}, a coefficient of determination: This is the consistency corrected robust coefficient
-    of determination by Renaud and Victoria-Feser (2010).
-  }
+  \item{cov}{derived from \code{object$cov}.}% FIXME: say more
+  \item{r.squared}{robust \dQuote{R squared} or \eqn{R^2}, a coefficient
+    of determination:  This is the consistency corrected robust
+    coefficient of determination by Renaud and Victoria-Feser (2010).}
   \item{adj.r.squared}{an adjusted R squared, see \code{r.squared}.}
 }
 \references{

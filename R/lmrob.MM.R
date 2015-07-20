@@ -1239,7 +1239,6 @@ ghq <- function(n = 1, modify = TRUE) {
            "nonsingular"= 1L,
            stop("unknown setting for parameter ss"))
 
-globalVariables(c("Freq"), add=TRUE)
 
 outlierStats <- function(object, x = object$x,
                          control = object$control,

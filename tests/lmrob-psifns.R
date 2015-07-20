@@ -175,12 +175,7 @@ ctr9$tuning.chi
 (tol4 <- .Machine$double.eps^.25)
 
 Rver <- getRversion()
-if(FALSE) {## eventually:
-    integr.bug <- "2.12.0" <= Rver && Rver <= "3.0.1"
-} else { ## needed for R-3.0.1 patched
-    integr.bug <- ("2.12.0" <= Rver && Rver < "3.0.1") ||
-        (Rver == "3.0.1" && as.numeric(R.version[["svn rev"]]) < 63315)
-}
+integr.bug <- "2.12.0" <= Rver && Rver <= "3.0.1"
 integr.bug
 if(integr.bug) tol4 <- 8*tol4
 

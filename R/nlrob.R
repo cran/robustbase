@@ -243,10 +243,10 @@ nlrob <-
 .method.nlrob <- function(obj) if(inherits(obj, "nls")) "M" else obj$ctrl$method
 
 .vcov.m <- function(object, Scale, resid.sc) {
-    if((meth <- .method.nlrob(object)) == "M") {
+    if(.method.nlrob(object) == "M") {
 	AtWAinv <- chol2inv(object$m$Rmat())
 	stopifnot(length(Scale) == 1, Scale >= 0,
-		  is.numeric(resid.sc), length(resid.sc) == (n <- nobs(object)),
+		  is.numeric(resid.sc), length(resid.sc) == nobs(object),
 		  is.character(nms.coef <- names(coef(object))),
 		  length(nms.coef) == nrow(AtWAinv),
 		  is.function(psi <- object$psi))
@@ -408,8 +408,21 @@ print.summary.nlrob <-
 	    if(!is.null(ps <- ctrl$psi )) paste0("\", psi = \"", ps),
 	    "\"\n", sep="")
     }
+    resid <- x$residuals
     df <- x$df
     rdf <- df[2L]
+    cat(if (!is.null(x$weights) && diff(range(x$weights))) "Weighted ",
+	"Residuals:\n", sep = "")
+    if (rdf > 5L) {
+	nam <- c("Min", "1Q", "Median", "3Q", "Max")
+	rq <- 
+	    if (NCOL(resid) > 1)
+		structure(apply(t(resid), 1, quantile),
+			  dimnames = list(nam, dimnames(resid)[[2]]))
+	    else setNames(quantile(resid), nam)
+	print(rq, digits = digits, ...)
+    }
+    else print(resid, digits = digits, ...)
     cat("\nParameters:\n")
     printCoefmat(x$coefficients, digits = digits, signif.stars = signif.stars,
 		 ...)

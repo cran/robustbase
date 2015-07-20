@@ -259,7 +259,7 @@ covariance.matrix.rlm <- function(obj, method = 'XtWX')
 
 covariance.matrix.lm <- function(obj) {
   s <- summary(obj)
-  s$cov.unscaled*s$sigma^2
+  s$cov * s$sigma^2
 }
 
 sigma <- function(x, ...) UseMethod("sigma")

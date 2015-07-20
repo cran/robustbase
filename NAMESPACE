@@ -4,12 +4,12 @@ if(FALSE) {##MM
     stopifnot(require(codetoolsBioC), require(robustbase))
     findExternalDeps("robustbase")
 }
-importFrom("grDevices", dev.interactive)
+importFrom("grDevices", dev.interactive, extendrange)
 importFrom("graphics", abline, box, legend, lines, matplot, mtext,
-           par, plot, points, text, title)
+           panel.smooth, par, plot, points, strheight, text, title)
 importFrom("stats",
            aggregate, alias, as.formula, binomial,
-           coef, cov, cov.wt, cov2cor, delete.response, deviance, dnorm, dpois,
+           coef, cor, cov, cov.wt, cov2cor, delete.response, deviance, dnorm, dpois,
            family, fitted, fivenum, formula,
            gaussian, glm, glm.fit, integrate, is.empty.model, lm.fit, lm.wfit,
            mad, mahalanobis, median, model.frame, model.matrix, model.matrix.lm,
@@ -24,8 +24,10 @@ importFrom("stats",
 
            ## S3 generics (*not* shown yet by  findExternalDeps() above):
            anova, case.names, confint,
-           dummy.coef, logLik, variable.names
+           dummy.coef, logLik, profile, variable.names
            )
+
+
 ## ^^^^ MASS has a bit more; take it as example
 if(getRversion() >= "3.1.0")
 importFrom("stats", .lm.fit, confint.lm, dummy.coef.lm)

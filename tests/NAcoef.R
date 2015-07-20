@@ -5,6 +5,7 @@
 require(robustbase)
 source(system.file("test-tools-1.R", package="Matrix", mustWork=TRUE))
 ##-> assertError(), etc
+ALL.equal <- function(x,y, ...) all.equal(x,y, tolerance=1e-15, ...)
 
 ## generate simple example data
 data <- expand.grid(x1=letters[1:3], x2=LETTERS[1:3], rep=1:3)
@@ -53,9 +54,16 @@ stopifnot(all.equal(alias(cm1), alias(rm1)))
 
 ####
 ## these helper functions should print NAs for the dropped coefficients
-print(rm1)
-summary(rm1)
-confint(rm1)
+  print(rm1)
+summary(rm1) -> s1
+confint(rm1) -> ci1
+stopifnot(identical(is.na(coef(cm1)), apply(ci1, 1L, anyNA)),
+	  identical(sigma(rm1), s1$ sigma),
+	  identical(vcov(rm1),  s1$ cov  ),
+	  TRUE)
+
+print(s1, showAlgo=FALSE)
+ci1
 ## drop1 should return df = 0
 #drop1(rm1) ## drop.lm does not return valid results (yet)!
 
@@ -81,13 +89,14 @@ anova(rm1, rm0, test="Deviance")
 stopifnot(is.infinite(kr1 <- kappa(rm1)), kr1 == kappa(cm1), # = +Inf both
           identical(labels(rm1), labels(cm1)))
 
-#logLik(rm1)
+logLik(rm1)# well, and what does it mean?
+
 ## plot(rm1, which=1) ## plot.lmrob() fails "singular covariance" .. FIXME!
 par(mfrow=c(2,2))
 plot(rm1, which=2:4)
-stopifnot(all.equal(predict(rm1), predict(rm1c), tolerance=1e-15),
-          all.equal(predict(rm1,  se.fit=TRUE, interval="confidence"),
-		    predict(rm1c, se.fit=TRUE, interval="confidence"), tolerance=1e-15))
+stopifnot(ALL.equal(predict(rm1), predict(rm1c)),
+          ALL.equal(predict(rm1,  se.fit=TRUE, interval="confidence"),
+		    predict(rm1c, se.fit=TRUE, interval="confidence")))
 predict(rm1, type="terms", se.fit=TRUE, interval="confidence")
 #proj(rm1) ## fails "FIXME"
 residuals(rm1)
@@ -99,7 +108,7 @@ attributes(V1) <- attributes(V1)[c("dim","dimnames", "weights")]; V1
 set.seed(12); sc <- simulate(cm1, 64)
 set.seed(12); rc <- simulate(rm1, 64)
 
-stopifnot(all.equal(sqrt(diag(V1)), coef(summary(rm1))[,"Std. Error"], tolerance=1e-15),
+stopifnot(ALL.equal(sqrt(diag(V1)), coef(summary(rm1))[,"Std. Error"]),
 	  all.equal(sc, rc, tolerance = 0.08),# dimension *and* approx. values (no NA)
 	  identical(variable.names(rm1), variable.names(cm1)),
 	  all.equal(residuals(rm1), residuals(cm1), tolerance = 0.05),# incl. names

@@ -352,13 +352,13 @@ predict.lmrob <- function (object, newdata = NULL, scale = NULL, ...)
 print.summary.lmrob <-
     function (x, digits = max(3, getOption("digits") - 3),
 	      symbolic.cor = x$symbolic.cor,
-	      signif.stars = getOption("show.signif.stars"), ...)
+	      signif.stars = getOption("show.signif.stars"),
+              showAlgo = TRUE, ...)
 {
     cat("\nCall:\n",
-	cl <- paste(deparse(x$call, width.cutoff=72), sep = "\n", collapse = "\n"),
+	paste(deparse(x$call, width.cutoff=72), sep = "\n", collapse = "\n"),
 	"\n", sep = "")
     control <- lmrob.control.neededOnly(x$control)
-    ## if(!any(grepl("method *= *['\"]", cl)))## 'method = ".."' not explicitly visible above
     cat(" \\--> method = \"", control$method, '"\n', sep = "")
     ## else cat("\n")
     resid <- x$residuals
@@ -368,10 +368,11 @@ print.summary.lmrob <-
 	"Residuals:\n", sep = "")
     if (rdf > 5L) {
 	nam <- c("Min", "1Q", "Median", "3Q", "Max")
-	if (NCOL(resid) > 1)
-	    rq <- structure(apply(t(resid), 1, quantile),
-			    dimnames = list(nam, dimnames(resid)[[2]]))
-	else rq <- structure(quantile(resid), names = nam)
+	rq <-
+	    if (NCOL(resid) > 1)
+		structure(apply(t(resid), 1, quantile),
+			  dimnames = list(nam, dimnames(resid)[[2]]))
+	    else setNames(quantile(resid), nam)
 	print(rq, digits = digits, ...)
     }
     else print(resid, digits = digits, ...)
@@ -434,14 +435,14 @@ print.summary.lmrob <-
 	if (!is.null(rw <- x$rweights)) {
 	    if (any(zero.w <- x$weights == 0))
 		rw <- rw[!zero.w]
-            eps.outlier <- if (is.function(control$eps.outlier))
-                control$eps.outlier(nobs(x)) else control$eps.outlier
+            eps.outlier <- if (is.function(EO <- control$eps.outlier))
+                EO(nobs(x)) else EO
 	    summarizeRobWeights(rw, digits = digits, eps = eps.outlier, ...)
 	}
 
     } else cat("\nNo Coefficients\n")
 
-    if (!is.null(control))
+    if (showAlgo && !is.null(control))
 	printControl(control, digits = digits, drop. = "method")
     invisible(x)
 }
@@ -468,13 +469,14 @@ print.lmrob <- function(x, digits = max(3, getOption("digits") - 3), ...)
 				control$method))
 	    }
 	}
-	print(format(coef(x), digits = digits), print.gap = 2, quote = FALSE)
+	print(format(cf, digits = digits), print.gap = 2, quote = FALSE)
     } else cat("No coefficients\n")
     cat("\n")
     invisible(x)
 }
 
-print.lmrob.S <- function(x, digits = max(3, getOption("digits") - 3), ...)
+print.lmrob.S <- function(x, digits = max(3, getOption("digits") - 3),
+			  showAlgo = TRUE, ...)
 {
     cat("S-estimator lmrob.S():\n")
     if(length((cf <- coef(x)))) {
@@ -489,7 +491,8 @@ print.lmrob.S <- function(x, digits = max(3, getOption("digits") - 3), ...)
     cat("scale = ",format(x$scale, digits=digits), "; ",
 	if(x$converged)"converged" else "did NOT converge",
 	" in ", x$k.iter, " refinement steps\n")
-    printControl(x$control, digits = digits, drop. = "method")
+    if (showAlgo && !is.null(x$control))
+        printControl(x$control, digits = digits, drop. = "method")
     invisible(x)
 }
 
@@ -541,7 +544,7 @@ summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...
             pred <- object$fitted.values
             resp <- if (is.null(object[["y"]])) pred + resid else object$y
             wgt <- object$rweights
-            scale.rob <- object$scale
+            ## scale.rob <- object$scale
             ## correction E[wgt(r)] / E[psi'(r)] ( = E[wgt(r)] / E[r*psi(r)] )
             ctrl <- object$control
             c.psi <- ctrl$tuning.psi
@@ -553,14 +556,15 @@ summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...
                     else if (isTRUE(all.equal(c.psi, c(-.5, 1.0, 0.85, NA)))) 1.33517
                     else if (isTRUE(all.equal(c.psi, c(-.5, 1.5, 0.85, NA)))) 1.395828
                     else lmrob.E(wgt(r), ctrl) / lmrob.E(r*psi(r), ctrl)
-                } else if (isTRUE(all.equal(c.psi, .Mpsi.tuning.default(psi)))) {
+		} else if (any(psi == .Mpsi.R.names) &&
+			   isTRUE(all.equal(c.psi, .Mpsi.tuning.default(psi)))) {
                     switch(psi,
                            bisquare = 1.207617,
                            welsh    = 1.224617,
                            optimal  = 1.068939,
                            hampel   = 1.166891,
                            lqq      = 1.159232,
-                           stop(':summary.lmrob: unsupported psi function'))
+			   stop('unsupported psi function -- should not happen'))
                 } else lmrob.E(wgt(r), ctrl) / lmrob.E(r*psi(r), ctrl)
             resp.mean <- if (df.int == 1L) sum(wgt * resp)/sum(wgt) else 0
             yMy <- sum(wgt * (resp - resp.mean)^2)
@@ -568,11 +572,11 @@ summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...
             ans$r.squared <- r2correc <- (yMy - rMr) / (yMy + rMr * (correc - 1))
             ans$adj.r.squared <- 1 - (1 - r2correc) * ((n - df.int) / df)
         } else ans$r.squared <- ans$adj.r.squared <- 0
-	ans$cov.unscaled <- object$cov
+	ans$cov <- object$cov
 	if(length(object$cov) > 1L)
-	    dimnames(ans$cov.unscaled) <- dimnames(ans$coefficients)[c(1,1)]
+	    dimnames(ans$cov) <- dimnames(ans$coefficients)[c(1,1)]
 	if (correlation) {
-	    ans$correlation <- ans$cov.unscaled / outer(se, se)
+	    ans$correlation <- ans$cov / outer(se, se)
 	    ans$symbolic.cor <- symbolic.cor
 	}
     } else { ## p = 0: "null model"
@@ -580,19 +584,18 @@ summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...
 	ans$df <- c(0L, df, length(aliased))
 	ans$coefficients <- matrix(NA, 0L, 4L, dimnames = list(NULL, cf.nms))
         ans$r.squared <- ans$adj.r.squared <- 0
-	ans$cov.unscaled <- object$cov
+	ans$cov <- object$cov
     }
     ans$aliased <- aliased # used in print method
     ans$sigma <- sigma # 'sigma': in summary.lm() & 'fit.models' pkg
     if (is.function(ans$control$eps.outlier))
         ans$control$eps.outlier <- ans$control$eps.outlier(nobs(object))
-    if (is.function(ans$control$eps.x)) {
-        if (!is.null(object[['x']])) {
-            ans$control$eps.x <- ans$control$eps.x(max(abs(object[['x']])))
-        } else ans$control$eps.x <- NULL
-    }
-    class(ans) <- "summary.lmrob"
-    ans
+    if (is.function(ans$control$eps.x))
+	ans$control$eps.x <-
+	    if(!is.null(o.x <- object[['x']]))
+                ans$control$eps.x(max(abs(o.x))) ## else NULL
+    structure(ans,
+	      class = "summary.lmrob")
 }
 
 
@@ -604,16 +607,15 @@ variable.names.lmrob <- function(object, full = FALSE, ...)
     else character()
 }
 
-vcov.lmrob <- function (object, cov=object$control$cov, ...) {
-  if (!is.null(object$cov) && identical(cov, object$control$cov))
-    return(object$cov)
-  else {
-    ## cov = ..$control$cov is typically ".vcov.w" or ".vcov.avar1"
-    lf.cov <- if (!is.function(cov))
-      get(cov, mode = "function")
-    else cov
-    lf.cov(object, ...)
-  }
+vcov.lmrob <- function (object, cov = object$control$cov, ...) {
+    if (!is.null(object$cov) && (missing(cov) ||
+				 identical(cov, object$control$cov)))
+	object$cov
+    else {
+	## cov = ..$control$cov is typically ".vcov.w" or ".vcov.avar1"
+	lf.cov <- if (!is.function(cov)) get(cov, mode = "function") else cov
+	lf.cov(object, ...)
+    }
 }
 
 sigma.lmrob <- function(object, ...) object$scale
@@ -649,9 +651,9 @@ printControl <-
     cat(header,"\n")
     is.str <- (nc <- names(ctrl)) %in% str.names
     do. <- !is.str & !(nc %in% drop.)
-    is.ch <- sapply(ctrl, is.character)
-    real.ctrl <- sapply(ctrl, function(x)
-			length(x) > 0 && is.numeric(x) && x != round(x))
+    is.ch <- vapply(ctrl, is.character, NA)
+    real.ctrl <- vapply(ctrl, function(x)
+			length(x) > 0 && is.numeric(x) && any(x %% 1 != 0), NA)
     PR(ctrl[do. & real.ctrl], digits = digits, ...)
     ## non-real, non-char ones (typically integers), but dropping 0-length ones
     PR(ctrl[do. & !is.ch & !real.ctrl], ...)

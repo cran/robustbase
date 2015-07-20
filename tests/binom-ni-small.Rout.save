@@ -1,6 +1,6 @@
 
-R version 3.0.1 Patched (2013-05-24 r62794) -- "Good Sport"
-Copyright (C) 2013 The R Foundation for Statistical Computing
+R Under development (unstable) (2015-07-18 r68693) -- "Unsuffered Consequences"
+Copyright (C) 2015 The R Foundation for Statistical Computing
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -147,7 +147,7 @@ List of 27
   .. .. ..$ : NULL
   .. .. ..$ : chr [1:2] "k" ""
   ..$ x               : num [1:51] 0 0.02 0.04 0.06 0.08 0.1 0.12 0.14 0.16 0.18 ...
-  ..- attr(*, "terms")=Classes 'terms', 'formula' length 3 cbind(k, ni - k) ~ x
+  ..- attr(*, "terms")=Classes 'terms', 'formula'  language cbind(k, ni - k) ~ x
   .. .. ..- attr(*, "variables")= language list(cbind(k, ni - k), x)
   .. .. ..- attr(*, "factors")= int [1:2, 1] 0 1
   .. .. .. ..- attr(*, "dimnames")=List of 2
@@ -162,9 +162,9 @@ List of 27
   .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "nmatrix.2" "numeric"
   .. .. .. ..- attr(*, "names")= chr [1:2] "cbind(k, ni - k)" "x"
  $ call             : language glmrob(formula = cbind(k, ni - k) ~ x, family = binomial, acc = 1e-10)
- $ formula          :Class 'formula' length 3 cbind(k, ni - k) ~ x
+ $ formula          :Class 'formula'  language cbind(k, ni - k) ~ x
   .. ..- attr(*, ".Environment")=<environment: R_GlobalEnv> 
- $ terms            :Classes 'terms', 'formula' length 3 cbind(k, ni - k) ~ x
+ $ terms            :Classes 'terms', 'formula'  language cbind(k, ni - k) ~ x
   .. ..- attr(*, "variables")= language list(cbind(k, ni - k), x)
   .. ..- attr(*, "factors")= int [1:2, 1] 0 1
   .. .. ..- attr(*, "dimnames")=List of 2
@@ -351,8 +351,8 @@ test.acc
 +                     rg3.15  [no.comp], tol = 1e-13))
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  0.548 0.044 0.584 0 0 
+Time elapsed:  0.389 0.082 0.561 0 0.008 
 > 
 > proc.time()
    user  system elapsed 
-  0.548   0.044   0.584 
+  0.389   0.090   0.561 

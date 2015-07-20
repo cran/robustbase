@@ -4,7 +4,28 @@
 \title{News for \R Package \pkg{robustbase}}
 \encoding{UTF-8}
 
-\section{CHANGES in robustbase VERSION 0.92-4 (2015-06-04)}{
+\section{CHANGES in robustbase VERSION 0.92-5 (2015-07-21, svn r698)}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item \emph{Hidden} \code{print()} methods \code{print.summary.lmrob()}
+      and \code{print.lmrob.S()} get a \code{showAlgo = TRUE} argument
+      which the user can set to FALSE in order to suppress printing of
+      the \dQuote{Algorithmic parameters}.
+      \item import (remaining parts) from "base" packages.
+      \item \code{summary(<nlrob>)} now also prints a summary on the residuals.
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item \code{summary(lmrob(.))}'s variance-covariance matrix is now
+      called \code{cov} instead of \code{cov.unscaled} (because it
+      \emph{is} scaled).  Code which has been using \code{vcov(<lmrob>)}
+      or \code{<lmrob> $ cov}, or even \code{<summary.lmrob> $ cov} is not affected.
+    }
+  }
+}
+
+\section{CHANGES in robustbase VERSION 0.92-4 (2015-06-04, svn r696)}{
   \subsection{NEW FEATURES}{
     \itemize{
       \item Started this \file{NEWS.Rd} file, to eventually replace the \file{ChangeLog}

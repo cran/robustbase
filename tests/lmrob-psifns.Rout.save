@@ -1,5 +1,5 @@
 
-R version 3.1.2 Patched (2015-01-12 r67440) -- "Pumpkin Helmet"
+R Under development (unstable) (2015-07-18 r68693) -- "Unsuffered Consequences"
 Copyright (C) 2015 The R Foundation for Statistical Computing
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
@@ -61,7 +61,7 @@ Loading required package: tools
 +                   lmrob.control(psi = "ggw", tuning.psi = cc)$tuning.psi)
 + )
 > cat('Time for constants computation of tuning.psi: ', st,'\n')
-Time for constants computation of tuning.psi:  0.202 0.001 0.204 0 0 
+Time for constants computation of tuning.psi:  0.315 0 0.315 0 0 
 > cGct <- t(sapply(cG.cnst, attr, "constants"))[,-1]
 > colnames(cGct) <- c("a","b","c", "rhoInf")
 > signif(cGct, 4)
@@ -682,20 +682,15 @@ attr(,"constants")
 [1] 0.0001220703
 > 
 > Rver <- getRversion()
-> if(FALSE) {## eventually:
-+     integr.bug <- "2.12.0" <= Rver && Rver <= "3.0.1"
-+ } else { ## needed for R-3.0.1 patched
-+     integr.bug <- ("2.12.0" <= Rver && Rver < "3.0.1") ||
-+         (Rver == "3.0.1" && as.numeric(R.version[["svn rev"]]) < 63315)
-+ }
+> integr.bug <- "2.12.0" <= Rver && Rver <= "3.0.1"
 > integr.bug
 [1] FALSE
 > if(integr.bug) tol4 <- 8*tol4
 > 
 > assert.EQ(attr(ctr9$tuning.psi, "constants"), tpsi., tol=tol4, giveRE=TRUE)
-Mean relative difference: 2.495013e-05 
+Mean relative difference: 2.495013e-05
 > assert.EQ(attr(ctr9$tuning.chi, "constants"), tchi., tol=tol4, giveRE=TRUE)
-Mean relative difference: 5.155651e-05 
+Mean relative difference: 5.155651e-05
 > 
 > summary(mp9 <- lmrob(Y ~ ., data = aircraft, control = ctr9))
 
@@ -745,8 +740,8 @@ seed : int(0)
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  2.277 0.063 2.41 0 0.003 
+Time elapsed:  2.586 0.253 2.923 0 0.008 
 > 
 > proc.time()
    user  system elapsed 
-  2.277   0.066   2.410 
+  2.586   0.261   2.923 

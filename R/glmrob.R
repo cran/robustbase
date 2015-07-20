@@ -153,8 +153,7 @@ summary.glmrob <- function(object, correlation=FALSE, symbolic.cor=FALSE, ...)
 	ans$correlation <- cov2cor(covmat)
 	ans$symbolic.cor <- symbolic.cor
     }
-    class(ans) <- "summary.glmrob"
-    return(ans)
+    structure(ans, class = "summary.glmrob")
 }
 
 ## almost a copy of vcov.glm() [if that didn't have summmary.glm() explicitly]
@@ -162,7 +161,7 @@ vcov.glmrob <- function (object, ...)
 {
     so <- summary(object, corr = FALSE, ...)
     ## so$dispersion * so$cov.unscaled
-    ## chanced from cov.unscaled to cov.scaled
+    ## changed from cov.unscaled to cov.scaled
     so$cov.scaled
 }
 

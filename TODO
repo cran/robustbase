@@ -139,7 +139,7 @@ R users already know optim() etc.. so the name seems more logical for them.
     which calls  lmrob..M..fit() which is already documented as "simple"
     M-estimator (though the *scale* is kept fixed; i.e., no  'proposal 2').
 ** TODO glmrob(), glmrobMqle(), etc : expression()s and eval() no longer "satisfactory",
-   e.g., see FIXME in ./R/glmrobMqle-DQD.Rq
+   e.g., see FIXME in ./R/glmrobMqle.R
 ** TODO covMcd(): pass k3 as argument; default=current ==> allow "formula"  k3 = k3(n,p) !!
 ** covOGK():
    The argument name 'weight.fn' is pretty ugly and the default function

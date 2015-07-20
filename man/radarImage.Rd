@@ -20,7 +20,6 @@
   }
 }
 % \details{
-%   ~~ If necessary, more details than the __description__ above ~~
 % }
 \source{
   The website accompanying the MMY-book:
