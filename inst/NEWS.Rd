@@ -4,6 +4,25 @@
 \title{News for \R Package \pkg{robustbase}}
 \encoding{UTF-8}
 
+\section{CHANGES in robustbase VERSION 0.92-6 (2016-05-28, svn r717)}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item Now provide an \code{"lmrob"} method for the standard \R
+      generic function \code{hatvalues()}, and also export its lower
+      level workhorse \code{.lmrob.hat()} (formerly hidden
+      \code{lmrob.leverages()}), which now by default has
+      \code{names(.)}.
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item \code{.lmrob.hat()} (formerly \code{lmrob.leverages()}) has
+      been corrected for the rank-deficient case.
+      \item \code{classPC(m)} now also works for a 1-column matrix.
+    }
+  }
+}
+
 \section{CHANGES in robustbase VERSION 0.92-5 (2015-07-21, svn r698)}{
   \subsection{NEW FEATURES}{
     \itemize{

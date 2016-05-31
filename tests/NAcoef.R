@@ -5,7 +5,6 @@
 require(robustbase)
 source(system.file("test-tools-1.R", package="Matrix", mustWork=TRUE))
 ##-> assertError(), etc
-ALL.equal <- function(x,y, ...) all.equal(x,y, tolerance=1e-15, ...)
 
 ## generate simple example data
 data <- expand.grid(x1=letters[1:3], x2=LETTERS[1:3], rep=1:3)
@@ -40,7 +39,7 @@ class(rm0) <- c(class(rm0), "lm")
 
 ## the full matrix (data) should be returned by model matrix (frame)
 stopifnot(all.equal(model.matrix(cm1), model.matrix(rm1)),
-          all.equal(model.frame(cm1), model.frame(rm1)))
+          all.equal(model.frame (cm1), model.frame (rm1)))
 ## qr decomposition should be for the full data and pivots identical lm result
 qr.cm1 <- qr(cm1)$qr
 qr.rm1 <- rm1$qr$qr
@@ -84,19 +83,24 @@ anova(rm1, rm0, test="Deviance")
 #dfbetas(rm1)
 #effects(rm1) ## fails
 #extractAIC(rm1)
-#stopifnot(all.equal(hatvalues(rm1), robustbase:::lmrob.leverages(wqr=rm1$qr))) ## fails
 #influence(rm1)
+stopifnot(all.equal(hv1 <- hatvalues(rm1), .lmrob.hat(wqr=rm1$qr), tol=1e-15),
+          all.equal(hv1, stats:::hatvalues.lm(rm1), tol=1e-15),
+          all.equal(hat(cm1$qr), unname(hatvalues(cm1)), tol=1e-15),
+          all.equal(unname(hv1), hat(rm1$qr), tol=1e-15),
+          ## ditto :
+          all.equal(hv1c <- hatvalues(rm1c), stats:::hatvalues.lm(rm1c), tol=1e-15))
+
+## kappa() & labels() :
 stopifnot(is.infinite(kr1 <- kappa(rm1)), kr1 == kappa(cm1), # = +Inf both
           identical(labels(rm1), labels(cm1)))
-
 logLik(rm1)# well, and what does it mean?
-
 ## plot(rm1, which=1) ## plot.lmrob() fails "singular covariance" .. FIXME!
 par(mfrow=c(2,2))
 plot(rm1, which=2:4)
-stopifnot(ALL.equal(predict(rm1), predict(rm1c)),
-          ALL.equal(predict(rm1,  se.fit=TRUE, interval="confidence"),
-		    predict(rm1c, se.fit=TRUE, interval="confidence")))
+stopifnot(all.equal(predict(rm1), predict(rm1c), tol=1e-15),
+          all.equal(predict(rm1,  se.fit=TRUE, interval="confidence"),
+		    predict(rm1c, se.fit=TRUE, interval="confidence"), tol=1e-15))
 predict(rm1, type="terms", se.fit=TRUE, interval="confidence")
 #proj(rm1) ## fails "FIXME"
 residuals(rm1)
@@ -108,7 +112,7 @@ attributes(V1) <- attributes(V1)[c("dim","dimnames", "weights")]; V1
 set.seed(12); sc <- simulate(cm1, 64)
 set.seed(12); rc <- simulate(rm1, 64)
 
-stopifnot(ALL.equal(sqrt(diag(V1)), coef(summary(rm1))[,"Std. Error"]),
+stopifnot(all.equal(sqrt(diag(V1)), coef(summary(rm1))[,"Std. Error"], tol=1e-15),
 	  all.equal(sc, rc, tolerance = 0.08),# dimension *and* approx. values (no NA)
 	  identical(variable.names(rm1), variable.names(cm1)),
 	  all.equal(residuals(rm1), residuals(cm1), tolerance = 0.05),# incl. names

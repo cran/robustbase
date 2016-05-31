@@ -201,7 +201,7 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 	trial = whimed_i(work, iwt, j, acand, a_srt, iw_cand);
 	double eps_trial = eps[0] * (eps[0] + fabs(trial));
 	if(trace_lev >= 3)
-	    Rprintf("%2s it=%2d, whimed(*, n=%6d)= %8g ", " ", it, j, trial);
+	    Rprintf("%2s it=%2d, whimed(*, n=%6d)=%11.5g ", " ", it, j, trial);
 
 	j = 1;
 	for (i = h2; i >= 1; i--) {

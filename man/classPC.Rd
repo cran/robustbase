@@ -75,6 +75,11 @@ stopifnot(all.equal(pcx$eigenvalues, diag(S.S)/k))
 ## the usual n > p case :
 pc.x <- classPC(t(x))
 pc.x$rank # = 10, full rank in the n > p case
+
+cpc1 <- classPC(cbind(1:3)) # 1-D matrix
+stopifnot(cpc1$rank == 1,
+          all.equal(cpc1$eigenvalues, 1),
+          all.equal(cpc1$loadings, 1))
 \dontshow{
 stopifnot(classPC(x, center=FALSE)$rank == min(dim(x)))
 ii <- names(pcx); ii <- ii[ii != "scores"]

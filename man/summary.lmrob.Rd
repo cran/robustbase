@@ -2,6 +2,8 @@
 \title{Summary Method for "lmrob" Objects}
 %
 \alias{summary.lmrob}
+\alias{hatvalues.lmrob}
+\alias{.lmrob.hat}
 \alias{vcov.lmrob}
 \alias{print.summary.lmrob}
 \alias{model.matrix.lmrob}
@@ -14,8 +16,11 @@
   work (via the default methods), and
   \code{\link{predict}()} (see \code{\link{predict.lmrob}},
   \code{\link{vcov}()}, \code{\link{weights}()} (see
-  \code{\link{weights.lmrob}}), \code{\link{model.matrix}()}, etc. have
-  explicitly defined \code{lmrob} methods.
+  \code{\link{weights.lmrob}}), \code{\link{model.matrix}()},
+  \code{\link{confint}()}, \code{\link{dummy.coef}()},
+  \code{\link{hatvalues}()}, etc.,
+  have explicitly defined \code{lmrob} methods.  \code{.lmrob.hat()} is
+  the lower level \dQuote{work horse} of the \code{hatvalues()} method.
 }
 \usage{
 \method{summary}{lmrob}(object, correlation = FALSE,
@@ -27,6 +32,9 @@
 
 \method{vcov}{lmrob}(object, cov = object$control$cov, \dots)
 \method{model.matrix}{lmrob}(object, \dots)
+
+% not yet
+% .lmrob.hat(x, w = rep(1, NROW(x)), wqr = qr(sqrt(w) * x))
 }
 \arguments{
   \item{object}{an \R object of class \code{lmrob}, typically created by

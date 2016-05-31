@@ -18,7 +18,7 @@
   }
 }
 \usage{
-## You can *not* call the  nlrob(*, method = <M>) like this
+## You can *not* call the  nlrob(*, method = <M>) like this ==> see  help(nlrob)
 ## ------- ===== ------------------------------------------
 
 nlrob.MM(formula, data, pnames, lower, upper,

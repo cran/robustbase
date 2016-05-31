@@ -254,20 +254,23 @@ chk.s <- function(...) {
 
 ##' Robust Mahalanobis Distances
 ##' internal function, used in lmrob() and plot.lmrob()
+##' also "wanted" by 'robustloggamma' pkg
 robMD <- function(x, intercept, wqr, ...) {
+    ## NB:  'wqr' only needed when covMcd()  is not (entirely) successful
     if(intercept == 1) x <- x[, -1, drop=FALSE]
     if(ncol(x) >= 1) {
 	rob <- tryCatch(covMcd(x, ...),
-                        warning = function(w) structure("covMcd failed with a warning",
+                        warning = function(w) structure("covMcd produced a warning",
                         class="try-error", condition = w),
                         error = function(e) structure("covMcd failed with an error",
                         class="try-error", condition = e))
 	if (inherits(rob, "try-error")) {
             warning("Failed to compute robust Mahalanobis distances, reverting to robust leverages.")
-            return(lmrob.leverages(wqr = wqr))
-        }
-	sqrt( mahalanobis(x, rob$center, rob$cov) )
-    }
+	    .lmrob.hat(wqr = wqr)
+	}
+	else
+	    sqrt( mahalanobis(x, rob$center, rob$cov) )
+    } ## else NULL
 }
 
 ### Method Functions for class lmrob objects ###

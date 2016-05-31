@@ -32,15 +32,16 @@
 
 #include <Rmath.h> /* -> <math.h> and much more */
 
-/* Interface routines to be called via .C() : */
 #include "robustbase.h"
 
+// whimed() and whimed_i()  function called from C : in ./mc.c , ./qn_sn.c :
 #define _i_whimed_
 #include "wgt_himed_templ.h"
 
 #define _d_whimed_
 #include "wgt_himed_templ.h"
 
+/* Interface routines to be called via .C() : */
 
 void wgt_himed_i(double *x, Sint *n, Sint *iw, double *res)
 {

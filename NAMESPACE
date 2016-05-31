@@ -11,7 +11,8 @@ importFrom("stats",
            aggregate, alias, as.formula, binomial,
            coef, cor, cov, cov.wt, cov2cor, delete.response, deviance, dnorm, dpois,
            family, fitted, fivenum, formula,
-           gaussian, glm, glm.fit, integrate, is.empty.model, lm.fit, lm.wfit,
+           gaussian, glm, glm.fit, hatvalues,
+           integrate, is.empty.model, lm.fit, lm.wfit,
            mad, mahalanobis, median, model.frame, model.matrix, model.matrix.lm,
            model.offset, model.response, model.weights,
            na.fail, na.omit, na.pass, napredict, naresid,
@@ -81,6 +82,7 @@ export(Sn, Qn, Qn.old,
        lmrob.fit.MM, lmrob..M..fit, lmrob..D..fit,
        lmrob.S, lmrob.lar, lmrob.M.S,
        lmrob.control,
+       .lmrob.hat, # was lmrob.leverages()
        splitFrame,
        outlierStats,
 
@@ -122,6 +124,7 @@ S3method(confint, nlrob)
 S3method(dummy.coef, lmrob)
 S3method(estimethod, nlrob)
 S3method(family, lmrob)
+S3method(hatvalues, lmrob)
 S3method(kappa, lmrob)
 S3method(labels, lmrob)
 S3method(model.matrix, lmrob)

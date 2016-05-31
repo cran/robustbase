@@ -19,6 +19,7 @@
 **** DONE shouldn't we rename jde() to jdeopt() or even jdeoptim(), jDEoptim(), or JDEoptim()
 R users already know optim() etc.. so the name seems more logical for them.
 * Short Term
+** TODO mc(x) can *fail* to converge: workaround: jitter() -> ~/R/MM/Pkg-ex/robust/Robnik-mc.R
 ** TODO estimethod(): also for lmrob() and glmrob() models
 ** TODO VT implement .detMcd() in C
 ** TODO r6pack(milk, ..): *return* singularity message but do not signal an error
@@ -197,13 +198,15 @@ R users already know optim() etc.. so the name seems more logical for them.
    otherwise: test this, ask author for "donation" to robustbase
 
 *** adjOutlyingness() :
-     typo-bug is corrected; and I have made it more pretty.
+**** typo-bug is corrected; and I have made it more pretty.
      Still a bit problematic when denominator = 0
      Currently leave away all the c/0 = Inf and 0/0 = NaN values.
 
      MM: Maybe, it's the fact that the   coef = 1.5  should really depend on
          the sample size  n   and will be too large for small n (??)
    --> should ask Mia and maybe Guy Brys
+**** For really small (n,p):  Taking 250 random samples of size p; is non-sense when choose(n,p) <= 250
+  Rather then, take *all* sub-samples of size p ==> getting a non-random result.
 
 *** Add data sets from the MMY-book -- mostly done {do we have *all* ?}
 

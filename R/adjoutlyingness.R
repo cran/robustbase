@@ -26,7 +26,7 @@
 
 
 adjOutlyingness <- function(x, ndir=250, clower=4, cupper=3,
-                            alpha.cutoff = 0.75, coef = 1.5, qr.tol = 1e-12,
+                            alpha.cutoff = 0.75, coef = 1.5, qr.tol = 1e-12, keep.tol = 1e-12,
                             only.outlyingness = FALSE)
 ## Skewness-Adjusted Outlyingness
 {
@@ -55,7 +55,7 @@ adjOutlyingness <- function(x, ndir=250, clower=4, cupper=3,
 
         Bnorm <- sqrt(colSums(B^2))
         Nx <- mean(abs(x.)) ## so the comparison is scale-equivariant:
-        keep <- Bnorm*Nx > 1e-12
+        keep <- Bnorm*Nx > keep.tol
         Bnormr <- Bnorm[  keep ]
         B      <-     B[, keep , drop=FALSE]
 
@@ -79,7 +79,8 @@ adjOutlyingness <- function(x, ndir=250, clower=4, cupper=3,
         ##    A=diag(1./Bnormr)*B;         %ndirect*n
 
     }
-    Y <- x %*% A # (n x p) %*% (p, ndir) == (n x ndir)
+    Y <- x %*% A # (n x p) %*% (p, nd') == (n x nd');
+    ##  nd' = ndir.final := ndir - {those not in 'keep'}
 
     ## Compute and sweep out the median
     med <- colMedians(Y)
@@ -135,7 +136,7 @@ adjOutlyingness <- function(x, ndir=250, clower=4, cupper=3,
 	cutoff <- Qadj[2] + coef * (Qadj[2] - Qadj[1]) *
 	    (if(mcadjout > 0) exp(cupper*mcadjout) else 1)
 
-	list(adjout = adjout, iter = it,
+	list(adjout = adjout, iter = it, ndir.final = sum(keep),
 	     MCadjout = mcadjout, Qalph.adjout = Qadj, cutoff = cutoff,
 	     nonOut = (adjout <= cutoff))
     }

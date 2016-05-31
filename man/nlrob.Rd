@@ -198,11 +198,16 @@ nlrob(formula, data, start, lower, upper,
 }
 
 \author{
-  Andreas Ruckstuhl (inspired by \code{\link[MASS]{rlm}}() and
-  \code{\link{nls}}()), in July 1994 for S-plus.\cr
-  Christian Sangiorgio did the update to \R and corrected some errors,
-  from June 2002 to January 2005, and Andreas contributed slight changes
-  and the first methods in August 2005.
+  \describe{
+    \item{\code{method = "M"}:}{
+      Andreas Ruckstuhl (inspired by \code{\link[MASS]{rlm}}() and
+      \code{\link{nls}}()), in July 1994 for S-plus.\cr
+      Christian Sangiorgio did the update to \R and corrected some errors,
+      from June 2002 to January 2005, and Andreas contributed slight changes
+      and the first methods in August 2005.}
+    \item{\code{method = "MM"}, etc:}{Originally all by Eduardo
+      L. T. Conceicao, see \code{\link{nlrob.algorithms}}:} % nlrob-algos.Rd
+  }
 
   Since then, the help page, testing, more cleanup, new methods: Martin
   Maechler.

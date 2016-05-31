@@ -776,9 +776,9 @@ lmrob.tau <- function(obj, x=obj$x, control = obj$control, h, fast = TRUE)
     if(is.null(control)) stop("'control' is missing")
     if(missing(h))
 	h <- if (is.null(obj$qr))
-	    lmrob.leverages(x, obj$rweights)
+	    .lmrob.hat(x, obj$rweights)
 	else
-	    lmrob.leverages(wqr = obj$qr)
+	    .lmrob.hat(wqr = obj$qr)
 
     ## speed up: use approximation if possible
     if (fast && !control$method %in% c('S', 'SD')) {
@@ -896,18 +896,33 @@ lmrob.tau.fast.coefs <- function(cc, psi) {
     c(tfact = tfact, tcorr = tcorr)
 }
 
-lmrob.hatmatrix <- function(x, w = rep(1, NROW(x)), wqr = qr(sqrt(w) * x))
+lmrob.hatmatrix <- function(x, w = rep(1, NROW(x)), wqr = qr(sqrt(w) * x), names = FALSE)
 {
-    tcrossprod(qr.Q(wqr))
+    H <- tcrossprod(qr.qy(wqr, diag(1, NROW(x), x$rank)))
+    if(names && !is.null(rnms <- dimnames(wqr$qr)[[1L]]))
+	dimnames(H) <- list(rnms,rnms)
+    H
 }
 
-lmrob.leverages <- function(x, w = rep(1, NROW(x)), wqr = qr(sqrt(w) * x))
+.lmrob.hat <- function(x, w = rep(1, NROW(x)), wqr = qr(sqrt(w) * x), names = TRUE)
 {
     if (missing(wqr) && !is.matrix(x)) x <- as.matrix(x)
     ## Faster than computing the whole hat matrix, and then diag(.) :
     ## == diag(lmrob.hatmatrix(x, w, ...))
-    pmin(1, rowSums(qr.Q(wqr)^2))
+    h <- pmin(1, rowSums(qr.qy(wqr, diag(1, NROW(wqr$qr), wqr$rank))^2))
+    if(names && !is.null(rnms <- dimnames(wqr$qr)[[1L]]))
+	names(h) <- rnms
+    h
 }
+
+hatvalues.lmrob <- function(model, ...)
+{
+    if (is.null(wqr <- model$qr))
+	.lmrob.hat(model$x, model$rweights)
+    else
+	.lmrob.hat(wqr = wqr)
+}
+
 
 ##' psi |--> ipsi \in \{0,1,...6} : integer codes used in C
 .psi2ipsi <- function(psi)
@@ -1256,7 +1271,7 @@ outlierStats <- function(object, x = object$x,
     rw <- object$rweights
     ##    ^^^^^^^^^^^^^^^ not weights(..., type="robustness") as we
     ##                    don't want naresid() padding here.
-    if (is.function(epsw)) epsw <- epsw(nobs(object))
+    if (is.function(epsw)) epsw <- epsw(nobs(object, use.fallback = TRUE))
     if (!is.numeric(epsw) || length(epsw) != 1)
         stop("'epsw' must be numeric(1) or a function of nobs(obj.) which returns a numeric(1)")
     rj <- abs(rw) < epsw

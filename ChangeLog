@@ -1,3 +1,6 @@
+NOTE: All newer changes are in  ./inst/NEWS.Rd  --> `news(package = "robustbase")`
+----                            ---------------
+
 2014-12-12  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* R/mc.R (mc): fix for limit case where x[] contains +/-Inf: pass +/- Inf to C

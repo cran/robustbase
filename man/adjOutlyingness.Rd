@@ -11,7 +11,8 @@
 }
 \usage{
 adjOutlyingness(x, ndir = 250, clower = 4, cupper = 3,
-                alpha.cutoff = 0.75, coef = 1.5, qr.tol = 1e-12,
+                alpha.cutoff = 0.75, coef = 1.5,
+                qr.tol = 1e-12, keep.tol = 1e-12,
                 only.outlyingness = FALSE)
 }
 \arguments{
@@ -35,6 +36,9 @@ adjOutlyingness(x, ndir = 250, clower = 4, cupper = 3,
     \code{\link{solve.qr}} for determining the \code{ndir} directions,
     each determined by a random sample of \eqn{p} (out of \eqn{n})
     observations.}
+  \item{keep.tol}{positive tolerance to determine which of the sample
+    direction should be kept, namely only those for which
+    \eqn{\|x\| \cdot \|B\|}{||x|| * ||B||} is larger than \code{keep.tol}.}
   \item{only.outlyingness}{logical indicating if the final outlier
     determination should be skipped.  In that case, a vector is
     returned, see \sQuote{Value:} below.}

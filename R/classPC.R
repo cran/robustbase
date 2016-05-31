@@ -35,7 +35,7 @@ classPC <- function(x, scale=FALSE, center=TRUE,
     if(via.svd) {
 	svd <- svd(x, nu=0)
 	rank <- rankMM(x, sv=svd$d)
-	loadings <- svd$v[,1:rank]
+	loadings <- svd$v[,1:rank, drop=FALSE]
 	eigenvalues <- (svd$d[1:rank])^2 /(n-1) ## FIXME: here .^2; later sqrt(.)
     } else { ## n <= p; was "kernelEVD"
 	e <- eigen(tcrossprod(x), symmetric=TRUE)

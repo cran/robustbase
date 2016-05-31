@@ -52,7 +52,7 @@ robustDoc <- system.file('doc', package='robustbase')
 robustDta <- robustDoc
 
 ## initialize (packages, data, ...):
-source(file.path(robustDoc, 'simulation.init.R'))
+source(file.path(robustDoc, 'simulation.init.R')) # 'xtable'
 
 ## set the amount of trimming used in calculation of average results
 trim <- 0.1
@@ -71,14 +71,14 @@ source(file.path(robustDoc, 'graphics.functions.R'))
 
 ## set ggplot theme
 theme <- theme_bw(base_size = 10)
-theme$legend.key.size <- unit(0.9, "lines")
-theme$plot.margin <- unit(c(1/2, 0, 0, 0), "lines")
+theme$legend.key.size <- unit(1, "lines")# was 0.9 in pre-v.3 ggplot2
+theme$plot.margin <- unit(c(1/2, 1/8, 1/8, 1/8), "lines")# was (1/2, 0,0,0)
 theme_set(theme)
 ## set default sizes for lines and points
-update_geom_defaults("point", aes(size = 4/3))
-update_geom_defaults("line", aes(size = 1/4))
-update_geom_defaults("hline", aes(size = 1/4))
-update_geom_defaults("smooth", aes(size = 1/4))
+update_geom_defaults("point",  list(size = 4/3))
+update_geom_defaults("line",   list(size = 1/4))
+update_geom_defaults("hline",  list(size = 1/4))
+update_geom_defaults("smooth", list(size = 1/4))
 ## alpha value for plots with many points
 alpha.error <- 0.3
 alpha.n <- 0.4
@@ -114,23 +114,23 @@ if (packageVersion("ggplot2") <= "0.9.1") {
                                 fill = theme$panel.grid.major$colour)
 }
 
-legend.mod <- list(`SMD.Wtau` = expression(paste('SMD.W',tau)),
-                   `SMDM.Wtau` = expression(paste('SMDM.W',tau)),
-                   `MM.Avar1` = expression(paste('MM.',Avar[1])),
-                   `MMqT` = expression(paste('MM',q[T])),
-                   `MMqT.Wssc` = expression(paste('MM',q[T],'.Wssc')),
-                   `MMqE` = expression(paste('MM',q[E])),
-                   `MMqE.Wssc` = expression(paste('MM',q[E],'.Wssc')),
-                   `sigma_S` = expression(hat(sigma)[S]),
-                   `sigma_D` = expression(hat(sigma)[D]),
-                   `sigma_S*qE` = expression(q[E]*hat(sigma)[S]),
-                   `sigma_S*qT` = expression(q[T]*hat(sigma)[S]),
-                   `sigma_robust` = expression(hat(sigma)[robust]),
-                   `sigma_OLS` = expression(hat(sigma)[OLS]),
-                   `t1` = expression(t[1]),
-                   `t3` = expression(t[3]),
-                   `t5` = expression(t[5]),
-                   `cskt(Inf,2)` = expression(paste('cskt(',infinity,',2)'))
+legend.mod <- list(`SMD.Wtau` = quote('SMD.W'~tau),
+                   `SMDM.Wtau` = quote('SMDM.W'~tau),
+                   `MM.Avar1` = quote('MM.'~Avar[1]),
+                   `MMqT` = quote('MM'~~q[T]),
+                   `MMqT.Wssc` = quote('MM'~~q[T]*'.Wssc'),
+                   `MMqE` = quote('MM'~~q[E]),
+                   `MMqE.Wssc` = quote('MM'~~q[E]*'.Wssc'),
+                   `sigma_S` = quote(hat(sigma)[S]),
+                   `sigma_D` = quote(hat(sigma)[D]),
+                   `sigma_S*qE` = quote(q[E]*hat(sigma)[S]),
+                   `sigma_S*qT` = quote(q[T]*hat(sigma)[S]),
+                   `sigma_robust` = quote(hat(sigma)[robust]),
+                   `sigma_OLS` = quote(hat(sigma)[OLS]),
+                   `t1` = quote(t[1]),
+                   `t3` = quote(t[3]),
+                   `t5` = quote(t[5]),
+                   `cskt(Inf,2)` = quote(cskt(infinity,2))
                    )
 @% end{graphics-setup}
 
@@ -258,9 +258,8 @@ tmp <- rbind(f.plot.psi(x, 'optimal'),
              f.plot.psi(x, 'bisquare'),
              f.plot.psi(x, 'lqq'),
              f.plot.psi(x, 'hampel'))
-print(ggplot(tmp, aes(x, value, color = psi)) + geom_line() +
-      ylab(expression(psi(x))) +
-      scale_color_discrete(name = expression(paste(psi, '-function'))))
+print( ggplot(tmp, aes(x, value, color = psi)) + geom_line() + ylab(quote(psi(x))) +
+          scale_color_discrete(name = quote(psi ~ '-function')))
 @
 \includegraphics{plot-fig-psi-functions}
 \end{center}
@@ -306,7 +305,8 @@ An example design is shown in Fig.~\ref{fig:example.design}.
 
 \begin{figure}
 \begin{center}
-<<fig-example-design, fig=TRUE, include=FALSE, eval=FALSE, echo=FALSE>>=
+<<fig-example-design,fig=TRUE,include=FALSE,eval=TRUE,echo=FALSE>>=
+require(GGally)
 colnames(rand_25_5) <- paste0("X", 1:5) # workaround new (2014-12) change in GGally
 print(ggpairs(rand_25_5, axisLabels="show", title = "rand_25_5: n=25, p=5"))
 @
@@ -524,7 +524,7 @@ if (!file.exists(aggrResultsFile)) {
     }
     if (is.function(attr(estlist$design, 'gen'))) {
       ## calculate leverages
-      lXlevs <- apply(lXs, 3:4, robustbase:::lmrob.leverages)
+      lXlevs <- apply(lXs, 3:4, .lmrob.hat)
     }
     ## calculate fitted values from betas
     if (!is.function(attr(estlist$design, 'gen'))) { ## fixed design case
@@ -585,11 +585,9 @@ if (!file.exists(aggrResultsFile)) {
           }
           ## calculate correction factors
           ## A
-          lsp2 <- rowSums(Mpsi(lresid,lctrl$tuning.psi,
-                                                    lctrl$psi)^2)
+          lsp2 <- rowSums(Mpsi(lresid,lctrl$tuning.psi, lctrl$psi)^2)
           ## B
-          lspp <- rowSums(lpp <- Mpsi(lresid,lctrl$tuning.psi,
-                                                           lctrl$psi,1))
+          lspp <- rowSums(lpp <- Mpsi(lresid,lctrl$tuning.psi, lctrl$psi,1))
           ## calculate Huber\'s small sample correction factor
           lK <- 1 + rowSums((lpp - lspp/n)^2)*NCOL(lX)/lspp^2 ## 1/n cancels
         } else {
@@ -598,16 +596,18 @@ if (!file.exists(aggrResultsFile)) {
         ## only calculate tau variants if possible
         if (grepl('args.method=\\w*(D|T)\\w*\\b', lcdn[1])) { ## SMD or SMDM
           ## calculate robustness weights
-          lwgts <- Mwgt(lresid,lctrl$tuning.psi, lctrl$psi)
+          lwgts <- Mwgt(lresid, lctrl$tuning.psi, lctrl$psi)
           ## function to calculate robustified leverages
-          tfun <- if (is.function(attr(estlist$design, 'gen')))
-            function(i) {
-              if (all(is.na(lwgts[i,]))) lwgts[i,] else
-              robustbase:::lmrob.leverages(lXs[,,i,lcdn[2]],lwgts[i,])
-            } else function(i) {
-              if (all(is.na(lwgts[i,]))) lwgts[i,] else
-              robustbase:::lmrob.leverages(lX,lwgts[i,])
-            }
+          tfun <-
+            if (is.function(attr(estlist$design, 'gen')))
+              function(i) {
+                if (all(is.na(wi <- lwgts[i,]))) wi
+                else .lmrob.hat(lXs[,,i,lcdn[2]],wi)
+              }
+            else
+              function(i) {
+                if (all(is.na(wi <- lwgts[i,]))) wi else .lmrob.hat(lX, wi)
+              }
           llev <- sapply(1:dim(r.test)[1], tfun)
           ## calculate unique leverages
           lt <- robustbase:::lmrob.tau(list(),h=llev,control=lctrl)
@@ -615,7 +615,7 @@ if (!file.exists(aggrResultsFile)) {
           lresid <- t(lresid) / lt
           ## A
           lsp2t <- colSums(Mpsi(lresid,lctrl$tuning.psi,
-                                                     lctrl$psi)^2)
+                                lctrl$psi)^2)
           ## B
           lsppt <- colSums(Mpsi(lresid,lctrl$tuning.psi,
                                                      lctrl$psi,1))
@@ -912,8 +912,8 @@ print(ggplot(test.3, aes(p/n, exp(meanlogsigma.1), color = Est.Scale)) +
       geom_hline(yintercept = 1) +
       g.scale_y_log10_1() +
       facet_wrap(~ Psi) +
-      ylab(expression(paste('geometric ',mean(hat(sigma))))) +
-      scale_shape_discrete(expression(n)) +
+      ylab(quote('geometric ' ~ mean(hat(sigma)))) +
+      scale_shape_discrete(quote(n)) +
       scale_colour_discrete("Scale Est.", labels=lab(test.3$Est.Scale)))
 @
 \includegraphics{plot-fig-meanscale}
@@ -930,12 +930,12 @@ print(ggplot(test.3, aes(p/n, exp(meanlogsigma.1), color = Est.Scale)) +
 print(ggplot(test.3, aes(p/n, sdlogsigma.1*sqrt(n), color = Est.Scale)) +
       stat_summary(aes(x=ratio), fun.y=median, geom='line') +
       geom_point(aes(shape = factor(n)), alpha = alpha.n) +
-      ylab(expression(sd(log(hat(sigma)))*sqrt(n))) +
+      ylab(quote(sd(log(hat(sigma)))*sqrt(n))) +
       facet_wrap(~ Psi) +
       geom_point(data=test.lm.2, alpha=alpha.n, aes(color = Est.Scale)) +
       stat_summary(data=test.lm.2, aes(x=ratio, color = Est.Scale),
                    fun.y=median, geom='line') +
-      scale_shape_discrete(expression(n)) +
+      scale_shape_discrete(quote(n)) +
       scale_colour_discrete("Scale Est.", labels=lab(test.3$Est.Scale,
                                           test.lm.2$Est.Scale)))
 @
@@ -954,7 +954,7 @@ print(ggplot(test.4, aes(p/n, sdlogsigma.1*sqrt(n),
                          color = Est.Scale)) +
       stat_summary(aes(x=ratio), fun.y=median, geom='line') +
       geom_point(aes(shape = Error), alpha = alpha.error) +
-      ylab(expression(sd(log(hat(sigma)))*sqrt(n))) +
+      ylab(quote(sd(log(hat(sigma)))*sqrt(n))) +
       facet_wrap(~ Psi) +
       geom_point(data=test.lm, alpha=alpha.n, aes(color = Est.Scale)) +
       stat_summary(data=test.lm, aes(x=ratio, color = Est.Scale),
@@ -982,8 +982,8 @@ print(ggplot(tmp <- droplevels(subset(test.3, Estimator %in% c("SMD", "MMqE"))),
       geom_hline(yintercept = 1) +
       g.scale_y_log10_1() +
       facet_wrap(~ Psi) +
-      ylab(expression(q)) +
-      scale_shape_discrete(expression(n)) +
+      ylab(quote(q)) +
+      scale_shape_discrete(quote(n)) +
       scale_colour_discrete("Scale Est.", labels=lab(tmp$Est.Scale)))
 @
 \includegraphics{plot-fig-qscale}
@@ -1003,8 +1003,8 @@ print(ggplot(tmp <- droplevels(subset(test.3, Estimator %in% c("SMD", "MMqE"))),
       geom_point(aes(shape = factor(n)), alpha = alpha.n) +
       g.scale_y_log10_0.05() +
       facet_wrap(~ Psi) +
-      ylab(expression(M/q)) +
-      scale_shape_discrete(expression(n)) +
+      ylab(quote(M/q)) +
+      scale_shape_discrete(quote(n)) +
       scale_colour_discrete("Scale Est.", labels=lab(tmp$Est.Scale)))
 @
 \includegraphics{plot-fig-Mscale}
@@ -1026,8 +1026,8 @@ print(ggplot(tmp <- droplevels(subset(test.1, Estimator %in% c("SMD", "MMqE") &
       geom_hline(yintercept = 1) +
       g.scale_y_log10_1() +
       facet_wrap(~ Error) + ## labeller missing!
-      ylab(expression(q)) +
-      scale_shape_discrete(expression(n)) +
+      ylab(quote(q)) +
+      scale_shape_discrete(quote(n)) +
       scale_colour_discrete("Scale Est.", labels=lab(tmp$Est.Scale)),
       legend.mod = legend.mod)
 @
@@ -1049,8 +1049,8 @@ print(ggplot(tmp <- droplevels(subset(test.1, Estimator %in% c("SMD", "MMqE") &
       geom_point(aes(shape = factor(n)), alpha = alpha.n) +
       g.scale_y_log10_0.05() +
       facet_wrap(~ Error) +
-      ylab(expression(M/q)) +
-      scale_shape_discrete(expression(n)) +
+      ylab(quote(M/q)) +
+      scale_shape_discrete(quote(n)) +
       scale_colour_discrete("Scale Est.", labels=lab(tmp$Est.Scale)),
       legend.mod = legend.mod)
 @
@@ -1071,8 +1071,8 @@ print(ggplot(test.2, aes(p/n, efficiency.1, color = Estimator)) +
       geom_hline(yintercept = 0.95) +
       stat_summary(aes(x=ratio), fun.y=median, geom='line') +
       facet_wrap(~ Psi) +
-      ylab(expression(paste('efficiency of ',hat(beta)))) +
-      g.scale_shape(expression(n)) +
+      ylab(quote('efficiency of' ~~ hat(beta))) +
+      g.scale_shape(quote(n)) +
       scale_colour_discrete(name = "Estimator",
                             labels = lab(test.2$Estimator)))
 @
@@ -1096,7 +1096,7 @@ print(ggplot(tmp <- droplevels(subset(test.1, Error != 't1')),
       g.scale_shape(values=c(16,17,15,3,7,8,9,1,2,4)[-4],
                     labels=lab(tmp$Error)) +
       facet_wrap(~ Psi) +
-      ylab(expression(paste('efficiency of ',hat(beta)))) +
+      ylab(quote('efficiency of '~hat(beta))) +
       scale_colour_discrete(name = "Estimator",
                             labels = lab(tmp$Estimator)))
 @
@@ -1121,9 +1121,9 @@ print(ggplot(test.2, aes(p/n, AdB2.1/(1-p/n), color = Estimator)) +
                    fun.y=median, geom='line', linetype = 3) +
       geom_hline(yintercept = 1/0.95) +
       g.scale_y_log10_1() +
-      scale_shape_discrete(expression(n)) +
+      scale_shape_discrete(quote(n)) +
       scale_colour_discrete(name = "Estimator", labels = lab(test.2$Estimator))  +
-      ylab(expression(mean(hat(gamma)))) +
+      ylab(quote(mean(hat(gamma)))) +
       facet_wrap(~ Psi))
 @
 \includegraphics{plot-fig-AdB2-1}
@@ -1148,9 +1148,9 @@ print(ggplot(test.2, aes(p/n, sdAdB2.1/(1-p/n), color = Estimator)) +
       stat_summary(aes(x=ratio, y=sdAdB2t.1),
                    fun.y=median, geom='line', linetype = 3) +
       g.scale_y_log10_0.05() +
-      scale_shape_discrete(expression(n)) +
+      scale_shape_discrete(quote(n)) +
       scale_colour_discrete(name = "Estimator", labels=lab(test.2$Estimator))  +
-      ylab(expression(sd(hat(gamma)))) +
+      ylab(quote(sd(hat(gamma)))) +
       facet_wrap(~ Psi))
 @
 \includegraphics{plot-fig-sdAdB2-1}
@@ -1169,12 +1169,12 @@ print(ggplot(test.2, aes(p/n, f.truncate(emplev_1),
                          color = method.cov)) +
       g.truncate.lines + g.truncate.areas +
       geom_point(aes(shape = factor(n)), alpha = alpha.n) +
-      scale_shape_discrete(expression(n)) +
+      scale_shape_discrete(quote(n)) +
       stat_summary(aes(x=ratio), fun.y=median, geom='line') +
       geom_hline(yintercept = 0.05) +
       g.scale_y_log10_0.05() +
       scale_colour_discrete(name = "Estimator", labels=lab(test.2$method.cov))  +
-      ylab(expression(paste("empirical level (", H[0], ": ", beta[1], "=", 0, ")"))) +
+      ylab(quote("empirical level "~ list (H[0] : beta[1] == 0) )) +
       facet_wrap(~ Psi))
 @
 \includegraphics{plot-fig-emp-level}
@@ -1195,9 +1195,9 @@ print(ggplot(tmp <- droplevels(subset(test.1, Psi == 'lqq' & emplev_1 != 0)),
       stat_summary(aes(x=ratio), fun.y=median, geom='line') +
       geom_hline(yintercept = 0.05) +
       g.scale_y_log10_0.05() +
-      g.scale_shape(expression(n)) +
+      g.scale_shape(quote(n)) +
       scale_colour_discrete(name = "Estimator", labels=lab(tmp$method.cov)) +
-      ylab(expression(paste("empirical level (", H[0], ": ", beta[1], "=", 0, ")"))) +
+      ylab(quote("empirical level "~ list (H[0] : beta[1] == 0) )) +
       facet_wrap(~ Error),
       legend.mod = legend.mod
       )
@@ -1225,8 +1225,7 @@ print(ggplot(tmp <- subset(test.1, n == 25),
       scale_colour_discrete(name = "Estimator (Cov. Est.)"
                             ,labels=lab(tmp$method.cov, tmp2$method.cov)
                             ) +
-      ylab(expression(paste("empirical power (", H[0], ": ",
-          beta[1], "=", 0.2, ")"))) +
+      ylab(quote("empirical level "~ list (H[0] : beta[1] == 0.2) )) +
       facet_wrap(~ Psi)
       )
 @
@@ -1252,8 +1251,7 @@ print(ggplot(tmp <- subset(test.1, n == 25),
       scale_colour_discrete(name = "Estimator (Cov. Est.)"
                             ,labels=lab(tmp$method.cov, tmp2$method.cov)
                             ) +
-      ylab(expression(paste("empirical power (", H[0], ": ",
-          beta[1], "=", 0.4, ")"))) +
+      ylab(quote("empirical level "~ list (H[0] : beta[1] == 0.4) )) +
       facet_wrap(~ Psi)
       )
 @
@@ -1279,8 +1277,7 @@ print(ggplot(tmp <- subset(test.1, n == 25),
       scale_colour_discrete(name = "Estimator (Cov. Est.)"
                             , labels=lab(tmp$method.cov, tmp2$method.cov)
                             ) +
-      ylab(expression(paste("empirical power (", H[0], ": ",
-          beta[1], "=", 0.6, ")"))) +
+      ylab(quote("empirical level "~ list (H[0] : beta[1] == 0.6) )) +
       facet_wrap(~ Psi)
       )
 @
@@ -1306,8 +1303,7 @@ print(ggplot(tmp <- subset(test.1, n == 25),
       scale_colour_discrete(name = "Estimator (Cov. Est.)"
                             , labels=lab(tmp$method.cov, tmp2$method.cov)
                             ) +
-      ylab(expression(paste("empirical power (", H[0], ": ",
-          beta[1], "=", 0.8, ")"))) +
+      ylab(quote("empirical level "~ list (H[0] : beta[1] == 0.8) )) +
       facet_wrap(~ Psi)
       )
 @
@@ -1333,8 +1329,7 @@ print(ggplot(tmp <- subset(test.1, n == 25),
       scale_colour_discrete(name = "Estimator (Cov. Est.)"
                             , labels=lab(tmp$method.cov, tmp2$method.cov)
                             ) +
-      ylab(expression(paste("empirical power (", H[0], ": ",
-          beta[1], "=", 1, ")"))) +
+      ylab(quote("empirical level "~ list (H[0] : beta[1] == 1) )) +
       facet_wrap(~ Psi)
       )
 @
@@ -1493,10 +1488,10 @@ if (!file.exists(asymptMBFile)) {
 
 print(ggplot(rmb, aes(x, l, color=psi)) +
       geom_line() + geom_line(aes(x, u, color=psi), linetype = 2) +
-      coord_cartesian(ylim=c(0,10)) +
+      coord_cartesian(ylim = c(0,10)) +
       scale_y_continuous(breaks = 1:10) +
-      scale_colour_hue(expression(paste(psi,'-function'))) +
-      xlab(expression(paste("amount of contamination  ", epsilon))) +
+      scale_colour_hue(quote(psi ~ '-function')) +
+      xlab(quote("amount of contamination" ~~ epsilon)) +
       ylab("maximum asymptotic bias bounds"))
 @
 \includegraphics{plot-fig-max-asymptotic-bias}
