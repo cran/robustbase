@@ -11,8 +11,10 @@ lmrob <-
     if (miss.ctrl <- missing(control))
 	control <- if (missing(method))
 	    lmrob.control(...) else lmrob.control(method = method, ...)
-    else ## check dots
-	chk.s(...)
+    else if (length(list(...))) ## "sophisticated version" of chk.s(...)
+	warning("arguments .. in ",
+		sub(")$", "", sub("^list\\(", "", deparse(list(...), control = c()))), "  are disregarded.\n",
+		"  Maybe use  lmrob(*, control=lmrob.control(....) with all these.")
     ret.x <- x
     ret.y <- y
     cl <- match.call()
@@ -93,8 +95,6 @@ lmrob <-
 	}
 	## check for singular fit
 
-        ## faster, but no longer "allowed" by the Crania:
-        ## z0 <- .Call(stats:::C_Cdqrls, x, y, tol = control$solve.tol)
 	if(getRversion() >= "3.1.0") {
 	    z0 <- .lm.fit(x, y, tol = control$solve.tol)
 	    piv <- z0$pivot
@@ -548,13 +548,13 @@ summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...
             resp <- if (is.null(object[["y"]])) pred + resid else object$y
             wgt <- object$rweights
             ## scale.rob <- object$scale
-            ## correction E[wgt(r)] / E[psi'(r)] ( = E[wgt(r)] / E[r*psi(r)] )
+            ## correction = E[wgt(r)] / E[psi'(r)]  =  E[wgt(r)] / E[r*psi(r)]
             ctrl <- object$control
             c.psi <- ctrl$tuning.psi
             psi <- ctrl$psi
             correc <-
                 if (psi == 'ggw') {
-                    if (isTRUE(all.equal(c.psi, c(-.5, 1.0, 0.95, NA)))) 1.121708
+                    if      (isTRUE(all.equal(c.psi, c(-.5, 1.0, 0.95, NA)))) 1.121708
                     else if (isTRUE(all.equal(c.psi, c(-.5, 1.5, 0.95, NA)))) 1.163192
                     else if (isTRUE(all.equal(c.psi, c(-.5, 1.0, 0.85, NA)))) 1.33517
                     else if (isTRUE(all.equal(c.psi, c(-.5, 1.5, 0.85, NA)))) 1.395828
@@ -563,7 +563,7 @@ summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...
 			   isTRUE(all.equal(c.psi, .Mpsi.tuning.default(psi)))) {
                     switch(psi,
                            bisquare = 1.207617,
-                           welsh    = 1.224617,
+                           welsh    = 1.224617, # 1.2246131
                            optimal  = 1.068939,
                            hampel   = 1.166891,
                            lqq      = 1.159232,
@@ -615,7 +615,7 @@ vcov.lmrob <- function (object, cov = object$control$cov, ...) {
 				 identical(cov, object$control$cov)))
 	object$cov
     else {
-	## cov = ..$control$cov is typically ".vcov.w" or ".vcov.avar1"
+	## cov is typically = ".vcov.w" or ".vcov.avar1", but can be *any* user func.
 	lf.cov <- if (!is.function(cov)) get(cov, mode = "function") else cov
 	lf.cov(object, ...)
     }

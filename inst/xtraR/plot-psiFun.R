@@ -1,4 +1,5 @@
-## Functions to plot and check psi-functions
+#### Functions to plot and check psi-functions
+#### -----------------------------------------
 ## used in ../../tests/lmrob-psifns.R,
 ##	   ../../tests/psi-rho-etc.R
 ##     and ../../vignettes/psi_functions.Rnw  vignette

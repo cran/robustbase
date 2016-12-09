@@ -47,7 +47,7 @@ setClass("functionXal1", contains = "functionXal",
          })
 
 setClass("psi_func",
-         representation(rho = "functionX",
+         slots = c(rho = "functionX",
                         psi = "functionX", ## psi(x) == d/dx rho(x) = x * wgt(x)
                         wgt = "functionX", ## wgt(x) == psi(x) / x
                         Dpsi = "functionX",## psi'(x) == d/dx psi(x) = rho''(x)
@@ -258,7 +258,7 @@ setMethod("plot", signature(x = "psi_func"),
                          main=main, col=col, leg.loc=leg.loc, ...)
 	  })
 
-##-------- TODO: Rather right short  vignette with these formulae
+##-------- TODO: Rather write short  __vignette__  with these formulae:
 
 ##' \Phi_j(t) := \int_{-\infty}^t  u^j \phi(u) \;du
 ##' ---------    where \phi(.) (= \code{dnorm()})

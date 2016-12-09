@@ -522,7 +522,7 @@ lmrob.mscale <- function(e, control, p = 0L) {
             scale = as.double(mad(e)),
             coef = double(1),
             as.double(control$tuning.chi),
-            as.integer(robustbase:::.psi2ipsi(control$psi)),
+            as.integer(.psi2ipsi(control$psi)),
             as.double(control$bb), ## delta
             best_r = as.integer(control$best.r.s),
             groups = as.integer(control$groups),
@@ -556,7 +556,7 @@ lmrob.dscale <- function(r, control,
             length = as.integer(length(r)),
             scale = as.double(scale),
             c = as.double(c.psi),
-            ipsi = robustbase:::.psi2ipsi(psi),
+            ipsi = .psi2ipsi(psi),
             type = 3L, ## dt1 as only remaining option
             rel.tol = as.double(control$rel.tol),
             k.max = as.integer(control$k.max),

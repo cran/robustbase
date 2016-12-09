@@ -75,8 +75,9 @@ export(Sn, Qn, Qn.old,
        tukeyChi, tukeyPsi1, # TODO deprecate: see ./TODO
        Mpsi, Mchi, Mwgt, MrhoInf, .Mpsi, .Mchi, .Mwgt, .MrhoInf,
        .Mwgt.psi1,
-       .Mchi.tuning.default, .Mpsi.tuning.default, .regularize.Mpsi,
-       .Mchi.tuning.defaults,.Mpsi.tuning.defaults,
+       .Mchi.tuning.default,  .Mpsi.tuning.default, .regularize.Mpsi,
+       .Mchi.tuning.defaults, .Mpsi.tuning.defaults,
+       .psi2ipsi, .psi.ggw.findc, .psi.lqq.findc,
 
        lmrob, lmrob.fit,
        lmrob.fit.MM, lmrob..M..fit, lmrob..D..fit,

@@ -158,7 +158,7 @@ getOption("SweaveHooks")[["fig"]]()
 
 
 ###################################################
-### code chunk number 5: lmrob_simulation.Rnw:282-302
+### code chunk number 5: fgen
 ###################################################
 
 f.gen <- function(n, p, rep, err) {
@@ -188,11 +188,13 @@ for (i in 1:NROW(lsit))
 getOption("SweaveHooks")[["fig"]]()
 require(GGally)
 colnames(rand_25_5) <- paste0("X", 1:5) # workaround new (2014-12) change in GGally
-print(ggpairs(rand_25_5, axisLabels="show", title = "rand_25_5: n=25, p=5"))
+## and the 2016-11-* change needs data frames:
+df.r_25_5 <- as.data.frame(rand_25_5)
+print(ggpairs(df.r_25_5, axisLabels="show", title = "rand_25_5: n=25, p=5"))
 
 
 ###################################################
-### code chunk number 7: lmrob_simulation.Rnw:379-380
+### code chunk number 7: lmrob_simulation.Rnw:381-382
 ###################################################
 aggrResultsFile <- file.path(robustDta, "aggr_results.Rdata")
 
@@ -247,26 +249,26 @@ aggrResultsFile <- file.path(robustDta, "aggr_results.Rdata")
 
 
 ###################################################
-### code chunk number 9: lmrob_simulation.Rnw:431-432
+### code chunk number 9: lmrob_simulation.Rnw:433-434
 ###################################################
 str(estlist, 1)
 
 
 ###################################################
-### code chunk number 10: lmrob_simulation.Rnw:437-438
+### code chunk number 10: lmrob_simulation.Rnw:439-440
 ###################################################
 estlist$errs[[1]]
 
 
 ###################################################
-### code chunk number 11: lmrob_simulation.Rnw:444-446 (eval = FALSE)
+### code chunk number 11: lmrob_simulation.Rnw:446-448 (eval = FALSE)
 ###################################################
 ## set.seed(estlist$seed)
 ## errs <- c(sapply(1:nrep, function(x) do.call(fun, c(n = nobs, args))))
 
 
 ###################################################
-### code chunk number 12: lmrob_simulation.Rnw:457-458
+### code chunk number 12: lmrob_simulation.Rnw:459-460
 ###################################################
 str(estlist$output[1:3], 2)
 
@@ -935,19 +937,19 @@ getOption("SweaveHooks")[["fig"]]()
 
 
 ###################################################
-### code chunk number 33: fig-pred-points (eval = FALSE)
+### code chunk number 33: fig-pred-points
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
-## pp <- f.prediction.points(dd)[1:7,]
-## ## Worked in older ggplot2 -- now  plotmatrix() is gone, to be replaced by GGally::ggpairs):
-## ## tmp <- plotmatrix(pp)$data
-## ## tmp$label <- as.character(1:7)
-## ## print(plotmatrix(dd) + geom_text(data=tmp, color = 2, aes(label=label), size = 2.5))
-## tmp <- ggpairs(pp)$data
-## tmp$label <- as.character(1:7) # and now?
-## ## ggpairs() + geom_text()  does *NOT* work {ggpairs has own class}
-## ## print(ggpairs(dd) + geom_text(data=tmp, color = 2, aes(label=label), size = 2.5))
-## ggpairs(dd) ## not at all satisfactory !! __FIXME__
+pp <- f.prediction.points(dd)[1:7,]
+## Worked in older ggplot2 -- now  plotmatrix() is gone, to be replaced by GGally::ggpairs):
+## tmp <- plotmatrix(pp)$data
+## tmp$label <- as.character(1:7)
+## print(plotmatrix(dd) + geom_text(data=tmp, color = 2, aes(label=label), size = 2.5))
+tmp <- ggpairs(pp)$data
+tmp$label <- as.character(1:7) # and now?
+## ggpairs() + geom_text()  does *NOT* work {ggpairs has own class}
+## print(ggpairs(dd) + geom_text(data=tmp, color = 2, aes(label=label), size = 2.5))
+print( ggpairs(dd) )## now (2016-11) fine
 
 
 ###################################################
@@ -977,7 +979,7 @@ getOption("SweaveHooks")[["fig"]]()
 
 
 ###################################################
-### code chunk number 35: lmrob_simulation.Rnw:1413-1468
+### code chunk number 35: lmrob_simulation.Rnw:1415-1470
 ###################################################
 ## Henning (1994) eq 33:
 g <- Vectorize(function(s, theta, mu, ...) {

@@ -23,7 +23,7 @@ covComed(X, n.iter = 2, reweight = FALSE, tolSolve = control$tolSolve,
   \item{X}{data matrix of dimension, say \eqn{n \times p}{n x p}.}
   \item{n.iter}{number of comedian() iterations.  Can be as low as zero.}
   \item{reweight}{logical indicating if the final distances and weights
-    should be recomuted from the final \code{cov} and \code{center}.
+    should be recomputed from the final \code{cov} and \code{center}.
     The default is currently \code{FALSE} because that was implicit in
     the first version of the \R code.}
   \item{tolSolve}{a numerical tolerance passed to \code{\link{solve}}.}

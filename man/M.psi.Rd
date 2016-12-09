@@ -1,4 +1,5 @@
 \name{Mpsi}
+\title{Psi / Chi / Wgt / Rho Functions for *M-Estimation}
 \alias{Mchi}
 \alias{Mpsi}
 \alias{Mwgt}
@@ -8,7 +9,7 @@
 \alias{.Mwgt}
 \alias{.Mwgt.psi1}
 \alias{.MrhoInf}
-\title{Psi / Chi / Wgt / Rho Functions for *M-Estimation}
+\alias{.psi2ipsi}
 \description{
   Compute Psi / Chi / Wgt / Rho functions for M-estimation,
   i.e., including MM, etc.
@@ -73,6 +74,12 @@ MrhoInf(cc, psi)
   a function with arguments \code{(x, deriv=0)}, which for
   \code{deriv=0} computes \code{Mwgt(x, cc, psi)} and otherwise computes
   \code{Mpsi(x, cc, psi, deriv=deriv)}.
+
+  \code{.Mpsi()}, \code{.Mchi()}, \code{.Mwgt()}, and \code{.MrhoInf()} are
+  low-level versions of
+  \code{Mpsi()},  \code{Mchi()},  \code{Mwgt()}, and  \code{MrhoInf()}, respectively,
+  and \code{.psi2ipsi()} provides the psi-function integer codes needed
+  for \code{ipsi} argument of the \code{.M*()} functions.
 }
 \value{
   a numeric vector of the same length as \code{x}, with corresponding
@@ -85,12 +92,17 @@ MrhoInf(cc, psi)
 }
 \author{
   Manuel Koller, notably for the original C implementation;
-  tweaks and speedup via \code{\link{.Call}} by Martin Maechler.
+  tweaks and speedup via \code{\link{.Call}} and \code{.M*()} etc by
+  Martin Maechler.
 }
 \seealso{
  \code{\link{psiFunc}} and the \code{\linkS4class{psi_func}} class, both
  of which provide considerably more on the \R side, but are less
  optimized for speed.
+
+ \code{\link{.Mpsi.tuning.defaults}}, etc, for tuning constants'
+ defaults for\code{lmrob()}, and \code{\link{.psi.ggw.findc}()}
+ utilities to construct such constants' vectors.
 }
 \examples{
 x <- seq(-5,7, by=1/8)
@@ -136,13 +148,13 @@ stopifnot(identical(attributes(x), attributes(px)))
 ## The "optimal" psi exists in two versions "in the litterature": ---
 ## Maronna et al. 2006, 5.9.1, p.144f:
 psi.M2006 <- function(x, c = 0.013)
-  sign(x) * pmax(0, abs(x) - c/dnorm(x))
+  sign(x) * pmax(0, abs(x) - c/dnorm(abs(x)))
 ## and the other is the one in robustbase from 'robust': via Mpsi(.., "optimal")
 ## Here are both for 95\% efficiency:
 (c106 <- .Mpsi.tuning.default("optimal"))
 c1 <- curve(Mpsi(x, cc = c106, psi="optimal"), -5, 7, n=1001)
 c2 <- curve(psi.M2006(x), add=TRUE, n=1001, col=adjustcolor(2,0.4), lwd=2)
-abline(0,1, lty=3); abline(v=0,h=0, lty=3)
+abline(0,1, v=0, h=0, lty=3)
 ## the two psi's are similar, but really quite different
 
 ## a zoom into Maronna et al's:

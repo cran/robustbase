@@ -458,8 +458,9 @@ void R_lmrob_M_S(double *X1, double *X2, double *y, double *res,
 
 /* This function performs RWLS iterations starting from
  * an S-regression estimator (and associated residual scale).
- * So, in itself, this is ``just'' an M-estimator :
- *
+ * So, in itself, this is ``just'' an M-estimator -- called from R's
+ * lmrob..M..fit()  [ ../R/lmrob.MM.R ]
+ * ~~~~~~~~~~~~~~~
  * NOTE: rel_tol now controls the *relative* changes in beta,
  *      instead of being hard-wired to EPS = 1e-7 and bounding the
  *	absolute || beta_1 - beta_2 ||
@@ -620,10 +621,10 @@ double rho_inf(const double k[], int ipsi) {
     default: error("rho_inf(): ipsi=%d not implemented.", ipsi);
     case 0: return(R_PosInf); // huber
     case 1: return(c*c/6.); // biweight
-    case 2: return(c*c); // GaussWeight
+    case 2: return(c*c); // GaussWeight / "Welsh"
     case 3: return(3.25*c*c); // Optimal
     case 4: return(0.5*k[0]*(k[1]+k[2]-k[0])); // Hampel
-    case 5: // GGW
+    case 5: // GGW (Generalized Gauss Weight)
 	switch((int)c) {
 	default:
 	case 0: return(k[4]); break; // k[4] == cc[5] in R -- must be correct!
@@ -650,7 +651,7 @@ double normcnst(const double k[], int ipsi) {
     default: error("normcnst(): ipsi=%d not implemented.", ipsi);
     case 0: return(0.); // huber {normcnst() should never be used for that!}
     case 1: return(6./(c*c)); // biweight
-    case 2: return(1./(c*c)); // GaussWeight
+    case 2: return(1./(c*c)); // GaussWeight / "Welsh"
     case 3: return(1./3.25/(c*c)); // Optimal
     case 4: return(2./(k[0]*(k[1]+k[2]-k[0]))); // Hampel
     case 5: // GGW
@@ -680,10 +681,10 @@ double rho(double x, const double c[], int ipsi)
     default: error("rho(): ipsi=%d not implemented.", ipsi);
     case 0: return(rho_huber(x, c)); // huber
     case 1: return(rho_biwgt(x, c)); // biweight
-    case 2: return(rho_gwgt(x, c)); // GaussWeight
+    case 2: return(rho_gwgt(x, c)); // GaussWeight / "Welsh"
     case 3: return(rho_opt(x, c)); // Optimal
     case 4: return(rho_hmpl(x, c)); // Hampel
-    case 5: return(rho_ggw(x, c)); // GGW
+    case 5: return(rho_ggw(x, c)); // GGW (Generalized Gauss Weight)
     case 6: return(rho_lqq(x, c)); // LQQ := Linear-Quadratic-Quadratic
 	// was LGW := "lin psip" := piecewise linear psi'()
     }
@@ -699,7 +700,7 @@ double psi(double x, const double c[], int ipsi)
     default: error("psi(): ipsi=%d not implemented.", ipsi);
     case 0: return(psi_huber(x, c)); // huber
     case 1: return(psi_biwgt(x, c)); // biweight
-    case 2: return(psi_gwgt(x, c)); // GaussWeight
+    case 2: return(psi_gwgt(x, c)); // GaussWeight / "Welsh"
     case 3: return(psi_opt(x, c)); // Optimal
     case 4: return(psi_hmpl(x, c)); // Hampel
     case 5: return(psi_ggw(x, c)); // GGW
@@ -717,7 +718,7 @@ double psip(double x, const double c[], int ipsi)
     default: error("psip(): ipsi=%d not implemented.", ipsi);
     case 0: return(psip_huber(x, c)); // huber
     case 1: return(psip_biwgt(x, c)); // biweight
-    case 2: return(psip_gwgt(x, c)); // GaussWeight
+    case 2: return(psip_gwgt(x, c)); // GaussWeight / "Welsh"
     case 3: return(psip_opt(x, c)); // Optimal
     case 4: return(psip_hmpl(x, c)); // Hampel
     case 5: return(psip_ggw(x, c)); // GGW
@@ -738,7 +739,7 @@ double psi2(double x, const double c[], int ipsi)
 
     default: error("psi2(): ipsi=%d not implemented.", ipsi);
 /*
-    case 2: return(psi2_gwgt(x, c)); // GaussWeight
+    case 2: return(psi2_gwgt(x, c)); // GaussWeight / "Welsh"
     case 3: return(psi2_opt(x, c)); // Optimal
     case 5: return(psi2_ggw(x, c)); // GGW
 */
@@ -755,7 +756,7 @@ double wgt(double x, const double c[], int ipsi)
     default:
     case 0: return(wgt_huber(x, c)); // huber
     case 1: return(wgt_biwgt(x, c)); // biweight
-    case 2: return(wgt_gwgt(x, c)); // GaussWeight
+    case 2: return(wgt_gwgt(x, c)); // GaussWeight / "Welsh"
     case 3: return(wgt_opt(x, c)); // Optimal
     case 4: return(wgt_hmpl(x, c)); // Hampel
     case 5: return(wgt_ggw(x, c)); // GGW
@@ -873,7 +874,7 @@ double wgt_biwgt(double x, const double c[])
     }
 }
 
-//---------- gwgt == Gauss Weight Loss function =: "Welsch" --------------------
+//---------- gwgt == Gauss Weight Loss function =: "Welsh" --------------------
 
 double rho_gwgt(double x, const double c[])
 {
@@ -1163,6 +1164,7 @@ double rho_ggw(double x, const double k[])
 	double c;
 	switch((int)k[0]) {
 	default: error("rho_ggw(): case (%i) not implemented.", (int)k[0]);
+	    // c : identical numbers to those in SET_ABC_GGW  below
 	case 1: j = 0; c = 1.694;     break;
 	case 2: j = 1; c = 1.2442567; break;
 	case 3: j = 2; c = 0.4375470; break;
@@ -1281,7 +1283,7 @@ double wgt_ggw(double x, const double k[])
 // k[0:2] == (b, c, s) :
 // k[0]= b = bend adjustment
 // k[1]= c = cutoff of central linear part
-// k[2]= s = slope of descending
+// k[2]= s : "slope of descending": 1 - s = min_x psi'(x)
 
 // "lin psip" := piecewise linear psi'() :
 double psip_lqq (double x, const double k[])
@@ -1344,8 +1346,8 @@ double psi_lqq (double x, const double k[])
 		   (ax - k[2] * pow(ax - k[1], 2.) / k[0] / 2.));
 	else {
 	    double
-		s5 = k[2] - 1.,
-		s6 = -2 * k01 + k[0] * k[2];
+		s5 = k[2] - 1., // s - 1
+		s6 = -2 * k01 + k[0] * k[2]; // numerator( -a ) ==> s6/s5 = -a
 	    if (/* k01 < ax && */ ax < k01 - s6 / s5)
 		return((double) (x>0 ? 1 : -1) *
 		       (-s6/2. - pow(s5, 2.) / s6 * (pow(ax - k01, 2.) / 2. + s6 / s5 * (ax - k01))));

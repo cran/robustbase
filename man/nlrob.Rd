@@ -293,7 +293,7 @@ legend("topleft", c("classical nls()", "robust nlrob()"),
        lwd = 1, col= c("blue", "magenta"), inset = 0.05)
 
 ## See  ?nlrob.algorithms for examples
-\dontrun{
+\donttest{
 DNase1 <- DNase[DNase$Run == 1,]
 form <- density ~ Asym/(1 + exp(( xmid -log(conc) )/scal ))
 gMM  <- nlrob(form, data = DNase1, method = "MM",
@@ -304,7 +304,8 @@ gMM  <- nlrob(form, data = DNase1, method = "MM",
 gCM  <- nlrob(form, data = DNase1, method = "CM",
               lower = c(Asym = 0, xmid = 0, scal = 0, sigma = 0),
               upper = c(3,3,3, sigma = 0.8))
-}%not run
+summary(gCM)# (did fail)
+}%not (always) tested
 }
 \keyword{robust}
 \keyword{regression}

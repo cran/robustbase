@@ -27,7 +27,7 @@
 
 adjOutlyingness <- function(x, ndir=250, clower=4, cupper=3,
                             alpha.cutoff = 0.75, coef = 1.5, qr.tol = 1e-12, keep.tol = 1e-12,
-                            only.outlyingness = FALSE)
+                            only.outlyingness = FALSE, maxit.mult = max(100, p))
 ## Skewness-Adjusted Outlyingness
 {
     x <- data.matrix(x)
@@ -38,7 +38,7 @@ adjOutlyingness <- function(x, ndir=250, clower=4, cupper=3,
         B <- matrix(0, p, ndir)
         E <- matrix(1, p, 1)
         x. <- unname(x) # for speed in subsequent subsetting and solve
-        maxit <- as.integer(100 * ndir)
+        maxit <- as.integer(maxit.mult * ndir)
         ## ^^ original code had 'Inf', i.e. no iter.count check;
         ## often, maxit == ndir would suffice
 	i <- 1L
@@ -51,7 +51,7 @@ adjOutlyingness <- function(x, ndir=250, clower=4, cupper=3,
             }
         }
         if(it == maxit)
-            stop("**** sampling iterations were not sufficient. Please report")
+            stop("** direction sampling iterations were not sufficient. Try increasing 'maxit.mult'")
 
         Bnorm <- sqrt(colSums(B^2))
         Nx <- mean(abs(x.)) ## so the comparison is scale-equivariant:

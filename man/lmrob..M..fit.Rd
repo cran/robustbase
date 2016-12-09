@@ -7,7 +7,8 @@
   \code{beta.initial}, this results in an MM-estimator.
 }
 \usage{
-lmrob..M..fit(x, y, beta.initial, scale, control, obj, mf = obj$model)
+lmrob..M..fit(x, y, beta.initial, scale, control, obj,
+              mf = obj$model, method = obj$control$method)
 }
 \arguments{
   \item{x}{design matrix (\eqn{n \times p}{n x p}) typically including a
@@ -18,17 +19,19 @@ lmrob..M..fit(x, y, beta.initial, scale, control, obj, mf = obj$model)
   \item{scale}{robust residual scale estimate. Usually
     an S-scale estimator.}
   \item{control}{list of control parameters, as returned
-    by \code{\link{lmrob.control}}.  Currently, only the components
-    \code{c("max.it", "rel.tol","trace.lev", "psi", "tuning.psi",
-      "method")} are accessed.}
-  \item{obj}{an optional \code{lmrob}-object.  If specified, this is used to
-    set values for the other arguments.}
+    by \code{\link{lmrob.control}}.  Currently, the components
+    \code{c("max.it", "rel.tol","trace.lev", "psi", "tuning.psi", "mts", "subsampling")}
+    are accessed.}
+  \item{obj}{an optional \code{lmrob}-object.  If specified, this is
+    typically used to set values for the other arguments.}
   \item{mf}{(optional) a model frame as returned by \code{\link{model.frame}},
     used only to compute outlier statistics, see \code{\link{outlierStats}}.}
+  \item{method}{optional; the \code{method} used for \emph{obj} computation.}
 }
 \details{
-  This function is used by \code{\link{lmrob.fit}} %% and *fit.M() %% << TODO
-  and typically not to be used on its own.
+  This function is used by \code{\link{lmrob.fit}} (and
+  \code{anova(<lmrob>, type = "Deviance")}) and typically not to be used
+  on its own.
 }
 \value{A list with the following elements:
   \item{coef}{the M-estimator (or MM-estim.) of regression}
@@ -54,9 +57,13 @@ y <- stack.loss
 ## 1) initial LTS:
 m0 <- ltsReg(X[,-1], y)
 ## 2) M-estimate started from LTS:
-m1 <- lmrob..M..fit(X, y, beta.initial = coef(m0), scale = m0$scale,
-                    control = lmrob.control(tuning.psi = 1.6,
-		                            psi = 'bisquare'))
+m1 <- lmrob..M..fit(X, y, beta.initial = coef(m0), scale = m0$scale, method = "SM",
+                    control = lmrob.control(tuning.psi = 1.6, psi = 'bisquare'))
+## no 'method' (nor 'obj'):
+m1. <- lmrob..M..fit(X, y, beta.initial = coef(m0), scale = m0$scale,
+                     control = m1$control)
+stopifnot(all.equal(m1, m1., tol = 1e-15)) # identical {call *not* stored!}
+
 cbind(m0$coef, m1$coef)
 ## the scale is kept fixed:
 stopifnot(identical(unname(m0$scale), m1$scale))
@@ -69,7 +76,7 @@ summarizeRobWeights(m1.wts)
 which(m0$lts.wt == 0) # 1,3,4,21 but not 13
 \dontshow{stopifnot(which(m0$lts.wt == 0) == c(1,3,4,21))
 }
-## Add M-step to SMD-estimate
+## Manually add M-step to SMD-estimate (=> equivalent to "SMDM"):
 m2 <- lmrob(stack.loss ~ ., data = stackloss, method = 'SMD')
 m3 <- lmrob..M..fit(obj = m2)
 
@@ -94,13 +101,12 @@ lmrob.custom <- function(x, y, beta.initial, scale, terms) {
 }
 
 m4 <- lmrob.custom(X, y, m2$init$init.S$coef,
-                   m2$init$scale,m2$terms)
+                   m2$init$scale, m2$terms)
 stopifnot(all.equal(m4$coef, m3$coef))
 
 ## Start from ltsReg:
 m5 <- ltsReg(stack.loss ~ ., data = stackloss)
 m6 <- lmrob.custom(m5$X, m5$Y, coef(m5), m5$scale, m5$terms)
-
 }
 \keyword{robust}
 \keyword{regression}

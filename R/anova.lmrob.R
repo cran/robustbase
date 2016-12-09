@@ -109,9 +109,10 @@ anovaLmrobPair <- function(FMfit, reduced.model, initCoef, test)
     "Deviance" = {
 	y <- FMfit$residuals + FMfit$fitted.values
 	s0 <- FMfit$scale
+        fCtrl <- FMfit$control
 	psi <- function(u, deriv = 0)
-	    Mpsi(u, cc = FMfit$control$tuning.psi,
-                   psi = FMfit$control$psi, deriv)
+	    Mpsi(u, cc = fCtrl$tuning.psi,
+                   psi = fCtrl$psi, deriv)
 	iC <-
 	    if(is.null(initCoef)) {
 		res <- as.vector(y - X[,RMod] %*% FMfit$coef[RMod])
@@ -128,7 +129,7 @@ anovaLmrobPair <- function(FMfit, reduced.model, initCoef, test)
 
 	RMfit <- lmrob..M..fit(x = X[,RMod, drop=FALSE], y = y,
 			       beta.initial = iC, scale = s0,
-			       control = FMfit$control)
+			       control = fCtrl, method = fCtrl$method)
 	FMres <- as.vector(y - X[,FMod] %*% FMfit$coef[FMod])
 	RMres <- RMfit$resid ## as.vector(y - X[,RMod] %*% RMfit$coef)
 	FM_sRho <- sum(psi(FMres/s0, deriv = -1))

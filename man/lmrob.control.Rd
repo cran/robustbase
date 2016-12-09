@@ -12,6 +12,11 @@
   estimator and the associated S-, M- and D-estimators.  Using
   \code{setting="KS2011"} sets the defaults as suggested by
   Koller and Stahel (2011) and analogously for \code{"KS2014"}.
+
+  The \code{.M*.default} \code{\link{function}}s and
+  \code{.M*.defaults} \code{\link{list}}s contain default tuning
+  parameters for all the predefined \eqn{\psi}{psi} functions, see also
+  \code{\link{Mpsi}}, etc.
 }
 \usage{
 lmrob.control(setting, seed = NULL, nResample = 500,
@@ -158,8 +163,8 @@ lmrob.control(setting, seed = NULL, nResample = 500,
   respectively.
 }
 \details{The option \code{setting="KS2011"} alters the default
-  arguments.  They are changed to \code{method = 'SMDM'}, \code{psi = 'lqq'},
-  \code{max.it = 500}, \code{k.max = 2000}, \code{cov = '.vcov.w'}.
+  arguments.  They are changed to \code{method = "SMDM"}, \code{psi = "lqq"},
+  \code{max.it = 500}, \code{k.max = 2000}, \code{cov = ".vcov.w"}.
   The defaults of all the remaining arguments are not changed.
 
   The option \code{setting="KS2014"} builds upon \code{setting="KS2011"}.
@@ -221,9 +226,11 @@ lmrob.control(setting, seed = NULL, nResample = 500,
   Koller, M. and Stahel, W.A. (2014)
   Nonsingular subsampling for regression S~estimators with categorical
   predictors. Under review.
+  (2012 version available from \url{https://arxiv.org/abs/1208.5595})
 }
 \author{ Matias Salibian-Barrera, Martin Maechler and Manuel Koller}
-\seealso{ \code{\link{lmrob}}, also for references and examples.
+\seealso{  \code{\link{Mpsi}}, etc, for the (fast!) psi function computations;
+  \code{\link{lmrob}}, also for references and examples.
 }
 \examples{
 ## Show the default settings:
@@ -243,6 +250,8 @@ str(.Mpsi.tuning.defaults)
 stopifnot(identical(.Mpsi.tuning.defaults,
                    sapply(names(.Mpsi.tuning.defaults),
                           .Mpsi.tuning.default)))
+## Containing (names!) all our (pre-defined) redescenders:
+str(.Mchi.tuning.defaults)
 }
 \keyword{robust}
 \keyword{regression}

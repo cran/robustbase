@@ -77,7 +77,7 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
 
       The argument \code{setting} of \code{\link{lmrob.control}} is provided
       to set alternative defaults as suggested in Koller and Stahel (2011)
-      (use \code{setting="KS2011"}, or its extension
+      (\code{setting="KS2011"}; now do use its extension
       \code{setting="KS2014"}).  For details, see \code{\link{lmrob.control}}.
     }
     \item{Initial Estimator \code{init}:}{
@@ -135,6 +135,8 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
       covariance matrix estimate used is based on the asymptotic
       normality of the estimated coefficients (\code{cov=".vcov.w"}) as
       described in Koller and Stahel (2011).
+      The var-cov computation can be skipped by \code{cov = "none"} and
+      (re)done later by e.g., \code{vcov(<obj>, cov = ".vcov.w")}.
 
       As of robustbase version 0.91-0 (April 2014), the computation of
       robust standard errors for \code{method="SMDM"} has been changed.
@@ -232,8 +234,11 @@ data(coleman)
 set.seed(0)
 ## Default for a very long time:
 summary( m1 <- lmrob(Y ~ ., data=coleman) )
-## Nowadays strongly recommended for routine use:
-summary( m2 <- lmrob(Y ~ ., data=coleman, setting = "KS2011") )
+
+## Nowadays **strongly recommended** for routine use:
+summary(m2 <- lmrob(Y ~ ., data=coleman, setting = "KS2014") )
+##                                       ------------------
+
 plot(residuals(m2) ~ weights(m2, type="robustness")) ##-> weights.lmrob()
 abline(h=0, lty=3)
 
@@ -244,18 +249,19 @@ plot(starsCYG)
 (RlmST <- lmrob(log.light ~ log.Te, data = starsCYG))
 abline(lmST, col = "red")
 abline(RlmST, col = "blue")
-summary(RlmST)
+## --> Least Sq.:/ negative slope  \\ robust: slope ~= 2.2 % checked in ../tests/lmrob-data.R
+summary(RlmST) # -> 4 outliers; rest perfect
 vcov(RlmST)
 stopifnot(all.equal(fitted(RlmST),
-                    predict(RlmST, newdata = starsCYG),
-                    tolerance = 1e-14))
+                    predict(RlmST, newdata = starsCYG), tol = 1e-14))
+## FIXME: setting = "KS2011"  or  setting = "KS2014"  **FAIL** here
 
-## --- init argument
-## string
+##--- 'init' argument -----------------------------------
+## 1)  string
 set.seed(0)
 m3 <- lmrob(Y ~ ., data=coleman, init = "S")
 stopifnot(all.equal(m1[-18], m3[-18]))
-## function
+## 2) function
 initFun <- function(x, y, control, mf) {
     init.S <- lmrob.S(x, y, control)
     list(coefficients=init.S$coef, scale = init.S$scale)

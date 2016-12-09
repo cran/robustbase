@@ -3,6 +3,15 @@
 @PREAMBLE{ " "  # "\providecommand{\noop}[1]{} "
 	 # " \ifx\undefined\SfSbibINI\else\SfSbibINI\fi" }
 
+@Manual{robustbase-pkg,
+    title = {robustbase: Basic Robust Statistics},
+    author = {Martin Maechler and Valentin Todorov and Andreas Ruckstuhl and Matias Salibian-Barrera and Manuel Koller and Eduardo L. T. Conceicao},
+    year = 2016,
+    note = {R package version 0.92-6},
+    url = {http://CRAN.R-project.org/package=robustbase},
+    url = {http://robustbase.r-forge.r-project.org/},
+}
+
 @article{RouPvD99,
   author =	 {Peter J. Rousseeuw and Katrien van~Driessen},
   title = {A Fast Algorithm for the Minimum Covariance Determinant Estimator},
@@ -43,7 +52,7 @@
 
 %% ------ was ./lmrob_simulation.bib ------------------------
 %%              ~~~~~~~~~~~~~~~~~~~~
-@Article{	  berrendero2007maximum,
+@Article{berrendero2007maximum,
   title		= {{On the maximum bias functions of MM-estimates and
 		  constrained M-estimates of regression}},
   author	= {Berrendero, J.R. and Mendes, B.V.M. and Tyler, D.E.},
@@ -55,14 +64,14 @@
   publisher	= {IMS INSTITUTE OF MATHEMATICAL STATISTICS}
 }
 
-@TechReport{	  croux03,
+@TechReport{croux03,
   author	= {Croux, C. and Dhaene, G. and Hoorelbeke, D.},
   title		= {Robust standard errors for robust estimators},
   institution	= {Dept. of Applied Economics, K.U. Leuven},
   year		= 2003
 }
 
-@Article{	  fernandez1998bayesian,
+@Article{fernandez1998bayesian,
   title		= {On Bayesian Modeling of Fat Tails and Skewness},
   author	= {Fern{\'a}ndez, C. and Steel, M.F.J.},
   journal	= {Journal of the American Statistical Association},
@@ -82,7 +91,7 @@
   pages =	 {73--101},
 }
 
-@Book{		  hubpr09,
+@Book{hubpr09,
   author	= {Peter J. Huber and Elvezio M. Ronchetti},
   title		= {Robust Statistics, Second Edition},
   publisher	= {Wiley and Sons Inc.},
@@ -90,7 +99,7 @@
   year		= 2009
 }
 
-@Article{        ks2011,
+@Article{ks2011,
   title 	= "Sharpening Wald-type inference in robust regression for
                    small samples",
   journal 	= "Computational Statistics \& Data Analysis",
@@ -107,7 +116,27 @@
   keywords2 	= "Robust inference"
 }
 
-@Article{	  maronna2009correcting,
+@Misc{ks2014,
+  author =	 "Manuel Koller and Werner A. Stahel",
+  year =	 2014,
+  title =	 {Nonsingular subsampling for regression {S}~estimators with categorical predictors},
+  journal =	 {under review (2012 version from arXiv)},
+  keywords =	 "MM-estimator",
+  keywords1 =	 "Robust regression",
+}
+ @Comment url =		 {http://arxiv.org/abs/1208.5595},
+
+@Misc{kolm2012,
+  author =	 {Manuel Koller},
+  year =	 2012,
+  title =	 {Nonsingular subsampling for S-estimators with categorical predictors},
+  url =		 {http://arxiv.org/abs/1208.5595},
+  keywords =	 "MM-estimator",
+  keywords1 =	 "Robust regression",
+}
+
+
+@Article{maronna2009correcting,
   title		= {Correcting {MM} estimates for "fat" data sets},
   volume	= 54,
   number	= 12,
@@ -121,12 +150,14 @@
   year		= 2010
 }
 
-@Book{		  marrmy06,
-  author	= {Ricardo A. Maronna and R. Douglas Martin and Victor J. Yohai},
-  title		= {Robust Statistics, Theory and Methods},
-  publisher	= {Wiley},
-  year		= 2006,
-  address	= {N.Y.}
+@Book{MarRMY06,
+  author =	 {Ricardo A. Maronna and R. Douglas Martin and Victor J. Yohai},
+  title = 	 {Robust Statistics, Theory and Methods},
+  year = 	 2006,
+  publisher = 	 {John Wiley \& Sons, Ltd},
+  pages =	 408,
+  ISBN = 	 {0-470-01092-4},
+  series =	 {Wiley Series in Probility and Statistics},
 }
 
 @Book{hamfrrs86,
@@ -136,4 +167,24 @@
   year		= 1986,
   address	= {N.Y.},
   publisher	= {Wiley}
+}
+
+@Manual{R-Lang,
+    title = {R: A Language and Environment for Statistical Computing},
+    author = {{R Core Team}},
+    organization = {R Foundation for Statistical Computing},
+    address = {Vienna, Austria},
+    year = {2016},
+    url = {https://www.R-project.org/},
+  }
+
+
+@Article{RenOVicM2010,
+  author = 	 {Olivier Renaud and Maria-Pia Victoria-Feser},
+  title = 	 {A robust coefficient of determination for regression},
+  journal = 	 {Journal of Statistical Planning and Inference},
+  year = 	 2010,
+  volume = 	 140,
+  pages = 	 {1852--1862},
+  annote = 	 {robust $R^2$}
 }

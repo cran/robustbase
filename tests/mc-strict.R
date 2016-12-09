@@ -70,8 +70,8 @@ set.seed(6); S.time(a6 <- adjOutlyingness(wood[, 1:5]))# the 'X' space
 
 ## 32-bit <-> 64-bit different results {tested on Linux only}
 is32 <- .Machine$sizeof.pointer == 4 ## <- should work for Linux/MacOS/Windows
-isMac <- Sys.info()["sysname"] == "Darwin"
-isSun <- Sys.info()["sysname"] == "SunOS"
+isMac <- Sys.info()[["sysname"]] == "Darwin"
+isSun <- Sys.info()[["sysname"]] == "SunOS"
 Rnk <- function(u) rank(unname(u), ties.method = "first")
 ## to use for testing below:
 cat("\nRnk(a3 $ adjout): "); dput(Rnk(a3$adjout), control= {})

@@ -55,7 +55,12 @@
     algorithmic parameters (as mostly inside the \code{control} part)
     should be shown.}
   \item{cov}{covariance estimation function to use, a
-    \code{\link{function}} or \link{character} string naming the function.}
+    \code{\link{function}} or \link{character} string naming the
+    function; \pkg{robustbase} currently provides \code{".vcov.w"} and
+    \code{".vcov.avar1"}, see \emph{Details} of \code{\link{lmrob}}.
+    Particularly useful when \code{object} is the result of
+    \code{lmrob(.., cov = "none")}, where \preformatted{  object$cov <- vcov(object, cov = ".vcov.w")}
+    allows to \emph{update} the fitted object.}
   \item{\dots}{potentially more arguments passed to methods.}
 }
 \value{

@@ -1,7 +1,7 @@
 \name{adjOutlyingness}
 \alias{adjOutlyingness}
 \title{Compute (Skewness-adjusted) Multivariate Outlyingness}
-\newcommand{\CRANpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
+\newcommand{\CRANpkg}{\href{https://CRAN.R-project.org/package=#1}{\pkg{#1}}}
 \description{
   For an \eqn{n \times p}{n * p} data matrix (or data frame) \code{x},
   compute the \dQuote{\emph{outlyingness}} of all \eqn{n} observations.
@@ -13,7 +13,7 @@
 adjOutlyingness(x, ndir = 250, clower = 4, cupper = 3,
                 alpha.cutoff = 0.75, coef = 1.5,
                 qr.tol = 1e-12, keep.tol = 1e-12,
-                only.outlyingness = FALSE)
+                only.outlyingness = FALSE, maxit.mult = max(100, p))
 }
 \arguments{
   \item{x}{a numeric \code{\link{matrix}} or \code{\link{data.frame}}.}
@@ -42,6 +42,9 @@ adjOutlyingness(x, ndir = 250, clower = 4, cupper = 3,
   \item{only.outlyingness}{logical indicating if the final outlier
     determination should be skipped.  In that case, a vector is
     returned, see \sQuote{Value:} below.}
+  \item{maxit.mult}{integer factor; \code{maxit <- maxit.mult * ndir}
+    will determine the maximal number of direction searching
+    iterations.  May need to be increased for higher dimensional data.}
 }
 \note{
  The result is \emph{random} as it depends on the sample of

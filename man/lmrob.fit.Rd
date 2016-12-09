@@ -21,7 +21,7 @@ lmrob.fit(x, y, control, init = NULL, mf = NULL)
     and the subsequent M- and D-estimates.}
   \item{init}{optional \code{\link{list}} of initial estimates.  See
     \emph{Details}.}
-  \item{mf}{(optional) a model frame as returned by \code{\link{model.frame}}, 
+  \item{mf}{(optional) a model frame as returned by \code{\link{model.frame}},
     used only to compute outlier statistics, see \code{\link{outlierStats}}.}
 }
 \details{This function is the basic fitting function for MM-type estimation,
@@ -43,7 +43,7 @@ lmrob.fit(x, y, control, init = NULL, mf = NULL)
   \item{coefficients}{estimated regression coefficient vector}
   \item{scale}{the robustly estimated error standard deviation}% = final.MM$scale,
   \item{cov}{variance-covariance matrix of \code{coefficients}, if the
-    RWLS iterations have converged}
+    RWLS iterations have converged (and \code{control$cov} is not \code{"none"}).}
   \item{control}{}% = control,
   \item{iter}{}% = final.MM$iter, <<<<<< also 'init.S' !
   \item{converged}{logical indicating if the RWLS iterations have converged.}

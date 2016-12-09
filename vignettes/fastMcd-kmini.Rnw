@@ -40,7 +40,7 @@
 \newcommand{\R}{{\normalfont\textsf{R}}{}}
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand*{\pkg}[1]{\texttt{#1}}
-\newcommand*{\CRANpkg}[1]{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
+\newcommand*{\CRANpkg}[1]{\href{https://CRAN.R-project.org/package=#1}{\pkg{#1}}}
 
 %----------------------------------------------------
 \begin{document}

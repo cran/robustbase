@@ -19,6 +19,9 @@
 **** DONE shouldn't we rename jde() to jdeopt() or even jdeoptim(), jDEoptim(), or JDEoptim()
 R users already know optim() etc.. so the name seems more logical for them.
 * Short Term
+** TODO [Peter Filzmoser, Geneva 2016-07-07 talk]: covMcd() warns when n < 2*p .. should not *warn* but give message()
+** TODO [Peter Filzmoser, Geneva 2016-07-07 talk]: solve.default(getCov(mcd)) error  with CovControlOgk() init
+*** INSTEAD it should report the (theoretical) breakdown point (p ...) / (n - h ... ) [from the MCD theory]
 ** TODO mc(x) can *fail* to converge: workaround: jitter() -> ~/R/MM/Pkg-ex/robust/Robnik-mc.R
 ** TODO estimethod(): also for lmrob() and glmrob() models
 ** TODO VT implement .detMcd() in C
@@ -127,10 +130,13 @@ R users already know optim() etc.. so the name seems more logical for them.
 **** DONE Deprecate* the "2)", tukeyChi() etc, making them call the M.*fun():
 
 * Mid Term
+** TODO R/lmrob.MM.R: Using lmrob.E( * )
+*** TODO: numerically clearly better than these -- e.g. in summary.lmrob(): use integrate(), or
+*** ---- allow to specify 'use.integrate=TRUE, tol = 1e-10' etc for *accurate* cor.factors
+*** "hampel", "bisquare", "lqq" (polyn!): derive *exact* formula; others maybe, too <==> psi_func objects above?
 ** TODO New  lmrob() features ("M-S" as option?):
-*** Function names with "." (which are exported) are frowned upon
-      e.g.  lmrob.split()
-*** checking .vcov.avar1() and its "posdefify" options ??
+*** Function names with "." (which are exported) are frowned upon e.g.  lmrob.split()
+*** checking .vcov.avar1() and its "posdefify" options [but "KS201x" uses .vcov.w() anyway]
 *** TODO lmrob.mar() [file:inst/doc/estimating.functions.R]: Maronna & Yohai (2010) should
          ~~~~~~~~~~  become part of robustbase, maybe under a better name,
     e.g. via lmrob( ... control ..) or directly.

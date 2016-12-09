@@ -1,7 +1,7 @@
 
-R Under development (unstable) (2014-07-10 r66124) -- "Unsuffered Consequences"
-Copyright (C) 2014 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin13.1.0 (64-bit)
+R Under development (unstable) (2016-06-30 r70858) -- "Unsuffered Consequences"
+Copyright (C) 2016 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -188,17 +188,17 @@ seed : int(0)
 Call:
 lmrob(formula = stack.loss ~ ., data = stackloss, method = "SMD", compute.outlier.stats = "S", 
     cov = ".vcov.w")
- \--> method = "SMD"
+ \--> method = "MM"
 Residuals:
       Min        1Q    Median        3Q       Max 
 -10.50974  -1.43819  -0.09134   1.02503   7.23113 
 
 Coefficients:
             Estimate Std. Error t value Pr(>|t|)    
-(Intercept) -41.5246     8.9525  -4.638 0.000235 ***
-Air.Flow      0.9388     0.1175   7.990 3.71e-07 ***
-Water.Temp    0.5796     0.3199   1.812 0.087756 .  
-Acid.Conc.   -0.1129     0.1176  -0.960 0.350512    
+(Intercept) -41.5246     9.3676  -4.433 0.000365 ***
+Air.Flow      0.9388     0.1230   7.636 6.84e-07 ***
+Water.Temp    0.5796     0.3348   1.731 0.101505    
+Acid.Conc.   -0.1129     0.1231  -0.917 0.371736    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -220,10 +220,8 @@ warn.limit.reject warn.limit.meanrw
         5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
-   maxit.scale      trace.lev            mts     compute.rd      numpoints 
-           200              0           1000              0             10 
-fast.s.large.n 
-          2000 
+   maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
+           200              0           1000              0           2000 
                   psi           subsampling                   cov 
            "bisquare"         "nonsingular"             ".vcov.w" 
 compute.outlier.stats 
@@ -236,7 +234,11 @@ seed : int(0)
 > m4a$call <- m4$call
 > 
 > all.equal(m4, m4a)
-[1] TRUE
+[1] "Component \"control\": Component \"method\": 1 string mismatch"                                
+[2] "Component \"init\": Component \"control\": Component \"method\": 1 string mismatch"            
+[3] "Component \"cov\": Attributes: < Component \"corrfact\": Mean relative difference: 0.1167673 >"
+[4] "Component \"cov\": Attributes: < Component \"scorr\": Mean relative difference: 0.01959345 >"  
+[5] "Component \"cov\": Mean relative difference: 0.09488594"                                       
 > 
 > ## SMDM
 > set.seed(0)
@@ -291,7 +293,7 @@ seed : int(0)
 Call:
 lmrob(formula = stack.loss ~ ., data = stackloss, method = "SMDM", psi = "bisquare", 
     compute.outlier.stats = "S")
- \--> method = "SMDM"
+ \--> method = "SMD"
 Residuals:
     Min      1Q  Median      3Q     Max 
 -9.6746 -1.7721  0.1346  1.2041  6.6080 
@@ -337,7 +339,9 @@ seed : int(0)
 > class(m5a) <- class(m5)
 > 
 > all.equal(m5, m5a)
-[1] TRUE
+[1] "Component \"control\": Component \"method\": 1 string mismatch"                                        
+[2] "Component \"init\": Component \"control\": Component \"method\": 1 string mismatch"                    
+[3] "Component \"init\": Component \"init\": Component \"control\": Component \"method\": 1 string mismatch"
 > 
 > ## Fast S large n strategy (sped up)
 > model <- model.frame(LNOx ~ . ,data = NOxEmissions)
@@ -359,4 +363,4 @@ Error in lmrob.S(model.matrix(model, NOxEmissions)[1:682, ], NOxEmissions$LNOx[1
 > 
 > proc.time()
    user  system elapsed 
-  0.609   0.045   0.643 
+  0.203   0.043   0.240 

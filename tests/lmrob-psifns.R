@@ -147,31 +147,32 @@ summary(mp4 <- update(mp0, psi = 'ggw', tuning.psi = c(-.5, 1.5, 0.85, NA),
                       tuning.chi = c(-0.5, 1.5, NA, 0.5)))
 
 set.seed(6)
-summary(mp5 <- update(mp0, psi = 'ggw', tuning.psi = c(-.5, 1.0, 0.95, NA),
+summary(mp5 <- update(mp0, psi = 'ggw',
+                      tuning.psi = c(-0.5, 1.0, 0.95, NA),
                       tuning.chi = c(-0.5, 1.0, NA, 0.5)))
 
 set.seed(7)
 summary(mp6 <- update(mp0, psi = 'hampel'))
 
 set.seed(8)
-ctr7 <- lmrob.control(psi = 'ggw', tuning.psi = c(-.3, 1.4, 0.95, NA),
+ctr7 <- lmrob.control(psi = 'ggw',
+                      tuning.psi = c(-0.3, 1.4, 0.95, NA),
                       tuning.chi = c(-0.3, 1.4, NA, 0.5))
 ctr7$tuning.psi ## -> "constants"
 ctr7$tuning.chi
-summary(mp7 <-lmrob(Y ~ ., data = aircraft, control = ctr7))
+summary(mp7 <-lmrob(Y ~ ., data = aircraft, control = ctr7)) # *not* converging in k.max=200
 
 set.seed(9)
 summary(mp8 <- update(mp0, psi = 'lqq'))
 
-set.seed(10)
-ctr9 <- lmrob.control(psi = 'lqq', tuning.psi = c(ctr7$tuning.psi),
-                      tuning.chi = c(ctr7$tuning.chi))
+set.seed(10) ##  c(.) drops attributes :
+ctr9 <- lmrob.control(psi = 'lqq', tuning.psi = c(ctr7$tuning.psi), tuning.chi = c(ctr7$tuning.chi))
 ctr9$tuning.psi
 ctr9$tuning.chi
 ## Confirm these constants above (against the ones we got earlier)
 ## by recomputing them using higher accuracy :
-(tpsi. <- robustbase:::.psi.lqq.findc(ctr9$tuning.psi, rel.tol=1e-11, tol=1e-8))
-(tchi. <- robustbase:::.psi.lqq.findc(ctr9$tuning.chi, rel.tol=1e-11, tol=1e-8))
+(tpsi. <- do.call(.psi.lqq.findc, c(ctr9$tuning.psi, list(rel.tol=1e-11, tol=1e-8))))
+(tchi. <- do.call(.psi.lqq.findc, c(ctr9$tuning.chi, list(rel.tol=1e-11, tol=1e-8))))
 (tol4 <- .Machine$double.eps^.25)
 
 Rver <- getRversion()

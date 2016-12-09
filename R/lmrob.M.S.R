@@ -97,6 +97,7 @@ splitFrame <- function(mf, x = model.matrix(mt, mf),
          x2 = x[, !x1.idx, drop=FALSE])
 }
 
+##' Compute M-S-estimator for linear regression ---> ../man/lmrob.M.S.Rd
 lmrob.M.S <- function(x, y, control, mf, split) {
     if (missing(split))
         split <- splitFrame(mf, x, control$split.type)
