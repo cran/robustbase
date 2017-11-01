@@ -4,12 +4,46 @@
 \title{News for \R Package \pkg{robustbase}}
 \encoding{UTF-8}
 
+\section{CHANGES in robustbase VERSION 0.92-8 (2017-10-30, svn r778)}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item \code{fullRank()} utility for \code{adjOutlyingness}:
+
+      \item \code{adjOutlyingness()}, gets new options \code{p.samp} and
+      \code{trace.lev}, and when it fails to find enough good
+      directions, now checks the rank and mentions \code{fullRank()} in
+      case the matrix is (QR-)rank deficient.
+
+      \item The \code{"lmrob"} method for \code{vcov()} gets optional
+      argument \code{complete = TRUE}, where only \emph{complete =
+	FALSE} is back compatible.
+
+      \item improved (error) messages in singular case in
+      \code{.vcov.avar1()}.
+
+      \item \code{.psi.const()} is exported as well, and help is
+      improved about using and setting non-default psi tuning constants.
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item loosened some regression test tolerances (for alternatives
+      to BLAS) in \file{tests/(mc-strict|poisson-ex)}.
+
+      \item \code{scaleTau2(x, *)} gains an optional \code{sigma0}
+      argument and now returns zero instead of \code{NaN} when
+      \code{sigma0 == 0}.
+    }
+  }
+}
+
 \section{CHANGES in robustbase VERSION 0.92-7 (2016-11-23, svn r742)}{
   \subsection{NEW FEATURES}{
     \itemize{
       \item \code{vignette(psi_functions)}
 
-      \item \code{adjOutlyingness(..., maxit.mult = 1000)} new option, may
+      \item \code{adjOutlyingness(..., maxit.mult = max(100, p))} new option,
+      allowing more iterations for finding \dQuote{good} projection directions.
     }
   }
   \subsection{BUG FIXES}{

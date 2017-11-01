@@ -219,7 +219,7 @@ ltsReg.default <- function (x, y, intercept = TRUE,
 	h <- h.alpha.n(alpha, n, dx[2])
 	p <- 1
 	if (alpha == 1) {
-	    scale <- sqrt(cov.wt(as.matrix(y))$cov)
+	    scale <- sqrt(drop(cov.wt(as.matrix(y))$cov))
 	    center <- as.vector(mean(y))
 	    ## xbest <- NULL
 	} else {
@@ -258,7 +258,7 @@ ltsReg.default <- function (x, y, intercept = TRUE,
             sum.w <- sum(weights)
 	    reweighting <- cov.wt(as.matrix(y), wt = weights)
 	    ans$coefficients <- reweighting$center
-	    ans$scale <- sqrt(sum.w/(sum.w - 1) * reweighting$cov)
+	    ans$scale <- sqrt(sum.w/(sum.w - 1) * drop(reweighting$cov))
 	    resid <- y - ans$coefficients
 	    ans$crit <- sum(sort((y - center)^2, partial = h)[1:h])
 	    if (sum.w != n) {
@@ -489,7 +489,7 @@ ltsReg.default <- function (x, y, intercept = TRUE,
     ans$cnp2 <- cnp2
     class(ans) <- "lts"
     ans$call <- match.call()
-    return(ans)
+    ans
 } ## {ltsReg.default}
 
 summary.lts <- function (object, correlation = FALSE, ...)

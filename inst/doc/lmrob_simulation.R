@@ -153,7 +153,7 @@ getOption("SweaveHooks")[["fig"]]()
 ##              f.plot.psi(x, 'bisquare'),
 ##              f.plot.psi(x, 'lqq'),
 ##              f.plot.psi(x, 'hampel'))
-## print( ggplot(tmp, aes(x, value, color = psi)) + geom_line() + ylab(quote(psi(x))) +
+## print( ggplot(tmp, aes(x, value, color = psi)) + geom_line(lwd=1.25) + ylab(quote(psi(x))) +
 ##           scale_color_discrete(name = quote(psi ~ '-function')))
 
 

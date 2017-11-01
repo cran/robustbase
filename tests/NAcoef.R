@@ -6,7 +6,7 @@ require(robustbase)
 source(system.file("test-tools-1.R", package="Matrix", mustWork=TRUE))
 ##-> assertError(), etc
 
-## generate simple example data
+## generate simple example data (almost as in ./weights.R )
 data <- expand.grid(x1=letters[1:3], x2=LETTERS[1:3], rep=1:3)
 set.seed(1)
 data$y <- rnorm(nrow(data))
@@ -57,8 +57,8 @@ stopifnot(all.equal(alias(cm1), alias(rm1)))
 summary(rm1) -> s1
 confint(rm1) -> ci1
 stopifnot(identical(is.na(coef(cm1)), apply(ci1, 1L, anyNA)),
-	  identical(sigma(rm1), s1$ sigma),
-	  identical(vcov(rm1),  s1$ cov  ),
+	  identical(sigma(rm1),                 s1$ sigma),
+	  identical(vcov(rm1, complete=FALSE),  s1$ cov  ),
 	  TRUE)
 
 print(s1, showAlgo=FALSE)
@@ -107,7 +107,8 @@ residuals(rm1)
 #rstandard(rm1)
 #rstudent(rm1)
 #simulate(rm1) ## just $weights needs to be changed to prior weights
-V1 <- vcov(rm1) # but don't show the "eigen" part {vectors may flip sign}:
+V1 <- vcov(rm1, complete=FALSE)
+## but don't show the "eigen" part {vectors may flip sign}:
 attributes(V1) <- attributes(V1)[c("dim","dimnames", "weights")]; V1
 set.seed(12); sc <- simulate(cm1, 64)
 set.seed(12); rc <- simulate(rm1, 64)

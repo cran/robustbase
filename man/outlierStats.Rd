@@ -64,9 +64,10 @@ outlierStats(object, x = object$x, control = object$control,
   (\code{Mean.RobWeight}).
 }
 \references{
-  Koller, M. and Stahel, W.A. (2014)
-  Nonsingular subsampling for regression S~estimators with categorical
-  predictors. Under review.
+  Koller, M. and Stahel, W.A. (2017)
+  Nonsingular subsampling for regression {S}~estimators with categorical predictors,
+  \emph{Computational Statistics} \bold{32}(2): 631--646.
+  \doi{10.1007/s00180-016-0679-x}
 }
 \author{Manuel Koller}
 \seealso{

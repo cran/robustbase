@@ -45,7 +45,7 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
     components of the fit (the model frame, the model matrix, the
     response) are returned.}
 
-  \item{singular.ok}{logical. If \code{FALSE} (the default in S but
+  \item{singular.ok}{logical.  If \code{FALSE} (the default in S but
     not in \R) a singular fit is an error.}
 
   \item{contrasts}{an optional list.  See the \code{contrasts.arg}
@@ -78,7 +78,7 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
       The argument \code{setting} of \code{\link{lmrob.control}} is provided
       to set alternative defaults as suggested in Koller and Stahel (2011)
       (\code{setting="KS2011"}; now do use its extension
-      \code{setting="KS2014"}).  For details, see \code{\link{lmrob.control}}.
+      \code{setting="KS2014"}).  For further details, see \code{\link{lmrob.control}}.
     }
     \item{Initial Estimator \code{init}:}{
       The initial estimator may be specified using the argument
@@ -100,10 +100,10 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
       estimator an S-estimator (Rousseeuw and Yohai, 1984) which is
       computed using the Fast-S algorithm of Salibian-Barrera and Yohai
       (2006), calling \code{\link{lmrob.S}()}.  That function, since
-      March 2012, uses \emph{nonsingular} subsampling which makes the
-      Fast-S algorithm feasible for categorical data as well, see Koller
-      (2012).  Note that convergence problems may still show up as
-      warnings, e.g., \preformatted{
+      March 2012, by default uses \emph{nonsingular} subsampling which
+      makes the Fast-S algorithm feasible for categorical data as well,
+      see Koller (2012).  Note that convergence problems may still show
+      up as warnings, e.g., \preformatted{
   S refinements did not converge (to refine.tol=1e-07) in 200 (= k.max) steps
 }
       and often can simply be remedied by increasing (i.e. weakening)
@@ -190,14 +190,17 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
   \emph{Robust standard errors for robust estimators},
   Discussion Papers Series 03.16, K.U. Leuven, CES.
 
-  Koller, M. (2012), Nonsingular subsampling for S-estimators with
-  categorical predictors, \emph{ArXiv e-prints}, arXiv:1208.5595v1.
+  Koller, M. (2012)
+  Nonsingular subsampling for S-estimators with categorical predictors,
+  \emph{ArXiv e-prints} \url{https://arxiv.org/abs/1208.5595};
+  extended version published as Koller and Stahel (2017), see
+  \code{\link{lmrob.control}}.
 
-  Koller, M. and Stahel, W.A. (2011), Sharpening Wald-type inference in
-  robust regression for small samples, \emph{Computational Statistics &
-    Data Analysis} \bold{55}(8), 2504--2515.
+  Koller, M. and Stahel, W.A. (2011)
+  Sharpening Wald-type inference in robust regression for small samples.
+  \emph{Computational Statistics & Data Analysis} \bold{55}(8), 2504--2515.
 
-  Maronna, R. A., and Yohai, V. J. (2000).
+  Maronna, R. A., and Yohai, V. J. (2000)
   Robust regression with both continuous and categorical predictors.
   \emph{Journal of Statistical Planning and Inference} \bold{89}, 197--214.
 
@@ -210,14 +213,19 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
 
   Salibian-Barrera, M. and Yohai, V.J. (2006)
   A fast algorithm for S-regression estimates,
-  \emph{Journal of Computational and Graphical Statistics},
-  \bold{15}(2), 414--427.
+  \emph{Journal of Computational and Graphical Statistics} \bold{15}(2), 414--427.
 
   Yohai, V.J. (1987)
   High breakdown-point and high efficiency estimates for regression.
   \emph{The Annals of Statistics} \bold{15}, 642--65.
+
+  Yohai, V., Stahel, W.~A. and Zamar, R. (1991)
+  A procedure for robust estimation and inference in linear regression;
+  in Stahel and Weisberg (eds), \emph{Directions in Robust Statistics
+    and Diagnostics}, Part II, Springer, New York, 365--374;
+  \doi{10.1007/978-1-4612-4444-8_20}.
 }
-\author{Matias Salibian-Barrera and Manuel Koller}
+\author{(mainly:) Matias Salibian-Barrera and Manuel Koller}
 \seealso{
   \code{\link{lmrob.control}};
   for the algorithms \code{\link{lmrob.S}}, \code{\link{lmrob.M.S}} and

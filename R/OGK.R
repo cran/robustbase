@@ -154,13 +154,16 @@ covOGK <- function(X, n.iter = 2,
 ## is in /u/maechler/R/other-people/Mspline/Mspline/R/scaleTau.R
 ##
 scaleTau2 <- function(x, c1 = 4.5, c2 = 3.0, consistency = TRUE,
-                      mu.too = FALSE, ...)
+                      sigma0 = median(x.), # = MAD(x)  {without consistency factor}
+                      mu.too = FALSE)
 {
-    ## NOTA BENE: This is *NOT* consistency corrected
     n <- length(x)
     medx <- median(x)
     x. <- abs(x - medx)
-    sigma0 <- median(x.) ## = MAD(x)  {without consistency factor}
+    if(sigma0 <= 0) { # no way to get tau-estim.
+	if(!missing(sigma0)) warning("sigma0 =", sigma0," ==> scaleTau2(.) = 0")
+	return(c(if(mu.too) medx, 0))
+    }
     mu <-
         if(c1 > 0) {
             ## w <- pmax(0, 1 - (x. / (sigma0 * c1))^2)^2   -- but faster:

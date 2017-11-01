@@ -461,6 +461,7 @@ smoothWgt <- function(x, c, h) {
 	       paste("There are", m,
 		     "observations (in the entire dataset of", n, "obs.)",
 		     "lying on the")
+	   invisible(obsMsg)# <- codetools
            with(singList,
                 c(switch(exactCode,
                          ## exactfit == 1 :
@@ -471,7 +472,7 @@ smoothWgt <- function(x, c, h) {
 			 ## exactfit == 3:
 			 paste0("The ", h,
 				"-th order statistic of the absolute deviation of variable ",
-				which(singList$coeff == 1), " is zero.")),
+				which(coeff == 1), " is zero.")),
 
                   if(p == 2) {
                       paste(obsMsg(count, n.obs), "line with equation ",

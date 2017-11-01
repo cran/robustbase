@@ -2,10 +2,17 @@
 \title{Find Tuning Constant(s) for "lqq" and "ggw" Psi Functions}
 \alias{.psi.ggw.findc}% --> ../R/lmrob.MM.R
 \alias{.psi.lqq.findc}
+\alias{.psi.const}
 \description{
   Find psi function tuning constant sets for \code{"LQQ"} and \code{"GGW"}
   psi (\eqn{\psi}) functions by specifying largest descent (minimal
   slope), efficiency and or breakdown point.
+
+  \code{.psi.const()} is called from \code{\link{lmrob.control}()} to
+  set the tuning constants for psi and chi for \code{"LQQ"} and
+  \code{"GGW"} psi.  Unless  the specified tuning constants are from
+  fixed small set where the computations are stored precomputed,
+  \code{.psi.const()} calls the corresponding \code{.psi.<psi>.findc()}.
 }
 \usage{
 .psi.ggw.findc(ms, b, eff = NA, bp = NA,
@@ -17,6 +24,7 @@
                interval = c(0.1, 4), subdivisions = 100L,
                rel.tol = .Machine$double.eps^0.25, abs.tol = rel.tol,
                tol = .Machine$double.eps^0.25, maxiter = 1000)
+.psi.const(cc, psi)
 }
 \arguments{
   \item{ms}{number, the minimal slope, typically negative.}
@@ -30,18 +38,39 @@
 
   \item{interval}{for finding \eqn{c} via \code{\link{uniroot}()}.}
   \item{subdivisions}{passed to \code{\link{integrate}()}.}
-  \item{rel.tol, abs.tol}{relative and absolute tolerance for \code{\link{integrate}()}.}
+  \item{rel.tol, abs.tol}{relative and absolute tolerance for
+    \code{\link{integrate}()}.}
   \item{tol}{relative tolerance for \code{\link{uniroot}()}.}
   \item{ms.tol}{relative tolerance for the internal
     \code{.psi.ggw.finda()}, eventually passed to \code{\link{optimize}}
     inside (internal) \code{.psi.ggw.mxs()}.}
-  \item{maxiter}{maximal number of iterations for \code{\link{uniroot}()}.}
+  \item{maxiter}{maximal number of iterations for
+    \code{\link{uniroot}()}.}
+
+  %% for .psi.const() :
+  \item{cc}{(for \code{.psi.const()}:) numeric vector of length 4,
+    containing all constants \code{c(ms, b*, eff, bp)}, where
+    \code{b* = b}   for \code{"ggw"} and
+    \code{b* = b.c} for \code{"lqq"}, and one of \code{(eff, bp)}
+    is \code{NA}.}
+  \item{psi}{a string, either \code{"ggw"} or \code{"lqq"}.}
 }
 \value{
-  constants for \code{"lqq"} psi functions: \eqn{(b, c, s) = (b/c * c, c, s = 1 - min_slope)}
+  a \code{\link{numeric}} vector of constants, for \code{"lqq"} or
+  \code{"ggw"} psi functions, respectively:
+  \describe{
+    \item{\code{"lqq"}:}{\eqn{(b, c, s) = (b/c * c, c, s = 1 - min_slope)},}
+    \item{\code{"ggw"}:}{\eqn{(0, a, b, c, \rho(\infty))}{%
+	                      (0, a, b, c,  rho(Inf))}.}
+  }
+}
+\references{
+  See the vignette about  %% ../vignettes/psi_functions.Rnw :
+  \dQuote{\eqn{\psi}{psi}-Functions Available in Robustbase}.
 }
 \seealso{\code{\link{Mpsi}()} etc for the psi function definitions;
-  \code{\link{.Mpsi.tuning.defaults}}, etc, for tuning constants' efaults for\code{\link{lmrob}()}.
+  \code{\link{.Mpsi.tuning.defaults}}, etc, for tuning constants'
+  defaults for \code{\link{lmrob}()}.
 }
 \author{Manuel Koller (original) and Martin Maechler (arguments, export,
   docs).

@@ -3,6 +3,13 @@
 #### August 06, 2010  2:14 PM 9121 BYlogreg.r.txt == BYlogreg.R (*this* original)
 ####    May 04, 2005  9:24 AM 6702 BYlogreg.txt   == BYlogreg.R.~2005~
 ####    May 04, 2005  9:25 AM 6720 WBYlogreg.txt  == WBYlogreg.R
+####
+#### Sep. 27, 2017: available at
+####
+#### NB: Splus original Version of this file:  BYlogreg.ssc in the
+#### --  in FunctionsRob/ (from FunctionsRob.zip) from Wiley's book supplements
+#### http://www.wiley.com/legacy/wileychi/robust_statistics/robust.html
+#### see my ../misc/MMY-book/Wiley-supplements/FunctionsRob/BYlogreg.ssc
 
 
 ##  Computation of the estimator of Bianco and Yohai (1996) in logistic regression

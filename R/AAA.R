@@ -110,13 +110,16 @@ doExtras <- function() {
         identical("true", unname(Sys.getenv("R_PKG_CHECKING_doExtras")))
 }
 
-if(getRversion() < "3.3") {
-    sigma <- function(object, ...) UseMethod("sigma")
-
-    ## For completeness, and when comparing with nlrob() results:
-    sigma.nls <- function(object, ...)
-	## sqrt (  sum( R_i ^ 2) / (n - p) ) :
-	sqrt( deviance(object) / (nobs(object) - length(coef(object))) )
+if(getRversion() < "3.5") {
+    isTRUE  <- function(x) is.logical(x) && length(x) == 1L && !is.na(x) && x
+    isFALSE <- function(x) is.logical(x) && length(x) == 1L && !is.na(x) && !x
+    if(getRversion() < "3.3") {
+	sigma <- function(object, ...) UseMethod("sigma")
+	## For completeness, and when comparing with nlrob() results:
+	sigma.nls <- function(object, ...)
+	    ## sqrt (  sum( R_i ^ 2) / (n - p) ) :
+	    sqrt( deviance(object) / (nobs(object) - length(coef(object))) )
+    }
 }
 
 
@@ -125,3 +128,22 @@ pasteK <- function(...) paste(..., collapse = ", ")
 
 ## stopifnot(..) helper :
 is.1num <- function(x) is.numeric(x) && length(x) == 1L
+
+##' return 'x' unless it is NULL where you'd use 'orElse'
+`%||%` <- function(x, orElse) if(!is.null(x)) x else orElse
+
+##' Augment a vcov-matrix by NA rows & cols when needed; from */R/src/library/stats/R/vcov.R
+.vcov.aliased <-
+    asNamespace("stats")$.vcov.aliased %||%
+    function(aliased, vc, complete = TRUE) {
+        ## Checking for "NA coef": "same" code as in print.summary.lm() in ./lm.R :
+        if(complete && nrow(vc) < (P <- length(aliased)) && any(aliased)) {
+            ## add NA rows and columns in vcov
+            cn <- names(aliased)
+            VC <- matrix(NA_real_, P, P, dimnames = list(cn,cn))
+            j <- which(!aliased)
+            VC[j,j] <- vc
+            VC
+        } else  # default
+            vc
+    }

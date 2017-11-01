@@ -63,7 +63,6 @@ nlrob.MM <-
                  optim.control = list(), optArgs = list(...)),
              ...)
 {
-    ctrl.exp <- substitute(ctrl)
     if(missing(ctrl)) {
         init <- match.arg(init)
         psi  <- match.arg(psi)

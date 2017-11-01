@@ -1,6 +1,6 @@
 
-R version 3.3.0 Patched (2016-05-26 r70671) -- "Supposedly Educational"
-Copyright (C) 2016 The R Foundation for Statistical Computing
+R Under development (unstable) (2017-10-13 r73550) -- "Unsuffered Consequences"
+Copyright (C) 2017 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -25,7 +25,7 @@ Loading required package: robustbase
 Loading required package: tools
 > ##-> assertError(), etc
 > 
-> ## generate simple example data
+> ## generate simple example data (almost as in ./weights.R )
 > data <- expand.grid(x1=letters[1:3], x2=LETTERS[1:3], rep=1:3)
 > set.seed(1)
 > data$y <- rnorm(nrow(data))
@@ -86,8 +86,8 @@ Coefficients:
 > summary(rm1) -> s1
 > confint(rm1) -> ci1
 > stopifnot(identical(is.na(coef(cm1)), apply(ci1, 1L, anyNA)),
-+ 	  identical(sigma(rm1), s1$ sigma),
-+ 	  identical(vcov(rm1),  s1$ cov  ),
++ 	  identical(sigma(rm1),                 s1$ sigma),
++ 	  identical(vcov(rm1, complete=FALSE),  s1$ cov  ),
 + 	  TRUE)
 > 
 > print(s1, showAlgo=FALSE)
@@ -301,7 +301,8 @@ $residual.scale
 > #rstandard(rm1)
 > #rstudent(rm1)
 > #simulate(rm1) ## just $weights needs to be changed to prior weights
-> V1 <- vcov(rm1) # but don't show the "eigen" part {vectors may flip sign}:
+> V1 <- vcov(rm1, complete=FALSE)
+> ## but don't show the "eigen" part {vectors may flip sign}:
 > attributes(V1) <- attributes(V1)[c("dim","dimnames", "weights")]; V1
             (Intercept)         x1b         x1c         x2B          x2C
 (Intercept)   0.2963116 -0.32142943 -0.33884229 -0.23800957 -0.328912503

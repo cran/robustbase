@@ -1,7 +1,7 @@
 
-R version 3.0.0 Patched (2013-04-28 r62686) -- "Masked Marvel"
-Copyright (C) 2013 The R Foundation for Statistical Computing
-Platform: x86_64-unknown-linux-gnu (64-bit)
+R Under development (unstable) (2017-09-26 r73351) -- "Unsuffered Consequences"
+Copyright (C) 2017 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -531,10 +531,14 @@ Coefficients:
 Scale estimate 19.3 
 
 > 
+> if(length(W <- warnings())) print(if(getRversion() >= "3.5") summary(W) else W)
+2 identical warnings:
+In covMcd(X, alpha = alpha, use.correction = use.correction) :
+  Initial scale 0 because more than 'h' (=16) observations are identical.
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  0.668 0.059 0.807 0.001 0.005 
+Time elapsed:  0.332 0.058 0.463 0.002 0.001 
 > 
 > proc.time()
    user  system elapsed 
-  0.670   0.064   0.807 
+  0.334   0.059   0.463 

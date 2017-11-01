@@ -41,7 +41,7 @@
   Robust multivariate regression;
   \emph{Technometrics} \bold{46}, 293--305.
 
-  \url{http://users.ugent.be/~svaelst/data/pulpfiber.txt}
+  Till 2016 available from \code{http://users.ugent.be/~svaelst/data/pulpfiber.txt}
 }
 \author{port to \R and this help page: Martin Maechler
 }

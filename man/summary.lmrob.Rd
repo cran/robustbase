@@ -22,7 +22,7 @@
   have explicitly defined \code{lmrob} methods.  \code{.lmrob.hat()} is
   the lower level \dQuote{work horse} of the \code{hatvalues()} method.
 }
-\usage{
+\usage{% all source in   ../R/lmrob.R <<<
 \method{summary}{lmrob}(object, correlation = FALSE,
         symbolic.cor = FALSE, \dots)
 \method{print}{summary.lmrob}(x, digits = max(3, getOption("digits") - 3),
@@ -30,7 +30,7 @@
       signif.stars = getOption("show.signif.stars"),
       showAlgo = TRUE, \dots)
 
-\method{vcov}{lmrob}(object, cov = object$control$cov, \dots)
+\method{vcov}{lmrob}(object, cov = object$control$cov, complete = TRUE, \dots)
 \method{model.matrix}{lmrob}(object, \dots)
 
 % not yet
@@ -61,6 +61,13 @@
     Particularly useful when \code{object} is the result of
     \code{lmrob(.., cov = "none")}, where \preformatted{  object$cov <- vcov(object, cov = ".vcov.w")}
     allows to \emph{update} the fitted object.}
+  \item{complete}{(mainly for \R \code{>= 3.5.0}:)% ~/R/D/r-devel/R/src/library/stats/man/vcov.Rd
+    \code{\link{logical}} indicating if the
+    full variance-covariance matrix should be returned also in case of
+    an over-determined system where some coefficients are undefined and
+    \code{\link{coef}(.)} contains \code{NA}s correspondingly.   When
+    \code{complete = TRUE},  \code{vcov()} is compatible with
+    \code{coef()} also in this singular case.}
   \item{\dots}{potentially more arguments passed to methods.}
 }
 \value{

@@ -3,22 +3,24 @@
 \title{Robust Tau-Estimate of Scale}
 \description{
   Computes the robust \eqn{\tau}-estimate of univariate scale, as
-  proposed by Maronna and Zamar (2002); improved by a consistency factor.
-%% FIXME: and a finite sample correction by Martin Maechler !!
+  proposed by Maronna and Zamar (2002); improved by a consistency factor,
+  %% FIXME: TODO: and a finite sample correction by Martin Maechler
+  %% (currently have 'n-2' but can be better !!!!
 }
 \usage{
 scaleTau2(x, c1 = 4.5, c2 = 3.0, consistency = TRUE,
-          mu.too = FALSE, ...)
+          sigma0 = median(x.), mu.too = FALSE)
 }
 \arguments{
   \item{x}{numeric vector}
   \item{c1,c2}{non-negative numbers, specifying cutoff values for the
     biweighting of the mean and the rho function respectively.}
-  \item{mu.too}{logical indicating if both location and scale should be
-    returned or just the scale (when \code{mu.too=FALSE} as by default).}
   \item{consistency}{logical indicating if the consistency correction
     factor (for the scale) should be applied.}
-  \item{\dots}{potentially additional arguments which are not used.}
+  \item{sigma0}{the initial scale estimate \eqn{s_0}{s0}, defaulting to
+    the MAD; may be set to a positive value when the MAD is zero.}
+  \item{mu.too}{logical indicating if both location and scale should be
+    returned or just the scale (when \code{mu.too=FALSE} as by default).}
 }
 \details{
   First, \eqn{s_0}{s0} := MAD, i.e. the equivalent of \code{\link{mad}(x,
@@ -73,10 +75,11 @@ if(doExtras <- robustbase:::doExtras()) {
  set.seed(11)
  ## show how much faster this is, compared to Qn
  x <- sample(c(rnorm(1e6), rt(5e5, df=3)))
- (system.time(Qx <- Qn(x)))
- (system.time(S2x <- scaleTau2(x)))
+ (system.time(Qx <- Qn(x)))         ## 2.04 [2017-09, lynne]
+ (system.time(S2x <- scaleTau2(x))) ## 0.25    (ditto)
  cbind(Qn = Qx, sTau2 = S2x)
-}  
+}##       Qn    sTau2
+##  1.072556 1.071258
 }
 \keyword{robust}
 \keyword{univar}

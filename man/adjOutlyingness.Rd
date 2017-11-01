@@ -10,15 +10,20 @@
   medcouple, \code{\link{mc}()}.
 }
 \usage{
-adjOutlyingness(x, ndir = 250, clower = 4, cupper = 3,
+adjOutlyingness(x, ndir = 250, p.samp = p, clower = 4, cupper = 3,
                 alpha.cutoff = 0.75, coef = 1.5,
                 qr.tol = 1e-12, keep.tol = 1e-12,
-                only.outlyingness = FALSE, maxit.mult = max(100, p))
+                only.outlyingness = FALSE, maxit.mult = max(100, p),
+                trace.lev = 0)
 }
 \arguments{
-  \item{x}{a numeric \code{\link{matrix}} or \code{\link{data.frame}}.}
+  \item{x}{a numeric \code{\link{matrix}} or \code{\link{data.frame}},
+    which must be of full rank \eqn{p}.}
   \item{ndir}{positive integer specifying the number of directions that
     should be searched.}
+  \item{p.samp}{the sample size to use for finding good random
+    directions, must be at least \code{p}.  The default, \code{p} had
+    been hard coded previously.}
   \item{clower, cupper}{the constant to be used for the lower and upper
     tails, in order to transform the data towards symmetry.  You can set
     \code{clower = 0, cupper = 0} to get the \emph{non}-adjusted,
@@ -35,7 +40,8 @@ adjOutlyingness(x, ndir = 250, clower = 4, cupper = 3,
   \item{qr.tol}{positive tolerance to be used for \code{\link{qr}} and
     \code{\link{solve.qr}} for determining the \code{ndir} directions,
     each determined by a random sample of \eqn{p} (out of \eqn{n})
-    observations.}
+    observations.  Note that the default \eqn{10^{-12}} is rather small,
+    and \code{\link{qr}}'s default \code{= 1e-7} may be more appropriate.}
   \item{keep.tol}{positive tolerance to determine which of the sample
     direction should be kept, namely only those for which
     \eqn{\|x\| \cdot \|B\|}{||x|| * ||B||} is larger than \code{keep.tol}.}
@@ -44,11 +50,15 @@ adjOutlyingness(x, ndir = 250, clower = 4, cupper = 3,
     returned, see \sQuote{Value:} below.}
   \item{maxit.mult}{integer factor; \code{maxit <- maxit.mult * ndir}
     will determine the maximal number of direction searching
-    iterations.  May need to be increased for higher dimensional data.}
+    iterations.  May need to be increased for higher dimensional data,
+    though increasing \code{ndir} may be more important.}
+  \item{trace.lev}{an integer, if positive allows to monitor the
+    direction search.}
 }
 \note{
  The result is \emph{random} as it depends on the sample of
- \code{ndir} directions chosen.
+ \code{ndir} directions chosen; hence \code{\link{set.seed}()} yourself
+ for reproducibility!
 
  Till Aug/Oct. 2014, the default values for \code{clower} and \code{cupper} were
  accidentally reversed, and the signs inside \code{exp(.)} where swapped
@@ -92,6 +102,15 @@ adjOutlyingness(x, ndir = 250, clower = 4, cupper = 3,
   A Robustification of Independent Component Analysis;
   \emph{Journal of Chemometrics}, \bold{19}, 1--12.
 
+  Hubert, M., Van der Veeken, S. (2008)
+  Outlier detection for skewed data;
+  \emph{Journal of Chemometrics} \bold{22}, 235--246.
+  %% preprint \url{http://wis.kuleuven.be/stat/robust/papers/2008/outlierdetectionskeweddata-revision.pdf}
+  %%MM: Journal-pdf  ~/save/papers/robust-diverse/Hubert_VdV_skewed-Chemom_2008.pdf
+  %%MM: Compstat 2010: Slides (of talk) and paper of Mia H:
+  %% ~/save/papers/robust-diverse/Hubert_skewed-CS2010-slides.pdf  and
+  %% ~/save/papers/robust-diverse/Hubert_skewed-CS2010-paper.pdf (slides are better !!)
+
   For the up-to-date reference, please consult
   \url{http://wis.kuleuven.be/stat/robust}
 }
@@ -124,7 +143,7 @@ which(! ao.hbk$nonOut) # 1 .. 14   --- but not for all random seeds!
 cc <- covMcd(hbk)
 stopifnot(all(cc$mcd.wt == ao.hbk$nonOut))
 
-## This is revealing (about 1--2 cases, where outliers are *not* == 1:14
+## This is revealing: About 1--2 cases, where outliers are *not* == 1:14
 ##  but needs almost 1 [sec] per call:
 if(interactive()) {
   for(i in 1:30) {
@@ -142,6 +161,15 @@ out <- capture.output(
 )
 untrace(mc)
 stopifnot(length(out) == 0)
+
+## A rank-deficient case
+T <- tcrossprod(data.matrix(toxicity))
+try(adjOutlyingness(T, maxit. = 20, trace.lev = 2)) # fails and recommends:
+T. <- fullRank(T)
+aT <- adjOutlyingness(T.)
+plot(sort(aT$adjout, decreasing=TRUE), log="y")
+plot(T.[,9:10], col = (1:2)[1 + (aT$adjout > 10000)])
+## .. (not conclusive; directions are random, more 'ndir' makes a difference!)
 }
 \keyword{robust}
 \keyword{multivariate}

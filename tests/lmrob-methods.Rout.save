@@ -1,6 +1,6 @@
 
-R Under development (unstable) (2016-06-30 r70858) -- "Unsuffered Consequences"
-Copyright (C) 2016 The R Foundation for Statistical Computing
+R version 3.4.2 Patched (2017-10-12 r73550) -- "Short Summer"
+Copyright (C) 2017 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -68,7 +68,7 @@ compute.outlier.stats
                   "S" 
 seed : int(0) 
 Warning message:
-In lf.cov(init, x) :
+In lf.cov(init, x = x) :
   :.vcov.w: ignoring cov.resid == final since est != final
 > set.seed(0)
 > m0a <- lmrob.S(m0$x, stack.loss, lmrob.control())

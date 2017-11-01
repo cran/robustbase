@@ -25,34 +25,44 @@
 ##     ^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-adjOutlyingness <- function(x, ndir=250, clower=4, cupper=3,
+adjOutlyingness <- function(x, ndir = 250, p.samp = p, clower=4, cupper=3,
                             alpha.cutoff = 0.75, coef = 1.5, qr.tol = 1e-12, keep.tol = 1e-12,
-                            only.outlyingness = FALSE, maxit.mult = max(100, p))
+                           only.outlyingness = FALSE, maxit.mult = max(100, p), trace.lev = 0)
 ## Skewness-Adjusted Outlyingness
 {
     x <- data.matrix(x)
     n <- nrow(x)
     p <- ncol(x)
-    stopifnot(n >= 1, p >= 1, is.numeric(x))
-    if (p < n) {
+    stopifnot(n >= 1, p >= 1, p.samp >= p, is.numeric(x))
+    if (p <= n) {
         B <- matrix(0, p, ndir)
         E <- matrix(1, p, 1)
         x. <- unname(x) # for speed in subsequent subsetting and solve
         maxit <- as.integer(maxit.mult * ndir)
         ## ^^ original code had 'Inf', i.e. no iter.count check;
         ## often, maxit == ndir would suffice
+        if(trace.lev >= 2) p10 <- 10 ^ max(0, min(6 - trace.lev, floor(log10(maxit))))
 	i <- 1L
 	it <- 0L
 	while (i <= ndir  &&  (it <- it+1L) < maxit) {
-            P <- x.[sample(n,p), , drop=FALSE]
+            P <- x.[sample.int(n, p.samp), , drop=FALSE]
             if ((qrP <- qr(P, tol = qr.tol))$rank == p) {
                 B[,i] <- solve(qrP, E, tol = qr.tol)
+                if(trace.lev) cat(" it=",it,"; found direction # ", i,"\n", sep="")
 		i <- i+1L
+            } else if(trace.lev >= 2) {
+                if(it %% p10 == 0)
+                    cat(" it=",it,": rank(qr(P ..)) = ", qrP$rank, " < p = ",p,"\n", sep="")
             }
         }
-        if(it == maxit)
-            stop("** direction sampling iterations were not sufficient. Try increasing 'maxit.mult'")
-
+	if(it == maxit) {
+	    rnk.x <- qr(x, tol = qr.tol)$rank
+	    if(rnk.x < p)
+		stop("Matrix 'x' is not of full rank: rankM(x) = ",rnk.x," < p = ",p,
+                     "\n Use fullRank(x) instead")
+	    ## else
+	    stop("** direction sampling iterations were not sufficient. Maybe try increasing 'maxit.mult'")
+	}
         Bnorm <- sqrt(colSums(B^2))
         Nx <- mean(abs(x.)) ## so the comparison is scale-equivariant:
         keep <- Bnorm*Nx > keep.tol
@@ -140,5 +150,20 @@ adjOutlyingness <- function(x, ndir=250, clower=4, cupper=3,
 	     MCadjout = mcadjout, Qalph.adjout = Qadj, cutoff = cutoff,
 	     nonOut = (adjout <= cutoff))
     }
+}
+
+##' Compute a "full rank" version of matrix x,
+##' by removing columns (or rows when nrow(x) < ncol(x)), using qr() and it's pivots
+fullRank <- function(x, tol = 1e-7, qrx = qr(x, tol=tol)) {
+    d <- dim(x)
+    n <- d[[1L]]; p <- d[[2L]]
+    if(n < p)
+        return( t(fullRank(t(x), tol=tol)) )
+    ## else n >= p >= rank(.)
+    rnk <- qrx$rank
+    if(rnk == p)
+        x
+    else
+        x[, qrx$pivot[seq_len(rnk)], drop=FALSE]
 }
 

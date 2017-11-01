@@ -77,7 +77,7 @@ export(Sn, Qn, Qn.old,
        .Mwgt.psi1,
        .Mchi.tuning.default,  .Mpsi.tuning.default, .regularize.Mpsi,
        .Mchi.tuning.defaults, .Mpsi.tuning.defaults,
-       .psi2ipsi, .psi.ggw.findc, .psi.lqq.findc,
+       .psi2ipsi, .psi.const, .psi.ggw.findc, .psi.lqq.findc,
 
        lmrob, lmrob.fit,
        lmrob.fit.MM, lmrob..M..fit, lmrob..D..fit,
@@ -91,7 +91,7 @@ export(Sn, Qn, Qn.old,
        adjbox,
        adjboxStats,
        adjOutlyingness,
-
+       fullRank,
        glmrob,
        nlrob, nlrob.control
        , glmrobMqle.control, glmrobBY.control, glmrobMT.control

@@ -327,8 +327,6 @@ void R_lmrob_S(double *X, double *y, int *n, int *P,
      *        =  2, by default
      */
 
-    /* Rprintf("R_lmrob_s %d\n", *iipsi); */
-
     if (*nRes > 0) {
 	if (*n > *cutoff) {
 	    if(*trace_lev > 0)
@@ -345,6 +343,8 @@ void R_lmrob_S(double *X, double *y, int *n, int *P,
 		   best_r, bb, rrhoc, iipsi, beta_s, scale, *trace_lev, *mts, *ss);
 	}
     } else {
+	if(*trace_lev > 0)
+	    Rprintf("lmrob_S(nRes = 0, n = %d): --> find_scale() only:\n", *n);
 	*scale = find_scale(y, *bb, rrhoc, *iipsi, *scale, *n, *P,
 			    *max_it_scale);
     }
@@ -1283,7 +1283,7 @@ double wgt_ggw(double x, const double k[])
 // k[0:2] == (b, c, s) :
 // k[0]= b = bend adjustment
 // k[1]= c = cutoff of central linear part
-// k[2]= s : "slope of descending": 1 - s = min_x psi'(x)
+// k[2]= s : "slope of descending": 1 - s = min_x psi'(x) =: ms
 
 // "lin psip" := piecewise linear psi'() :
 double psip_lqq (double x, const double k[])
@@ -1465,8 +1465,9 @@ static void sample_noreplace(int *x, int n, int k, int *ind_space)
 }
 
 /* RWLS iterations starting from i_estimate,
- * ---- the workhorse of the "lmrob_MM" algorithm;
- * in itself,  ``just'' an M-estimator :
+ * ---- the workhorse of the "lmrob_MM" algorithm, called only from R_lmrob_MM(),
+ * which itself is called only from R's  lmrob..M..fit().
+ * In itself,  ``just'' an M-estimator :
  */
 Rboolean rwls(const double X[], const double y[], int n, int p,
 	 double *estimate, double *i_estimate,
@@ -2357,7 +2358,7 @@ Rboolean m_s_descent(double *X1, double *X2, double *y,
  * starting value for S estimates                                       *
  * uses a custom LU decomposition, which acts on the transposed design  *
  * matrix. In case of a singular subsample, the subsample is modified   *
- * until it is non-singular (for ss == 1).                              *
+ * until it is non-singular (for ss == TRUE (== 1)).                    *
  *                                                                      *
  * Parts of the algorithm are based on the Gaxpy version of the LU      *
  * decomposition with partial pivoting by                               *
@@ -2391,8 +2392,8 @@ Rboolean subsample(const double x[], const double y[], int n, int m,
        mts:       the number of singular samples allowed before
                   giving up (Max Try Samples)
        ss:        type of subsampling to be used:
-                  0: simple subsampling
-                  1: nonsingular subsampling
+                  0 (FALSE): simple subsampling
+                  1  (TRUE): nonsingular subsampling
        tol_inv:   tolerance for declaring a matrix singular
        solve:     solve the least squares problem on the subsample?
                   (0: no, 1: yes)

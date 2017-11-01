@@ -10,10 +10,18 @@
   For more details, see the reference.
 
   Note: This function is for \dQuote{back-compatibility} with the
-  \code{BYlogreg()} code web-published at
-  \url{http://www.econ.kuleuven.be/public/NDBAE06/programs/roblog/};
-  instead, the recommended interface is \code{\link{glmrob}(*, method =
-  "BY")} or \code{... method = "WBY" ..}, see \code{\link{glmrob}}.
+  \code{BYlogreg()} code web-published at KU Leuven, Belgium,
+  % moved to ? -- but NA (404) on 2017-09-26: % --> ../R/BYlogreg.R
+  % \url{http://feb.kuleuven.be/public/NDBAE06/programs/roblog/};
+  % now, findable at
+  % http://feb.kuleuven.be/public/u0017833/software_donotuse/logreg/BYlogreg.txt
+  % but rather use Wiley's book resources
+  and also available as file \file{FunctionsRob/BYlogreg.ssc} from
+  \url{http://www.wiley.com/legacy/wileychi/robust_statistics/robust.html}.
+
+  However instead of using this function, the recommended interface is
+  \code{\link{glmrob}(*, method = "BY")} or \code{... method = "WBY" ..},
+  see \code{\link{glmrob}}.
 }
 \usage{
 BYlogreg(x0, y, initwml = TRUE, addIntercept = TRUE,

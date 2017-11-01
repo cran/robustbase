@@ -84,7 +84,8 @@ tauHuber <- function(x, mu, k=1.5, s = mad(x), resid = (x - mu)/s) {
   ## -------------------------------------------------------------------------
   ## Author: Rene Locher Update: R. Frisullo 23.4.02;  M.Maechler (as.log(); s, resid)
   inr <- abs(resid) <= k
-  psi  <- ifelse(inr, resid, sign(resid)*k)                # psi (x)
+  ## psi  <- ifelse(inr, resid, sign(resid)*k)             # psi (x) -- more efficiently:
+  psi <- resid; out <- which(!inr); if(length(out)) psi[out] <- sign(resid[out]) * k
   psiP <- as.logical(inr)# = ifelse(abs(resid) <= k, 1, 0) # psi'(x)
   length(x) * sum(psi^2) / sum(psiP)^2
 }
