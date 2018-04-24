@@ -16,7 +16,7 @@ nlrob(formula, data, start, lower, upper,
       method = c("M", "MM", "tau", "CM", "mtl"),
       psi = .Mwgt.psi1("huber", cc=1.345), scale = NULL,
       test.vec = c("resid", "coef", "w"), maxit = 20,
-      tol = 1e-06, acc, algorithm = "default", doCov = FALSE,
+      tol = 1e-06, acc, algorithm = "default", doCov = FALSE, model = FALSE,
       control = if(method == "M") nls.control() else
 		nlrob.control(method, optArgs = list(trace=trace), ...),
       trace = FALSE, ...)
@@ -127,6 +127,8 @@ nlrob(formula, data, start, lower, upper,
     already.  This used to be hard-wired to \code{TRUE}; however, the
     default has been set to \code{FALSE}, as \code{\link{vcov}(obj)} and
     \code{\link{summary}(obj)} can easily compute it when needed.}
+  \item{model}{a \code{\link{logical}} indicating if the
+    \code{\link{model.frame}} should be returned as well.}
   \item{control}{an optional list of control settings.
     \describe{
       \item{for \code{method = "M"}:}{settings for \code{\link{nls}()}.
@@ -274,6 +276,8 @@ Rm3DN2 <- nlrob(density ~  Asym/(1 + exp(( xmid - log(conc) )/scal ) ),
 Rm3DN2
 summary(Rm3DN2) # -> robustness weight of obs. 10 ~= 0.037
 confint(Rm3DN2, method = "Wald")
+stopifnot(identical(Rm3DN2$dataClasses,
+                    c(density = "numeric", conc = "numeric")))
 
 ## utility function sfsmisc::lseq() :
 lseq <- function (from, to, length)
@@ -304,7 +308,9 @@ gMM  <- nlrob(form, data = DNase1, method = "MM",
 gCM  <- nlrob(form, data = DNase1, method = "CM",
               lower = c(Asym = 0, xmid = 0, scal = 0, sigma = 0),
               upper = c(3,3,3, sigma = 0.8))
-summary(gCM)# (did fail)
+summary(gCM)# did fail; note it has  NA NA NA (std.err, t val, P val)
+stopifnot(identical(Rm3DN2$dataClasses, gMM$dataClasses),
+          identical(   gCM$dataClasses, gMM$dataClasses))
 }%not (always) tested
 }
 \keyword{robust}

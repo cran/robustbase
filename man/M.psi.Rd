@@ -12,9 +12,9 @@
 \alias{.psi2ipsi}
 \description{
   Compute Psi / Chi / Wgt / Rho functions for M-estimation,
-  i.e., including MM, etc.
-  %% TODO: More, notably definitions ... but they are all nicely in the
-  %% vignette.. How can we link from here to there ???
+  i.e., including MM, etc.  For definitions and details, please use the
+  vignette \href{https://cran.r-project.org/package=robustbase/vignettes/psi_functions.pdf}{%
+    \dQuote{\eqn{\psi}{psi}-Functions Available in Robustbase}}.
 
   \code{MrhoInf(x)} computes \eqn{\rho(\infty)}{rho(Inf)}, i.e., the
   normalizing or scaling constant for the transformation
@@ -49,8 +49,10 @@ MrhoInf(cc, psi)
   \item{deriv}{an integer, specifying the \emph{order} of derivative to
     consider; particularly, \code{Mpsi(x, *, deriv = -1)} is the
     principal function of \eqn{\psi()}{psi()}, typically denoted
-    \eqn{\rho()}{rho()} in the literature.}
-  %% FIXME: mention that  deriv = 2 is *partially* implemented
+    \eqn{\rho()}{rho()} in the literature.  For some psi functions,
+    currently \code{"huber"}, \code{"bisquare"}, \code{"hampel"}, and \code{"lqq"},
+    \code{deriv = 2} is implemented, for the other psi's only
+    \eqn{d \in \{-1,0,1\}}{d in {-1,0,1\}}.}}
 }
 \details{
   Theoretically, \code{Mchi()} would not be needed explicitly as it can be computed
@@ -80,6 +82,11 @@ MrhoInf(cc, psi)
   \code{Mpsi()},  \code{Mchi()},  \code{Mwgt()}, and  \code{MrhoInf()}, respectively,
   and \code{.psi2ipsi()} provides the psi-function integer codes needed
   for \code{ipsi} argument of the \code{.M*()} functions.
+
+  For \code{psi = "ggw"}, the \eqn{\rho()}{rho()} function has no closed
+  form and must be computed via numerical integration, apart from 6
+  special cases including the defaults, see the \sQuote{Details} in
+  \code{help(\link{.psi.ggw.findc})}.
 }
 \value{
   a numeric vector of the same length as \code{x}, with corresponding
@@ -137,6 +144,27 @@ x <- runif(256, -4, 10)
 stopifnot(all.equal(psi.hampel(x), MASS::psi.hampel(x)),
           all.equal(                 psi.hampel(x, deriv=1),
                     as.numeric(MASS::psi.hampel(x, deriv=1))))
+
+## "lqq" / "LQQ" and its tuning constants:
+ctl0 <- lmrob.control(psi = "lqq", tuning.psi=c(-0.5, 1.5, 0.95, NA))
+ctl  <- lmrob.control(psi = "lqq", tuning.psi=c(-0.5, 1.5, 0.90, NA))
+ctl0$tuning.psi  ## keeps the vector _and_ has "constants" attribute:
+## [1] -0.50  1.50  0.95    NA
+## attr(,"constants")
+## [1] 1.4734061 0.9822707 1.5000000
+ctl$tuning.psi ## ditto:
+## [1] -0.5  1.5  0.9  NA \\  .."constants"   1.213726 0.809151 1.500000
+stopifnot(all.equal(Mpsi(0:2, cc = ctl$tuning.psi, psi = ctl$psi),
+                    c(0, 0.977493, 1.1237), tol = 6e-6))
+x <- seq(-4,8, by = 1/16)
+## Show how you can use .Mpsi() equivalently to Mpsi()
+stopifnot(all.equal( Mpsi(x, cc = ctl$tuning.psi, psi = ctl$psi),
+                    .Mpsi(x, ccc = attr(ctl$tuning.psi, "constants"),
+                             ipsi = .psi2ipsi("lqq"))))
+stopifnot(all.equal( Mpsi(x, cc = ctl0$tuning.psi, psi = ctl0$psi, deriv=1),
+                    .Mpsi(x, ccc = attr(ctl0$tuning.psi, "constants"),
+                             ipsi = .psi2ipsi("lqq"),              deriv=1)))
+
 
 ## M*() preserving attributes :
 x <- matrix(x, 32, 8, dimnames=list(paste0("r",1:32), col=letters[1:8]))

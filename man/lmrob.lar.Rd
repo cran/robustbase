@@ -8,14 +8,15 @@
   copy of \code{lmRob.lar} (in early 2012) from the \pkg{robust} package.
 }
 \usage{
-lmrob.lar(x, y, control, mf)
+lmrob.lar(x, y, control, \dots)
 }
 \arguments{
   \item{x}{numeric matrix for the predictors.}
   \item{y}{numeric vector for the response.}
   \item{control}{\code{\link{list}} as returned by
     \code{\link{lmrob.control}()} .}
-  \item{mf}{dummy parameter.}
+  \item{\dots}{(unused but needed when called as \code{init(x,y,ctrl, mf)}
+    from \code{\link{lmrob}()})}
 }
 \details{
   This method is used for computing the M-S estimate and typically not
@@ -51,7 +52,12 @@ lmrob.lar(x, y, control, mf)
 data(stackloss)
 X <- model.matrix(stack.loss ~ . , data = stackloss)
 y <- stack.loss
-lmrob.lar(X, y)
+(fm.L1 <- lmrob.lar(X, y))
+with(fm.L1, stopifnot(converged
+  , status == 1L
+  , all.equal(scale, 1.5291576438)
+  , sum(abs(residuals) < 1e-15) == 4 # p=4 exactly fitted obs.
+))
 }
 \keyword{ L1 }
 \keyword{ regression }

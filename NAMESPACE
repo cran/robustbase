@@ -43,7 +43,9 @@ importFrom("utils", globalVariables, str)
 
 ## MASS has many rlm S3 methods; should we use some of them - for rnls() ?!
 ## we also currently use MASS::cov.rob(); but probably only temporarily
-importFrom("methods", is, new, setClass, setMethod, slot, "slot<-")
+importFrom("methods", is, new, setClass, setMethod, slot, "slot<-",
+	   ## needed, e.g. for 'robustlmm' to work w/o warning:
+	   as, "as<-", coerce, "coerce<-")
 
 importFrom("DEoptimR", JDEoptim)
 

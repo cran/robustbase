@@ -6,7 +6,8 @@
   \dQuote{M-S} algorithm.
 }
 \usage{
-lmrob.M.S(x, y, control, mf, split)
+lmrob.M.S(x, y, control, mf,
+          split = splitFrame(mf, x, control$split.type))
 }
 \arguments{
   \item{x}{numeric matrix (a \code{\link{model.matrix}}) of the
@@ -22,8 +23,8 @@ lmrob.M.S(x, y, control, mf, split)
   \sQuote{on its own}).
 
   An M-S estimator is a combination of an S-estimator for the
-  continuous variables and an L1-estimator for the categorical
-  variables.
+  continuous variables and an L1-estimator (i.e. an M-estimator with
+  \eqn{\psi(t) = sign(t)}) for the categorical variables.
 
   The S-estimator is estimated using a subsampling algorithm.  If the
   model includes interactions between categorical (\code{\link{factor}})

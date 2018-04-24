@@ -166,10 +166,12 @@ Convergence in 1 IRWLS iterations
 Robustness weights: 
  All 33 weights are ~= 1.
 Algorithmic parameters: 
-               bb        refine.tol           rel.tol         solve.tol 
-        3.846e-04         1.000e-07         1.000e-07         1.000e-07 
-      eps.outlier             eps.x warn.limit.reject warn.limit.meanrw 
-        3.030e-03         4.369e-12         5.000e-01         5.000e-01 
+               bb        refine.tol           rel.tol         scale.tol 
+        3.846e-04         1.000e-07         1.000e-07         1.000e-10 
+        solve.tol       eps.outlier             eps.x warn.limit.reject 
+        1.000e-07         3.030e-03         4.369e-12         5.000e-01 
+warn.limit.meanrw 
+        5.000e-01 
      nResample     tuning.chi     tuning.psi         max.it       best.r.s 
            500             20             20             50              2 
       k.fast.s          k.max    maxit.scale      trace.lev            mts 
@@ -217,10 +219,12 @@ Robustness weights:
  6 observations c(3,6,15,18,27,30) are outliers with |weight| = 0 ( < 0.0037); 
  27 weights are ~= 1.
 Algorithmic parameters: 
-               bb        refine.tol           rel.tol         solve.tol 
-        3.846e-04         1.000e-07         1.000e-07         1.000e-07 
-      eps.outlier             eps.x warn.limit.reject warn.limit.meanrw 
-        3.704e-03         5.094e-12         5.000e-01         5.000e-01 
+               bb        refine.tol           rel.tol         scale.tol 
+        3.846e-04         1.000e-07         1.000e-07         1.000e-10 
+        solve.tol       eps.outlier             eps.x warn.limit.reject 
+        1.000e-07         3.704e-03         5.094e-12         5.000e-01 
+warn.limit.meanrw 
+        5.000e-01 
      nResample     tuning.chi     tuning.psi         max.it       best.r.s 
            500             20             20             50              2 
       k.fast.s          k.max    maxit.scale      trace.lev            mts 
@@ -266,10 +270,12 @@ Convergence in 1 IRWLS iterations
 Robustness weights: 
  All 38 weights are ~= 1.
 Algorithmic parameters: 
-               bb        refine.tol           rel.tol         solve.tol 
-        3.846e-04         1.000e-07         1.000e-07         1.000e-07 
-      eps.outlier             eps.x warn.limit.reject warn.limit.meanrw 
-        2.632e-03         4.369e-12         5.000e-01         5.000e-01 
+               bb        refine.tol           rel.tol         scale.tol 
+        3.846e-04         1.000e-07         1.000e-07         1.000e-10 
+        solve.tol       eps.outlier             eps.x warn.limit.reject 
+        1.000e-07         2.632e-03         4.369e-12         5.000e-01 
+warn.limit.meanrw 
+        5.000e-01 
      nResample     tuning.chi     tuning.psi         max.it       best.r.s 
            500             20             20             50              2 
       k.fast.s          k.max    maxit.scale      trace.lev            mts 
@@ -509,13 +515,6 @@ Coefficients:
 (Intercept)           x3  
     18.7474       0.1751  
 
-> 
-> warnings()
-Warning messages:
-1: In lf.cov(object, complete = complete, ...) :
-  X'WX is almost singular. Consider using cov = ".vcov.w"
-2: In lf.cov(object, complete = complete, ...) :
-  .vcov.avar1: negative diag(<vcov>) fixed up; consider 'cov=".vcov.w."' instead
 > 
 > proc.time()
    user  system elapsed 

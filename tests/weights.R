@@ -226,5 +226,3 @@ all.equal(vcov(cm2), vcovC(rm2, cov = ".vcov.avar1"), check.attributes=FALSE) # 
 
 ## testing weight=0 bug
 lmrob(y ~ x3, data, weights=weights)
-
-warnings()

@@ -55,6 +55,7 @@ R.ini.cf <- t(sapply(mget(ls(patt = "^RlmST")), function(OB) OB$init$coef))
 R..cf    <- t(sapply(mget(ls(patt = "^RlmST")), coef))
 cbind(R.ini.cf, R..cf) ##---> "lqq" is *NOT* robust enough here -- but "biweight" is !!
 
+options(digits = 5)# less platform dependence
 ## Directly look at init.S():
 x.s <- model.matrix(~ log.Te, data = starsCYG)
 y.s <- model.response(model.frame(log.light ~ log.Te, data = starsCYG))
@@ -102,7 +103,7 @@ leg.s <- c("default, biweight"
            ,"KS14, GGW"
            ,"KS14, Welsh"
            )
-nEst <- length(leg.s) # == number of estimators used belw
+nEst <- length(leg.s) # == number of estimators used below
 nn <- length(y1 <- c(NA, seq(2,9, length=64)))
 nCf <- length(coef(rr)) + 1 # +1: sigma
 r.coef <- matrix(NA, length(y1), nEst*nCf)

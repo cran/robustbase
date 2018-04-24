@@ -55,14 +55,41 @@
     is \code{NA}.}
   \item{psi}{a string, either \code{"ggw"} or \code{"lqq"}.}
 }
+\details{
+  For some important special cases, the result of \code{.psi.*.findc()}
+  are stored precomputed for efficiency reasons.  These cases are (the
+  defaults for \code{tuning.chi} and \code{tuning.psi} respectively in
+  \code{\link{lmrob.control}()}s result,
+  \tabular{ll}{
+    \code{tuning.chi}               \tab\code{tuning.psi} \cr
+    \code{c(-0.5, 1.5, NA, 0.5)}    \tab\code{c(-0.5, 1.5, 0.95, NA)}
+  }
+  and for \code{"ggw"} additionally, these four cases:
+  \tabular{ll}{
+    \code{tuning.chi}               \tab\code{tuning.psi} \cr
+    {}                              \tab\code{c(-0.5, 1.5, 0.85, NA)} \cr
+    \code{c(-0.5, 1,   NA,  0.5)}   \tab\code{c(-0.5, 1,   0.95, NA)} \cr
+    {}                              \tab\code{c(-0.5, 1,   0.85, NA)}
+  } %tab
+  Note that for \code{"ggw"}, exactly these \eqn{2+4 = 6} cases also
+  allow fast \eqn{\rho} and \eqn{\chi} (aka
+  \eqn{\tilde\rho(\cdot)}{rho~(.)}, see \code{\link{Mchi}}),
+  function evaluations.  For all other tuning constant settings, rho()
+  evaluations are based on numerical integration via \R's own
+  \code{Rdqags()} C function (part of R's official API).
+}
 \value{
   a \code{\link{numeric}} vector of constants, for \code{"lqq"} or
   \code{"ggw"} psi functions, respectively:
   \describe{
     \item{\code{"lqq"}:}{\eqn{(b, c, s) = (b/c * c, c, s = 1 - min_slope)},}
     \item{\code{"ggw"}:}{\eqn{(0, a, b, c, \rho(\infty))}{%
-	                      (0, a, b, c,  rho(Inf))}.}
+	(0, a, b, c,  rho(Inf))}.}
   }
+  \code{.psi.const(cc, psi)} returns the argument \code{cc} with the
+  above constant vectors as attribute \code{"constants"}, in the case of
+  \code{psi = "lqq"} in all cases (since \pkg{robustbase} version >=
+  0.93), for \code{psi = "ggw"} only in the non-standard cases.
 }
 \references{
   See the vignette about  %% ../vignettes/psi_functions.Rnw :
@@ -72,19 +99,18 @@
   \code{\link{.Mpsi.tuning.defaults}}, etc, for tuning constants'
   defaults for \code{\link{lmrob}()}.
 }
-\author{Manuel Koller (original) and Martin Maechler (arguments, export,
-  docs).
+\author{Manuel Koller (original) and Martin Maechler (arguments, export, docs).
 }
 \examples{
-(c.ge95 <- .psi.ggw.findc(ms = -.5, b = 1.5, eff = 0.95))
-(c.ge90 <- .psi.ggw.findc(ms = -.5, b = 1.5, eff = 0.90))
-(c.gb50 <- .psi.ggw.findc(ms = -.5, b = 1.5,  bp = 0.50))
+(c.ge95 <- .psi.ggw.findc(ms = -0.5, b = 1.5, eff = 0.95))
+(c.ge90 <- .psi.ggw.findc(ms = -0.5, b = 1.5, eff = 0.90))
+(c.gb50 <- .psi.ggw.findc(ms = -0.5, b = 1.5,  bp = 0.50))
 stopifnot(all.equal(c.ge95, c(0, 1.386362,   1.5, 1.0628199,  4.7773893), tol = 1e-5),
           all.equal(c.ge90, c(0, 1.0282811,  1.5, 0.87086259, 3.2075233), tol = 1e-5),
           all.equal(c.gb50, c(0, 0.20367394, 1.5, 0.29591308, 0.37033962),tol = 1e-5))
 
-(cl.e.95 <- .psi.lqq.findc(ms = -.5, b.c = 1.5, eff = .95))
-(cl.b.50 <- .psi.lqq.findc(ms = -.5, b.c = 1.5,  bp = .50))
+(cl.e.95 <- .psi.lqq.findc(ms = -0.5, b.c = 1.5, eff = .95))
+(cl.b.50 <- .psi.lqq.findc(ms = -0.5, b.c = 1.5,  bp = .50))
 stopifnot(all.equal(cl.e.95, c(1.4734061,  0.98227073, 1.5), tol = 1e-5),
           all.equal(cl.b.50, c(0.40154568, 0.26769712, 1.5), tol = 1e-5))
 }

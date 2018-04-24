@@ -5,6 +5,7 @@
 require(robustbase)
 source(system.file("test-tools-1.R", package="Matrix", mustWork=TRUE))
 ##-> assertError(), etc
+options(digits = 5)# -> higher chance of platform independence
 
 ## generate simple example data (almost as in ./weights.R )
 data <- expand.grid(x1=letters[1:3], x2=LETTERS[1:3], rep=1:3)

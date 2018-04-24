@@ -10,10 +10,13 @@ data(coleman)
 ## "empty model" (not really a lot of sense)
 (m0 <- lmrob(Y ~ 0, data = coleman))
 summary(m0)
+stopifnot(is.numeric(coef(m0)), length(coef(m0)) == 0,
+          residuals(m0) == coleman[,"Y"])
 ## "Intercept" only: robust mean
 (m1 <- lmrob(Y ~ 1, data = coleman))
 summary(m1)
-
+stopifnot(all.equal(coef(m1),
+		    c("(Intercept)" = 35.56048875388), tol = 1e-11))
 
 (mC <- lmrob(Y ~ ., data = coleman,
 	     control = lmrob.control(refine.tol = 1e-8, rel.tol = 1e-9)))
@@ -60,9 +63,24 @@ set.seed(17)
 a <- gen(n=n, p=p, n0= n0, y0=10, x0=10)
 plot(a$x[,1], a$y, col = c(rep(2, n0), rep(1, n-n0)))
 system.time( m1 <- lmrob(y~x, data = a,
-                         control = lmrob.control(compute.rd = TRUE)))
+                         control = lmrob.control(compute.rd = TRUE, trace.lev=4)))
 plot(m1, ask=FALSE)
 ##-> currently 5 plots; MM:I  don't like #3 (Response vs fitted)
+
+S1 <- m1$init.S
+resS1 <- drop(a$y - model.matrix(m1, data=a) %*% coef(S1))
+all.equal(S1$residuals, resS1)## hmm, but still close
+##  "Mean relative difference: 2.655326e-07"
+
+ctr.t3 <- lmrob.control(trace.lev = 3)
+(mS <- lmrob.S(x=a$x, y=residuals(S1), only.scale=TRUE, control = ctr.t3))
+all.equal(S1$scale, mS)
+## "Mean relative difference: 0.003015849" -- too different, why?
+(mS. <- lmrob.S(x=a$x, y=resS1, only.scale=TRUE, control = ctr.t3))
+all.equal(mS, mS., tol=0)# 2.401 e -10 -- ok/perfect
+stopifnot(all.equal(mS, mS.),
+	  all.equal(mS, S1$scale, tol = 0.008)) # at least that
+
 
 ## don't compute robust distances --> faster by factor of two:
 system.time(m2 <- lmrob(y~x, data = a,

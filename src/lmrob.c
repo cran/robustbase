@@ -60,15 +60,15 @@
  *  but first make many of these 'static' <<< FIXME!
  */
 void fast_s_large_n(double *X, double *y,
-		    int *nn, int *pp, int *nRes, int *max_it_scale,
+		    int *nn, int *pp, int *nRes, int *max_it_scale, double *res,
 		    int *ggroups, int *nn_group,
-		    int *K, int *max_k, double rel_tol, double inv_tol, int *converged,
+		    int *K, int *max_k, double rel_tol, double inv_tol, double scale_tol, int *converged,
 		    int *best_r, double *bb, double *rrhoc, int *iipsi,
 		    double *bbeta, double *sscale, int trace_lev, int mts, int ss);
 
 void fast_s(double *X, double *y,
-	    int *nn, int *pp, int *nRes, int *max_it_scale,
-	    int *K, int *max_k, double rel_tol, double inv_tol, int *converged,
+	    int *nn, int *pp, int *nRes, int *max_it_scale, double *res,
+	    int *K, int *max_k, double rel_tol, double inv_tol, double scale_tol, int *converged,
 	    int *best_r, double *bb, double *rrhoc, int *iipsi,
 	    double *bbeta, double *sscale, int trace_lev, int mts, int ss);
 
@@ -87,14 +87,18 @@ double norm1(double *x, int n);
 double norm_diff2 (double *x, double *y, int n);
 double norm_diff (double *x, double *y, int n);
 double norm1_diff(double *x, double *y, int n);
-double normcnst(const double c[], int ipsi);
-double rho_inf (const double c[], int ipsi);
 
-double rho(double x, const double c[], int ipsi);
-double psi(double x, const double c[], int ipsi);
-double psip(double x, const double c[], int ipsi);// psi'
-double psi2(double x, const double c[], int ipsi);// psi''
-double wgt(double x, const double c[], int ipsi);
+/* moved to robustbase.h
+ *
+ * double normcnst(const double c[], int ipsi);
+ * double rho_inf (const double c[], int ipsi);
+
+ * double rho(double x, const double c[], int ipsi);
+ * double psi(double x, const double c[], int ipsi);
+ * double psip(double x, const double c[], int ipsi);// psi'
+ * double psi2(double x, const double c[], int ipsi);// psi''
+ * double wgt(double x, const double c[], int ipsi);
+ */
 
 double rho_huber(double x, const double c[]);
 double psi_huber(double x, const double c[]);
@@ -150,7 +154,8 @@ int refine_fast_s(const double X[], double *wx, const double y[], double *wy,
 		  double *beta_ref, double *scale);
 
 void m_s_subsample(double *X1, double *y, int n, int p1, int p2,
-		   int nResample, int max_it_scale, double rel_tol, double inv_tol, double *bb,
+		   int nResample, int max_it_scale,
+		   double rel_tol, double inv_tol, double scale_tol, double *bb,
 		   double *rrhoc, int ipsi, double *sscale, int trace_lev,
 		   double *b1, double *b2, double *t1, double *t2,
 		   double *y_tilde, double *res, double *x1, double *x2,
@@ -159,7 +164,7 @@ void m_s_subsample(double *X1, double *y, int n, int p1, int p2,
 
 Rboolean m_s_descent(double *X1, double *X2, double *y,
 		 int n, int p1, int p2, int K_m_s, int max_k, int max_it_scale,
-		 double rel_tol, double *bb, double *rrhoc, int ipsi,
+		 double rel_tol, double scale_tol, double *bb, double *rrhoc, int ipsi,
 		 double *sscale, int trace_lev,
 		 double *b1, double *b2, double *t1, double *t2,
 		 double *y_tilde, double *res, double *res2, double *x1, double *x2,
@@ -172,9 +177,9 @@ Rboolean subsample(const double x[], const double y[], int n, int m,
 		   double *Dr, double *Dc, int rowequ, int colequ,
 		   Rboolean sample, int mts, Rboolean ss, double tol_inv, Rboolean solve);
 
-int fast_s_with_memory(double *X, double *y,
-		       int *nn, int *pp, int *nRes, int *max_it_scale,
-		       int *K, int *max_k, double rel_tol, double inv_tol,  int trace_lev,
+int fast_s_with_memory(double *X, double *y, double *res,
+		       int *nn, int *pp, int *nRes, int *max_it_scale, int *K, int *max_k,
+		       double rel_tol, double inv_tol, double scale_tol, int trace_lev,
 		       int *best_r, double *bb, double *rrhoc, int *iipsi,
 		       double **best_betas, double *best_scales, int mts, int ss);
 
@@ -187,8 +192,9 @@ double kthplace(double *, int, int);
 
 int find_max(double *a, int n);
 
-double find_scale(double *r, double b, double *rrhoc, int ipsi,
-		  double initial_scale, int n, int p, int max_iter);
+double find_scale(const double r[], double b, const double rrhoc[], int ipsi,
+		  double initial_scale, int n, int p, int max_iter, double scale_tol,
+		  Rboolean trace);
 
 double median_abs(double *, int, double *);
 double MAD(double *a, int n, double center, double *tmp, double *tmp2);
@@ -227,10 +233,10 @@ void zero_mat(double **a, int n, int m);
 #define FIT_WLS(_X_, _x_, _y_, _n_, _p_)			\
     /* add weights to _y_ and _x_ */                            \
     for (j=0; j<_n_; j++) {                                     \
-    wtmp = sqrt(weights[j]);                                    \
-    _y_[j] *= wtmp;                                             \
-    for (k=0; k<_p_; k++)                                       \
-	_x_[_n_*k+j] = _X_[_n_*k+j] * wtmp;                     \
+	wtmp = sqrt(weights[j]);				\
+	_y_[j] *= wtmp;						\
+	for (k=0; k<_p_; k++)					\
+	    _x_[_n_*k+j] = _X_[_n_*k+j] * wtmp;			\
     }                                                           \
     /* solve weighted least squares problem */                  \
     F77_CALL(dgels)("N", &_n_, &_p_, &one, _x_, &_n_, _y_,      \
@@ -241,7 +247,7 @@ void zero_mat(double **a, int n, int m);
 	    error("DGELS: illegal argument in %i. argument.", info); \
 	} else {                                                \
 	    if (trace_lev >= 4) {				\
-		Rprintf(" Robustness weights in failing step: ");	\
+		Rprintf(" Robustness weights in failing step: "); \
 		disp_vec(weights, _n_);				\
 	    }                                                   \
 	    CLEANUP_WLS;					\
@@ -312,15 +318,19 @@ void zero_mat(double **a, int n, int m);
 #define EPS_SCALE 1e-10
 #define INFI 1e+20
 
-/* Called from R, this function computes an S-regression estimator */
+/* Called from R's  lmrob.S() in ../R/lmrob.MM.R,
+ * help() in ../man/lmrob.S.Rd, this function computes an S-regression estimator
+             ~~~~~~~~~~~~~~~~~
+ */
 void R_lmrob_S(double *X, double *y, int *n, int *P,
 	       int *nRes, // = nResample ( = 500, by default)
 	       double *scale, double *beta_s,
 	       double *rrhoc, int *iipsi, double *bb,
 	       int *best_r, int *Groups, int *N_group,
-	       int *K_s, int *max_k, int *max_it_scale, //double *rel_tol_scale,
-	       double *rel_tol, double *inv_tol, int *converged,
-	       int *trace_lev, int *mts, int *ss, int *cutoff)
+	       int *K_s, int *max_k, int *max_it_scale,
+	       double *rel_tol, double *inv_tol,
+	       double *scale_tol, // <- new, was hardwired to EPS_SCALE := 1e-10
+	       int *converged, int *trace_lev, int *mts, int *ss, int *cutoff)
 {
     /* best_r = 't' of Salibian-Barrera_Yohai(2006),
      *	      = no. of best candidates to be iterated further ("refined")
@@ -328,25 +338,28 @@ void R_lmrob_S(double *X, double *y, int *n, int *P,
      */
 
     if (*nRes > 0) {
+	double *res = (double *) R_alloc(*n, sizeof(double)); // residuals
 	if (*n > *cutoff) {
 	    if(*trace_lev > 0)
 		Rprintf("lmrob_S(n = %d, nRes = %d): fast_s_large_n():\n", *n, *nRes);
-	    fast_s_large_n(X, y, n, P, nRes, max_it_scale,
+	    fast_s_large_n(X, y, n, P, nRes, max_it_scale, res,
 			   Groups, N_group,
-			   K_s, max_k, *rel_tol, *inv_tol, converged,
+			   K_s, max_k, *rel_tol, *inv_tol, *scale_tol, converged,
 			   best_r, bb, rrhoc, iipsi, beta_s, scale, *trace_lev, *mts, *ss);
 	} else {
 	    if(*trace_lev > 0)
 		Rprintf("lmrob_S(n = %d, nRes = %d): fast_s() [non-large n]:\n", *n, *nRes);
-	    fast_s(X, y, n, P, nRes, max_it_scale,
-		   K_s, max_k, *rel_tol, *inv_tol, converged,
+	    fast_s(X, y, n, P, nRes, max_it_scale, res,
+		   K_s, max_k, *rel_tol, *inv_tol, *scale_tol, converged,
 		   best_r, bb, rrhoc, iipsi, beta_s, scale, *trace_lev, *mts, *ss);
 	}
-    } else {
+	COPY(res, y, *n); // return the 'residuals' in 'y'
+    } else { // nRes[] <= 0   <==>   'only.scale = TRUE'
 	if(*trace_lev > 0)
-	    Rprintf("lmrob_S(nRes = 0, n = %d): --> find_scale() only:\n", *n);
+	    Rprintf("lmrob_S(nRes = 0, n = %d): --> find_scale(*, scale=%g) only:\n",
+		    *n, *scale);
 	*scale = find_scale(y, *bb, rrhoc, *iipsi, *scale, *n, *P,
-			    *max_it_scale);
+			    *max_it_scale, *scale_tol, *trace_lev >= 3);
     }
 }
 
@@ -357,7 +370,8 @@ void R_lmrob_M_S(double *X1, double *X2, double *y, double *res,
 		 int *nn, int *pp1, int *pp2, int *nRes, int *max_it_scale,
 		 double *scale, double *b1, double *b2,
 		 double *rho_c, int *ipsi, double *bb,
-		 int *K_m_s, int *max_k, double *rel_tol, double *inv_tol,
+		 int *K_m_s, int *max_k,
+		 double *rel_tol, double *inv_tol, double *scale_tol,
 		 int *converged,
 		 int *trace_lev,
 		 int *orthogonalize, int *subsample, int *descent,
@@ -421,7 +435,7 @@ void R_lmrob_M_S(double *X1, double *X2, double *y, double *res,
     /* STEP 2: Subsample */
     if (*subsample) {
 	m_s_subsample(X1, y_work, n, p1, p2, *nRes, *max_it_scale,
-		      *rel_tol, *inv_tol, bb,
+		      *rel_tol, *inv_tol, *scale_tol, bb,
 		      rho_c, *ipsi, scale, *trace_lev,
 		      b1, b2, t1, t2, y_tilde, res, x1, x2,
 		      &NIT, &K, &KODE, &SIGMA, &BET0,
@@ -450,7 +464,7 @@ void R_lmrob_M_S(double *X1, double *X2, double *y, double *res,
     if (*descent) {
 	*converged = m_s_descent(
 	    X1, X2, y, n, p1, p2, *K_m_s, *max_k, *max_it_scale,
-	    *rel_tol, bb, rho_c, *ipsi, scale, *trace_lev,
+	    *rel_tol, *scale_tol, bb, rho_c, *ipsi, scale, *trace_lev,
 	    b1, b2, t1, t2, y_tilde, res, y_work, x1, x2,
 	    &NIT, &K, &KODE, &SIGMA, &BET0, SC1, SC2, SC3, SC4);
     }
@@ -642,7 +656,7 @@ double rho_inf(const double k[], int ipsi) {
 
 double normcnst(const double k[], int ipsi) {
     /*
-     * return normalizing constant for psi functions
+     * return normalizing constant for psi functions :=  1 / \rho(\infty)
      */
 
     double c = k[0];
@@ -1099,14 +1113,13 @@ double wgt_hmpl(double x, const double k[])
 
 //--- GGW := Generalized Gauss-Weight    Koller and Stahel (2011)
 //--- ---
-// rho() & chi()  need to be calculated by numerical integration
-
+// rho() & chi()  need to be calculated by numerical integration -- apart from 6 pre-stored cases
 double rho_ggw(double x, const double k[])
 {
     /*
      * Gauss Weight with constant center
      */
-    if (k[0] > 0) { // for hard-coded constants
+    if (k[0] > 0) { // for hard-coded constants --- use a *polynomial* approximation
 	const double C[6][20] = { // 0: b = 1, 95% efficiency
 	    {0.094164571656733, -0.168937372816728, 0.00427612218326869,
 	     0.336876420549802, -0.166472338873754, 0.0436904383670537,
@@ -1156,21 +1169,19 @@ double rho_ggw(double x, const double k[])
 	     -4.91933095295458, 1.39443093325178, -0.247689078940725,
 	     0.0251861553415515, -0.00112130382664914}};
 
-	double end[6] = {18.5527638190955, 13.7587939698492,
-			 4.89447236180905,
-			 11.4974874371859, 8.15075376884422,
-			 3.17587939698492};
-	int j;
+	double end[6] = {18.5527638190955, 13.7587939698492, 4.89447236180905,
+			 11.4974874371859, 8.15075376884422, 3.17587939698492};
+	int j = ((int)k[0]) - 1;
 	double c;
-	switch((int)k[0]) {
-	default: error("rho_ggw(): case (%i) not implemented.", (int)k[0]);
+	switch(j) {
 	    // c : identical numbers to those in SET_ABC_GGW  below
-	case 1: j = 0; c = 1.694;     break;
-	case 2: j = 1; c = 1.2442567; break;
-	case 3: j = 2; c = 0.4375470; break;
-	case 4: j = 3; c = 1.063;     break;
-	case 5: j = 4; c = 0.7593544; break;
-	case 6: j = 5; c = 0.2959132; break;
+	case 0: c = 1.694;     break;
+	case 1: c = 1.2442567; break;
+	case 2: c = 0.4375470; break;
+	case 3: c = 1.063;     break;
+	case 4: c = 0.7593544; break;
+	case 5: c = 0.2959132; break;
+	default: error("rho_ggw(): case (%i) not implemented.", j+1);
 	}
 	x = fabs(x);
 	if (x <= c)
@@ -1199,19 +1210,19 @@ double rho_ggw(double x, const double k[])
 	else return(1.);
     }
     else { // k[0] == 0; k[1:4] = (a, b, c, rho(Inf)) =  "general parameters"
-	// calculate integral
 	x = fabs(x);
 	double a = 0., epsabs = R_pow(DOUBLE_EPS, 0.25), result, abserr;
 	int neval, ier, last, limit = 100, lenw = 4 * limit;
 	int   *iwork =    (int *) R_alloc(limit, sizeof(int));
 	double *work = (double *) R_alloc(lenw,  sizeof(double));
+
+	// --> calculate integral of psi(.);  Rdqags() is from R's official API ("Writing R Extensions")
 	Rdqags(psi_ggw_vec, (void *)k, &a, &x, &epsabs, &epsabs,
 	       &result, &abserr, &neval, &ier,
 	       &limit, &lenw, &last,
 	       iwork, work);
-	if (ier >= 1) {
-	    error("Error while calling Rdqags(): ier = %i", ier);
-	}
+	if (ier >= 1)
+	    error("Error from Rdqags(psi_ggw*, k, ...): ier = %i", ier);
 	return(result/k[4]);
     }
 }
@@ -1230,7 +1241,6 @@ double psi_ggw(double x, const double k[])
     /* set a,b,c */						\
 	double a, b, c;						\
 	switch((int)k[0]) {					\
-	default: error(#NAME "_ggw: Case not implemented.");	\
 	    /* user specified: */				\
 	case 0: a = k[1];      b = k[2]; c = k[3]; break;	\
 	    /* Set of predefined cases: */			\
@@ -1240,6 +1250,7 @@ double psi_ggw(double x, const double k[])
 	case 4: a = 1.387;     b = 1.5;  c = 1.063; break;	\
 	case 5: a = 0.8372485; b = 1.5;  c = 0.7593544; break;	\
 	case 6: a = 0.2036741; b = 1.5;  c = 0.2959132; break;	\
+	default: error(#NAME "_ggw: Case not implemented.");	\
 	}							\
 	double ax = fabs(x);
 
@@ -1507,14 +1518,11 @@ Rboolean rwls(const double X[], const double y[], int n, int p,
 	/* calculate residuals */
 	COPY(y, resid, n);
 	F77_CALL(dgemv)("N", &n, &p, &dmone, X, &n, estimate, &one, &done, resid, &one);
-	if(trace_lev >= 3) {
-	    /* get the residuals and loss for the new estimate */
-	    *loss = sum_rho_sc(resid,scale,n,0,rho_c,ipsi);
-	    Rprintf("  it %4d: L(b1) = %.12g ", iterations, *loss);
-	}
-	/* check for convergence */
 	d_beta = norm1_diff(beta0,estimate, p);
 	if(trace_lev >= 3) {
+	    /* get the loss for the new estimate */
+	    *loss = sum_rho_sc(resid,scale,n,0,rho_c,ipsi);
+	    Rprintf("  it %4d: L(b1) = %#.12g ", iterations, *loss);
 	    if(trace_lev >= 4) {
 		Rprintf("\n  b1 = (");
 		for(j=0; j < p; j++)
@@ -1523,17 +1531,16 @@ Rboolean rwls(const double X[], const double y[], int n, int p,
 	    }
 	    Rprintf(" ||b0 - b1||_1 = %g\n", d_beta);
 	}
+	/* check for convergence */
 	converged = d_beta <= epsilon * fmax2(epsilon, norm1(estimate, p));
 	COPY(estimate, beta0, p);
     } /* end while(!converged & iter <=...) */
 
-    if (trace_lev < 3)
-	/* get the residuals and loss for the new estimate */
-	*loss = sum_rho_sc(resid,scale,n,0,rho_c,ipsi);
-
-    if(trace_lev)
-	Rprintf(" rwls() used %d it.; last ||b0 - b1||_1 = %g;%sconvergence\n",
-		iterations, d_beta, (converged ? " " : " NON-"));
+    if(0 < trace_lev) {
+	if(trace_lev < 3) *loss = sum_rho_sc(resid,scale,n,0,rho_c,ipsi);
+	Rprintf(" rwls() used %2d it.; last ||b0 - b1||_1 = %#g, L(b1) = %.12g; %sconvergence\n",
+		iterations, d_beta, *loss, (converged ? "" : "NON-"));
+    }
 
     *max_it = iterations;
 
@@ -1567,9 +1574,9 @@ void zero_mat(double **a, int n, int m)
 /* This function implements the "large n" strategy
  */
 void fast_s_large_n(double *X, double *y,
-		    int *nn, int *pp, int *nRes, int *max_it_scale,
+		    int *nn, int *pp, int *nRes, int *max_it_scale, double *res,
 		    int *ggroups, int *nn_group,
-		    int *K, int *max_k, double rel_tol, double inv_tol, int *converged,
+		    int *K, int *max_k, double rel_tol, double inv_tol, double scale_tol, int *converged,
 		    int *best_r, double *bb, double *rrhoc, int *iipsi,
 		    double *bbeta, double *sscale,
 		    int trace_lev, int mts, int ss)
@@ -1580,6 +1587,11 @@ void fast_s_large_n(double *X, double *y,
  * *nn =: n = the length of y
  * *pp =: p = the number of columns in X
  * *nRes  = number of re-sampling candidates to be used in each partition
+
+ * *ggroups = number of groups in which to split the
+ *	      random subsample
+ * *nn_group = size of each of the (*ggroups) groups
+ *	       to use in the random subsample
  * *K     = number of refining steps for each candidate (typically 1 or 2)
  * *max_k = number of refining steps for each candidate (typically 1 or 2)
              [used to be hard coded to MAX_ITER_REFINE_S = 50 ]
@@ -1587,10 +1599,6 @@ void fast_s_large_n(double *X, double *y,
              [used to be hard coded to EPS = 1e-7 ]
  * *converged: will become 0(FALSE)  iff at least one of the best_r iterations
  *             did not converge (in max_k steps to rel_tol precision)
- * *ggroups = number of groups in which to split the
- *	      random subsample
- * *nn_group = size of each of the (*ggroups) groups
- *	       to use in the random subsample
  * *best_r = no. of best candidates to be iterated further ("refined")
  * *bb	   = right-hand side of S-equation (typically 1/2)
  * *rrhoc  = tuning constant for loss function
@@ -1656,8 +1664,9 @@ void fast_s_large_n(double *X, double *y,
 	}
 	if (trace_lev)
 	    Rprintf(" Subsampling to find candidate betas in group %d:\n", i);
-	if(fast_s_with_memory(xsamp, ysamp,
-			      &n_group, pp, nRes, max_it_scale, K, max_k, rel_tol, inv_tol,
+	if(fast_s_with_memory(xsamp, ysamp, res,
+			      &n_group, pp, nRes, max_it_scale, K, max_k,
+			      rel_tol, inv_tol, scale_tol,
 			      trace_lev, best_r, bb, rrhoc,
 			      iipsi, best_betas + i* *best_r,
 			      best_scales+ i* *best_r, mts, ss)) {
@@ -1674,8 +1683,7 @@ void fast_s_large_n(double *X, double *y,
  * with kk C-steps and keep only the "best_r" best ones
  */
     /* initialize new work matrices */
-    double *wx, *wy, *res;
-    res = (double *) R_alloc(n,   sizeof(double));
+    double *wx, *wy;
     wx =  (double *) R_alloc(n*p, sizeof(double)); // need only k here,
     wy =  (double *) R_alloc(n,   sizeof(double)); // but n in the last step
     xsamp =     (double *) Calloc(sg*p, double);
@@ -1718,7 +1726,7 @@ void fast_s_large_n(double *X, double *y,
 	}
 	if ( sum_rho_sc(res, worst_sc, sg, p, rrhoc, ipsi) < b ) {
 	    /* scale will be better */
-	    sc = find_scale(res, b, rrhoc, ipsi, sc, sg, p, *max_it_scale);
+	    sc = find_scale(res, b, rrhoc, ipsi, sc, sg, p, *max_it_scale, scale_tol, trace_lev >= 3);
 	    k2 = pos_worst_scale;
 	    final_best_scales[ k2 ] = sc;
 	    COPY(beta_ref, final_best_betas[k2], p);
@@ -1788,9 +1796,9 @@ void fast_s_large_n(double *X, double *y,
 
 } /* fast_s_large_n() */
 
-int fast_s_with_memory(double *X, double *y,
+int fast_s_with_memory(double *X, double *y, double *res,
 		       int *nn, int *pp, int *nRes, int *max_it_scale,
-		       int *K, int *max_k, double rel_tol, double inv_tol,
+		       int *K, int *max_k, double rel_tol, double inv_tol, double scale_tol,
 		       int trace_lev, int *best_r, double *bb, double *rrhoc,
 		       int *iipsi, double **best_betas, double *best_scales,
 		       int mts, int ss)
@@ -1800,8 +1808,9 @@ int fast_s_with_memory(double *X, double *y,
  * same as fast_s, but it returns the best_r best betas,
  * and their associated scales.
  *
- * x an	 n x p design matrix (including intercept if appropriate)
- * y an	 n vector
+ * x       : an n x p design matrix (including intercept if appropriate)
+ * y       : an n vector
+ * res     : an n vector of residuals
  * *nn = n, *pp = p
  * *nRes   = number of re-sampling candidates to be taken
  * *K	   = number of refining steps for each candidate
@@ -1817,7 +1826,7 @@ int fast_s_with_memory(double *X, double *y,
     int i,j,k;
     int n = *nn, p = *pp, nResample = *nRes;
     Rboolean conv = FALSE;
-    double *beta_cand, *beta_ref, *res;
+    double *beta_cand, *beta_ref;
     int ipsi = *iipsi;
     double b = *bb, sc, worst_sc = INFI;
     double work0, *weights, *work, *wx, *wy;
@@ -1827,7 +1836,6 @@ int fast_s_with_memory(double *X, double *y,
     SETUP_SUBSAMPLE(n, p, X, 1);
     INIT_WLS(X, y, n, p);
 
-    res	=       (double *) Calloc(n,   double);
     wx =        (double *) Calloc(n*p, double);
     wy =        (double *) Calloc(n,   double);
     beta_cand = (double *) Calloc(p,   double);
@@ -1862,7 +1870,8 @@ int fast_s_with_memory(double *X, double *y,
 
 	if ( sum_rho_sc(res, worst_sc, n, p, rrhoc, ipsi) < b )	{
 	    /* scale will be better */
-	    sc = find_scale(res, b, rrhoc, ipsi, sc, n, p, *max_it_scale);
+	    sc = find_scale(res, b, rrhoc, ipsi, sc, n, p,
+			    *max_it_scale, scale_tol, trace_lev >= 3);
 	    k = pos_worst_scale;
 	    best_scales[ k ] = sc;
 	    for(j=0; j < p; j++)
@@ -1882,15 +1891,15 @@ int fast_s_with_memory(double *X, double *y,
     CLEANUP_SUBSAMPLE;
     CLEANUP_WLS;
 
-    Free(res); Free(wx); Free(wy);
+    Free(wx); Free(wy);
     Free(beta_cand); Free(beta_ref);
 
     return sing;
 } /* fast_s_with_memory() */
 
 void fast_s(double *X, double *y,
-	    int *nn, int *pp, int *nRes, int *max_it_scale,
-	    int *K, int *max_k, double rel_tol, double inv_tol, int *converged,
+	    int *nn, int *pp, int *nRes, int *max_it_scale, double *res,
+	    int *K, int *max_k, double rel_tol, double inv_tol, double scale_tol, int *converged,
 	    int *best_r, double *bb, double *rrhoc, int *iipsi,
 	    double *bbeta, double *sscale, int trace_lev, int mts, int ss)
 {
@@ -1923,12 +1932,11 @@ void fast_s(double *X, double *y,
     /* Rprintf("fast_s %d\n", ipsi); */
 
     /* (Pointers to) Arrays - to be allocated */
-    double *wx, *wy, *beta_cand, *beta_ref, *res;
-    double **best_betas, *best_scales;
+    double *wx, *wy, *beta_cand, *beta_ref,
+	**best_betas, *best_scales;
 
     SETUP_SUBSAMPLE(n, p, X, 0);
 
-    res	   = (double *) R_alloc(n, sizeof(double));
     wx     = (double *) R_alloc(n*p, sizeof(double));
     wy     = (double *) R_alloc(n,   sizeof(double));
 
@@ -1994,7 +2002,8 @@ void fast_s(double *X, double *y,
 	}
 	if ( sum_rho_sc(res, worst_sc, n, p, rrhoc, ipsi) < b )	{
 	    /* scale will be better */
-	    sc = find_scale(res, b, rrhoc, ipsi, sc, n, p, *max_it_scale);
+	    sc = find_scale(res, b, rrhoc, ipsi, sc, n, p,
+			    *max_it_scale, scale_tol, trace_lev >= 3);
 	    k = pos_worst_scale;
 	    best_scales[ k ] = sc;
 	    COPY(beta_ref, best_betas[k], p);
@@ -2125,7 +2134,7 @@ int refine_fast_s(const double X[], double *wx, const double y[], double *wy,
 	    double del = norm_diff(beta_cand, beta_ref, p);
 	    double nrmB= norm(beta_cand, p);
 	    if(trace_lev >= 4)
-		Rprintf("   it %4d, ||b[i]||= %.12g, ||b[i] - b[i-1]|| = %.15g\n",
+		Rprintf("   it %4d, ||b[i]||= %#.12g, ||b[i] - b[i-1]|| = %#.15g\n",
 			i, nrmB, del);
 	    converged = (del <= rel_tol * fmax2(rel_tol, nrmB));
 	    if(converged)
@@ -2153,7 +2162,8 @@ int refine_fast_s(const double X[], double *wx, const double y[], double *wy,
 /* Recreates RLFRSTML function found in src/lmrobml.f    */
 /* of the robust package                                 */
 void m_s_subsample(double *X1, double *y, int n, int p1, int p2,
-		   int nResample, int max_it_scale, double rel_tol, double inv_tol, double *bb,
+		   int nResample, int max_it_scale,
+		   double rel_tol, double inv_tol, double scale_tol, double *bb,
 		   double *rrhoc, int ipsi, double *sscale, int trace_lev,
 		   double *b1, double *b2, double *t1, double *t2,
 		   double *y_tilde, double *res, double *x1, double *x2,
@@ -2202,9 +2212,10 @@ void m_s_subsample(double *X1, double *y, int n, int p1, int p2,
 	if (sum_rho_sc(res, *sscale, n, p, rrhoc, ipsi) < b) {
 	    /* scale will be better */
 	    /* STEP 5: Solve for sc */
-	    sc = find_scale(res, b, rrhoc, ipsi, sc, n, p, max_it_scale);
+	    sc = find_scale(res, b, rrhoc, ipsi, sc, n, p, max_it_scale,
+			    scale_tol, trace_lev >= 4);
 	    if(trace_lev >= 2)
-		Rprintf("  Sample[%3d]: new candidate with sc = %10.5g\n",i,sc);
+		Rprintf("  Sample[%3d]: new candidate with sc = %#10.5g\n",i,sc);
 	    /* STEP 6: Update best fit */
 	    *sscale = sc;
 	    COPY(t1, b1, p1);
@@ -2239,7 +2250,7 @@ void m_s_subsample(double *X1, double *y, int n, int p1, int p2,
  */
 Rboolean m_s_descent(double *X1, double *X2, double *y,
 		 int n, int p1, int p2, int K_m_s, int max_k, int max_it_scale,
-		 double rel_tol, double *bb, double *rrhoc,  int ipsi,
+		 double rel_tol, double scale_tol, double *bb, double *rrhoc,  int ipsi,
 		 double *sscale, int trace_lev,
 		 double *b1, double *b2, double *t1, double *t2,
 		 double *y_tilde, double *res, double *res2, double *x1, double *x2,
@@ -2299,7 +2310,8 @@ Rboolean m_s_descent(double *X1, double *X2, double *y,
 		  *KODE);
 	}
 	/* STEP 3: Compute the scale estimate */
-	sc = find_scale(res2, b, rrhoc, ipsi, sc, n, p, max_it_scale);
+	sc = find_scale(res2, b, rrhoc, ipsi, sc, n, p, max_it_scale, scale_tol,
+			trace_lev >= 4); // <- here only if higher trace_lev
 	/* STEP 4: Check for convergence */
 	/* FIXME: check convergence using scale ? */
 	double del = sqrt(norm_diff2(b1, t1, p1) + norm_diff2(b2, t2, p2));
@@ -2325,12 +2337,12 @@ Rboolean m_s_descent(double *X1, double *X2, double *y,
 	    COPY(res2, res, n);
 	    *sscale = sc;
 	    if (trace_lev >= 2)
-		Rprintf("  Refinement step %3d: better fit, scale: %10.5g\n",
+		Rprintf("  Refinement step %3d: better fit, scale: %#10.5g\n",
 			nref, sc);
 	    nnoimpr = 0;
 	} else {
 	    if (trace_lev >= 3)
-		Rprintf("  Refinement step %3d: no improvement, scale: %10.5g\n",
+		Rprintf("  Refinement step %3d: no improvement, scale: %#10.5g\n",
 			nref, sc);
 	    nnoimpr++;
 	}
@@ -2527,36 +2539,45 @@ void get_weights_rhop(const double r[], double s, int n, const double rrhoc[], i
 	w[i] = wgt(r[i] / s, rrhoc, ipsi);
 }
 
-double find_scale(double *r, double b, double *rrhoc, int ipsi,
-		  double initial_scale, int n, int p, int max_iter)
+double find_scale(const double r[], double b, const double rrhoc[], int ipsi,
+		  double initial_scale, int n, int p, int max_iter, double scale_tol,
+		  Rboolean trace)
 {
+    if(initial_scale <= 0.) {
+	warning("find_scale(*, initial_scale = %g)  -> final scale = 0", initial_scale);
+	return 0.;
+    }
+    // else
     double scale = initial_scale;
+    if(trace) Rprintf("find_scale(*, ini.scale =%#15.11g):\nit | new scale\n", scale);
     for(int it = 0; it < max_iter; it++) {
 	scale = initial_scale *
 	    sqrt( sum_rho_sc(r, initial_scale, n, p, rrhoc, ipsi) / b ) ;
-	if(fabs(scale - initial_scale) <= EPS_SCALE*initial_scale) // converged:
+	if(trace) Rprintf("%2d | %#12.9g\n", it, scale);
+	if(fabs(scale - initial_scale) <= scale_tol*initial_scale) // converged:
 	    return(scale);
 	initial_scale = scale;
     }
-    warning("find_scale() did not converge in '%s' (= %d) iterations",
-	    "maxit.scale", /* <- name from lmrob.control() */ max_iter);
+    warning("find_scale() did not converge in '%s' (= %d) iterations with tol=%g, last rel.diff=%g",
+	    "maxit.scale", /* <- name from lmrob.control() */ max_iter, scale_tol,
+	    (scale - initial_scale) / initial_scale);
+
     return(scale);
 }
 
+// As R's which.max(a),  return()ing zero-based   k in {0,1,...,n-1}
 int find_max(double *a, int n)
 {
-    if(n==1)
-	return(0);
-    else {
-	int i, k = 0;
+    int k = 0;
+    if(n > 1) {
 	double tt = a[0];
-	for(i=1; i < n; i++)
+	for(int i=1; i < n; i++)
 	    if(tt < a[i]) {
 		tt = a[i];
 		k = i;
 	    }
-	return(k);
     }
+    return k;
 }
 
 double sum_rho_sc(const double r[], double scale, int n, int p, const double c[], int ipsi)
@@ -2636,8 +2657,7 @@ double MAD(double *a, int n, double center, double *b,
 double median(double *x, int n, double *aux)
 {
     double t;
-    int i;
-    for(i=0; i < n; i++) aux[i]=x[i];
+    for(int i=0; i < n; i++) aux[i]=x[i];
     if ( (n/2) == (double) n / 2 )
 	t = ( kthplace(aux,n,n/2) + kthplace(aux,n,n/2+1) ) / 2.0 ;
     else t = kthplace(aux,n, n/2+1 ) ;
@@ -2647,8 +2667,7 @@ double median(double *x, int n, double *aux)
 double median_abs(double *x, int n, double *aux)
 {
     double t;
-    int i;
-    for(i=0; i < n; i++) aux[i]=fabs(x[i]);
+    for(int i=0; i < n; i++) aux[i]=fabs(x[i]);
     if ( (n/2) == (double) n / 2 )
 	t = ( kthplace(aux,n,n/2) + kthplace(aux,n,n/2+1) ) / 2.0 ;
     else	t = kthplace(aux,n, n/2+1 ) ;
@@ -2657,24 +2676,21 @@ double median_abs(double *x, int n, double *aux)
 
 void disp_vec(double *a, int n)
 {
-    int i;
-    for(i=0; i < n; i++) Rprintf("%lf ",a[i]);
+    for(int i=0; i < n; i++) Rprintf("%lf ",a[i]);
     Rprintf("\n");
 }
 
 void disp_veci(int *a, int n)
 {
-    int i;
-    for(i=0; i < n; i++) Rprintf("%d ",a[i]);
+    for(int i=0; i < n; i++) Rprintf("%d ",a[i]);
     Rprintf("\n");
 }
 
 void disp_mat(double **a, int n, int m)
 {
-    int i,j;
-    for(i=0; i < n; i++) {
+    for(int i=0; i < n; i++) {
 	Rprintf("\n");
-	for(j=0; j < m; j++) Rprintf("%10.8f ",a[i][j]);
+	for(int j=0; j < m; j++) Rprintf("%10.8f ",a[i][j]);
     }
     Rprintf("\n");
 }

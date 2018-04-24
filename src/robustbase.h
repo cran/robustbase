@@ -66,7 +66,7 @@ void R_lmrob_S(double *X, double *y, int *n, int *P,
 	       double *C, int *iipsi, double *bb,
 	       int *best_r, int *Groups, int *N_group,
 	       int *K_s, int *max_k, int *max_it_scale,
-	       double *rel_tol, double *inv_tol,
+	       double *rel_tol, double *inv_tol, double *scale_tol,
                //     ^^^^^^^^^ = refine.tol in R
 	       int* converged, int *trace_lev, int *mts, int *ss, int *cutoff);
 
@@ -74,7 +74,7 @@ void R_lmrob_M_S(double *X1, double *X2, double *y, double *res,
 		 int *n, int *p1, int *p2, int *nRes, int *max_it_scale,
 		 double *scale, double *b1, double *b2,
 		 double *rho_c, int *ipsi, double *bb,
-		 int *K_m_s, int *max_k, double *rel_tol, double *inv_tol,
+		 int *K_m_s, int *max_k, double *rel_tol, double *inv_tol, double *scale_tol,
 		 int *converged, int *trace_lev,
 		 int *orthogonalize, int *subsample,
 		 int *descent, int *mts, int *ss);
@@ -96,6 +96,14 @@ void R_subsample(const double *x, const double *y, int *n, int *m,
 SEXP R_psifun(SEXP x_, SEXP c_, SEXP ipsi_, SEXP deriv_);
 SEXP R_chifun(SEXP x_, SEXP c_, SEXP ipsi_, SEXP deriv_);
 SEXP R_wgtfun(SEXP x_, SEXP c_, SEXP ipsi_);
+
+double rho(double x, const double c[], int ipsi);
+double psi(double x, const double c[], int ipsi);
+double psip(double x, const double c[], int ipsi);// psi'
+double psi2(double x, const double c[], int ipsi);// psi''
+double wgt(double x, const double c[], int ipsi);
+double rho_inf (const double c[], int ipsi); // == \rho(\infty)
+double normcnst(const double c[], int ipsi); // == 1 / \rho(\infty) ==  1 / rho_inf()
 
 
 void R_find_D_scale(double *rr, double *kkappa, double *ttau, int *llength,

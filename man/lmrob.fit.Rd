@@ -21,8 +21,7 @@ lmrob.fit(x, y, control, init = NULL, mf = NULL)
     and the subsequent M- and D-estimates.}
   \item{init}{optional \code{\link{list}} of initial estimates.  See
     \emph{Details}.}
-  \item{mf}{(optional) a model frame as returned by \code{\link{model.frame}},
-    used only to compute outlier statistics, see \code{\link{outlierStats}}.}
+  \item{mf}{unused and deprecated.}
 }
 \details{This function is the basic fitting function for MM-type estimation,
   called by \code{\link{lmrob}} and typically not to be used on its own.

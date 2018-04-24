@@ -24,7 +24,7 @@ lmrob.control(setting, seed = NULL, nResample = 500,
               max.it = 50, groups = 5, n.group = 400,
               k.fast.s = 1, best.r.s = 2,
               k.max = 200, maxit.scale = 200, k.m_s = 20,
-              refine.tol = 1e-7, rel.tol = 1e-7, solve.tol = 1e-7,
+              refine.tol = 1e-7, rel.tol = 1e-7, scale.tol = 1e-10, solve.tol = 1e-7,
               trace.lev = 0,
               mts = 1000, subsampling = c("nonsingular", "simple"),
               compute.rd = FALSE, method = "MM", psi = "bisquare",
@@ -90,6 +90,8 @@ lmrob.control(setting, seed = NULL, nResample = 500,
     tolerance for the fully iterated best candidates.}
   \item{rel.tol}{(for the RWLS iterations of the MM algorithm): relative
     convergence tolerance for the parameter vector.}
+  \item{scale.tol}{(for the scale estimation iterations of the S algorithm): relative
+    convergence tolerance for the \code{scale} \eqn{\sigma(.)}.}
   \item{solve.tol}{(for the S algorithm): relative
     tolerance for inversion.  Hence, this corresponds to
     \code{\link{solve.default}()}'s \code{tol}.}
@@ -187,39 +189,41 @@ lmrob.control(setting, seed = NULL, nResample = 500,
 
   These defaults are:
   \tabular{rll}{
-    \code{psi}     \tab \code{tuning.chi} \tab \code{tuning.psi} \cr
-    \code{bisquare}\tab \code{1.54764}    \tab \code{4.685061} \cr
-    \code{welsh}   \tab \code{0.5773502}  \tab \code{2.11} \cr
-    \code{ggw} 	   \tab \code{c(-0.5, 1.5, NA, 0.5)} \tab \code{c(-0.5, 1.5, 0.95, NA)} \cr
-    \code{lqq}     \tab \code{c(-0.5, 1.5, NA, 0.5)} \tab \code{c(-0.5, 1.5, 0.95, NA)} \cr
-    \code{optimal} \tab \code{0.4047}     \tab \code{1.060158} \cr
-    \code{hampel}  \tab \code{c(1.5, 3.5, 8)*0.2119163} \tab \code{c(1.5, 3.5, 8)*0.9014}
+    \code{psi}     \tab\code{tuning.chi}               \tab\code{tuning.psi} \cr
+    \code{bisquare}\tab\code{1.54764}                  \tab\code{4.685061} \cr
+    \code{welsh}   \tab\code{0.5773502}                \tab\code{2.11} \cr
+    \code{ggw} 	   \tab\code{c(-0.5, 1.5, NA, 0.5)}    \tab\code{c(-0.5, 1.5, 0.95, NA)} \cr
+    \code{lqq}     \tab\code{c(-0.5, 1.5, NA, 0.5)}    \tab\code{c(-0.5, 1.5, 0.95, NA)} \cr
+    \code{optimal} \tab\code{0.4047}                   \tab\code{1.060158} \cr
+    \code{hampel}  \tab\code{c(1.5, 3.5, 8)*0.2119163} \tab\code{c(1.5, 3.5, 8)*0.9014}
   }
-  The values for the tuning constant for the \code{ggw} psi function are
-  hard coded.  The constants vector has four elements: minimal slope, b
-  (controlling the bend at the maximum of the curve), efficiency,
-  breakdown point.  Use \code{NA} for an unspecified value, see examples
-  in the tables.
+  The values for the tuning constant for the \code{ggw} and \code{lqq}
+  psi functions are specified differently here by a vector with four
+  elements: minimal slope, b (controlling the bend at the maximum of the curve),
+  efficiency, breakdown point.
+  Use \code{NA} for an unspecified value of either efficiency or
+  breakdown point, see examples in the tables (above and below).
+  For these table examples, the respective \dQuote{inner constants} are
+  stored precomputed, see \code{\link{.psi.lqq.findc}} for more.
 
   The constants for the \code{"hampel"} psi function are chosen to have a
   redescending slope of \eqn{-1/3}.  Constants for a slope of \eqn{-1/2}
   would be
   \tabular{rll}{
-    \code{psi} \tab \code{tuning.chi} \tab \code{tuning.psi} \cr
-    \code{"hampel"} \tab \code{c(2, 4, 8) * 0.1981319} \tab
-    \code{c(2, 4, 8) * 0.690794}
+    \code{psi}     \tab\code{tuning.chi}             \tab\code{tuning.psi} \cr
+    \code{"hampel"}\tab\code{c(2, 4, 8) * 0.1981319} \tab\code{c(2, 4, 8) * 0.690794}
   }
 
   Alternative coefficients for an efficiency of 85\%
   at the normal are given in the table below.
   \tabular{rl}{
-    \code{psi}		  \tab \code{tuning.psi} \cr
-    \code{bisquare}	  \tab \code{3.443689} \cr
-    \code{welsh}	  \tab \code{1.456} \cr
-    \code{ggw}, \code{lqq}\tab \code{c(-0.5, 1.5, 0.85, NA)} \cr
-    \code{optimal}        \tab \code{0.8684} \cr
-    \code{hampel} (-1/3)  \tab \code{c(1.5, 3.5, 8)* 0.5704545} \cr
-    \code{hampel} (-1/2)  \tab \code{c( 2,  4,  8) * 0.4769578}
+    \code{psi}		  \tab\code{tuning.psi} \cr
+    \code{bisquare}	  \tab\code{3.443689} \cr
+    \code{welsh}	  \tab\code{1.456} \cr
+    \code{ggw}, \code{lqq}\tab\code{c(-0.5, 1.5, 0.85, NA)} \cr
+    \code{optimal}        \tab\code{0.8684} \cr
+    \code{hampel} (-1/3)  \tab\code{c(1.5, 3.5, 8)* 0.5704545} \cr
+    \code{hampel} (-1/2)  \tab\code{c( 2,  4,  8) * 0.4769578}
   }
 }
 \references{

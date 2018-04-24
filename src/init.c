@@ -32,7 +32,7 @@ static R_NativePrimitiveArgType R_lmrob_S_t[] = {
     /* rrhoc */ REALSXP, INTSXP, REALSXP,
     /* best_r */ INTSXP, INTSXP, INTSXP,
     /* K_s */ INTSXP, INTSXP, INTSXP,
-    /* rel_tol*/ REALSXP, REALSXP,
+    /* rel_tol*/ REALSXP, REALSXP, REALSXP,
     /* converged */ LGLSXP, INTSXP, INTSXP, INTSXP, INTSXP
 };
 
@@ -57,12 +57,13 @@ static R_NativePrimitiveArgType R_calc_fitted_t[] = {
 
 static R_NativePrimitiveArgType R_lmrob_M_S_t[] = {
     REALSXP, REALSXP, REALSXP, REALSXP,
-    INTSXP, INTSXP, INTSXP, INTSXP, INTSXP,
-    REALSXP, REALSXP, REALSXP,
-    REALSXP, INTSXP, REALSXP,
-    INTSXP, INTSXP, REALSXP, REALSXP,
-    LGLSXP, INTSXP,
-    LGLSXP, LGLSXP, LGLSXP, INTSXP, INTSXP
+    /* nn */ INTSXP, INTSXP, INTSXP, INTSXP, INTSXP,
+    /* scale */ REALSXP, REALSXP, REALSXP,
+    /* rho_c */ REALSXP, INTSXP, REALSXP,
+    /* K_m_s */ INTSXP, INTSXP,
+    /* rel_tol */ REALSXP, REALSXP, REALSXP,
+    /* converged */ LGLSXP, INTSXP,
+    /* orthogonalize */ LGLSXP, LGLSXP, LGLSXP, INTSXP, INTSXP
 };
 
 static R_NativePrimitiveArgType R_subsample_t[] = {
@@ -111,4 +112,15 @@ void R_init_robustbase(DllInfo *dll)
 {
     R_registerRoutines(dll, CEntries, CallEntries, FortEntries, NULL);
     R_useDynamicSymbols(dll, FALSE);
+
+    R_RegisterCCallable("robustbase", "R_psifun", (DL_FUNC) &R_psifun);
+    R_RegisterCCallable("robustbase", "R_chifun", (DL_FUNC) &R_chifun);
+    R_RegisterCCallable("robustbase", "R_wgtfun", (DL_FUNC) &R_wgtfun);
+    R_RegisterCCallable("robustbase", "rho",  (DL_FUNC) &rho);
+    R_RegisterCCallable("robustbase", "psi",  (DL_FUNC) &psi);
+    R_RegisterCCallable("robustbase", "psip", (DL_FUNC) &psip);
+    R_RegisterCCallable("robustbase", "psi2", (DL_FUNC) &psi2);
+    R_RegisterCCallable("robustbase", "wgt",  (DL_FUNC) &wgt);
+    R_RegisterCCallable("robustbase", "rho_inf",  (DL_FUNC) &rho_inf);
+    R_RegisterCCallable("robustbase", "normcnst", (DL_FUNC) &normcnst);
 }

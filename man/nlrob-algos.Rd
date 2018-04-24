@@ -21,7 +21,7 @@
 ## You can *not* call the  nlrob(*, method = <M>) like this ==> see  help(nlrob)
 ## ------- ===== ------------------------------------------
 
-nlrob.MM(formula, data, pnames, lower, upper,
+nlrob.MM(formula, data, lower, upper,
 	 tol = 1e-06,
 	 psi = c("bisquare", "lqq", "optimal", "hampel"),
          init = c("S", "lts"),
@@ -31,35 +31,39 @@ nlrob.MM(formula, data, pnames, lower, upper,
 		       optim.control = list(), optArgs = list(...)),
 	 ...)
 
-nlrob.tau(formula, data, pnames, lower, upper,
+nlrob.tau(formula, data, lower, upper,
 	  tol = 1e-06, psi = c("bisquare", "optimal"),
 	  ctrl = nlrob.control("tau", psi = psi, fnscale = NULL,
 			tuning.chi.scale = NULL, tuning.chi.tau = NULL,
 			optArgs = list(...)),
 	  ...)
 
-nlrob.CM(formula, data, pnames, lower, upper,
+nlrob.CM(formula, data, lower, upper,
 	 tol = 1e-06,
 	 psi = c("bisquare", "lqq", "welsh", "optimal", "hampel", "ggw"),
 	 ctrl = nlrob.control("CM", psi = psi, fnscale = NULL,
                         tuning.chi = NULL, optArgs = list(...)),
 	 ...)
 
-nlrob.mtl(formula, data, pnames, lower, upper,
+nlrob.mtl(formula, data, lower, upper,
 	  tol = 1e-06,
 	  ctrl = nlrob.control("mtl", cutoff = 2.5, optArgs = list(...)),
 	  ...)
 }
 \arguments{
   \item{formula}{nonlinear regression \code{\link{formula}}, using both
-    variable names from \code{data} and parameter names from \code{pnames}.}
+    variable names from \code{data} and parameter names from either
+	  \code{lower} or \code{upper}.}
   \item{data}{data to be used, a \code{\link{data.frame}}}
-  \item{pnames}{a \code{\link{character}} vector of parameter names
-    (used in \code{formula} above).  \bold{Deprecated}}
   \item{lower, upper}{bounds aka \dQuote{box constraints} for all the
     parameters, in the case "CM" and "mtl" these must include the error
     standard deviation as \code{"sigma"}, see \code{\link{nlrob}()}
-    about its \code{\link{names}}, etc.}
+    about its \code{\link{names}}, etc.
+
+    Note that one of these two must be a properly \dQuote{named}, e.g.,
+    \code{names(lower)} being a \code{\link{character}} vector of parameter names
+    (used in \code{formula} above).
+  }
   \item{tol}{numerical convergence tolerance.}
   \item{psi, init}{see \code{\link{nlrob.control}}.}
   \item{ctrl}{a \code{\link{list}}, typically the result of a call to

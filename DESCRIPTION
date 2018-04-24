@@ -1,7 +1,7 @@
 Package: robustbase
-Version: 0.92-8
-VersionNote: 0.92-7 on 2016-11-30 on CRAN
-Date: 2017-10-30
+Version: 0.93-0
+VersionNote: 0.92-8 on 2017-11-01 on CRAN
+Date: 2018-04-21
 Title: Basic Robust Statistics
 Authors@R: c(person("Martin","Maechler", role=c("aut","cre"), email="maechler@stat.math.ethz.ch")
          , person("Peter", "Rousseeuw", role="ctb", comment = "Qn and Sn")
@@ -30,13 +30,13 @@ Depends: R (>= 3.0.2)
 Imports: stats, graphics, utils, methods, DEoptimR
 Suggests: grid, MASS, lattice, boot, cluster, Matrix, robust,
         fit.models, MPV, xtable, ggplot2, GGally, RColorBrewer,
-        reshape2, sfsmisc, catdata
-SuggestsNote: mostly only because of vignette graphics
+        reshape2, sfsmisc, catdata, doParallel, foreach, skewt
+SuggestsNote: mostly only because of vignette graphics and simulation
 LazyData: yes
 License: GPL (>= 2)
 ByteCompile: yes
 NeedsCompilation: yes
-Packaged: 2017-10-30 14:18:42 UTC; maechler
+Packaged: 2018-04-21 16:19:20 UTC; maechler
 Author: Martin Maechler [aut, cre],
   Peter Rousseeuw [ctb] (Qn and Sn),
   Christophe Croux [ctb] (Qn and Sn),
@@ -49,4 +49,4 @@ Author: Martin Maechler [aut, cre],
   Maria Anna di Palma [ctb] (initial version of Comedian)
 Maintainer: Martin Maechler <maechler@stat.math.ethz.ch>
 Repository: CRAN
-Date/Publication: 2017-11-01 15:56:53 UTC
+Date/Publication: 2018-04-24 22:44:29 UTC

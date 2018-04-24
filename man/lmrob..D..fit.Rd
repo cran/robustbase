@@ -16,8 +16,7 @@ lmrob..D..fit(obj, x=obj$x, control = obj$control,
     to get it from \code{obj$x} and if this fails from \code{obj$model}.}
   \item{control}{list of control parameters, as returned
     by \code{\link{lmrob.control}}.}
-  \item{mf}{(optional) a model frame as returned by \code{\link{model.frame}},
-    used only to compute outlier statistics, see \code{\link{outlierStats}}.}
+  \item{mf}{unused and deprecated.}
   \item{method}{optional; the \code{method} used for \emph{obj} computation.}
 }
 \details{

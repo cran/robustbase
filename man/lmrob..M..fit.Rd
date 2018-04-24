@@ -24,8 +24,7 @@ lmrob..M..fit(x, y, beta.initial, scale, control, obj,
     are accessed.}
   \item{obj}{an optional \code{lmrob}-object.  If specified, this is
     typically used to set values for the other arguments.}
-  \item{mf}{(optional) a model frame as returned by \code{\link{model.frame}},
-    used only to compute outlier statistics, see \code{\link{outlierStats}}.}
+  \item{mf}{unused and deprecated.}
   \item{method}{optional; the \code{method} used for \emph{obj} computation.}
 }
 \details{

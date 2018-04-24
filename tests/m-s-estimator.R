@@ -85,7 +85,8 @@ ctrl$k.max <- 1
 mC <- m_s_descent      (x1, x2, y, ctrl, mss2$b1, mss2$b2, mss2$scale+10)
 mR <- m_s_descent_Ronly(x1, x2, y, ctrl, mss2$b1, mss2$b2, mss2$scale+10)
 nm <- c("b1","b2", "scale", "res")
-stopifnot(all.equal(mC[nm], mR[nm], check.attributes = FALSE, tolerance=5e-15))
+stopifnot(all.equal(mC[nm], mR[nm], check.attributes = FALSE, tolerance = 4e-14))
+                                        # seen 5.567e-15 in OpenBLAS      ^^^^^
 
 ## control$k.m_s <- 100
 res3 <- vector("list", 100)

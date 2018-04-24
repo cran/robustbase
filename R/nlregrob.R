@@ -25,36 +25,31 @@ getOptfun <- function(optimizer, needArgs = c("fn","par","lower","control"))
 ##' @param lower possibly unnamed numeric vector
 ##' @param upper as \code{lower}; both will be replicated to
 ##'    \code{length(pnames)} if that is specified and longer.
-##' @param pnames DEPRECATED possibly missing character vector
 ##' @param var.nms character vector of which 'pnames' must be a subset of.
-##' @param envir \code{\link{environment}: the function possibly assigns
-##'    "lower", "upper" in the environment \code{envir}.
-.fixupArgs <- function(lower, upper, pnames, var.nms, envir) {
-    if(missing(pnames)) {
-        if(is.null(pnames <- names(lower))) pnames <- names(upper)
-        if(is.null(pnames))
-            stop("Either specify 'pnames' or provide 'upper' or 'lower' with names()")
-    } else if (!is.character(pnames))
-        stop("'pnames' must be a character vector")
-    else
-        warning("specifying 'pnames' is deprecated; rather 'lower' or 'upper' should have names()")
+##' @param envir if not missing and an \code{\link{environment}: possibly assign
+##'    'lower', 'upper' of full length in the environment \code{envir}.
+.fixupArgs <- function(lower, upper, var.nms, envir) {
+    if(is.null(pnames <- names(lower))) pnames <- names(upper)
+    if(is.null(pnames))
+        stop("Provide 'upper' or 'lower' with names()")
     if(any(is.na(match(pnames, var.nms))))
         stop("parameter names must appear in 'formula'")
+    hasE <- !missing(envir) && is.environment(envir)
     npar <- length(pnames)
-    if (npar > 1 && length(lower) == 1)
-        envir$lower <- rep.int(lower, npar)
-    else if (length(lower) != npar)
+    if (npar > 1 && length(lower) == 1) {
+        if(hasE) envir$lower <- rep.int(lower, npar)
+    } else if (length(lower) != npar)
         stop(gettextf("lower must be either of length %d, or length 1", npar))
-    if (npar > 1 && length(upper) == 1)
-        envir$upper <- rep.int(upper, npar)
-    else if (length(upper) != npar)
+    if (npar > 1 && length(upper) == 1) {
+        if(hasE) envir$upper <- rep.int(upper, npar)
+    } else if (length(upper) != npar)
         stop(gettextf("upper must be either of length %d, or length 1", npar))
     stopifnot(is.numeric(lower), is.numeric(upper), lower <= upper)
     pnames
 }
 
 nlrob.MM <-
-    function(formula, data, pnames, lower, upper, tol = 1e-6,
+    function(formula, data, lower, upper, tol = 1e-6,
 	     psi = c("bisquare", "lqq", "optimal", "hampel"),
 	     init = c("S", "lts"),
              ctrl = nlrob.control("MM", psi=psi, init=init, fnscale=NULL,
@@ -152,7 +147,7 @@ nlrob.MM <-
         formula[[2L]] <- 0
     }
 
-    npar <- length(pnames <- .fixupArgs(lower, upper, pnames, varNames, environment()))
+    npar <- length(pnames <- .fixupArgs(lower, upper, varNames, environment()))
     ##			      ^^^^^^^^^ -> possibly changes (lower, upper) in envir.
     y <- eval(formula[[2L]], data)
     nobs <- length(y)
@@ -208,7 +203,7 @@ nlrob.MM <-
 } ## nlrob.MM
 
 
-nlrob.tau <- function(formula, data, pnames, lower, upper, tol = 1e-6,
+nlrob.tau <- function(formula, data, lower, upper, tol = 1e-6,
 		      psi = c("bisquare", "optimal"),
 		      ctrl = nlrob.control("tau", psi=psi, fnscale=NULL,
 			  tuning.chi.scale = NULL, tuning.chi.tau = NULL,
@@ -278,7 +273,7 @@ nlrob.tau <- function(formula, data, pnames, lower, upper, tol = 1e-6,
         formula[[2L]] <- 0
     }
 
-    npar <- length(pnames <- .fixupArgs(lower, upper, pnames, varNames, environment()))
+    npar <- length(pnames <- .fixupArgs(lower, upper, varNames, environment()))
     ##			      ^^^^^^^^^ -> possibly changes (lower, upper) in envir.
     y <- eval(formula[[2L]], data)
     nobs <- length(y)
@@ -314,7 +309,7 @@ nlrob.tau <- function(formula, data, pnames, lower, upper, tol = 1e-6,
 } ## nlrob.tau
 
 
-nlrob.CM <- function(formula, data, pnames, lower, upper, tol = 1e-6,
+nlrob.CM <- function(formula, data, lower, upper, tol = 1e-6,
 		     psi = c("bisquare", "lqq", "welsh", "optimal", "hampel", "ggw"),
                      ctrl = nlrob.control("CM", psi=psi, fnscale=NULL,
                          tuning.chi = NULL, optArgs = list(...)),
@@ -347,7 +342,7 @@ nlrob.CM <- function(formula, data, pnames, lower, upper, tol = 1e-6,
         formula[[2L]] <- 0
     }
 
-    npar <- length(pnames <- .fixupArgs(lower,upper,pnames, c(varNames,"sigma"),environment()))
+    npar <- length(pnames <- .fixupArgs(lower,upper, c(varNames,"sigma"),environment()))
     ##			      ^^^^^^^^^ -> possibly changes (lower, upper) in envir.
     if ("sigma" %in% pnames) {
 	if ("sigma" %in% varNames || "sigma" %in% names(data))
@@ -403,7 +398,7 @@ nlrob.CM <- function(formula, data, pnames, lower, upper, tol = 1e-6,
 } ## nlrob.CM
 
 
-nlrob.mtl <- function(formula, data, pnames, lower, upper, tol = 1e-6,
+nlrob.mtl <- function(formula, data, lower, upper, tol = 1e-6,
                       ctrl = nlrob.control("mtl", cutoff = 2.5, optArgs = list(...)),
                       ...)
 {
@@ -426,7 +421,7 @@ nlrob.mtl <- function(formula, data, pnames, lower, upper, tol = 1e-6,
         formula[[2L]] <- 0
     }
 
-    npar <- length(pnames <- .fixupArgs(lower,upper,pnames, c(varNames,"sigma"),environment()))
+    npar <- length(pnames <- .fixupArgs(lower,upper, c(varNames,"sigma"), environment()))
     ##			      ^^^^^^^^^ -> possibly changes (lower, upper) in envir.
     constant <- log(2*pi)
     if ("sigma" %in% pnames) {

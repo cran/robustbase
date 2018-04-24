@@ -4,6 +4,60 @@
 \title{News for \R Package \pkg{robustbase}}
 \encoding{UTF-8}
 
+\section{CHANGES in robustbase VERSION 0.93-0 (2018-04-21, svn r805)}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item \code{.psi.const(*, "lqq")} now also gives a
+      \code{"constants"} attribute.
+
+      \item more examples and help on Mpsi() etc functions and tuning constants.
+
+      \item The S estimator \code{lmrob.S()} and M-S estimator now both
+      make use of the new \code{lmrob.control()} argument
+      \code{scale.tol} which defaults to \code{1e-10}, its formerly
+      hardwired value.
+
+      \item \code{lmrob.S()} further gets a new option \code{only.scale = FALSE},
+      which when true allows to only compute the S scale estimate.  In
+      that case, but also generally, \code{trace.lev = 3} or larger also
+      produces output showing the C level \code{find_scale()} iterations.
+
+      \item (By Manuel Koller) There's now a small C API to call our
+      \code{Mpsi()} etc from C code in other packages, as
+      \code{C_psi()}, etc; using new \file{../inst/include/robustbase.h}.
+
+      \item \code{nlrob()$call$algorithm} now always contains the
+      algorithm used as a \code{\link{character}} string, compatibly
+      with \code{\link{nls}()}.
+
+      \item new data set \code{steamUse}.
+      %% which also depicts the \dQuote{non-robust} behavior of \code{lmrob(setting="KS2014")}
+
+      \item Vignette \file{lmrob_simulation.Rnw}: fixed the wrong
+      \dQuote{emprical power} plots; with faster \pkg{ggplot2}, remove
+      all \code{eval=FALSE} for plots and longer store the
+      \file{*.pdf}s.
+
+      \code{nlrob()} gets \code{model} option to ask for the
+      \code{model.frame} to be returned.
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item \code{lmrob(..., method = "S")} no longer necessarily
+      produces a warning in \code{.vcov.w()}.
+
+      \item \code{nlrob()} returns a correct \code{dataClasses} component.
+    }
+  }
+  \subsection{Tests Tweaks}{
+    \itemize{
+      \item For use in non-R-internal BLAS/Lapack libraries, several
+      \file{tests/*.R} examples have been tweaked.
+    }
+  }
+}
+
 \section{CHANGES in robustbase VERSION 0.92-8 (2017-10-30, svn r778)}{
   \subsection{NEW FEATURES}{
     \itemize{

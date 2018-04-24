@@ -14,7 +14,7 @@ nlrob <-
 	      psi = .Mwgt.psi1("huber", cc=1.345), scale = NULL,
 	      test.vec = c("resid", "coef", "w"),
 	      maxit = 20, tol = 1e-06, acc,
-	      algorithm = "default", doCov = FALSE,
+	      algorithm = "default", doCov = FALSE, model = FALSE,
 	      control = if(method == "M") nls.control() else
 			nlrob.control(method, optArgs = list(trace=trace), ...),
               trace = FALSE, ...)
@@ -40,8 +40,35 @@ nlrob <-
     }
     method <- match.arg(method)
     dataName <- substitute(data)
-    dataCl <- attr(attr(call, "terms"), "dataClasses")
     hasWgts <- !missing(weights) # not eval()ing !
+
+    ## we don't really need 'start' for non-"M" methods, but for the following logic,
+    ## Want 'dataClasses' -> need 'mf' --> 'varNames' -> 'pnames' -> 'start' :
+    varNames <- all.vars(formula)
+    var.nms <- c(varNames, if(method %in% c("CM", "mtl")) "sigma") # <--> "sigma" part of 'pnames'
+    ## FIXME:  nls() allows  a missing 'start'; we allow *iff* lower | upper has names:
+    if(missing(start) && (!missing(lower) || !missing(upper)))
+        pnames <- .fixupArgs(lower, upper, var.nms)
+    else if(length(pnames <- names(start)) != length(start))
+        stop("'start' or 'lower' or 'upper' must be fully named (list or numeric vector)")
+    else if(any(is.na(match(pnames, var.nms)))) # check also in .fixupArgs()
+	stop("parameter names must appear in 'formula'")
+    ## If it is a parameter it is not a variable
+    varNames <- varNames[is.na(match(varNames, pnames))]
+
+    ## do now: need 'dataClasses', hence the model.frame 'mf' for all 'method' cases
+    obsNames <- rownames(data <- as.data.frame(data))
+    ## From nls: using model.weights() e.g. when formula 'weights = sqrt(<var>)'
+    mf$formula <-  # replace by one-sided linear model formula
+	as.formula(paste("~", paste(varNames, collapse = "+")),
+		   env = environment(formula))
+    mf[c("start", "lower", "upper", "method", "psi", "scale", "test.vec",
+	 "maxit", "tol", "acc", "algorithm", "doCov", "model", "control", "trace")] <- NULL
+    mf[[1L]] <- quote(stats::model.frame)
+    mf <- eval.parent(mf)
+    dataCl <- attr(attr(mf, "terms"), "dataClasses")
+    ## mf <- as.list(mf)
+
     if(method != "M") {
       if(hasWgts) ## FIXME .. should not be hard, e.g. for MM
           stop("specifying 'weights' is not yet supported for method ", method)
@@ -62,8 +89,10 @@ nlrob <-
 		  domain=NA)
       }
       force(control)
+
       fixAns <- function(mod) {
-          mod$call <- call # the nlrob() one, not nlrob.<foo>()
+          mod$call <- call # replace the nlrob.<foo>() one
+          mod$data <- dataName # (ditto)
           ctrl <- mod$ctrl
           if(is.character(psi <- ctrl$psi) && is.numeric(cc <- ctrl$tuning.psi.M)) {# MM:
               psi <- .Mwgt.psi1(psi, cc=cc)
@@ -72,11 +101,12 @@ nlrob <-
               mod$w <- # as we have no 'weights' yet
               mod$rweights <- psi(res.sc)
           } ## else mod$rweights <- mod$psi <- NULL
-          mod$data <- dataName
           mod$dataClasses <- dataCl
+          if(model) mod$model <- mf
           mod
-      }
-      switch(method,
+      } ## {fixAns}
+      ##
+      switch(method, ## source for these is all in >>> nlregrob.R <<<
 	     "MM" = {
 		 return(fixAns(nlrob.MM (formula, data, lower=lower, upper=upper,
 					 tol=tol, ctrl= control)))
@@ -94,21 +124,14 @@ nlrob <-
 					 tol=tol, ctrl= control)))
 	     })
     } ## {non-"M" methods}
+    ##
     ## else: method == "M", original method, the only one based on 'nls' :
-
-    varNames <- all.vars(formula)
     env <- environment(formula)
     if (is.null(env)) env <- parent.frame()
-    ## FIXME:  nls() allows  a missing 'start'; we don't :
-    if(length(pnames <- names(start)) != length(start))
-        stop("'start' must be fully named (list or numeric vector)")
     if (!((is.list(start) && all(sapply(start, is.numeric))) ||
 	  (is.vector(start) && is.numeric(start))))
 	stop("'start' must be a named list or numeric vector")
-    if(any(is.na(match(pnames, varNames))))
-	stop("parameter names must appear in 'formula'")
-    ## If it is a parameter it is not a variable
-    varNames <- varNames[is.na(match(varNames, pnames))]
+
     test.vec <- match.arg(test.vec)
     if(missing(lower)) lower <- -Inf
     if(missing(upper)) upper <- +Inf
@@ -124,19 +147,9 @@ nlrob <-
 	stop(gettextf("Do not use '%s' as a variable name or as a parameter name",
 		      nm), domain=NA)
 
-    obsNames <- rownames(data <- as.data.frame(data))
     data <- as.list(data)# to be used as such
-
-    ## From nls: using model.weights() e.g. when formula 'weights = sqrt(<var>)'
-    mf$formula <-  # replace by one-sided linear model formula
-        as.formula(paste("~", paste(varNames, collapse = "+")),
-                   env = environment(formula))
-    mf[c("start", "lower", "upper", "method", "psi", "scale", "test.vec",
-         "maxit", "tol", "acc", "algorithm", "doCov", "control", "trace")] <- NULL
-    mf[[1L]] <- quote(stats::model.frame)
-    mf <- eval.parent(mf)
+    ## 'mf' now defined before "dispatch" to method !
     nobs <- nrow(mf)
-    mf <- as.list(mf)
     if (hasWgts)
 	hasWgts <- !is.null(weights <- model.weights(mf))
     if (hasWgts && any(weights < 0 | is.na(weights)))
@@ -222,7 +235,7 @@ nlrob <-
 	tau <- mean(rw^2) / mean(psi(res.sc, d=TRUE))^2
 	AtWAinv * Scale^2 * tau
     }
-
+    if(is.null(call$algorithm)) call$algorithm <- algorithm
     ## returned object:	 ==  out$m$fitted()  [FIXME?]
     fit <- setNames(eval(formula[[3]], c(data, start)), obsNames)
     structure(class = c("nlrob", "nls"),
@@ -234,6 +247,7 @@ nlrob <-
 		   Scale=Scale, w=w, rweights = rw,
 		   cov = asCov, test.vec=test.vec, status=status, iter=iiter,
 		   psi=psi, data = dataName, dataClasses = dataCl,
+		   model = if(model) mf,
 		   control = control))
 }
 

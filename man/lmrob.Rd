@@ -92,8 +92,8 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
       Or a \emph{list} giving the initial coefficients and scale as
       \code{coefficients} and \code{scale}.  See also \emph{Examples}.
 
-      Note that if the init argument supplied is a function or list, the
-      method argument must \emph{not} contain the initial estimator, e.g.,
+      Note that if the \code{init} argument is a function or list, the
+      \code{method} argument must \emph{not} contain the initial estimator, e.g.,
       use \code{MDM} instead of \code{SMDM}.
 
       The default, equivalent to \code{init = "S"}, uses as initial
@@ -141,8 +141,7 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
       As of robustbase version 0.91-0 (April 2014), the computation of
       robust standard errors for \code{method="SMDM"} has been changed.
       The old behaviour can be restored by setting the control parameter
-      \code{cov.corrfact = "tauold"}.
-
+      \code{cov.corrfact = "tauold"}.%% FIXME: regr.test for that
     }
   }%end {describe}
 }
@@ -270,7 +269,7 @@ set.seed(0)
 m3 <- lmrob(Y ~ ., data=coleman, init = "S")
 stopifnot(all.equal(m1[-18], m3[-18]))
 ## 2) function
-initFun <- function(x, y, control, mf) {
+initFun <- function(x, y, control, ...) { # no 'mf' needed
     init.S <- lmrob.S(x, y, control)
     list(coefficients=init.S$coef, scale = init.S$scale)
 }
