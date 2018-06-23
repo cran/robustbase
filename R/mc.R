@@ -49,6 +49,10 @@ mc <- function(x, na.rm = FALSE,
     structure(m, mcComp = if(full.result) rr)
 }
 
+## eps1 = 1e-13, eps2 = eps1  <==>  original code which only had  'eps = 1e-13'
+##                                  hardcoded in C code.
+## These defaults do *not* make sense here, but in mc().
+## However, currently they are used in ../tests/mc-etc.R
 mcComp <- function(x, doReflect, eps1 = 1e-13, eps2 = eps1, maxit = 1000,
                    trace.lev = 1)
 

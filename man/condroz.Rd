@@ -8,7 +8,7 @@
   communities of the Condroz region in Belgium. The data pertain to a
   subset of 428 samples with a pH-value between 7.0 and 7.5.
 }
-\usage{data(condroz)}
+\usage{data(condroz, package="robustbase")}
 \format{
   A data frame with 428 observations on the following 2 variables.
   \describe{

@@ -43,6 +43,21 @@ mc(x, na.rm = FALSE, doReflect = (length(x) <= 100),
   \item{iter,iter2}{number of iterations used.}
   \item{converged,converged2}{logical specifying \dQuote{convergence}.}
 }
+\section{Convergence Problems}{
+  For extreme cases there \emph{are} convergence problems.
+
+  Some of them can be alleviated by \dQuote{loosening} the tolerances
+  \code{eps1} and \code{eps2}.
+  \cr
+  For others, with pecular values, notably many almost-ties with the
+  median, it can help extremely to replace \code{mc(x, *)} by
+  \code{mc(jitter(x), *)}.% MM: see also ~/R/MM/Pkg-ex/robustbase/Robnik-mc.R
+
+  Also, the algorithm not only centers the data around the median but
+  also scales them by the extremes which may have a negative effect
+  e.g., when changing an extreme outlier to even more extreme, the
+  result changes wrongly; see the 'mc10x' example.
+}
 \references{
   Guy Brys, Mia Hubert and Anja Struyf (2004)
   A Robust Measure of Skewness;
@@ -70,6 +85,13 @@ mc(cushny) # 0.125
 stopifnot(mc(c(-20, -5, -2:2, 5, 20)) == 0,
           mc(x1, doReflect=FALSE) ==  -mc(-x1, doReflect=FALSE),
           all.equal(mc(x1, doReflect=FALSE), -1/3, tolerance = 1e-12))
+
+## Susceptibility of the current algorithm to large outliers :
+dX10 <- function(X) c(1:5,7,10,15,25, X) # generate skewed size-10 with 'X'
+x <- c(10,20,30, 100^(1:20))
+(mc10x <- vapply(x, function(X) mc(dX10(X)), 1))
+## limit X -> Inf  should be 7/12 = 0.58333...  but that "breaks down a bit" :
+plot(x, mc10x, type="b", main = "mc( c(1:5,7,10,15,25, X) )", xlab="X", log="x")
 }
 \keyword{robust}
 \keyword{univar}

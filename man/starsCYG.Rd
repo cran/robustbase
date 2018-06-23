@@ -17,7 +17,7 @@
    main sequence and the four remaining stars are called \dQuote{giants} (the
    points 11, 20, 30, 34).
 }
-\usage{data(starsCYG)}
+\usage{data(starsCYG, package="robustbase")}
 \format{
   A data frame with 47 observations on the following 2 variables
   \describe{

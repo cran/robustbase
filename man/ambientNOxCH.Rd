@@ -8,7 +8,7 @@
   i.e., mono-nitrogen oxides, in [ppb] at 13 sites in central
   Switzerland and Aarau for the year 2004.
 }
-\usage{data(ambientNOxCH)}
+\usage{data(ambientNOxCH, package="robustbase")}
 \format{
   A data frame with 366 observations on the following 14 variables.
   \describe{

@@ -77,10 +77,10 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
     R_rsort(&x[1], n); /* full sort */
 
     double xmed; // := median( x[1:n] ) = - median( z[0:(n-1)] ):
-    if (n%2) { /* n even */
+    if (n%2) { // n odd
 	xmed = x[(n/2)+1];
     }
-    else { /* n  odd */
+    else { // n even
 	int ind = (n/2);
 	xmed = (x[ind] + x[ind+1])/2;
     }
@@ -100,6 +100,16 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
     /* center x[] wrt median --> such that then  median( x[1:n] ) == 0 */
     for (i = 1; i <= n; i++)
 	x[i] -= xmed;
+
+/* MM: ==> This scaling is extremely outlier-dependent
+   --      it *kills*  equivariance when e.g. x[n] --> very large.
+   e.g., below '(eps[0] + fabs(xmed))' depends on rescaling
+
+   Should *NOT* be needed if everything else is *relative* instead of absolute
+   Consider replacing
+    1)  eps[0] * (eps[0] + fabs(xmed))   with  eps[0]*fabs(xmed)
+    2)        x[j] > x_eps               with     x[j] >= x_eps  (>= : for 0)
+*/
 
     /* Now scale to inside [-0.5, 0.5] and flip sign such that afterwards
     *  x[1] >= x[2] >= ... >= x[n] */
@@ -299,8 +309,10 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 	medc = - work[knew-nl-1];
     }
 
-    if(converged && trace_lev >= 2)
-	Rprintf("converged in %d iterations\n", it);
+    if(trace_lev >= 2)
+	Rprintf(converged ? "converged in %d iterations\n"
+		: "not converged in %d (maxit) iterations; try enlarging eps1, eps2 !?\n",
+		it);
 
 Finish:
     iter[0] = it; /* to return */
@@ -311,9 +323,24 @@ Finish:
 } /* end{ mc_C_d } */
 
 
+/* h_kern() -- was called  calwork()  in original  rmc.c  code   and did
+    if (fabs(a-b) < 2.0*eps) {
+        if (ai+bi == ab) {
+            return 0;
+        }
+        else {
+            return (ai+bi < ab) ? 1 : -1 ;
+        }
+    }
+    else {
+        return (a+b)/(a-b);
+    }
+*/
 static
 double h_kern(double a, double b, int ai, int bi, int ab, double eps)
 {
+// eps := 'eps2' in R's mc()
+
 /*     if (fabs(a-b) <= DBL_MIN) */
     /* check for zero division and positive b */
     if (fabs(a-b) < 2.0*eps || b > 0)

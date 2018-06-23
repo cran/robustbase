@@ -17,7 +17,7 @@
   The problem is to model the relationship between \code{diversity} and these
   other variables.
 }
-\usage{data(possumDiv)}
+\usage{data(possumDiv, package="robustbase")}
 \format{
   Two different representations of the same data are available:
 

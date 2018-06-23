@@ -1,6 +1,6 @@
 
-R version 3.4.3 Patched (2017-12-07 r73868) -- "Kite-Eating Tree"
-Copyright (C) 2017 The R Foundation for Statistical Computing
+R Under development (unstable) (2018-06-19 r74919) -- "Unsuffered Consequences"
+Copyright (C) 2018 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -194,6 +194,9 @@ chkPsi..(): Not checking psi''() := Mpsi(*, deriv=2)
 > 
 > stopifnot(chkPsiDeriv(p.psiFun(x., "biweight", par = 4)))
 > stopifnot(chkPsiDeriv(p.psiFun(x., "Welsh", par = 1.5)))
+> stopifnot(chkPsiDeriv(p.psiFun(x., "huber", par = 1.5),
++                       tol = c(1e-10, 5e-3)))
+> ## "huber"-rho via  Mpsi(*, deriv=-1)  was badly wrong till 2018-06
 > 
 > ## The same 6, all in one plot:
 > op <- par(mfrow=c(3,2), mgp = c(1.5, .6, 0), mar = .1+c(3,3,2,.5))
@@ -204,6 +207,7 @@ chkPsi..(): Not checking psi''() := Mpsi(*, deriv=2)
 > p.psiFun2(x., "biweight", par = 4)
 > p.psiFun2(x., "Welsh", par = 1.5)
 > par(op)
+> 
 > 
 > ### (2) Test them as  arguments of  lmrob() or  lmrob.control(): -----
 > 

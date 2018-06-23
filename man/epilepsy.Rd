@@ -6,7 +6,7 @@
   (Breslow, 1996) in order to illustrate diagnostic techniques in
   Poisson regression.
 }
-\usage{data(epilepsy)}
+\usage{data(epilepsy, package="robustbase")}
 \format{
   A data frame with 59 observations on the following 11 variables.
   \describe{

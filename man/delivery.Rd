@@ -8,7 +8,7 @@
   machine (Y) by means of the number of products stocked (X1) and the
   distance walked by the route driver (X2).
 }
-\usage{data(delivery)}
+\usage{data(delivery, package="robustbase")}
 \format{
   A data frame with 25 observations on the following 3 variables.
   \describe{

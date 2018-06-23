@@ -9,7 +9,7 @@
   of measurements on six different variables, one of which will be
   treated as a responce.
 }
-\usage{data(coleman)}
+\usage{data(coleman, package="robustbase")}
 \format{
   A data frame with 20 observations on the following 6 variables.
   \describe{

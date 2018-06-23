@@ -4,6 +4,24 @@
 \title{News for \R Package \pkg{robustbase}}
 \encoding{UTF-8}
 
+\section{CHANGES in robustbase VERSION 0.93-1 (2018-06-20, svn r815)}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item The \sQuote{Usage:}s in the data set help pages now say
+      \code{data(<..>, package="robustbase")}.
+
+      \item The \file{lmrob_simulation} vignette now should continue
+      to work with upcoming \pkg{ggplot2}.
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item \code{Mpsi(x, c, psi="huber", deriv=-1)} now gives rho(x)
+      instead of mostly \code{Inf}.
+    }
+  }
+}
+
 \section{CHANGES in robustbase VERSION 0.93-0 (2018-04-21, svn r805)}{
   \subsection{NEW FEATURES}{
     \itemize{

@@ -56,7 +56,7 @@
 \examples{
 str(huberPsi, give.attr = FALSE)
 
-plot(hampelPsi)# calling the plot method.
+plot(hampelPsi)# calling the plot method (nicely showing "all" !)
 }
 \keyword{classes}
 \keyword{robust}

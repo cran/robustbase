@@ -11,7 +11,7 @@
   A datset where the total biomass is modeled conditional on a
   three value factor, and hence \emph{vector} parameters are used.
 }
-\usage{data("biomassTill")}
+\usage{data("biomassTill", package="robustbase")}
 \format{
   A data frame with 58 observations on the following 3 variables.
   \describe{

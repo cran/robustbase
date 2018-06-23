@@ -1,7 +1,7 @@
 Package: robustbase
-Version: 0.93-0
-VersionNote: 0.92-8 on 2017-11-01 on CRAN
-Date: 2018-04-21
+Version: 0.93-1
+VersionNote: Released 0.93-0 on 2018-04-21 on CRAN
+Date: 2018-06-15
 Title: Basic Robust Statistics
 Authors@R: c(person("Martin","Maechler", role=c("aut","cre"), email="maechler@stat.math.ethz.ch")
          , person("Peter", "Rousseeuw", role="ctb", comment = "Qn and Sn")
@@ -15,7 +15,7 @@ Authors@R: c(person("Martin","Maechler", role=c("aut","cre"), email="maechler@st
          , person("Tobias", "Verbeke", role = c("ctb","fnd"), email = "tobias.verbeke@openanalytics.eu",
                   comment = "mc, adjbox")
          , person("Manuel", "Koller", role = "aut", email = "koller.manuel@gmail.com",
-                  comment = "lmrob, psi-func.")
+                  comment = "mc, lmrob, psi-func.")
          , person(c("Eduardo", "L. T."), "Conceicao", role = "aut", email = "mail@eduardoconceicao.org",
                   comment = "MM-, tau-, CM-, and MTL- nlrob")
          , person("Maria", "Anna di Palma", role = "ctb", comment = "initial version of Comedian")
@@ -36,7 +36,7 @@ LazyData: yes
 License: GPL (>= 2)
 ByteCompile: yes
 NeedsCompilation: yes
-Packaged: 2018-04-21 16:19:20 UTC; maechler
+Packaged: 2018-06-21 21:10:27 UTC; maechler
 Author: Martin Maechler [aut, cre],
   Peter Rousseeuw [ctb] (Qn and Sn),
   Christophe Croux [ctb] (Qn and Sn),
@@ -44,9 +44,9 @@ Author: Martin Maechler [aut, cre],
   Andreas Ruckstuhl [aut] (nlrob, anova, glmrob),
   Matias Salibian-Barrera [aut] (lmrob orig.),
   Tobias Verbeke [ctb, fnd] (mc, adjbox),
-  Manuel Koller [aut] (lmrob, psi-func.),
+  Manuel Koller [aut] (mc, lmrob, psi-func.),
   Eduardo L. T. Conceicao [aut] (MM-, tau-, CM-, and MTL- nlrob),
   Maria Anna di Palma [ctb] (initial version of Comedian)
 Maintainer: Martin Maechler <maechler@stat.math.ethz.ch>
 Repository: CRAN
-Date/Publication: 2018-04-24 22:44:29 UTC
+Date/Publication: 2018-06-23 04:53:08 UTC

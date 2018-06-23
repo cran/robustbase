@@ -9,7 +9,7 @@
   extraction and weighing. This data set was analyzed also by Yale and
   Forsythe (1976).
 }
-\usage{data(pilot)}
+\usage{data(pilot, package="robustbase")}
 \format{
   A data frame with 20 observations on the following 2 variables.
   \describe{

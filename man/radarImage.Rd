@@ -8,7 +8,7 @@
   are coordinates and values corresponding to three frequency bands for
   each of 1573 pixels.
 }
-\usage{data(radarImage)}
+\usage{data(radarImage, package="robustbase")}
 \format{
   A data frame with 1573 observations on the following 5 variables.
   \describe{

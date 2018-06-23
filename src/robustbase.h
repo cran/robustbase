@@ -59,6 +59,23 @@ double mc_C_d(double *z, int n, double *eps, int *iter);
 
 /* --------- ./lmrob.c --------- */
 
+inline
+Rboolean is_redescender(int ipsi) {// a simple wrapper for readability
+    // for now, fastest:
+    if(ipsi == 0)
+	return FALSE;
+    return TRUE;
+/* if have many more, maybe
+    switch(ipsi) {
+    default: error("ipsi=%d not implemented.", ipsi);
+    case 0: // huber and future other non-redescenders
+	return FALSE;
+    case 1: case 2: case 3: case 4: case 5: case 6:
+	return TRUE;
+    }
+*/
+}
+
 SEXP R_rho_inf(SEXP cc, SEXP ipsi);
 
 void R_lmrob_S(double *X, double *y, int *n, int *P,

@@ -7,7 +7,7 @@
   The aim of the experiment was to predict the toxicity of carboxylic acids on
   the basis of several molecular descriptors.
 }
-\usage{data(toxicity)}
+\usage{data(toxicity, package="robustbase")}
 \format{
   A data frame with 38 observations on the following 10 variables which are
   attributes for carboxylic acids:

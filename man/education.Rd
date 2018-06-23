@@ -8,7 +8,7 @@
    variables in the 50 US states, providing an interesting example of
    heteroscedacity.
 }
-\usage{data(education)}
+\usage{data(education, package="robustbase")}
 \format{
   A data frame with 50 observations on the following 6 variables.
 

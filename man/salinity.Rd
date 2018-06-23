@@ -16,7 +16,7 @@
 
   This data set is a prime example of the \emph{masking effect}.
 }
-\usage{data(salinity)}
+\usage{data(salinity, package="robustbase")}
 \format{
   A data frame with 28 observations on the following 4 variables
   (in parentheses are the names used in the 1980 reference).

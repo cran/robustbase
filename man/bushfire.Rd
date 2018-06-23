@@ -7,7 +7,7 @@
   The dataset contains satelite measurements on five frequency bands,
   corresponding to each of 38 pixels.
 }
-\usage{data(bushfire)}
+\usage{data(bushfire, package="robustbase")}
 \format{
   A data frame with 38 observations on 5 variables.
 %  \describe{}

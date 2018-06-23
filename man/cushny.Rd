@@ -10,7 +10,7 @@
   only needs the \emph{differences} of the two measurements.  These
   differences are the values of \code{cushny}.
 }
-\usage{data(cushny)}
+\usage{data(cushny, package="robustbase")}
 \format{
   numeric vector, sorted increasingly:\cr
   0 0.8 1 1.2 1.3 1.3 1.4 1.8 2.4 4.6

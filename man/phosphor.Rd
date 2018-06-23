@@ -7,7 +7,7 @@
   Phosphorus in the soil upon the phosphorus content of the corn grown
   in this soil, from Prescott (1975).
 }
-\usage{data(phosphor)}
+\usage{data(phosphor, package="robustbase")}
 \format{
   A data frame with 18 observations on the following 3 variables.
   \describe{

@@ -31,7 +31,7 @@ str(robustbase:::mcComp(-x3, doRefl = FALSE, maxit = 15, trace = 4))
 x4 <- c(1:5,7,10,15,25, 1e15) ## this is also in mc-strict.R (but differently)
 mcNaive(x4,"h.use") # 0.5833333
 mcNaive(x4,"simple")# == " == 7/12
-try( mc(x4) )# not converged  !!
+mc(x4) # now ok, == 7/12
 str(robustbase:::mcComp( x4, doRefl= FALSE, maxit = 15, trace= 3))## = 0: conv.quickly
 str(robustbase:::mcComp(-x4, doRefl= FALSE, maxit = 15, trace= 3)) # *not* conv!
 

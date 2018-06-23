@@ -9,7 +9,7 @@
   intercept. These data were contaminated by replacing a few
   observations with outliers.
 }
-\usage{data(wood)}
+\usage{data(wood, package="robustbase")}
 \format{
   A data frame with 20 observations on the following 6 variables.
   \describe{

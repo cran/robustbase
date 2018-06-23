@@ -8,7 +8,7 @@
   The cloud point is a measure of the degree of crystallization in a
   stock.
 }
-\usage{data(cloud)}
+\usage{data(cloud, package="robustbase")}
 \format{
   A data frame with 19 observations on the following 2 variables.
   \describe{

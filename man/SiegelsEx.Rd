@@ -8,7 +8,7 @@
   some robust regression estimators exhibit the \dQuote{\emph{exact fit}}
   property.
 }
-\usage{data(SiegelsEx)}
+\usage{data(SiegelsEx, package="robustbase")}
 \format{
   A data frame with 9 observations on the following 2 variables.
   \describe{

@@ -8,7 +8,7 @@
   117 patients affected by Crohn's disease (a chronic inflammatory
   disease of the intestines).
 }
-\usage{data(CrohnD)}
+\usage{data(CrohnD, package="robustbase")}
 \format{
   A data frame with 117 observations on the following 9 variables.
   \describe{

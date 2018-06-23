@@ -115,6 +115,9 @@ stopifnot(chkPsiDeriv(p.psiFun(x., "Hampel",
 
 stopifnot(chkPsiDeriv(p.psiFun(x., "biweight", par = 4)))
 stopifnot(chkPsiDeriv(p.psiFun(x., "Welsh", par = 1.5)))
+stopifnot(chkPsiDeriv(p.psiFun(x., "huber", par = 1.5),
+                      tol = c(1e-10, 5e-3)))
+## "huber"-rho via  Mpsi(*, deriv=-1)  was badly wrong till 2018-06
 
 ## The same 6, all in one plot:
 op <- par(mfrow=c(3,2), mgp = c(1.5, .6, 0), mar = .1+c(3,3,2,.5))
@@ -125,6 +128,7 @@ p.psiFun2(x., "Hampel", par = round(c(1.5, 3.5, 8) * 0.9016085, 1))
 p.psiFun2(x., "biweight", par = 4)
 p.psiFun2(x., "Welsh", par = 1.5)
 par(op)
+
 
 ### (2) Test them as  arguments of  lmrob() or  lmrob.control(): -----
 

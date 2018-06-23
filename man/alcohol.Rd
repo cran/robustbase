@@ -9,7 +9,7 @@
   alcohols.  The aim of the experiment was the prediction of the
   solubility on the basis of molecular descriptors.
 }
-\usage{data(alcohol)}
+\usage{data(alcohol, package="robustbase")}
 \format{
   A data frame with 44 observations on the following 7 numeric variables.
   \describe{

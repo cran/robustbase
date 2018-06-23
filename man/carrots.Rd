@@ -9,7 +9,7 @@
   blocks, eight levels of insecticide were applied and the carrots were
   tested for insect damage.
 }
-\usage{data(carrots)}
+\usage{data(carrots, package="robustbase")}
 
 \format{
   A data frame with 24 observations on the following 4 variables.

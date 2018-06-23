@@ -7,7 +7,7 @@
   A typical medium sized environmental data set with hourly measurements
   of \eqn{NOx} pollution content in the ambient air.
 }
-\usage{data(NOxEmissions)}
+\usage{data(NOxEmissions, package="robustbase")}
 \format{
   A data frame with 8088 observations on the following 4 variables.
   \describe{

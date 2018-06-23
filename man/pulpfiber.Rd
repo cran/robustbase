@@ -7,7 +7,7 @@
   Measurements of aspects pulp fibers and the paper produced from them.
   Four properties of each are measured in sixty-two samples.
 }
-\usage{data(pulpfiber)}
+\usage{data(pulpfiber, package="robustbase")}
 \format{
   A data frame with 62 observations on the following 8 variables.
   \describe{

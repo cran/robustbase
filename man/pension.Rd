@@ -5,7 +5,7 @@
  The total 1981 premium income of pension funds of Dutch firms,
  for 18 Professional Branches, from de Wit (1982).
 }
-\usage{data(pension)}
+\usage{data(pension, package="robustbase")}
 \format{
   A data frame with 18 observations on the following 2 variables.
   \describe{

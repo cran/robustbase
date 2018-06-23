@@ -14,7 +14,7 @@
   Todorov et al. (1994).  Atkinson (1994) used these data for ilustration
   of the forward search algorithm for identifying of multiple outliers.
 }
-\usage{data(milk)}
+\usage{data(milk, package="robustbase")}
 \format{
   A data frame with 86 observations on the following 8 variables, all
   but the first measure units in \emph{grams / liter}.

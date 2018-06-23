@@ -6,7 +6,7 @@
   Length of stay for 201 patients that stayed at the University Hospital
   of Lausanne during the year 2000.
 }
-\usage{data(los)}
+\usage{data(los, package="robustbase")}
 \format{
   Vector of integer values giving the length of stay (days):
 

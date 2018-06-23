@@ -1,4 +1,4 @@
-/* -*- mode: c; kept-new-versions: 40; kept-old-versions: 20 -*-
+/* -*- mode: c; kept-new-versions: 40; kept-old-versions: 40 -*-
  * Indentation (etc) style:  C-c . gnu */
 
 /* file lmrob.c
@@ -528,7 +528,7 @@ void R_subsample(const double x[], const double y[], int *n, int *m,
     PutRNGstate();
 }
 
-/*----------------------------------------------------------------------------*/
+//---- Psi(), Rho(), Functions-----------------------------------------------------------
 
 SEXP R_psifun(SEXP x_, SEXP c_, SEXP ipsi_, SEXP deriv_) {
     /*
@@ -552,10 +552,15 @@ SEXP R_psifun(SEXP x_, SEXP c_, SEXP ipsi_, SEXP deriv_) {
 #define for_i_n_NA  for(i = 0; i < n; i++) r[i] = ISNAN(x[i]) ? x[i] :
 
     switch(deriv) { // our rho() is rho~(), i.e., scaled to max = 1
-    case -1: {
-	double rho_Inf = rho_inf(cc, ipsi);
-	for_i_n_NA rho(x[i], cc, ipsi) * rho_Inf; break;
-    }
+    case -1:
+	if(is_redescender(ipsi)) {
+	    double rho_Inf = rho_inf(cc, ipsi);
+	    for_i_n_NA rho(x[i], cc, ipsi) * rho_Inf;
+	} else { // huber, ..
+	    for_i_n_NA rho(x[i], cc, ipsi);
+	}
+	break;
+
     case  0: for_i_n_NA psi (x[i], cc, ipsi); break;
     case  1: for_i_n_NA psip(x[i], cc, ipsi); break;
     case  2: for_i_n_NA psi2(x[i], cc, ipsi); break;

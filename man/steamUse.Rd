@@ -9,7 +9,7 @@
   operating days per month (\code{Operating.Days}) and
   mean outside temperature per month (\code{Temperature}).
 }
-\usage{data("steamUse")}
+\usage{data("steamUse", package="robustbase")}
 \format{
   A data frame with 25 observations on the following 9 variables.
   \describe{

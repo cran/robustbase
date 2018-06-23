@@ -9,7 +9,7 @@
   and the explanatory variables are aspect ratio, lift-to-drag ratio,
   weight of plane (in pounds) and maximal thrust.
 }
-\usage{data(aircraft)}
+\usage{data(aircraft, package="robustbase")}
 \format{
   A data frame with 23 observations on the following 5 variables.
   \describe{

@@ -39,7 +39,9 @@ hampelPsi
 \seealso{The description of class \code{\linkS4class{psi_func}}.
 }
 \examples{
-## classical {trivial, not interesting}:
+plot(huberPsi) # => shows "all" {as an object with a smart plot() method}
+
+## classical (Gaussian / "least-squares") psi {trivial}:
 F1 <- function(x, .) rep.int(1, length(x))
 FF <- function(.) rep.int(1, length(.))
 cPsi <- psiFunc(rho = function(x,.) x^2 / 2, psi = function(x, .) x,
@@ -47,6 +49,9 @@ cPsi <- psiFunc(rho = function(x,.) x^2 / 2, psi = function(x, .) x,
                 Erho = function(.) rep.int(1/2, length(.)),
                 Epsi2 = FF, EDpsi = FF, name = "classic", . = Inf)
 show(cPsi)
+plot(cPsi)
+## is the same as the limit of Huber's:
+plot(chgDefaults(huberPsi, k = Inf))
 
 ## Hampel's psi and rho:
 H.38 <- chgDefaults(hampelPsi, k = c(1.5, 3.5, 8))

@@ -9,7 +9,7 @@
    but here are included only the values for May. This data set
    is an example of the special treatment of the missing values.
 }
-\usage{data(airmay)}
+\usage{data(airmay, package="robustbase")}
 \format{
   A data frame with 31 observations on the following 4 variables.
   \describe{

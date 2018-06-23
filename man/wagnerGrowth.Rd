@@ -14,7 +14,7 @@
   \code{GHS}) during three time periods in 21 geographical regions of
   the greater Hannover area.
 }
-\usage{data(wagnerGrowth)}
+\usage{data(wagnerGrowth, package="robustbase")}
 \format{
   A data frame with \eqn{21 \times 3 = 63}{21 * 3 = 63} observations
   (one per \code{Region x Period}) on the following 7 variables.

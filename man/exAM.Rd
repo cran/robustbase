@@ -6,7 +6,7 @@
   This is an artificial data set, cleverly construced and used by
   Antille and May to demonstrate \sQuote{problems} with LMS and LTS.
 }
-\usage{data(exAM)}
+\usage{data(exAM, package="robustbase")}
 \format{
   A data frame with 12 observations on 2 variables, \code{x} and \code{y}.
 }

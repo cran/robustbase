@@ -6,7 +6,7 @@
   Number of international calls from Belgium, taken from the Belgian
   Statistical Survey, published by the Ministry of Economy.
 }
-\usage{data(telef)}
+\usage{data(telef, package="robustbase")}
 \format{
   A data frame with 24 observations on the following 2 variables.
   \describe{

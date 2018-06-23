@@ -8,7 +8,7 @@
   with information on over 2000 elderly US citizens, where the response,
   indicates participation in the U.S. Food Stamp Program.
 }
-\usage{data(foodstamp)}
+\usage{data(foodstamp, package="robustbase")}
 \format{
   A data frame with 150 observations on the following 4 variables.
   \describe{

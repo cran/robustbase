@@ -12,7 +12,7 @@
   classical methods, but can be easily unmasked using robust
   distances computed by, e.g., MCD - covMcd().
 }
-\usage{data(hbk)}
+\usage{data(hbk, package="robustbase")}
 \format{
   A data frame with 75 observations on 4 variables, where the last
   variable is the dependent one.

@@ -5,7 +5,7 @@
 \description{
   Finney's data on vaso constriction in the skin of the digits.
 }
-\usage{data(vaso)}
+\usage{data(vaso, package="robustbase")}
 \format{
   A data frame with 39 observations on the following 3 variables.
   \describe{

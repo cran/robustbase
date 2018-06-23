@@ -13,7 +13,7 @@
   To this end, one number (in observation 4) has been modified from the
   original data from originally 44.9 to 15.7 (here).
 }
-\usage{data(kootenay)}
+\usage{data(kootenay, package="robustbase")}
 \format{
   A data frame with 13 observations on the following 2 variables.
   \describe{

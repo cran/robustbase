@@ -1,5 +1,5 @@
 
-#### Testing  medcouple	 and related functions
+#### Testing  medcouple mc() and related functions
 
 ### here, we do "strict tests" -- hence no *.Rout.save
 ### hence, can also produce non-reproducible output such as timing
@@ -14,6 +14,19 @@ assertEQm12 <- function(x,y, giveRE=TRUE, ...)
 c.time <- function(...) cat('Time elapsed: ', ..., '\n')
 S.time <- function(expr) c.time(system.time(expr))
 DO <- function(...) S.time(stopifnot(...))
+
+(doExtras <- robustbase:::doExtras())# TRUE if interactive() or activated by envvar
+La_version()# to know, for completeness
+
+## Are BLAS and LAPACK the same library?
+## TRUE e.g. for OpenBLAS;  FALSE for R's own source compiled
+(is.BLAS.LAPACK <- exists("La_library", mode="function") &&
+     identical(La_library(), extSoftVersion()[["BLAS"]]))
+## also TRUE for Windows [since both are "" !!]
+
+## Rather would want to know which of (OpenBLAS | ATLAS | MKL | R's own BLAS+LAPACK)
+
+
 
 n.set <- c(1:99, 1e5L+ 0:1) # large n gave integer overflow in earlier versions
 DO(0 == sapply(n.set, function(n) mc(seq_len(n))))
@@ -88,12 +101,18 @@ cat("\nRnk(a4 $ adjout): "); dput(Rnk(a4$adjout), control= {})
         all.equal(i.a4Out, c(9:19, 23:27,57, 59, 70, 77))
 }
 
+## only for ATLAS (BLAS/Lapack), not all are TRUE; which ones?
+if(!all(a5$nonOut))
+  print(which(!a5$nonOut)) # if we know, enable check below
+
+
 stopifnot(which(!a2$nonOut) == 1:14,
 	  which(!a3$nonOut) == 1:14,
 	  ## 'longley', 'wood' have no outliers in the "adjOut" sense:
 	  ## FIXME: longley is platform dependent too
 	  if(isMac) TRUE else sum(a1.2$nonOut) >= 15, # sum(.) = 16 [nb-mm3, Oct.2014]
-	  a5$nonOut,
+	  if(doExtras) ## not (yet) for ATLAS [FIXME]
+              a5$nonOut else TRUE,
           a6$nonOut[-20],
 	  ## hbk (n = 75) :
 	  abs(Rnk(a3$adjout) -

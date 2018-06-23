@@ -7,7 +7,7 @@
   Lactic Acid Concentration in Blood, from Afifi and Azen (1979) -
   comparing the true concentration X with the measured value Y.
 }
-\usage{data(lactic)}
+\usage{data(lactic, package="robustbase")}
 \format{
   A data frame with 20 observations on the following 2 variables.
   \describe{
