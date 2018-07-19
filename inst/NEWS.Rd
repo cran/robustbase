@@ -4,6 +4,18 @@
 \title{News for \R Package \pkg{robustbase}}
 \encoding{UTF-8}
 
+\section{CHANGES in robustbase VERSION 0.93-1-1 (2018-07-18)}{
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item \file{src/robustbase.h}: \code{is_redescender} now
+      \code{\bold{static} inline}, needed for some compilers, e.g., on
+      ubuntu 18.04.
+      Fixing R-forge bug(s) 6588 (and 6590, 6593),
+      \url{https://r-forge.r-project.org/tracker/index.php?func=detail&aid=6588&group_id=59&atid=302}
+    }
+  }
+}
+
 \section{CHANGES in robustbase VERSION 0.93-1 (2018-06-20, svn r815)}{
   \subsection{NEW FEATURES}{
     \itemize{

@@ -59,7 +59,7 @@ double mc_C_d(double *z, int n, double *eps, int *iter);
 
 /* --------- ./lmrob.c --------- */
 
-inline
+static inline
 Rboolean is_redescender(int ipsi) {// a simple wrapper for readability
     // for now, fastest:
     if(ipsi == 0)

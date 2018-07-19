@@ -1,5 +1,5 @@
 ### R code from vignette source 'psi_functions.Rnw'
-### Encoding: UTF-8
+### Encoding: ASCII
 
 ###################################################
 ### code chunk number 1: init
