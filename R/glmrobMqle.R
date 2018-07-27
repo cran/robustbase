@@ -272,7 +272,7 @@ glmrobMqle <-
 	matMinv <- solve(matM)
 	asCov <-  matMinv %*% matQ %*% matMinv / nobs
     } else { ## ncoef == 0
-	matM <- matQ <- asCov <- matrix(, 0,0)
+	matM <- matQ <- asCov <- matrix(NA_real_, 0,0)
     }
 
     if(any(ina)) {# put NA's back, extending theta[] to "original length"
@@ -282,7 +282,7 @@ glmrobMqle <-
 	##No : lm() and glm() also do *not* do this
 	##No  p <- length(theta)
 	##No  nm <- names(theta)
-	##No  M <- matrix(as.numeric(NA), p, p, dimnames = list(nm,nm))
+	##No  M <- matrix(NA_real_, p, p, dimnames = list(nm,nm))
 	##No  Mn <- M; Mn[ok, ok] <- asCov ; asCov <- Mn
 	##No  Mn <- M; Mn[ok, ok] <- matM  ; matM  <- Mn
 	##No  Mn <- M; Mn[ok, ok] <- matQ  ; matQ  <- Mn

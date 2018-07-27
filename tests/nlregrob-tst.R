@@ -105,7 +105,9 @@ Cfit.40out  <- update(Cfit, data = d.exp40out,
                       control = nls.control(tol = Cfit$control$tol))
 if(FALSE) ## this fails for "bad" non-R BLAS/LAPACK
     Cfit.no.out <- update(Cfit.40out, subset = -(15:27))
-Cfit.no.out <- update(Cfit.40out, subset = -(15:27), start = c(a = 1, b = 0.2))
+## help giving it a good start *and* raise tolerance (from 8e-8):
+Cfit.no.out <- update(Cfit.40out, subset = -(15:27), start = c(a = 1, b = 0.2),
+                      control = nls.control(maxiter = 1000, tol = 5e-7, printEval=TRUE))
 
 if(doExtras) {
 Rf.out.MM.S.bisquare   <- update(Rfit.MM.S.bisquare, data=d.exp40out)

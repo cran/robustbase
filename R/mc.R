@@ -15,11 +15,11 @@ rmc <- function(x, na.rm = FALSE, ...) {
 
 ## ## Default method (for numeric vectors):
 ## mc.default <- function(x, na.rm = FALSE,
-mc <- function(x, na.rm = FALSE,
-		       doReflect = (length(x) <= 100),
-                       eps1 = .Machine$double.eps, eps2 = .Machine$double.xmin,
-                       maxit = 100, trace.lev = 0, full.result = FALSE
-### , ...)
+mc <- function(x, na.rm = FALSE, doReflect = (length(x) <= 100)
+             , doScale = TRUE # <- chg default to 'FALSE' ?
+             , eps1 = 1e-14, eps2 = 1e-15 # << new in 0.93-2 (2018-07..)
+             , maxit = 100, trace.lev = 0
+             , full.result = FALSE
                )
 {
     x <- as.numeric(x)
@@ -27,13 +27,13 @@ mc <- function(x, na.rm = FALSE,
     if (na.rm)
         x <- x[!ina]
     else if (any(ina))
-        return(as.numeric(NA))
+        return(NA_real_)
     ## ==> x is NA-free from here on
 
     ## if(length(l.. <- list(...)))
     ##     stop("In mc(): invalid argument(s) : ",
     ##          paste(sQuote(names(l..)), collapse=","), call. = FALSE)
-    rr <- mcComp(x, doReflect, eps1=eps1, eps2=eps2,
+    rr <- mcComp(x, doReflect, doScale=doScale, eps1=eps1, eps2=eps2,
                  maxit=maxit, trace.lev=trace.lev)
 
     if(!(conv1 <- rr[["converged"]]) |
@@ -53,11 +53,10 @@ mc <- function(x, na.rm = FALSE,
 ##                                  hardcoded in C code.
 ## These defaults do *not* make sense here, but in mc().
 ## However, currently they are used in ../tests/mc-etc.R
-mcComp <- function(x, doReflect, eps1 = 1e-13, eps2 = eps1, maxit = 1000,
-                   trace.lev = 1)
-
+mcComp <- function(x, doReflect, doScale, eps1, eps2, maxit = 1000, trace.lev = 1)
 {
-    stopifnot(is.logical(doReflect), length(doReflect) == 1,
+    stopifnot(is.logical(doReflect), length(doReflect) == 1L, !is.na(doReflect),
+              is.logical(doScale),   length(doScale)   == 1L, !is.na(doScale),
               is.1num(eps1), eps1 >= 0,
               is.1num(eps2), eps2 >= 0,
               length(maxit     <- as.integer(maxit)) == 1,
@@ -71,7 +70,9 @@ mcComp <- function(x, doReflect, eps1 = 1e-13, eps2 = eps1, maxit = 1000,
     ## NAOK=TRUE: to allow  +/- Inf to be passed
     ans <- .C(mc_C, x, n,
               eps = eps, iter = c.iter,
-              medc = double(1), NAOK=TRUE)[c("medc", "eps", "iter")]
+              medc = double(1)
+            , doScale = doScale
+            , NAOK=TRUE)[c("medc", "eps", "iter")]
     it <- ans[["iter"]]
     ans[["converged"]] <- it[2] == 1
     ans[["iter"]] <- it[1]
@@ -79,7 +80,9 @@ mcComp <- function(x, doReflect, eps1 = 1e-13, eps2 = eps1, maxit = 1000,
     if (doReflect) { ## also compute on reflected data
 	a2 <- .C(mc_C, -x, n,
                  eps2 = eps, iter2 = c.iter,
-                 medc2 = double(1), NAOK=TRUE)[c("medc2", "iter2")]
+                 medc2 = double(1)
+               , doScale = doScale
+               , NAOK=TRUE)[c("medc2", "iter2", "doScale")]
         it <- a2[["iter2"]]
         a2[["converged2"]] <- it[2] == 1
         a2[["iter2"]] <- it[1]

@@ -159,10 +159,30 @@ summary(m.hbk)
 stopifnot(1:10 == which(m.hbk$w < 0.01))
 
 data(heart)
-summary(mhrt <- lmrob(clength ~ ., data = heart))
+summary(mhrt <- lmrob(clength ~ ., data = heart)) # -> warning 'maxit.scale=200' too small
 stopifnot(8  == which(mhrt$w < 0.15),
           11 == which(0.61 < mhrt$w & mhrt$w < 0.62),
           c(1:7,9:10,12) == which(mhrt$w > 0.90))
+
+iN <- c(3,5,7,11)
+heartN <- heart; heartN[iN, "clength"] <- NA
+lmN <- lm   (clength ~ ., data = heartN) # default na.action=na.omit
+mhN <- lmrob(clength ~ ., data = heartN) # default na.action=na.omit
+ # ==> everything just uses the n=8 complete obs
+summary(mhN) # now *does* note the 4 omitted obs.
+mhNex <- lmrob(clength ~ ., data = heartN, na.action=na.exclude)
+summary(mhNex)
+mhNx1 <- update(mhNex, ~ . - weight)
+mhNx0 <- update(mhNex, ~ 1)
+stopifnot(
+    length(r.mNex <- resid(mhNex)) == nrow(heartN)
+   ,
+    iN == which(iNAr <- is.na(r.mNex))
+   ,
+    identical(iNAr, is.na(r.mN1 <- residuals(mhNx1)))
+   ,
+    identical(iNAr, is.na(r.mN0 <- residuals(mhNx0)))
+)
 
 data(stackloss)
 mSL <- lmrob(stack.loss ~ ., data = stackloss)

@@ -515,7 +515,7 @@ summary.lts <- function (object, correlation = FALSE, ...)
     r <- sqrt(w) * r
     resvar <- rss/rdf
 
-    R <- if (p > 0) chol2inv(Qr$qr[p1, p1, drop = FALSE]) else matrix(,p,p)
+    R <- if (p > 0) chol2inv(Qr$qr[p1, p1, drop = FALSE]) else matrix(NA_real_,p,p)
     ## no need to reorder R anymore, since 'X' already has "intercept first"
     se <- sqrt(diag(R) * resvar)
 

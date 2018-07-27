@@ -144,6 +144,10 @@ data <- data.frame(y=1:10,x1=0,x2=0,os=2,w=c(0.5, 1))
 sc5 <- summary(cm5 <- lm(y ~ 1+x1+x2+offset(os), data, weights=w))
 sc6 <- summary(cm6 <- lm(y ~ 0+x1+x2+offset(os), data, weights=w))
 
+if(getRversion() <= "3.5.1" && as.numeric(R.version$`svn rev`) < 74993)
+    ## in the past, lm() returned logical empty matrix
+    storage.mode(sc6$coefficients) <- "double"
+
 stopifnot(all.equal(coef(m5), coef(cm5), tolerance = 0.01),
           identical(coef(m6), coef(cm6)),
           all.equal(coef(sm5), coef(sc5), tolerance = 0.05),

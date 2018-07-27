@@ -1,7 +1,7 @@
 library(robustbase)
 
 if (FALSE) {
-    
+
     ## artificial data example, also used in example(outlierStats):
     data <- expand.grid(grp1 = letters[1:5], grp2 = letters[1:5], rep=1:3)
     set.seed(101)
@@ -11,12 +11,12 @@ if (FALSE) {
     set.seed(2)
     fit1 <- lmrob(y ~ grp1*grp2, data, control = control)
     fit2 <- lmrob(y ~ grp1*grp2, data, setting = "KS2014")
-    
+
     fit1$ostats ## SMDM
     fit1$init$ostats ## SMD
     fit1$init$init$ostats ## SM
     fit1$init$init$init.S$ostats ## S
-    
+
 }
 
 
@@ -48,17 +48,25 @@ if (FALSE) {
 
     ## some other datasets:
     ## ambienNOxCH
-    data <- cbind(stack(ambientNOxCH[,-1]), day = factor(ambientNOxCH[, 1]))
-
-    fit <- lmrob(values ~ ind + day, data, setting="KS2014", fast.s.large.n = Inf)
+    data <- cbind(stack(ambientNOxCH[,-1]),
+                  day = factor(ambientNOxCH[, 1]))
+    str(data)
+    ## 'data.frame':	4758 obs. of  3 variables:
+    ##  $ values: num  12 17 12.3 13.5 47 ...
+    ##  $ ind   : Factor w/ 13 levels "ad","ba","ef",..: 1 1 1 1 1 1 1 1 1 1 ...
+    ##  $ day   : Factor w/ 366 levels "2004-01-01","2004-01-02",..: 1 2 3 4 5 6 7 8 9 10 ...
+    ##
+    ## Takes > 1 hour  (how much ?) :
+    system.time(fit <- lmrob(values ~ ind + day, data,
+                             setting="KS2014", fast.s.large.n = Inf))
     summary(fit)
-    
+
     ## CrohnD produces an error as well
     set.seed(11)
     fit <- lmrob(BMI ~ age*country*sex*treat, CrohnD)
     summary(fit)
     fit$ostats
-    
+
     ## wagnerGrowth
     set.seed(4)
     fit <- lmrob(y ~ ., data=wagnerGrowth)

@@ -9,7 +9,8 @@
 }
 \usage{
 mc(x, na.rm = FALSE, doReflect = (length(x) <= 100),
-   eps1 = .Machine$double.eps, eps2 = .Machine$double.xmin,
+   doScale = TRUE,               # <- chg default to 'FALSE' ?
+   eps1 = 1e-14, eps2 = 1e-15,   # << new in 0.93-2 (2018-07..)
    maxit = 100, trace.lev = 0, full.result = FALSE)
 }
 \arguments{
@@ -21,7 +22,12 @@ mc(x, na.rm = FALSE, doReflect = (length(x) <= 100),
     \code{(mc.(x) - mc.(-x))/2}.  This makes sense since the internal
     MC, \code{mc.()} computes the himedian() which can differ slightly from
     the median.}%% only whenever sum(x <= med) * sum(x >= med) is even
-  \item{eps1,eps2}{tolerance in the algorithm; only change with care!}
+  \item{doScale}{logical indicating if the internal algorithm should
+    also \emph{scale} the data (using the most distant value from the
+    median which is unrobust and numerically dangerous); scaling has been
+    the hardwired default in the original algorithm and in \R's
+    \code{mc()} till summer 2018.}
+  \item{eps1, eps2}{tolerance in the algorithm; only change with care!}
   \item{maxit}{maximul number of iterations; typically a few should be
     sufficient.}
   \item{trace.lev}{integer specifying how much diagnostic output the

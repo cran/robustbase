@@ -16,7 +16,7 @@ static R_NativePrimitiveArgType Sn0_t[] = {
 };
 
 static R_NativePrimitiveArgType mc_C_t[] = {
-    REALSXP, INTSXP, REALSXP, INTSXP, REALSXP
+    REALSXP, INTSXP, REALSXP, INTSXP, REALSXP, LGLSXP
 };
 
 static R_NativePrimitiveArgType wgt_himed_i_t[] = {

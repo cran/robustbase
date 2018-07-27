@@ -1,5 +1,5 @@
 ### R code from vignette source 'lmrob_simulation.Rnw'
-### Encoding: ASCII
+### Encoding: UTF-8
 
 ###################################################
 ### code chunk number 1: initial-setup

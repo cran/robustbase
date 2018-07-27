@@ -1,6 +1,6 @@
 
-R version 3.4.2 Patched (2017-11-09 r73697) -- "Short Summer"
-Copyright (C) 2017 The R Foundation for Statistical Computing
+R version 3.5.1 (2018-07-02) -- "Feather Spray"
+Copyright (C) 2018 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -226,6 +226,9 @@ seed : int(0)
 +     sc <- summary(lm   (formula, data))
 +     sr <- summary(lmrob(formula, data, control= lmrCtrl))
 +     names(sc)[names(sc) == "sigma"] <- "scale"
++     if(sc$df[1] == 0 && getRversion() <= "3.5.1" && as.numeric(R.version$`svn rev`) < 74993)
++ 	## in the past, lm() returned logical empty matrix
++ 	storage.mode(sc$coefficients) <- "double"
 +     ret <- all.equal(sc[items], sr[items], tolerance=tol)
 +     if (!isTRUE(ret)) {
 +         print(sr)

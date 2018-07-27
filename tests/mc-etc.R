@@ -23,8 +23,16 @@ x3 <- c(-2, rep(-1,4), rep(0,6), 2, 2, 2:4)
 mcNaive(x3,"h.use") # 1/3
 mcNaive(x3,"simple")#  0
 
+mcComp <- robustbase:::mcComp
+mcComp. <- function (x, doScale,
+                     doReflect = FALSE, maxit = 15, eps1 = 1e-13, eps2 = eps1,
+                     trace.lev = 1, ...) {
+    mcComp(x, doReflect=doReflect, doScale=doScale,
+           maxit=maxit, eps1=eps1, eps2=eps2, trace.lev=trace.lev, ...)
+}
+
 try( mc(x3, doRefl = FALSE, maxit = 15, trace = 3)) ## "non-convergence" (32-bit)
-str(robustbase:::mcComp(-x3, doRefl = FALSE, maxit = 15, trace = 4))
+str(mcComp.(-x3, doScale=TRUE, trace = 4))
 
 ### And here is the "real" problem of the whole 'eps' idea:
 
@@ -32,12 +40,13 @@ x4 <- c(1:5,7,10,15,25, 1e15) ## this is also in mc-strict.R (but differently)
 mcNaive(x4,"h.use") # 0.5833333
 mcNaive(x4,"simple")# == " == 7/12
 mc(x4) # now ok, == 7/12
-str(robustbase:::mcComp( x4, doRefl= FALSE, maxit = 15, trace= 3))## = 0: conv.quickly
-str(robustbase:::mcComp(-x4, doRefl= FALSE, maxit = 15, trace= 3)) # *not* conv!
+str(mcComp.( x4, doScale=TRUE, trace= 3))## = 0: conv.quickly
+str(mcComp.(-x4, doScale=TRUE, trace= 3)) # *not* conv!
 
-## ## a much more extreme eps seems the cure:
-## str(robustbase:::mcComp( x4, doRefl= FALSE, eps1=.Machine$double.xmin))
-## str(robustbase:::mcComp(-x4, doRefl= FALSE, eps1=.Machine$double.xmin))
+if(FALSE) { ## a much more extreme eps seems the cure:
+    str(mcComp.( x4, doScale=TRUE, eps1=.Machine$double.xmin))
+    str(mcComp.(-x4, doScale=TRUE, eps1=.Machine$double.xmin))
+}
 
 ### Examples "like x3" (non-convergence on 32-bit)
 xClist <- list(## length 5 :

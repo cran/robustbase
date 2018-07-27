@@ -40,7 +40,7 @@ function (formula, family, data, weights, subset,
 	    names(Y) <- nm
     }
     X <- if (!is.empty.model(mt))
-	model.matrix(mt, mf, contrasts) else matrix(, NROW(Y), 0)
+	model.matrix(mt, mf, contrasts) else matrix(NA_real_, NROW(Y), 0)
     weights <- model.weights(mf)
     offset <- model.offset(mf)
     if (!is.null(weights) && any(weights < 0))

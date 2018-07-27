@@ -32,6 +32,9 @@ test <- function(formula, data,
     sc <- summary(lm   (formula, data))
     sr <- summary(lmrob(formula, data, control= lmrCtrl))
     names(sc)[names(sc) == "sigma"] <- "scale"
+    if(sc$df[1] == 0 && getRversion() <= "3.5.1" && as.numeric(R.version$`svn rev`) < 74993)
+	## in the past, lm() returned logical empty matrix
+	storage.mode(sc$coefficients) <- "double"
     ret <- all.equal(sc[items], sr[items], tolerance=tol)
     if (!isTRUE(ret)) {
         print(sr)

@@ -1,6 +1,6 @@
 
-R Under development (unstable) (2017-10-13 r73550) -- "Unsuffered Consequences"
-Copyright (C) 2017 The R Foundation for Statistical Computing
+R version 3.5.1 Patched (2018-07-24 r75005) -- "Feather Spray"
+Copyright (C) 2018 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -160,6 +160,7 @@ x1b:x2D      1.08478    1.32102   0.821    0.422
 x1c:x2D     -1.31578    1.33335  -0.987    0.336
 
 Robust residual standard error: 1.007 
+  (3 observations deleted due to missingness)
 Multiple R-squared:  0.9933,	Adjusted R-squared:  0.9887 
 Convergence in 1 IRWLS iterations
 
@@ -212,6 +213,7 @@ x1b:x2D      1.099090   1.461384   0.752    0.464
 x1c:x2D     -1.371953   1.698858  -0.808    0.432
 
 Robust residual standard error: 1.281 
+  (3 observations deleted due to missingness)
 Multiple R-squared:  0.9923,	Adjusted R-squared:  0.9866 
 Convergence in 1 IRWLS iterations
 
@@ -264,6 +266,7 @@ x1b:x2D      1.099090   1.110001   0.990    0.331
 x1c:x2D     -1.371953   1.290375  -1.063    0.297
 
 Robust residual standard error: 0.9728 
+  (4 observations deleted due to missingness)
 Multiple R-squared:  0.9923,	Adjusted R-squared:  0.989 
 Convergence in 1 IRWLS iterations
 

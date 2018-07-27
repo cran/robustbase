@@ -45,10 +45,12 @@ lmrob <-
     if (is.empty.model(mt)) {
 	x <- NULL
 	singular.fit <- FALSE ## to avoid problems below
-	z <- list(coefficients = if (is.matrix(y)) matrix(,0,3) else numeric(0),
+	z <- list(coefficients = if(is.matrix(y)) matrix(NA_real_, 0, ncol(y))
+				 else numeric(),
 		  residuals = y, scale = NA, fitted.values = 0 * y,
-		  cov = matrix(,0,0), weights = w, rank = 0,
-		  df.residual = NROW(y), converged = TRUE, iter = 0)
+		  cov = matrix(NA_real_,0,0), weights = w, rank = 0,
+		  df.residual = if(!is.null(w)) sum(w != 0) else NROW(y),
+                  converged = TRUE, iter = 0)
 	if(!is.null(offset)) {
 	    z$fitted.values <- offset
 	    z$residuals <- y - offset
@@ -178,10 +180,10 @@ lmrob <-
 			 piv)
 	    }
 	} else { ## rank 0
-	    z <- list(coefficients = if (is.matrix(y)) matrix(NA,p,ncol(y))
-				     else rep.int(as.numeric(NA), p),
+	    z <- list(coefficients = if (is.matrix(y)) matrix(NA_real_,p,ncol(y))
+				     else rep.int(NA_real_, p),
 		      residuals = y, scale = NA, fitted.values = 0 * y,
-		      cov = matrix(,0,0), rweights = rep.int(as.numeric(NA), NROW(y)),
+		      cov = matrix(NA_real_,0,0), rweights = rep.int(NA_real_, NROW(y)),
 		      weights = w, rank = 0, df.residual = NROW(y),
 		      converged = TRUE, iter = 0, control=control)
 	    if (is.matrix(y)) colnames(z$coefficients) <- colnames(x)
@@ -414,12 +416,13 @@ print.summary.lmrob <-
 			 na.print="NA", ...)
 	    cat("\nRobust residual standard error:",
 		format(signif(x$scale, digits)),"\n")
-          if (!is.null(x$r.squared) && x$df[1] != attr(x$terms, "intercept")) {
+	    if(nzchar(mess <- naprint(x$na.action)))
+		cat("  (",mess,")\n", sep = "")
+            if(!is.null(x$r.squared) && x$df[1] != attr(x$terms, "intercept")) {
                 cat("Multiple R-squared: ", formatC(x$r.squared, digits = digits))
                 cat(",\tAdjusted R-squared: ", formatC(x$adj.r.squared, digits = digits),
                     "\n")
             }
-	    ## FIXME: use naprint() here to list observations deleted due to missingness?
 	    correl <- x$correlation
 	    if (!is.null(correl)) {
 		p <- NCOL(correl)
@@ -531,7 +534,7 @@ summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...
 	se <- sqrt(if(length(object$cov) == 1L) object$cov else diag(object$cov))
 	est <- object$coefficients[object$qr$pivot[p1]]
 	tval <- est/se
-	ans <- object[c("call", "terms", "residuals", "scale", "rweights",
+	ans <- object[c("call", "terms", "residuals", "scale", "rweights", "na.action",
 			"converged", "iter", "control")]
 	if (!is.null(ans$weights))
 	    ans$residuals <- ans$residuals * sqrt(object$weights)
@@ -589,7 +592,7 @@ summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...
     } else { ## p = 0: "null model"
 	ans <- object
 	ans$df <- c(0L, df, length(aliased))
-	ans$coefficients <- matrix(NA, 0L, 4L, dimnames = list(NULL, cf.nms))
+	ans$coefficients <- matrix(ans$coefficients[0L], 0L, 4L, dimnames = list(NULL, cf.nms))
         ans$r.squared <- ans$adj.r.squared <- 0
 	ans$cov <- object$cov
     }

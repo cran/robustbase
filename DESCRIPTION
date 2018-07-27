@@ -1,7 +1,7 @@
 Package: robustbase
-Version: 0.93-1.1
-VersionNote: Released 0.93-1 on 2018-06-21 on CRAN
-Date: 2018-07-18
+Version: 0.93-2
+VersionNote: Released 0.93-1.1 on 2018-07-18 on CRAN
+Date: 2018-07-26
 Title: Basic Robust Statistics
 Authors@R: c(person("Martin","Maechler", role=c("aut","cre"), email="maechler@stat.math.ethz.ch")
          , person("Peter", "Rousseeuw", role="ctb", comment = "Qn and Sn")
@@ -26,7 +26,7 @@ Description: "Essential" Robust Statistics.
  regression methodology including model selections and multivariate
  statistics where we strive to cover the book "Robust Statistics,
  Theory and Methods" by 'Maronna, Martin and Yohai'; Wiley 2006.
-Depends: R (>= 3.0.2)
+Depends: R (>= 3.1.0)
 Imports: stats, graphics, utils, methods, DEoptimR
 Suggests: grid, MASS, lattice, boot, cluster, Matrix, robust,
         fit.models, MPV, xtable, ggplot2, GGally, RColorBrewer,
@@ -36,7 +36,7 @@ ByteCompile: yes
 LazyData: yes
 NeedsCompilation: yes
 License: GPL (>= 2)
-Packaged: 2018-07-18 10:36:40 UTC; maechler
+Packaged: 2018-07-27 07:28:53 UTC; maechler
 Author: Martin Maechler [aut, cre],
   Peter Rousseeuw [ctb] (Qn and Sn),
   Christophe Croux [ctb] (Qn and Sn),
@@ -49,4 +49,4 @@ Author: Martin Maechler [aut, cre],
   Maria Anna di Palma [ctb] (initial version of Comedian)
 Maintainer: Martin Maechler <maechler@stat.math.ethz.ch>
 Repository: CRAN
-Date/Publication: 2018-07-19 20:40:06 UTC
+Date/Publication: 2018-07-27 17:00:03 UTC

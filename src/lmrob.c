@@ -64,13 +64,13 @@ void fast_s_large_n(double *X, double *y,
 		    int *ggroups, int *nn_group,
 		    int *K, int *max_k, double rel_tol, double inv_tol, double scale_tol, int *converged,
 		    int *best_r, double *bb, double *rrhoc, int *iipsi,
-		    double *bbeta, double *sscale, int trace_lev, int mts, int ss);
+		    double *bbeta, double *sscale, int trace_lev, int mts, Rboolean ss);
 
 void fast_s(double *X, double *y,
 	    int *nn, int *pp, int *nRes, int *max_it_scale, double *res,
 	    int *K, int *max_k, double rel_tol, double inv_tol, double scale_tol, int *converged,
 	    int *best_r, double *bb, double *rrhoc, int *iipsi,
-	    double *bbeta, double *sscale, int trace_lev, int mts, int ss);
+	    double *bbeta, double *sscale, int trace_lev, int mts, Rboolean ss);
 
 Rboolean rwls(const double X[], const double y[], int n, int p,
 	 double *estimate, double *i_estimate,
@@ -171,17 +171,17 @@ Rboolean m_s_descent(double *X1, double *X2, double *y,
 		 int *NIT, int *K, int *KODE, double *SIGMA,  double *BET0,
 		 double *SC1, double *SC2, double *SC3, double *SC4);
 
-Rboolean subsample(const double x[], const double y[], int n, int m,
-		   double *beta, int *ind_space, int *idc, int *idr,
-		   double *lu, double *v, int *p,
-		   double *Dr, double *Dc, int rowequ, int colequ,
-		   Rboolean sample, int mts, Rboolean ss, double tol_inv, Rboolean solve);
+int subsample(const double x[], const double y[], int n, int m,
+	      double *beta, int *ind_space, int *idc, int *idr,
+	      double *lu, double *v, int *p,
+	      double *Dr, double *Dc, int rowequ, int colequ,
+	      Rboolean sample, int mts, Rboolean ss, double tol_inv, Rboolean solve);
 
-int fast_s_with_memory(double *X, double *y, double *res,
+Rboolean fast_s_with_memory(double *X, double *y, double *res,
 		       int *nn, int *pp, int *nRes, int *max_it_scale, int *K, int *max_k,
 		       double rel_tol, double inv_tol, double scale_tol, int trace_lev,
 		       int *best_r, double *bb, double *rrhoc, int *iipsi,
-		       double **best_betas, double *best_scales, int mts, int ss);
+		       double **best_betas, double *best_scales, int mts, Rboolean ss);
 
 /* for "tracing" only : */
 void disp_mat(double **a, int n, int m);
@@ -193,7 +193,9 @@ double kthplace(double *, int, int);
 int find_max(double *a, int n);
 
 double find_scale(const double r[], double b, const double rrhoc[], int ipsi,
-		  double initial_scale, int n, int p, int max_iter, double scale_tol,
+		  double initial_scale, int n, int p,
+		  int* iter, // input: max_iter,  output: #{iterations used}
+		  double scale_tol,
 		  Rboolean trace);
 
 double median_abs(double *, int, double *);
@@ -336,7 +338,6 @@ void R_lmrob_S(double *X, double *y, int *n, int *P,
      *	      = no. of best candidates to be iterated further ("refined")
      *        =  2, by default
      */
-
     if (*nRes > 0) {
 	double *res = (double *) R_alloc(*n, sizeof(double)); // residuals
 	if (*n > *cutoff) {
@@ -345,7 +346,7 @@ void R_lmrob_S(double *X, double *y, int *n, int *P,
 	    fast_s_large_n(X, y, n, P, nRes, max_it_scale, res,
 			   Groups, N_group,
 			   K_s, max_k, *rel_tol, *inv_tol, *scale_tol, converged,
-			   best_r, bb, rrhoc, iipsi, beta_s, scale, *trace_lev, *mts, *ss);
+			   best_r, bb, rrhoc, iipsi, beta_s, scale, *trace_lev, *mts, (Rboolean)*ss);
 	} else {
 	    if(*trace_lev > 0)
 		Rprintf("lmrob_S(n = %d, nRes = %d): fast_s() [non-large n]:\n", *n, *nRes);
@@ -356,10 +357,11 @@ void R_lmrob_S(double *X, double *y, int *n, int *P,
 	COPY(res, y, *n); // return the 'residuals' in 'y'
     } else { // nRes[] <= 0   <==>   'only.scale = TRUE'
 	if(*trace_lev > 0)
-	    Rprintf("lmrob_S(nRes = 0, n = %d): --> find_scale(*, scale=%g) only:\n",
+	    Rprintf("lmrob_S(nRes = 0, n = %d): --> find_scale(*, scale=%g) only:",
 		    *n, *scale);
 	*scale = find_scale(y, *bb, rrhoc, *iipsi, *scale, *n, *P,
-			    *max_it_scale, *scale_tol, *trace_lev >= 3);
+			    max_it_scale, *scale_tol, *trace_lev >= 3);
+	if(*trace_lev > 0) Rprintf(" used %d iterations\n", *max_it_scale);
     }
 }
 
@@ -1495,14 +1497,14 @@ Rboolean rwls(const double X[], const double y[], int n, int p,
 {
     int lwork = -1, one = 1, info = 1;
     double work0, *work, wtmp, *weights;
-    double *wx, *wy, done = 1., dmone = -1.;
-    double *beta0, d_beta = 0.;
+    double done = 1., dmone = -1., d_beta = 0.;
     int j, k, iterations = 0;
     Rboolean converged = FALSE;
 
-    wx     = (double *) R_alloc(n*p, sizeof(double));
-    wy     = (double *) R_alloc(n,   sizeof(double));
-    beta0  = (double *) R_alloc(p,   sizeof(double));
+    double
+	*wx     = (double *) R_alloc(n*p, sizeof(double)),
+	*wy     = (double *) R_alloc(n,   sizeof(double)),
+	*beta0  = (double *) R_alloc(p,   sizeof(double));
 
     INIT_WLS(wx, wy, n, p);
 
@@ -1584,7 +1586,7 @@ void fast_s_large_n(double *X, double *y,
 		    int *K, int *max_k, double rel_tol, double inv_tol, double scale_tol, int *converged,
 		    int *best_r, double *bb, double *rrhoc, int *iipsi,
 		    double *bbeta, double *sscale,
-		    int trace_lev, int mts, int ss)
+		    int trace_lev, int mts, Rboolean ss)
 {
 /* *X  = the n x p  design matrix (incl. intercept if appropriate),
  *	 in column order as sent by R)
@@ -1612,12 +1614,10 @@ void fast_s_large_n(double *X, double *y,
  * *bbeta  = final estimator
  * *sscale = associated scale estimator (or -1 when problem)
  */
-    int i,j,k, k2, it_k, ij, freedsamp = 0, initwls = 0;
+    int i,j,k, ij, freedsamp = 0, initwls = 0;
     int n = *nn, p = *pp, kk = *K, ipsi = *iipsi;
     int groups = *ggroups, n_group = *nn_group, sg = groups * n_group;
     double b = *bb, sc, best_sc, worst_sc;
-    int pos_worst_scale;
-    Rboolean conv;
     /* (Pointers to) Arrays - to be allocated */
     int *indices, *ind_space;
     double **best_betas, *best_scales;
@@ -1707,8 +1707,8 @@ void fast_s_large_n(double *X, double *y,
     double work0, *work, *weights;
     INIT_WLS(wx, wy, n, p); initwls = 1;
 
-    conv = FALSE;
-    pos_worst_scale = 0;
+    Rboolean conv = FALSE;
+    int pos_worst_scale = 0;
     for(i=0; i < *best_r; i++)
 	final_best_scales[i] = INFI;
     worst_sc = INFI;
@@ -1717,9 +1717,10 @@ void fast_s_large_n(double *X, double *y,
     for(i=0; i < (*best_r * groups); i++) {
 	if(trace_lev >= 3) {
 	    Rprintf("  Sample[%3d]: before refine_(*, conv=FALSE):\n", i);
-	    Rprintf("   beta_cand : "); disp_vec(best_betas[i],p);
-	    Rprintf("   with scale %.15g\n", best_scales[i]);
-
+	    if(i > 0) {
+		Rprintf("   beta_cand : "); disp_vec(best_betas[i],p);
+		Rprintf("   with scale %.15g\n", best_scales[i]);
+	    }
 	}
 	refine_fast_s(xsamp, wx, ysamp, wy, weights, sg, p, res,
 		      work, lwork, best_betas[i],
@@ -1730,9 +1731,10 @@ void fast_s_large_n(double *X, double *y,
 	    Rprintf("   with scale %.15g\n", sc);
 	}
 	if ( sum_rho_sc(res, worst_sc, sg, p, rrhoc, ipsi) < b ) {
+	    int scale_iter = *max_it_scale;
 	    /* scale will be better */
-	    sc = find_scale(res, b, rrhoc, ipsi, sc, sg, p, *max_it_scale, scale_tol, trace_lev >= 3);
-	    k2 = pos_worst_scale;
+	    sc = find_scale(res, b, rrhoc, ipsi, sc, sg, p, &scale_iter, scale_tol, trace_lev >= 3);
+	    int k2 = pos_worst_scale;
 	    final_best_scales[ k2 ] = sc;
 	    COPY(beta_ref, final_best_betas[k2], p);
 	    pos_worst_scale = find_max(final_best_scales, *best_r);
@@ -1752,7 +1754,7 @@ void fast_s_large_n(double *X, double *y,
 
     for(i=0; i < *best_r; i++) {
 	conv = TRUE;
-	it_k = refine_fast_s(X, wx, y, wy, weights, n, p, res,
+	int it_k = refine_fast_s(X, wx, y, wy, weights, n, p, res,
 			     work, lwork, final_best_betas[i], kk,
 			     &conv/* = TRUE */, *max_k, rel_tol, trace_lev,
 			     b, rrhoc, ipsi, final_best_scales[i],
@@ -1801,12 +1803,12 @@ void fast_s_large_n(double *X, double *y,
 
 } /* fast_s_large_n() */
 
-int fast_s_with_memory(double *X, double *y, double *res,
+Rboolean fast_s_with_memory(double *X, double *y, double *res,
 		       int *nn, int *pp, int *nRes, int *max_it_scale,
 		       int *K, int *max_k, double rel_tol, double inv_tol, double scale_tol,
 		       int trace_lev, int *best_r, double *bb, double *rrhoc,
 		       int *iipsi, double **best_betas, double *best_scales,
-		       int mts, int ss)
+		       int mts, Rboolean ss)
 {
 /*
  * Called from fast_s_large_n(), the adjustment for large "n",
@@ -1830,33 +1832,34 @@ int fast_s_with_memory(double *X, double *y, double *res,
 
     int i,j,k;
     int n = *nn, p = *pp, nResample = *nRes;
-    Rboolean conv = FALSE;
-    double *beta_cand, *beta_ref;
+    Rboolean conv = FALSE,
+	sing = FALSE; // sing = TRUE|FALSE  the final result
     int ipsi = *iipsi;
     double b = *bb, sc, worst_sc = INFI;
-    double work0, *weights, *work, *wx, *wy;
+    double work0, *weights, *work;
     int lwork = -1, one = 1, info = 1;
-    int pos_worst_scale, sing=0;
 
     SETUP_SUBSAMPLE(n, p, X, 1);
     INIT_WLS(X, y, n, p);
 
-    wx =        (double *) Calloc(n*p, double);
-    wy =        (double *) Calloc(n,   double);
-    beta_cand = (double *) Calloc(p,   double);
-    beta_ref  = (double *) Calloc(p,   double);
+    double
+	*wx =        (double *) Calloc(n*p, double),
+	*wy =        (double *) Calloc(n,   double),
+	*beta_cand = (double *) Calloc(p,   double),
+	*beta_ref  = (double *) Calloc(p,   double);
 
     for(i=0; i < *best_r; i++)
 	best_scales[i] = INFI;
-    pos_worst_scale = 0;
+    int pos_worst_scale = 0;
 
 /* resampling approximation  */
 
     for(i=0; i < nResample; i++) {
 	R_CheckUserInterrupt();
 	/* find a candidate */
-	sing = subsample(Xe, y, n, p, beta_cand, ind_space, idc, idr, lu, v, pivot,
-			 Dr, Dc, rowequ, colequ, 1, mts, ss, inv_tol, 1);
+	sing = (Rboolean) // 0 |--> FALSE (= success);  {1,2} |-> TRUE
+	    subsample(Xe, y, n, p, beta_cand, ind_space, idc, idr, lu, v, pivot,
+		      Dr, Dc, rowequ, colequ, 1, mts, ss, inv_tol, 1);
 	if (sing) {
 	    for (k=0; k< *best_r; k++) best_scales[i] = -1.;
 	    goto cleanup_and_return;
@@ -1874,9 +1877,10 @@ int fast_s_with_memory(double *X, double *y, double *res,
 	/* FIXME: if sc ~ 0 ---> return beta_cand and be done */
 
 	if ( sum_rho_sc(res, worst_sc, n, p, rrhoc, ipsi) < b )	{
+	    int scale_iter = *max_it_scale;
 	    /* scale will be better */
 	    sc = find_scale(res, b, rrhoc, ipsi, sc, n, p,
-			    *max_it_scale, scale_tol, trace_lev >= 3);
+			    &scale_iter, scale_tol, trace_lev >= 3);
 	    k = pos_worst_scale;
 	    best_scales[ k ] = sc;
 	    for(j=0; j < p; j++)
@@ -1884,8 +1888,8 @@ int fast_s_with_memory(double *X, double *y, double *res,
 	    pos_worst_scale = find_max(best_scales, *best_r);
 	    worst_sc = best_scales[pos_worst_scale];
 	    if (trace_lev >= 2) {
-	      Rprintf("  Sample[%3d]: found new candidate with scale %.7g\n",
-		      i, sc);
+	      Rprintf("  Sample[%3d]: found new candidate with scale %.7g in %d iter.\n",
+		      i, sc, scale_iter);
 	      Rprintf("               worst scale is now %.7g\n", worst_sc);
 	    }
 	}
@@ -1906,7 +1910,7 @@ void fast_s(double *X, double *y,
 	    int *nn, int *pp, int *nRes, int *max_it_scale, double *res,
 	    int *K, int *max_k, double rel_tol, double inv_tol, double scale_tol, int *converged,
 	    int *best_r, double *bb, double *rrhoc, int *iipsi,
-	    double *bbeta, double *sscale, int trace_lev, int mts, int ss)
+	    double *bbeta, double *sscale, int trace_lev, int mts, Rboolean ss)
 {
 /* *X  = the n x p  design matrix (incl. intercept if appropriate),
  *	 in column order as sent by R)
@@ -1925,40 +1929,38 @@ void fast_s(double *X, double *y,
  * *bbeta  = final estimator
  * *sscale = associated scale estimator (or -1 when problem)
  */
-    int i,k, it_k;
+    int i,k;
     int n = *nn, p = *pp, nResample = *nRes, ipsi = *iipsi;
-    Rboolean conv;
     double b = *bb;
-    double sc, best_sc, worst_sc, aux;
-    int pos_worst_scale;
+    double sc, best_sc, aux;
     int lwork = -1, one = 1, info = 1;
-    double work0, *work, *weights, sing=0;
+    double work0, *work, *weights;
 
     /* Rprintf("fast_s %d\n", ipsi); */
 
-    /* (Pointers to) Arrays - to be allocated */
-    double *wx, *wy, *beta_cand, *beta_ref,
-	**best_betas, *best_scales;
-
     SETUP_SUBSAMPLE(n, p, X, 0);
 
-    wx     = (double *) R_alloc(n*p, sizeof(double));
-    wy     = (double *) R_alloc(n,   sizeof(double));
-
-    best_betas = (double **) Calloc(*best_r, double *);
-    best_scales = (double *) Calloc(*best_r, double);
+    // More arrays, allocated:
+    double
+	*wx = (double *) R_alloc(n*p, sizeof(double)),
+	*wy = (double *) R_alloc(n,   sizeof(double)),
+	*beta_cand   = (double *) Calloc(p, double),
+	*beta_ref    = (double *) Calloc(p, double),
+	*best_scales = (double *) Calloc(*best_r, double),
+	// matrix:
+	**best_betas = (double **) Calloc(*best_r, double *);
     for(i=0; i < *best_r; i++) {
 	best_betas[i] = (double*) Calloc(p, double);
 	best_scales[i] = INFI;
     }
-    beta_cand = (double *) Calloc(p, double);
-    beta_ref  = (double *) Calloc(p, double);
 
     INIT_WLS(wx, wy, n, p);
 
     /* disp_mat(x, n, p); */
 
-    pos_worst_scale = 0; conv = FALSE; worst_sc = INFI;
+    int pos_worst_scale = 0;
+    Rboolean conv = FALSE;
+    double worst_sc = INFI;
 
     /* srand((long)*seed_rand); */
     GetRNGstate();
@@ -1972,8 +1974,9 @@ void fast_s(double *X, double *y,
 
 	R_CheckUserInterrupt();
 	/* find a candidate */
-	sing = subsample(Xe, y, n, p, beta_cand, ind_space, idc, idr, lu, v, pivot,
-			 Dr, Dc, rowequ, colequ, 1, mts, ss, inv_tol, 1);
+	Rboolean sing = (Rboolean) // 0 |--> FALSE (= success);  {1,2} |-> TRUE
+	    subsample(Xe, y, n, p, beta_cand, ind_space, idc, idr, lu, v, pivot,
+		      Dr, Dc, rowequ, colequ, 1, mts, ss, inv_tol, 1);
 	if (sing) {
 	    *sscale = -1.;
 	    goto cleanup_and_return;
@@ -2006,16 +2009,18 @@ void fast_s(double *X, double *y,
 	    goto cleanup_and_return;
 	}
 	if ( sum_rho_sc(res, worst_sc, n, p, rrhoc, ipsi) < b )	{
+	    int scale_iter = *max_it_scale;
 	    /* scale will be better */
 	    sc = find_scale(res, b, rrhoc, ipsi, sc, n, p,
-			    *max_it_scale, scale_tol, trace_lev >= 3);
+			    &scale_iter, scale_tol, trace_lev >= 3);
 	    k = pos_worst_scale;
 	    best_scales[ k ] = sc;
 	    COPY(beta_ref, best_betas[k], p);
 	    pos_worst_scale = find_max(best_scales, *best_r);
 	    worst_sc = best_scales[pos_worst_scale];
 	    if (trace_lev >= 2) {
-	      Rprintf("  Sample[%3d]: found new candidate with scale %.7g\n", i, sc);
+	      Rprintf("  Sample[%3d]: found new candidate with scale %.7g in %d iter.\n",
+		      i, sc, scale_iter);
 	      Rprintf("               worst scale is now %.7g\n", worst_sc);
 	    }
 	}
@@ -2031,7 +2036,7 @@ void fast_s(double *X, double *y,
     for(i=0; i < *best_r; i++) {
 	conv = TRUE;
 	if(trace_lev >= 4) Rprintf("  i=%d:\n", i);
-	it_k = refine_fast_s(X, wx, y, wy, weights, n, p, res, work, lwork,
+	int it_k = refine_fast_s(X, wx, y, wy, weights, n, p, res, work, lwork,
 			     best_betas[i], *K,  &conv /* = TRUE */, *max_k,
 			     rel_tol, trace_lev, b, rrhoc, ipsi,
 			     best_scales[i], /* -> */ beta_ref, &aux);
@@ -2192,9 +2197,10 @@ void m_s_subsample(double *X1, double *y, int n, int p1, int p2,
     for(i=0; i < nResample; i++) {
 	R_CheckUserInterrupt();
 	/* STEP 1: Draw a subsample of size p2 from (X2, y) */
-	Rboolean sing = subsample(Xe, y, n, p2, t2, ind_space, idc, idr, lu, v, pivot,
-				  Dr, Dc, rowequ, colequ, /* sample= */ TRUE, mts,
-				  ss, inv_tol, /*solve = */ TRUE);
+	Rboolean sing = (Rboolean) // 0 |--> FALSE (= success);  {1,2} |-> TRUE
+	    subsample(Xe, y, n, p2, t2, ind_space, idc, idr, lu, v, pivot,
+		      Dr, Dc, rowequ, colequ, /* sample= */ TRUE, mts,
+		      ss, inv_tol, /*solve = */ TRUE);
 	if (sing) {
 	    *sscale = -1.;
 	    goto cleanup_and_return;
@@ -2215,12 +2221,14 @@ void m_s_subsample(double *X1, double *y, int n, int p1, int p2,
 	}
 	/* STEP 4: Check if candidate looks promising */
 	if (sum_rho_sc(res, *sscale, n, p, rrhoc, ipsi) < b) {
+	    int scale_iter = max_it_scale;
 	    /* scale will be better */
 	    /* STEP 5: Solve for sc */
-	    sc = find_scale(res, b, rrhoc, ipsi, sc, n, p, max_it_scale,
+	    sc = find_scale(res, b, rrhoc, ipsi, sc, n, p, &scale_iter,
 			    scale_tol, trace_lev >= 4);
 	    if(trace_lev >= 2)
-		Rprintf("  Sample[%3d]: new candidate with sc = %#10.5g\n",i,sc);
+		Rprintf("  Sample[%3d]: new candidate with sc = %#10.5g in %d iter\n",
+			i, sc, scale_iter);
 	    /* STEP 6: Update best fit */
 	    *sscale = sc;
 	    COPY(t1, b1, p1);
@@ -2315,8 +2323,9 @@ Rboolean m_s_descent(double *X1, double *X2, double *y,
 		  *KODE);
 	}
 	/* STEP 3: Compute the scale estimate */
-	sc = find_scale(res2, b, rrhoc, ipsi, sc, n, p, max_it_scale, scale_tol,
-			trace_lev >= 4); // <- here only if higher trace_lev
+	int scale_iter = max_it_scale;
+	sc = find_scale(res2, b, rrhoc, ipsi, sc, n, p, &scale_iter,
+			scale_tol, trace_lev >= 4); // <- here only if higher trace_lev
 	/* STEP 4: Check for convergence */
 	/* FIXME: check convergence using scale ? */
 	double del = sqrt(norm_diff2(b1, t1, p1) + norm_diff2(b2, t2, p2));
@@ -2380,11 +2389,11 @@ Rboolean m_s_descent(double *X1, double *X2, double *y,
  * Parts of the algorithm are based on the Gaxpy version of the LU      *
  * decomposition with partial pivoting by                               *
  * Golub G. H., Van Loan C. F. (1996) - MATRIX Computations             */
-Rboolean subsample(const double x[], const double y[], int n, int m,
-		   double *beta, int *ind_space, int *idc, int *idr,
-		   double *lu, double *v, int *pivot,
-		   double *Dr, double *Dc, int rowequ, int colequ,
-		   Rboolean sample, int mts, Rboolean ss, double tol_inv, Rboolean solve)
+int subsample(const double x[], const double y[], int n, int m,
+	      double *beta, int *ind_space, int *idc, int *idr,
+	      double *lu, double *v, int *pivot,
+	      double *Dr, double *Dc, int rowequ, int colequ,
+	      Rboolean sample, int mts, Rboolean ss, double tol_inv, Rboolean solve)
 {
     /* x:         design matrix (n x m)
        y:         response vector
@@ -2415,11 +2424,11 @@ Rboolean subsample(const double x[], const double y[], int n, int m,
        solve:     solve the least squares problem on the subsample?
                   (0: no, 1: yes)
 
-       return condition:
+       return value ('condition'):
              0: success
-             1: singular (matrix xt does not contain a m dim. full rank
-                          submatrix)
-             2: too many singular resamples (simple subsampling case)    */
+             1: singular (matrix xt does not contain a m dim. full rank submatrix)
+             2: too many singular resamples (simple subsampling case)
+*/
     int j, k, l, one = 1, mu = 0, tmpi, i = 0, attempt = 0;
     double tmpd;
     Rboolean sing;
@@ -2545,7 +2554,9 @@ void get_weights_rhop(const double r[], double s, int n, const double rrhoc[], i
 }
 
 double find_scale(const double r[], double b, const double rrhoc[], int ipsi,
-		  double initial_scale, int n, int p, int max_iter, double scale_tol,
+		  double initial_scale, int n, int p,
+		  int* iter, // input: max_iter,  output: #{iterations used}
+		  double scale_tol,
 		  Rboolean trace)
 {
     if(initial_scale <= 0.) {
@@ -2555,20 +2566,22 @@ double find_scale(const double r[], double b, const double rrhoc[], int ipsi,
     // else
     double scale = initial_scale;
     if(trace) Rprintf("find_scale(*, ini.scale =%#15.11g):\nit | new scale\n", scale);
-    for(int it = 0; it < max_iter; it++) {
+    for(int it = 0; it < iter[0]; it++) {
 	scale = initial_scale *
 	    sqrt( sum_rho_sc(r, initial_scale, n, p, rrhoc, ipsi) / b ) ;
-	if(trace) Rprintf("%2d | %#12.9g\n", it, scale);
-	if(fabs(scale - initial_scale) <= scale_tol*initial_scale) // converged:
-	    return(scale);
+	if(trace) Rprintf("%2d | %#13.10g\n", it, scale);
+	if(fabs(scale - initial_scale) <= scale_tol*initial_scale) { // converged:
+	    *iter = it; return(scale);
+	}
 	initial_scale = scale;
     }
     warning("find_scale() did not converge in '%s' (= %d) iterations with tol=%g, last rel.diff=%g",
-	    "maxit.scale", /* <- name from lmrob.control() */ max_iter, scale_tol,
+	    "maxit.scale", /* <- name from lmrob.control() */ *iter, scale_tol,
 	    (scale - initial_scale) / initial_scale);
 
     return(scale);
 }
+
 
 // As R's which.max(a),  return()ing zero-based   k in {0,1,...,n-1}
 int find_max(double *a, int n)

@@ -56,7 +56,7 @@ splitFrame <- function(mf, x = model.matrix(mt, mf),
     factors <- attr(mt, "factors")
     factor.idx <- attr(mt, "dataClasses") == "factor"
     if (!any(factor.idx)) ## There are no factors
-        return(list(x1.idx = rep.int(FALSE, p), x1=matrix(,nrow(x),0L), x2=x))
+        return(list(x1.idx = rep.int(FALSE, p), x1=matrix(NA_real_,nrow(x),0L), x2=x))
     switch(type,
            ## --- include interactions cat * cont in x1:
            fi = { factor.asgn <- which(factor.idx %*% factors > 0) },

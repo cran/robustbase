@@ -32,12 +32,12 @@
    h_kern(a,b, ai,bi,ab, eps):	the values h(a,b)  needed to compute the mc
 */
 static
-double h_kern(double a, double b, int ai, int bi, int ab, double eps);
+double h_kern(double a, double b, int ai, int bi, int ab, double eps, Rboolean do_scale);
 
-
-void mc_C(double *z, int *in, double *eps, int *iter, double *out)
+// Called via .C() :
+void mc_C(double *z, int *in, double *eps, int *iter, double *out, int *scale)
 {
-    *out = mc_C_d(z, *in, eps, iter);
+    *out = mc_C_d(z, *in, eps, iter, *scale);
     return;
 }
 
@@ -49,7 +49,7 @@ void mc_C(double *z, int *in, double *eps, int *iter, double *out)
  *      eps2: used to check for over- and underflow, respectively
  *      therefore I suggest eps1 = DBL_EPS and eps2 = DBL_MIN
  */
-double mc_C_d(double *z, int n, double *eps, int *iter)
+double mc_C_d(double *z, int n, const double eps[], int *iter, int scale)
 {
 /* NOTE:
     eps	  = c(eps1, eps2)
@@ -57,7 +57,7 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
           = c(it, converged)     as output
 */
     int trace_lev = iter[1], it = 0;
-    Rboolean converged = TRUE;
+    Rboolean converged = TRUE, do_scale = (Rboolean) scale;
     double medc; // "the" result
     static const double Large = DBL_MAX / 4.;
 
@@ -85,44 +85,50 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 	xmed = (x[ind] + x[ind+1])/2;
     }
 
-    if (fabs(x[1] - xmed) < eps[0] * (eps[0] + fabs(xmed))) {
+    double x_eps = eps[0] * (do_scale ? eps[0] + fabs(xmed) : fabs(xmed));
+    if (fabs(x[1] - xmed) <= x_eps) {
 	medc = -1.; goto Finish;
-    } else if (fabs(x[n] - xmed) < eps[0] * (eps[0] + fabs(xmed))) {
+    } else if (fabs(x[n] - xmed) <= x_eps) {
 	medc =	1.; goto Finish;
     }
     /* else : median is not at the border ------------------- */
 
     if(trace_lev)
-	Rprintf("mc_C_d(z[1:%d], trace_lev=%d): Median = %g (not at the border)\n",
-		n, trace_lev, -xmed);
+	Rprintf("mc_C_d(z[1:%d], trace_lev=%d, scale=%s): Median = %g (not at the border)\n",
+		n, trace_lev, do_scale ? "T" : "F", -xmed);
 
     int i,j;
     /* center x[] wrt median --> such that then  median( x[1:n] ) == 0 */
     for (i = 1; i <= n; i++)
 	x[i] -= xmed;
 
-/* MM: ==> This scaling is extremely outlier-dependent
-   --      it *kills*  equivariance when e.g. x[n] --> very large.
-   e.g., below '(eps[0] + fabs(xmed))' depends on rescaling
+    if(do_scale) {
+	/* MM: ==> This scaling is extremely outlier-dependent
+	   --      it *kills*  equivariance when e.g. x[n] --> very large.
+	   e.g., below '(eps[0] + fabs(xmed))' depends on rescaling
 
-   Should *NOT* be needed if everything else is *relative* instead of absolute
-   Consider replacing
-    1)  eps[0] * (eps[0] + fabs(xmed))   with  eps[0]*fabs(xmed)
-    2)        x[j] > x_eps               with     x[j] >= x_eps  (>= : for 0)
-*/
+	   Should *NOT* be needed if everything else is *relative* instead of absolute
+	   Consider replacing
+	   1)  eps[0] * (eps[0] + fabs(xmed))   with  eps[0]*fabs(xmed)
+	   2)        x[j] > x_eps               with     x[j] >= x_eps  (>= : for 0)
+	*/
 
-    /* Now scale to inside [-0.5, 0.5] and flip sign such that afterwards
-    *  x[1] >= x[2] >= ... >= x[n] */
-    double xden = -2 * fmax2(-x[1], x[n]);
-    for (i = 1; i <= n; i++)
-	x[i] /= xden;
-    xmed /= xden;
-    if(trace_lev >= 2)
-	Rprintf(" x[] has been rescaled (* 1/s) with s = %g\n", -xden);
+	/* Now scale to inside [-0.5, 0.5] and flip sign such that afterwards
+	 *  x[1] >= x[2] >= ... >= x[n] */
+	double xden = -2 * fmax2(-x[1], x[n]);
+	for (i = 1; i <= n; i++)
+	    x[i] /= xden;
+	xmed /= xden;
+	x_eps = eps[0] * (eps[0] + fabs(xmed));
+	if(trace_lev >= 2)
+	    Rprintf(" x[] has been rescaled (* 1/s) with s = %g\n", -xden);
+    } else { // no re-scaling; still flipping signs :
+	for (i = 1; i <= n; i++)
+	    x[i] *= -1.;
+    }
 
     j = 1;
-    double x_eps = eps[0] * (eps[0] + fabs(xmed));
-    while (j <= n && x[j] > x_eps) { /* test relative to xmed */
+    while (j <= n && x[j] >= x_eps) { /* test relative to xmed */
 	/* x1[j] = x[j]; */
 	j++;
     }
@@ -131,7 +137,7 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 		x_eps, j-1);
     i = 1;
     double *x2 = x+j-1; /* pointer -- corresponding to  x2[i] = x[j]; */
-    while (j <= n && x[j] > -x_eps) { /* test relative to xmed */
+    while (j <= n && x[j] >= -x_eps) { /* test relative to xmed */
 	/* x1[j] = x[j]; */
         /* x2[i] = x[j]; */
         j++;
@@ -193,7 +199,7 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 	    if (left[i] <= right[i]) {
 		iwt[j] = right[i] - left[i]+1;
 		int k = left[i] + (iwt[j]/2);
-		work[j] = h_kern(x[k], x2[i], k, i, h1+1, eps[1]);
+		work[j] = h_kern(x[k], x2[i], k, i, h1+1, eps[1], do_scale);
 		j++;
 	    }
 	if(trace_lev >= 4) {
@@ -209,30 +215,30 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 	    }
 	}
 	trial = whimed_i(work, iwt, j, acand, a_srt, iw_cand);
-	double eps_trial = eps[0] * (eps[0] + fabs(trial));
+	double eps_trial = eps[0] * (do_scale ? eps[0] + fabs(trial) : fabs(trial));
 	if(trace_lev >= 3)
 	    Rprintf("%2s it=%2d, whimed(*, n=%6d)=%11.5g ", " ", it, j, trial);
 
 	j = 1;
 	for (i = h2; i >= 1; i--) {
-	    while (j <= h1 && h_kern(x[j],x2[i],j,i,h1+1,eps[1]) - trial > eps_trial) {
-		// while (j <= h1 && h_kern(x[j],x2[i],j,i,h1+1,eps[1]) > trial) {
+	    while (j <= h1 && h_kern(x[j],x2[i],j,i,h1+1,eps[1], do_scale) - trial > eps_trial) {
+		// while (j <= h1 && h_kern(x[j],x2[i],j,i,h1+1,eps[1], do_scale) > trial) {
 		if (trace_lev >= 5)
 		    Rprintf("\nj=%3d, i=%3d, x[j]=%g, x2[i]=%g, h=%g",
 			    j, i, x[j], x2[i],
-			    h_kern(x[j],x2[i],j,i,h1+1,eps[1]));
+			    h_kern(x[j],x2[i],j,i,h1+1,eps[1], do_scale));
 		j++;
 	    }
 /* 	    for(; j <= h1; j++) { */
-/* 		register double h = h_kern(x[j],x2[i],j,i,h1+1,eps[1]); */
+/* 		register double h = h_kern(x[j],x2[i],j,i,h1+1,eps[1], do_scale); */
 /* 		if(h > trial) break; */
 /* 	    } */
 	    p[i] = j-1;
 	}
 	j = h1;
 	for (i = 1, sum_p=0, sum_q=0; i <= h2; i++) {
-	    while (j >= 1 && trial - h_kern(x[j],x2[i],j,i,h1+1,eps[1]) > eps_trial)
-		// while (j >= 1 && h_kern(x[j],x2[i],j,i,h1+1,eps[1]) < trial)
+	    while (j >= 1 && trial - h_kern(x[j],x2[i],j,i,h1+1,eps[1], do_scale) > eps_trial)
+		// while (j >= 1 && h_kern(x[j],x2[i],j,i,h1+1,eps[1], do_scale) < trial)
 		j--;
 	    q[i] = j+1;
 
@@ -295,7 +301,7 @@ double mc_C_d(double *z, int n, double *eps, int *iter)
 	for (i = 1; i <= h2; i++) {
 	    if (left[i] <= right[i]) {
 		for (int k = left[i]; k <= right[i]; k++) {
-		    work[j] = -h_kern(x[k],x2[i],k,i,h1+1,eps[1]);
+		    work[j] = -h_kern(x[k],x2[i],k,i,h1+1,eps[1], do_scale);
 		    j++;
 		}
 	    }
@@ -337,13 +343,16 @@ Finish:
     }
 */
 static
-double h_kern(double a, double b, int ai, int bi, int ab, double eps)
+double h_kern(double a, double b, int ai, int bi, int ab, double eps, Rboolean do_scale)
 {
 // eps := 'eps2' in R's mc()
 
 /*     if (fabs(a-b) <= DBL_MIN) */
     /* check for zero division and positive b */
-    if (fabs(a-b) < 2.0*eps || b > 0)
+    // MK added a check '|| b > 0' ("or positive b"), but said "_and_ positive b" (r221)
+    /* if (fabs(a-b) < 2.0*eps || b > 0) */
+    // MM: don't see why (but it seems needed); the check should be *relative* to |a+b|
+    if (b > 0 || fabs(a-b) <= eps*(do_scale ? 2. : fabs(a+b))) // '<=' since RHS maybe 0
 	return sign((double)(ab - (ai+bi)));
 
     /* else */
