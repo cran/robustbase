@@ -149,8 +149,8 @@ if(getRversion() <= "3.5.1" && as.numeric(R.version$`svn rev`) < 74993)
     storage.mode(sc6$coefficients) <- "double"
 
 stopifnot(all.equal(coef(m5), coef(cm5), tolerance = 0.01),
-          identical(coef(m6), coef(cm6)),
+          all.equal(coef(m6), coef(cm6), tolerance = 1e-14),
           all.equal(coef(sm5), coef(sc5), tolerance = 0.05),
-          identical(coef(sm6), coef(sc6)),
+          all.equal(coef(sm6), coef(sc6), tolerance = 1e-14),
           identical(sm5$df, sc5$df),
           identical(sm6$df, sc6$df))

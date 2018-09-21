@@ -4,6 +4,16 @@
 \title{News for \R Package \pkg{robustbase}}
 \encoding{UTF-8}
 
+\section{CHANGES in robustbase VERSION 0.93-3 (2018-09-06)}{
+  \subsection{Tweaks}{
+    \itemize{
+      \item losen the strict tests, notably in
+      \file{tests/nlregrob-tst.R} to work around \code{nls()}
+      convergence issues on all non-standard BLAS platforms.
+    }
+  }
+}
+
 \section{CHANGES in robustbase VERSION 0.93-2 (2018-07-26)}{
   \subsection{BUG FIXES}{
     \itemize{

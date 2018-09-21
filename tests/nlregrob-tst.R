@@ -106,9 +106,15 @@ Cfit.40out  <- update(Cfit, data = d.exp40out,
 if(FALSE) ## this fails for "bad" non-R BLAS/LAPACK
     Cfit.no.out <- update(Cfit.40out, subset = -(15:27))
 ## help giving it a good start *and* raise tolerance (from 8e-8):
-Cfit.no.out <- update(Cfit.40out, subset = -(15:27), start = c(a = 1, b = 0.2),
-                      control = nls.control(maxiter = 1000, tol = 5e-7, printEval=TRUE))
-
+## still fails for all three of {ATLAS, MKL, OpenBLAS} with
+## Error in nls(formula = y ~ Expo(x, a, b), data = d.exp.Hlev, start = c(a = 1, :
+##     step factor 0.000488281 reduced below 'minFactor' of 0.000976562
+Cfit.no.out <-
+    tryCatch(error = function(e) e,
+    update(Cfit.40out, subset = -(15:27), start = c(a = 1, b = 0.2),
+           control = nls.control(maxiter = 1000, tol = 5e-7, printEval=TRUE))
+    )
+Cfit.no..ok <- !inherits(Cfit.no.out, "error")
 if(doExtras) {
 Rf.out.MM.S.bisquare   <- update(Rfit.MM.S.bisquare, data=d.exp40out)
 Rf.out.MM.S.lqq        <- update(Rf.out.MM.S.bisquare, psi = "lqq")
@@ -133,6 +139,7 @@ cE <- curve(Expo(x, a=1, b=0.2), 0, 10, n=1+2^9, col=cTr, lwd=2, lty=2, add=TRUE
 ll <- length(m1 <- sapply(ls.str(patt="^Rf.out"), get, simplify=FALSE))
 .tmp <- lapply(m1, function(.) lines(d.exp40out$x, fitted(.)))
 xx <- local({p <- par("usr"); seq(p[1],p[2], length.out=256)})
+if(Cfit.no..ok)
 lines(xx, predict(Cfit.no.out, list(x=xx)), col=cLS, lwd=3)
 lines(xx, predict(Cfit.40out , list(x=xx)), col=cLS, lty=2)
 legend("topleft", c("true", "LS [w/o outl]", "LS", names(m1)),
@@ -184,7 +191,9 @@ legend("topleft", c("true", "LS [w/o outl]", "LS", names(m1)),
 showProc.time()
 
 				        cfcl <- coef(Cfit)
+if(Cfit.no..ok) {
 				        cfcl.n.o <- coef(Cfit.no.out)
+} else {                                cfcl.n.o <- cfcl } # use substitute - for code below
 				        cfcl.n.H <- coef(Cfit.no.Hlev)
 ## no outliers present
 assert.EQ(coef(Rfit.MM.S.bisquare),	cfcl, tol = 0.01, giveRE=TRUE)

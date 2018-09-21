@@ -1,9 +1,9 @@
 Package: robustbase
-Version: 0.93-2
-VersionNote: Released 0.93-1.1 on 2018-07-18 on CRAN
-Date: 2018-07-26
+Version: 0.93-3
+VersionNote: Released 0.93-2 on 2018-07-26 on CRAN
+Date: 2018-09-06
 Title: Basic Robust Statistics
-Authors@R: c(person("Martin","Maechler", role=c("aut","cre"), email="maechler@stat.math.ethz.ch")
+Authors@R: c(person("Martin","Maechler", role=c("aut","cre"), email="maechler@stat.math.ethz.ch", comment = c(ORCID = "0000-0002-8685-9910"))
          , person("Peter", "Rousseeuw", role="ctb", comment = "Qn and Sn")
          , person("Christophe", "Croux", role="ctb", comment = "Qn and Sn")
          , person("Valentin", "Todorov", role = "aut", email = "valentin.todorov@chello.at",
@@ -36,8 +36,8 @@ ByteCompile: yes
 LazyData: yes
 NeedsCompilation: yes
 License: GPL (>= 2)
-Packaged: 2018-07-27 07:28:53 UTC; maechler
-Author: Martin Maechler [aut, cre],
+Packaged: 2018-09-06 09:56:24 UTC; maechler
+Author: Martin Maechler [aut, cre] (<https://orcid.org/0000-0002-8685-9910>),
   Peter Rousseeuw [ctb] (Qn and Sn),
   Christophe Croux [ctb] (Qn and Sn),
   Valentin Todorov [aut] (most robust Cov),
@@ -49,4 +49,4 @@ Author: Martin Maechler [aut, cre],
   Maria Anna di Palma [ctb] (initial version of Comedian)
 Maintainer: Martin Maechler <maechler@stat.math.ethz.ch>
 Repository: CRAN
-Date/Publication: 2018-07-27 17:00:03 UTC
+Date/Publication: 2018-09-21 16:10:02 UTC
