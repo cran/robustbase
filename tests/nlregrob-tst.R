@@ -1,4 +1,6 @@
 stopifnot(require("robustbase"))
+source(system.file("xtraR", "platform-sessionInfo.R", # moreSessionInfo() etc
+                             package = "robustbase", mustWork=TRUE))
 ## testing functions:
 source(system.file("test-tools-1.R",  package = "Matrix", mustWork=TRUE))# assert.EQ
 
@@ -12,6 +14,8 @@ showProc.time <- local({ ## function + 'pct' variable
 	cat('Time elapsed: ', (pct - ot)[1:3], final)
     }
 })
+
+mS <- moreSessionInfo(print.=TRUE)
 
 ## as long as we don't export these (nor provide an nlrob(., method=.) interface:
 nlrob.MM  <- robustbase:::nlrob.MM
@@ -36,6 +40,8 @@ if(start.from.true) { # population size = NP (random) + 1 (true parameters)
 
 if(!dev.interactive(orNone=TRUE))  pdf("nlregrob-tst.pdf")
 
+RNGversion("3.5.0") # -- TODO once R >> 3.5.0 : update results !!
+
 ## Stromberg, Arnold J. (1993).
 ## Computation of high breakdown nonlinear regression parameters.
 ## J. Amer. Statist. Assoc. 88(421), 237-244.
@@ -47,9 +53,11 @@ set.seed(2345) # for reproducibility
 d.exp30 <- data.frame(x = sort( runif(30, 0, 10) ), err = rnorm(30))
 d.exp30 <- transform(d.exp30, y = Expo(x, 1, 0.2) + err)
 ## classical (starting at truth .. hmm)
+op <- options(digits=12)
 Cfit <- nls(y ~ Expo(x, a, b), data = d.exp30, start = c(a = 1, b = 0.2),
-            control = nls.control(tol = 8e-8, printEval = TRUE))
+            control = nls.control(tol = 8e-8, printEval = TRUE), trace=TRUE)
 showProc.time()#                        ---- OS X needing 6e-8
+options(op)
 
 ## robust
 Rfit.MM.S.bisquare <-
@@ -101,7 +109,8 @@ showProc.time()
 
 ## 40% outliers present {use different data name: seen in print(<fitted model>)
 d.exp40out <- within(d.exp30, y[15:27] <- y[15:27] + 100)
-Cfit.40out  <- update(Cfit, data = d.exp40out,
+op <- options(digits=12)
+Cfit.40out  <- update(Cfit, data = d.exp40out, trace=TRUE,
                       control = nls.control(tol = Cfit$control$tol))
 if(FALSE) ## this fails for "bad" non-R BLAS/LAPACK
     Cfit.no.out <- update(Cfit.40out, subset = -(15:27))
@@ -111,10 +120,11 @@ if(FALSE) ## this fails for "bad" non-R BLAS/LAPACK
 ##     step factor 0.000488281 reduced below 'minFactor' of 0.000976562
 Cfit.no.out <-
     tryCatch(error = function(e) e,
-    update(Cfit.40out, subset = -(15:27), start = c(a = 1, b = 0.2),
+    update(Cfit.40out, subset = -(15:27), start = c(a = 1, b = 0.2), trace=TRUE,
            control = nls.control(maxiter = 1000, tol = 5e-7, printEval=TRUE))
     )
 Cfit.no..ok <- !inherits(Cfit.no.out, "error")
+options(op)
 if(doExtras) {
 Rf.out.MM.S.bisquare   <- update(Rfit.MM.S.bisquare, data=d.exp40out)
 Rf.out.MM.S.lqq        <- update(Rf.out.MM.S.bisquare, psi = "lqq")
@@ -153,11 +163,20 @@ d.exp.Hlev <- within(d.exp40out, {
     y <- Expo(x, 1, 0.2) + err
     y[28:30] <- y[28:30] + 500
 })
-if(FALSE) ## this fails for "bad" non-R BLAS/LAPACK
-    Cfit.Hlev <- update(Cfit.40out, data = d.exp.Hlev)
-Cfit.Hlev <- update(Cfit.40out, data = d.exp.Hlev, start = c(a = 1, b = 0.2))
-Cfit.no.Hlev <- update(Cfit.Hlev, subset = -(28:30))
+
+op <- options(digits=12)
+Cfit.Hlev <-
+    tryCatch(error = function(e) e,
+         update(Cfit.40out, data = d.exp.Hlev, start = c(a = 1, b = 0.2), trace=TRUE,
+                control = nls.control(maxiter = 100, tol = 5e-7, printEval=TRUE))
+         )
+if(Cfit.Hlev..ok <- !inherits(Cfit.Hlev, "error")) {
+    Cfit.no.Hlev <- update(Cfit.Hlev, subset = -(28:30))
+} else { ## substitute -- better?
+    Cfit.no.Hlev <- update(Cfit, subset = -(28:30))
+}
 showProc.time()
+options(op)
 
 if(doExtras) {
 Rf.Hlev.MM.S.bisquare   <- update(Rfit.MM.S.bisquare, data = d.exp.Hlev)
@@ -184,10 +203,15 @@ x.H <- seq(par("usr")[1], par("usr")[2], length.out = 256)
 ll <- length(m1 <- sapply(ls.str(patt="^Rf.Hlev"), get, simplify=FALSE))
 .tmp <- lapply(m1, function(.) lines(x.H, predict(., list(x=x.H))))
 lines(x.H, predict(Cfit.no.Hlev, list(x=x.H)), col=cLS, lwd=3)## L.S.(<good data>)
+if(Cfit.Hlev..ok) {
 lines(x.H, predict(Cfit.Hlev,    list(x=x.H)), col=cLS, lty=2)## L.S.
 legend("topleft", c("true", "LS [w/o outl]", "LS", names(m1)),
        lwd=c(2,3, rep(1,1+ll)), lty=c(2,1,2, rep(1,ll)),
        col=c(cTr, cLS,cLS, rep(par("fg"),ll)), bty="n", inset=.01)
+} else {
+    cat("no Cfit.Hlev  lines as nls() failed there\n")
+    cat("<FIXME> : legend(...)  !?\n")
+}
 showProc.time()
 
 				        cfcl <- coef(Cfit)

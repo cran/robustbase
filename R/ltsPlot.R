@@ -20,7 +20,7 @@
 plot.lts <- function(x,
 		   which = c("all", "rqq","rindex", "rfit", "rdiag"),
 		   classic = FALSE,
-		   ask = (which == "all" && dev.interactive()),
+		   ask = (which[1] == "all" && dev.interactive()),
 		   id.n, ...) {
     if (!inherits(x, "lts"))
 	stop("Use only with 'lts' objects")

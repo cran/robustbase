@@ -56,9 +56,15 @@ adjOutlyingness(x, ndir = 250, p.samp = p, clower = 4, cupper = 3,
     direction search.}
 }
 \note{
- The result is \emph{random} as it depends on the sample of
- \code{ndir} directions chosen; hence \code{\link{set.seed}()} yourself
- for reproducibility!
+  The result is \emph{random} as it depends on the sample of
+  \code{ndir} directions chosen; specifically, to get sub samples the algorithm uses
+  \code{\link{sample.int}(n, p.samp)}
+  which from \R version 3.6.0 depends on
+  \code{\link{RNGkind}(*, sample.kind)}.  Exact reproducibility of results
+  from \R versions 3.5.3 and earlier, requires setting
+  \code{\link{RNGversion}("3.5.0")}.% same text in ./glmrob.Rd ("MT")
+  In any case, do use \code{\link{set.seed}()} yourself
+  for reproducibility!
 
  Till Aug/Oct. 2014, the default values for \code{clower} and \code{cupper} were
  accidentally reversed, and the signs inside \code{exp(.)} where swapped
@@ -126,7 +132,7 @@ set.seed(1) ## result is random!
 ao1 <- adjOutlyingness(longley)
 ## which are outlying ?
 which(!ao1$nonOut) ## one: "1948" - for this seed! (often: none)
-stopifnot(all(ao1$nonOut[-2]))
+all(ao1$nonOut[-2]) # TRUE typically (R's own BLAS, Lapack, ..)
 
 ## An Example with outliers :
 

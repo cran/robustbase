@@ -14,7 +14,8 @@
 }
 \usage{
 \method{plot}{lts}(x, which = c("all","rqq","rindex","rfit","rdiag"),
-     classic=FALSE, ask=(which=="all" && dev.interactive()), id.n, \dots)
+     classic=FALSE, ask = (which[1] == "all" && dev.interactive()),
+     id.n, \dots)
 %    ltsPlot(x, which = c("all","rqq","rindex","rfit","rdiag"), classic=FALSE, ask=(which=="all" && dev.interactive()), id.n, \dots)
 }
 \arguments{

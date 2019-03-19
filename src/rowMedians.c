@@ -61,14 +61,13 @@ SEXP R_rowMedians(SEXP x, SEXP naRm, SEXP hasNA, SEXP byRow, SEXP keepNms) {
     nrow = INTEGER(ans)[1];
     ncol = INTEGER(ans)[0];
   }
-
+  UNPROTECT(1); // and reprotect :
   if (isReal(x)) {
-    ans = rowMedians_Real(x, nrow, ncol, narm, hasna, byrow);
+      ans = PROTECT(rowMedians_Real   (x, nrow, ncol, narm, hasna, byrow));
   } else if (isInteger(x)) {
-    ans = rowMedians_Integer(x, nrow, ncol, narm, hasna, byrow);
+      ans = PROTECT(rowMedians_Integer(x, nrow, ncol, narm, hasna, byrow));
   } else {
-    UNPROTECT(1);
-    error("Argument 'x' must be numeric (integer or double).");
+      error("Argument 'x' must be numeric (integer or double).");
   }
   if(keepnms) {
       SEXP xDnms = getAttrib(x, R_DimNamesSymbol);

@@ -5,7 +5,12 @@
 ### hence, can also produce non-reproducible output such as timing
 
 library(robustbase)
-source(system.file("xtraR/mcnaive.R", package = "robustbase"))# mcNaive()
+for(f in system.file("xtraR", c("mcnaive.R", # -> mcNaive()
+			      "platform-sessionInfo.R"),
+                     package = "robustbase", mustWork=TRUE)) {
+    cat("source(",f,"):\n", sep="")
+    source(f)
+}
 source(system.file("test-tools-1.R",  package="Matrix", mustWork=TRUE))
 assertEQm12 <- function(x,y, giveRE=TRUE, ...)
     assert.EQ(x,y, tol = 1e-12, giveRE=giveRE, ...)
@@ -15,17 +20,9 @@ c.time <- function(...) cat('Time elapsed: ', ..., '\n')
 S.time <- function(expr) c.time(system.time(expr))
 DO <- function(...) S.time(stopifnot(...))
 
+mS <- moreSessionInfo(print.=TRUE)
+
 (doExtras <- robustbase:::doExtras())# TRUE if interactive() or activated by envvar
-La_version()# to know, for completeness
-
-## Are BLAS and LAPACK the same library?
-## TRUE e.g. for OpenBLAS;  FALSE for R's own source compiled
-(is.BLAS.LAPACK <- exists("La_library", mode="function") &&
-     identical(La_library(), extSoftVersion()[["BLAS"]]))
-## also TRUE for Windows [since both are "" !!]
-
-## Rather would want to know which of (OpenBLAS | ATLAS | MKL | R's own BLAS+LAPACK)
-
 
 
 n.set <- c(1:99, 1e5L+ 0:1) # large n gave integer overflow in earlier versions
@@ -71,6 +68,8 @@ for(n in 3:50) {
 
 ###----  Strict tests of adjOutlyingness():
 ###                      ================= changed after long-standing bug fix in Oct.2014
+## as this calls, sample.int() and we carefully compare specific seed examples, need
+RNGversion("3.5.0") ## [TODO: adapt to "current" RNG settings]
 
 set.seed(1);  S.time(a1.1 <- adjOutlyingness(longley))
 set.seed(11); S.time(a1.2 <- adjOutlyingness(longley))
@@ -105,24 +104,32 @@ cat("\nRnk(a4 $ adjout): "); dput(Rnk(a4$adjout), control= {})
 if(!all(a5$nonOut))
   print(which(!a5$nonOut)) # if we know, enable check below
 
-
-stopifnot(which(!a2$nonOut) == 1:14,
-	  which(!a3$nonOut) == 1:14,
-	  ## 'longley', 'wood' have no outliers in the "adjOut" sense:
-	  ## FIXME: longley is platform dependent too
-	  if(isMac) TRUE else sum(a1.2$nonOut) >= 15, # sum(.) = 16 [nb-mm3, Oct.2014]
-	  if(doExtras) ## not (yet) for ATLAS [FIXME]
-              a5$nonOut else TRUE,
-          a6$nonOut[-20],
-	  ## hbk (n = 75) :
-	  abs(Rnk(a3$adjout) -
+stopifnot(exprs = {
+    which(!a2$nonOut) == 1:14
+    which(!a3$nonOut) == 1:14
+    ## 'longley', 'wood' have no outliers in the "adjOut" sense:
+    ## FIXME: longley is platform dependent too
+    { if(isMac) TRUE
+      else if(mS$ strictR) sum(a1.2$nonOut) >= 15 # sum(.) = 16 [nb-mm3, Oct.2014]
+      else ## however, openBLAS Fedora Linux /usr/bin/R gives sum(a1.2$nonOut) = 13
+          sum(a1.2$nonOut) >= 13
+    }
+    if(doExtras) {
+        if(mS$ strictR) a5$nonOut
+        else ## not for ATLAS
+            sum(a5$nonOut) >= 18 # 18: OpenBLAS
+    } else TRUE
+    a6$nonOut[-20]
+    ## hbk (n = 75) :
+    abs(Rnk(a3$adjout) -
              c(62, 64, 68, 71, 70,   65, 66, 63, 69, 67,   73, 75, 72, 74, 25,
                52, 44,  5, 11, 33,    6, 21, 29, 28, 59,    9, 12, 13, 37, 27,
                43, 35, 22, 55, 14,    2, 26, 46, 54, 15,   23, 41, 40, 32, 60,
                30, 61, 19, 16,  8,   39, 53, 51, 48, 20,   47, 50, 42,  7, 38,
                17, 57, 45, 18, 24,   34,  3, 58, 56,  4,    1, 10, 31, 36, 49)
 	      ) <= 3 ## all 0 on 32-bit Linux
-)
+})
+
 ## milk (n = 86) : -- Quite platform dependent!
 r <- Rnk(a4$adjout)
 r64 <- ## the 64-bit (ubuntu 14.04, nb-mm3) values:
@@ -164,6 +171,7 @@ for (i in 1:10) {
     ## this would produce an error in the 6th iteration
     aa <- adjOutlyingness(x=X,ndir=250)
 }
+
 
 ## "large n" (this did overflow sum_p, sum_q  earlier ==> had inf.loop):
 set.seed(3); x <- rnorm(2e5)
@@ -281,3 +289,7 @@ with(r.mc5Big, x[is.na(y)])
 
 
 c.time(proc.time())
+
+summary(warnings()) # seen 15 x  In mcComp(....) :
+## maximal number of iterations (100 =? 100) reached prematurely
+

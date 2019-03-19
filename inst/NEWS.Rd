@@ -4,7 +4,28 @@
 \title{News for \R Package \pkg{robustbase}}
 \encoding{UTF-8}
 
-\section{CHANGES in robustbase VERSION 0.93-3 (2018-09-06)}{
+\section{CHANGES in robustbase VERSION 0.93-4 (2019-03-18)}{
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item \env{R_CHECK_LENGTH_1*} fix in default value for \code{ask} in
+      plot methods for \code{mcd} and \code{lts}
+
+      \item \file{src/rowMedians.c} gets better PROTECT()ion thanks to
+      Tomas Kalibera's "rchk"s.
+    }
+  }
+  \subsection{Tweaks}{
+    \itemize{
+      \item losen the strict tests more, convergence issues on all
+      non-standard BLAS platforms.  Now modularized the partly platform
+      dependent testing into \code{moreSessionInfo()} in
+      \file{./xtraR/platform-sessionInfo.R}.  Further, for now use
+      \code{RNGversion("3.5.0")} e.g. in \file{../tests/mc-strict.R}.
+    }
+  }
+}
+
+\section{CHANGES in robustbase VERSION 0.93-3 (2018-09-06, svn r827)}{
   \subsection{Tweaks}{
     \itemize{
       \item losen the strict tests, notably in
@@ -14,7 +35,7 @@
   }
 }
 
-\section{CHANGES in robustbase VERSION 0.93-2 (2018-07-26)}{
+\section{CHANGES in robustbase VERSION 0.93-2 (2018-07-26, svn r825)}{
   \subsection{BUG FIXES}{
     \itemize{
       \item Update \code{lmrob(<empty multivariate>)} to the change in R
@@ -38,7 +59,7 @@
   }
 }
 
-\section{CHANGES in robustbase VERSION 0.93-1-1 (2018-07-18)}{
+\section{CHANGES in robustbase VERSION 0.93-1-1 (2018-07-18, svn r818)}{
   \subsection{BUG FIXES}{
     \itemize{
       \item \file{src/robustbase.h}: \code{is_redescender} now

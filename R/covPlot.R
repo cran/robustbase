@@ -25,7 +25,7 @@ plot.mcd <-
     function(x,
              which=c("all", "dd","distance","qqchi2","tolEllipsePlot","screeplot"),
              classic= FALSE,
-             ask = (which=="all" && dev.interactive()),
+             ask = (which[1] == "all" && dev.interactive()),
              cutoff = NULL, id.n, labels.id = rownames(x$X), cex.id = 0.75,
              label.pos = c(4,2), tol = 1e-7, ...)
 {
@@ -39,7 +39,8 @@ plot.mcd <-
 covPlot <-
     function(x, which = c("all", "dd", "distance", "qqchi2",
 			  "tolEllipsePlot", "screeplot"),
-	     classic = FALSE, ask = (which == "all" && dev.interactive()),
+	     classic = FALSE,
+             ask = (which[1] == "all" && dev.interactive()),
 	     m.cov = covMcd(x), cutoff = NULL,
              id.n, labels.id = rownames(x), cex.id = 0.75,
              label.pos = c(4,2), tol = 1e-7, ...)

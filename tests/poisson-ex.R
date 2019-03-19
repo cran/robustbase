@@ -85,6 +85,7 @@ X1 <- cbind(1, X.)
 if(FALSE) ## for debugging ...
 options(warn = 1, error=recover)
 
+RNGversion("3.5.0") ## [TODO: adapt to "current" RNG settings]
 set.seed(57)
 showSys.time(
     ## m1 <- glmrobMT(x=X1, y=y)

@@ -116,7 +116,11 @@ glmrob(formula, family, data, weights, subset, na.action,
   \cr
   \code{method="MT"}, currently only implemented for \code{family = poisson},
   computes an \dQuote{[M]-Estimator based on [T]ransformation},
-  by Valdora and Yohai (2013).
+  by Valdora and Yohai (2013), via (hidden internal) \code{glmrobMT()}; as
+  that uses \code{\link{sample}()}, from \R version 3.6.0 it depends on
+  \code{\link{RNGkind}(*, sample.kind)}.  Exact reproducibility of results
+  from \R versions 3.5.3 and earlier, requires setting
+  \code{\link{RNGversion}("3.5.0")}.% same text in ./adjOutlyingness.Rd
 
   \code{weights.on.x= "robCov"} makes sense if all explanatory variables
   are continuous.

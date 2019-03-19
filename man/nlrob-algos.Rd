@@ -73,7 +73,7 @@ nlrob.mtl(formula, data, lower, upper,
   \item{optim.control}{..}% FIXME
   \item{optArgs}{a \code{\link{list}} of optional arguments for
     optimization, e.g., \code{trace = TRUE}, passed to to the optimizer,
-    which currently must be \code{\link{JDEoptim}(.)}.}
+    which currently must be \code{\link[DEoptimR]{JDEoptim}(.)}.}
   \item{...}{alternative way to pass the \code{optArgs} above.}
 }
 \value{
@@ -84,6 +84,14 @@ nlrob.mtl(formula, data, lower, upper,
 \details{
   Copyright 2013, Eduardo L. T. Conceicao.  Available under
   the GPL (>= 2)
+
+  Currently, all four methods use \code{\link[DEoptimR]{JDEoptim}()}
+  from \CRANpkg{DEoptimR}, which subsamples using \code{\link{sample}()}.
+  From \R version 3.6.0, \code{\link{sample}} depends on
+  \code{\link{RNGkind}(*, sample.kind)}, such that exact reproducibility of
+  results from \R versions 3.5.3 and earlier requires setting
+  \code{\link{RNGversion}("3.5.0")}.
+  In any case, do use \code{\link{set.seed}()} additionally for reproducibility!
 }
 \author{
   Eduardo L. T. Conceicao; compatibility (to \code{\link{nlrob}})
@@ -112,6 +120,7 @@ nlrob.mtl(formula, data, lower, upper,
     \item{"CM":}{
       Mendes, B.V.M., and Tyler, D.E. (1996)
       Constrained M-estimation for regression.
+
       In: \emph{Robust Statistics, Data Analysis and Computer Intensive
 	Methods}, Lecture Notes in Statistics 109, Springer, New York, 299--320.
       %% not yet -- e.g. tuning constants for Welsh:
