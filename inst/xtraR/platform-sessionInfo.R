@@ -26,9 +26,17 @@ moreSessionInfo <- function(print. = FALSE) {
     if(is.null(osVersion)) osVersion <- "Fedora" # very last resort
     if(!length(BLAS.is.LAPACK <- sInfo$BLAS == sInfo$LAPACK))
         BLAS.is.LAPACK <- NA # R versions <= 3.3.x
+    ## A cheap check (that works on KH's debian-gcc setup, 2019-05):
+    if(!length(BLAS.is.openBLAS <- grepl("openblas", sInfo$BLAS, ignore.case=TRUE)))
+        BLAS.is.openBLAS <- NA
+    if(!length(Lapack.is.openBLAS <- grepl("openblas", sInfo$LAPACK, ignore.case=TRUE)))
+        Lapack.is.openBLAS <- NA
     if(print.)
-        cat("osVersion:", osVersion, "| ",
-            'BLAS "is" Lapack:', BLAS.is.LAPACK, "\n")
+        cat("osVersion:", osVersion, "\n"
+          ,'+  BLAS "is" Lapack:', BLAS.is.LAPACK
+          , '| BLAS=OpenBLAS:', BLAS.is.openBLAS
+          , '| Lapack=OpenBLAS:', Lapack.is.openBLAS
+          , "\n")
     ## NB: sessionInfo() really gets these:
     if(getRversion() >= "3.4") local({
         is.BLAS.LAPACK <- exists("La_library", mode="function") && ## R 3.4.0 and newer
@@ -52,13 +60,16 @@ moreSessionInfo <- function(print. = FALSE) {
     ##
     ##    strictR <- we_are_using_Rs_own_BLAS_and_Lapack()  [ ==> BLAS != Lapack ]
     ##
-    ## Actually the following is currently (2019-03)  equivalent to
+    ## Actually the following aims to be equivalent to {and *is* for MM on Fedora, 2019-03}
     ## strictR <- !(using ATLAS || OpenBLAS || MKL )
     if(TRUE) {
-        strictR <- !BLAS.is.LAPACK && !is.MS.Ropen
+        strictR <-
+            !BLAS.is.LAPACK   && !is.MS.Ropen		&&
+            !BLAS.is.openBLAS && !Lapack.is.openBLAS	&&
+            TRUE
     } else { ## workaround:
         strictR <- print(Sys.info()[["user"]]) == "maechler"# actually
-        ## but not when testing with /usr/bin/R [OpenBLAS!] (as "maechler"):
+        ## but not when testing with /usr/bin/R [OpenBLAS on Fedora!] (as "maechler"):
         if(strictR && substr(osVersion, 1,6) == "Fedora" && R.home() == "/usr/lib64/R")
             strictR <- FALSE
     }
@@ -69,7 +80,9 @@ moreSessionInfo <- function(print. = FALSE) {
                 , b64 = b64 # 64-bit (:<==> sizeof.pointer == 8 )
                 , b64nLD = b64nLD # 64-bit, but --no-long-double (sizeof.longdouble != 16)
                 , BLAS.is.LAPACK = BLAS.is.LAPACK
-                , is.MS.Ropen = is.MS.Ropen # is the R a version of Microsoft R Open (==> MKL-linked BLAS)
+                , BLAS.is.openBLAS = BLAS.is.openBLAS
+                , Lapack.is.openBLAS = Lapack.is.openBLAS
+                , is.MS.Ropen = is.MS.Ropen # is R a version of Microsoft R Open (==> MKL-linked BLAS)
                 , onWindows = onWindows
                 , osVersion = osVersion
                 , strictR = strictR # are BLAS & Lapack from R's source, and "otherwise known safe platform"

@@ -4,7 +4,16 @@
 \title{News for \R Package \pkg{robustbase}}
 \encoding{UTF-8}
 
-\section{CHANGES in robustbase VERSION 0.93-4 (2019-03-18)}{
+\section{CHANGES in robustbase VERSION 0.93-5 (2019-05-09, svn r840)}{
+  \subsection{Tweaks}{
+    \itemize{
+      \item For tests: try harder in \code{moreSessionInfo()} to detect
+      openBLAS (should work for KH's debian openBLAS setup).
+    }
+  }
+}
+
+\section{CHANGES in robustbase VERSION 0.93-4 (2019-03-18, svn r839)}{
   \subsection{BUG FIXES}{
     \itemize{
       \item \env{R_CHECK_LENGTH_1*} fix in default value for \code{ask} in
