@@ -5,6 +5,15 @@
 #include <R.h>
 
 /* called for  trace >= 2 : ----------------------------------------------- */
+#ifdef _new_gfortran__fixme
+# define F_Logical int_least32_t *
+#else
+# define F_Logical int *
+#endif
+// but  'int *' gives warnings with  LTO ?
+
+void F77_SUB(println)() { Rprintf("\n"); }
+void F77_SUB(prallc)(int *nrep) { Rprintf("will use *all* combinations: %d\n", *nrep); }
 
 void F77_SUB(pr1mcd)(int *i_trace, int *n, int *nvar, int *nhallf, int *krep,
 		     int *nmini, int *kmini)
@@ -14,7 +23,7 @@ void F77_SUB(pr1mcd)(int *i_trace, int *n, int *nvar, int *nhallf, int *krep,
 	    *i_trace);
 }
 
-void F77_SUB(pr2mcd)(Rboolean *part, Rboolean *all, // <- logical
+void F77_SUB(pr2mcd)(F_Logical part, F_Logical all,
 		     int *kstep, int *ngroup, int *minigr, int *nhalf, int *nrep)
 {
     Rprintf("pr[2]: (part=%d, all=%d); (kstep=%d, ngroup=%d, minigr=%d, nhalf=%d, nrep=%d)\n",
@@ -22,18 +31,18 @@ void F77_SUB(pr2mcd)(Rboolean *part, Rboolean *all, // <- logical
 }
 
 
-void F77_SUB(pr3mcd)(Rboolean *part, Rboolean *fine, int *final, // <- logical
+void F77_SUB(pr3mcd)(F_Logical part, F_Logical fine, F_Logical final,
 		     int *nrep, int *nn, int *nsel, int *nhalf, int *kstep,
-		     int *nmini, int *nmaxi)
+		     int *nmini, int *kmini)
 {
     char* phase_kind = (*part)
 	? ((*fine && !*final)
 	   ? "fine (2 of 3)"
 	   : ((*final) ? "final (3 of 3)" : "first (of 3)"))
 	: ((*final) ? "final" : "one");
-    Rprintf(" Main loop, phase[%s]:\n (nrep=%4d, nn=%4d, nsel=%4d, nhalf=%4d, kstep=%d, nmini=%d, nmaxi=%d)\n",
+    Rprintf(" Main loop, phase[%s]:\n (nrep=%4d, nn=%4d, nsel=%4d, nhalf=%4d, kstep=%d, nmini=%d, kmini=%d)\n",
 	    phase_kind, *nrep, *nn, *nsel, *nhalf,
-	    *kstep, *nmini, *nmaxi);
+	    *kstep, *nmini, *kmini);
 }
 
 void F77_SUB(prp1mcd)(int *n, int *ngroup, int *minigr, int *nhalf, int *nrep,

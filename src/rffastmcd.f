@@ -125,14 +125,14 @@ cc
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      subroutine rffastmcd(dat, n,nvar, nhalff, krep, nmini,kmini,
-     *     initcov, initmean,
-     *     inbest, det, weight, fit, coeff, kount, adcov,
-     *     temp, index1, index2, indexx, nmahad, ndist, am, am2, slutn,
-     *     med, mad, sd, means, bmeans, w, fv1, fv2,
-     *     rec, sscp1, cova1, corr1, cinv1, cova2, cinv2, z,
-     *     cstock, mstock, c1stock, m1stock, dath,
-     *     cutoff, chimed, i_trace)
+      subroutine rffastmcd(dat, n,nvar, nhalff, krep, nmini,kmini, ! 7
+     *     initcov, initmean, inbest, det,                         ! 11
+     *     weight, fit, coeff, kount, adcov,                       ! 16
+     *     temp, index1, index2, indexx, nmahad, ndist, am, am2,   ! 24
+     *     slutn, med, mad, sd, means, bmeans, w, fv1, fv2,        ! 33
+     *     rec, sscp1, cova1, corr1, cinv1, cova2, cinv2, z,       ! 41
+     *     cstock, mstock, c1stock, m1stock, dath,                 ! 46
+     *     cutoff, chimed, i_trace)                                ! 49 args
 
 cc      VT::10.10.2005 - a DATA operator was used for computing the
 cc              median and the 0.975 quantile of the chisq distribution
@@ -150,9 +150,9 @@ c      The number of iteration steps in stages 1,2 and 3 can be changed
 c      by adapting the parameters k1, k2, and k3.
 
       integer k1,k2,k3, int_max
-      parameter (k1=2)
-      parameter (k2=2)
-      parameter (k3=100)
+      parameter (k1 =  2 )
+      parameter (k2 =  2 )
+      parameter (k3 = 100)
 c int_max: easily recognized, slightly smaller than 2147483647 = .Machine$integer.max
       parameter (int_max = 2146666666)
 c Arguments
@@ -197,6 +197,7 @@ c      was hardcoded krep := 500; now an *argument*
       double precision cutoff, chimed
       integer i_trace
 
+      integer l2i
 c Functions from ./rf-common.f :
       integer replow
       integer rfncomb
@@ -364,7 +365,6 @@ c  "not part" : not partitioning; either  krep == 0  or   n <= 2*nmini-1 ( = 599
          if(krep.eq.0 .or. n.le.replow(nsel)) then
 c             use all combinations; happens iff  nsel = nvar+1 = p+1 <= 6
             nrep = rfncomb(nsel,n)
-            if(i_trace .ge. 2) call intpr('*all* combinations ',-1,0,0)
          else
             nrep=krep
             all = .false.
@@ -372,10 +372,10 @@ c             use all combinations; happens iff  nsel = nvar+1 = p+1 <= 6
       endif
 c     seed=iseed
 
-c     above: pr1mcd(i_trace, n, nvar, nhalff, krep, nmini, kmini)
-      if(i_trace .ge. 2) then
-         call pr2mcd(part, all, kstep, ngroup, minigr, nhalf, nrep)
-      endif
+c     above: prp1mcd (n,ngroup, minigr, nhalf,nrep, mini)
+      if(i_trace .ge. 2)
+     1     call pr2mcd(l2i(part), l2i(all),
+     2                 kstep, ngroup, minigr, nhalf, nrep)
 
 cc
 cc  Some more initializations:
@@ -522,8 +522,8 @@ c                       is determined according to the total number of observati
          nn=-1
       endif
       if(i_trace .ge. 2)  ! " Main loop, phase[%s]: ... "
-     1     call pr3mcd(part, fine, final, nrep, nn,
-     2                 nsel, nhalf, kstep, nmini, kmini)
+     1     call pr3mcd(l2i(part), l2i(fine), l2i(final),
+     2                 nrep, nn, nsel, nhalf, kstep,  nmini, kmini)
 
       if(fine .or.(.not.part.and.final)) then
          nrep = 10
@@ -960,7 +960,7 @@ C
 C                 Add one more observation and return to recompute the
 C                 covariance. In case of complete enumeration, when all
 C                 p+1 subsamples are generated, the array 'index1' must
-C                 be preserved 8around label 9550).
+C                 be preserved around label 9550).
 C
                      if(i_trace .ge. 2)
      *                call intpr('Singularity -> extended subsample: ',
@@ -1173,7 +1173,7 @@ cc
                   call rfcovcopy(means,bmeans,nvar,1)
                endif
  400        continue
-            if(i_trace .ge. 4) call intpr("", -1,1,0)
+            if(i_trace .ge. 4) call println()
 
 cc  After each iteration, it has to be checked whether the new solution
 cc  is better than some previous one and therefore needs to be stored. This
@@ -1397,9 +1397,22 @@ C     ------ == PutRNGstate() in C
       return
       end
 ccccc end {rffastmcd}
+ccccc
+ccccc
 
-ccccc
-ccccc
+
+c --- Auxiliary just to pass Fortran 'logical' as 'integer' to C;   int(.) does *not* work
+      integer function l2i(logi)
+      implicit none
+      logical logi
+      if(logi) then
+         l2i = 1
+      else
+         l2i = 0
+      endif
+      return
+      end
+
 ccccc
 ccccc
       subroutine rfexact(kount,nn,ndist, nvar,sscp1,

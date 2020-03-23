@@ -5,8 +5,8 @@
 }
 \description{
   Splits the design matrix into categorical and continuous
-  predictors.  Categorical variables are variables that are factors or
-  ordered factors.
+  predictors.  Categorical variables are variables that are \code{\link{factor}}s,
+  \code{\link{ordered}} factors, \emph{or} \code{\link{character}}.
 }
 \usage{
 splitFrame(mf, x = model.matrix(mt, mf),
@@ -59,11 +59,14 @@ splitFrame(mf, x = model.matrix(mt, mf),
 \examples{
 data(education)
 education <- within(education, Region <- factor(Region))
+educaCh   <- within(education, Region <- as.character(Region))
 
 ## no interactions -- same split for all types:
 fm1 <- lm(Y ~ Region + X1 + X2 + X3, education)
-splt <- splitFrame(fm1$model)
-str(splt)
+fmC <- lm(Y ~ Region + X1 + X2 + X3, educaCh  )
+splt <- splitFrame(fm1$model) ; str(splt)
+splC <- splitFrame(fmC$model)
+stopifnot(identical(splt, splC))
 
 ## with interactions:
 fm2 <- lm(Y ~ Region:X1:X2 + X1*X2, education)

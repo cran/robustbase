@@ -367,7 +367,7 @@ print.summary.lmrob <-
     cat("\nCall:\n",
 	paste(deparse(x$call, width.cutoff=72), sep = "\n", collapse = "\n"),
 	"\n", sep = "")
-    control <- lmrob.control.neededOnly(x$control)
+    control <- lmrob.control.minimal(x$control)
     cat(" \\--> method = \"", control$method, '"\n', sep = "")
     ## else cat("\n")
     resid <- x$residuals
@@ -461,7 +461,7 @@ print.summary.lmrob <-
 print.lmrob <- function(x, digits = max(3, getOption("digits") - 3), ...)
 {
     cat("\nCall:\n", cl <- deparse(x$call, width.cutoff=72), "\n", sep = "")
-    control <- lmrob.control.neededOnly(x$control)
+    control <- lmrob.control.minimal(x$control)
     if(!any(grepl("method *= *['\"]", cl)))## 'method = ".."' not explicitly visible above
 	cat(" \\--> method = \"", control$method, '"\n', sep = "") else cat("\n")
     if(length((cf <- coef(x)))) {

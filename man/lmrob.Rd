@@ -131,8 +131,8 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
       By default, standard errors are computed using the formulas of
       Croux, Dhaene and Hoorelbeke (2003) (\code{\link{lmrob.control}}
       option \code{cov=".vcov.avar1"}).  This method, however, works only
-      for MM-estimates. For other \code{method} arguments, the
-      covariance matrix estimate used is based on the asymptotic
+      for MM-estimates (i.e., \code{method = "MM"} or \code{ = "SM"}).  For other
+      \code{method} arguments, the covariance matrix estimate used is based on the asymptotic
       normality of the estimated coefficients (\code{cov=".vcov.w"}) as
       described in Koller and Stahel (2011).
       The var-cov computation can be skipped by \code{cov = "none"} and
@@ -157,10 +157,10 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
   \item{rweights}{the \dQuote{robustness weights} \eqn{\psi(r_i/S) / (r_i/S)}.}
   \item{fitted.values}{Fitted values associated with the estimator.}
   %control
-  \item{init.S}{The list returned by \code{\link{lmrob.S}} or
-    \code{\link{lmrob.M.S}} (for MM-estimates only)}
+  \item{init.S}{The \code{\link{list}} returned by \code{\link{lmrob.S}()} or
+    \code{\link{lmrob.M.S}()} (for MM-estimates, i.e., \code{method="MM"} or \code{"SM"} only)}
   \item{init}{A similar list that contains the results of intermediate
-    estimates (not for MM-estimates).}
+    estimates (\emph{not} for MM-estimates).}
   %qr
   \item{rank}{the numeric rank of the fitted linear model.}
   \item{cov}{The estimated covariance matrix of the regression

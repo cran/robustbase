@@ -20,54 +20,29 @@ cc  providing the initial code of this function.
 cc
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      subroutine rfltsreg(dat,n,nvar,nhalff,krep, inbest,objfct,
-     *     intercept,intadjust,nvad,datt,
-     *     weights,temp,index1,index2,aw2,aw,residu,y,nmahad,ndist,
-     *     am,am2,slutn,
-     *     jmiss,xmed,xmad,a,da,h,hvec,c,cstock,mstock,c1stock,
-     *     m1stock,dath,sd,means,bmeans, i_trace)
-c
-c    dat   = cbind(x,y)   hence  n x (p+1)
-c    nvar  = p
-c    nvad  = p+1
-c    nhalff: 'quan' = quan.f = h.alpha.n(alpha, n, rk)  which is
-c                   = (n + p + 1) %/% 2  when alpha= 1/2
-c    krep  = nsamp  (e.g. = 5000 for "best")
+      subroutine rfltsreg(dat,n,nvar, nhalff, krep, inbest, objfct,
+     *     intercept,intadjust, nvad, datt, weights,
+     *     temp, index1,index2, aw2,aw, residu, y, nmahad, ndist,
+     *     am,am2, slutn,
+     *     jmiss, xmed,xmad, a,da, h,hvec,
+     *     c, cstock, mstock, c1stock, m1stock,
+     *     dath, sd, means, bmeans, i_trace)
 c
       implicit none
-      integer kmini, nmini, k1,k2,k3,km10,nmaxi,maxmini
-      integer i_trace
-      integer i_aux(4) ! just for printing when i_trace > 0
 c
-ccc   parameter (nvmax=115)
-ccc   parameter (nmax=57000)
-cc
-      parameter (kmini=5)
-      parameter (nmini=300)
-      parameter (k1=2)
-      parameter (k2=2)
-      parameter (k3=100)
-
-cc  krep := the total number of trial subsamples
-cc          to be drawn when n exceeds 2*nmini;
-c           krep = 0  :<==>  "exact"  <==>  all possible subsamples
-
-cc
-ccc   parameter (nvmax1=nvmax+1)
-ccc   parameter (nvmax2=nvmax*nvmax)
-ccc   parameter (nvm11=nvmax*(nvmax+1))
-
-      parameter (km10=10*kmini)
-      parameter (nmaxi=nmini*kmini)
-C--   VT   parameter (maxmini=int((3*nmini-1)/2)+1)
-      parameter (maxmini=450)
-cc
-      integer n,nvar,nvad,nhalff
-
+      integer n                 ! n      = sample size
+     *     , nvad               ! nvad   = p+1
+     *     , nvar               ! nvar   = p
+     *     , nhalff             ! nhalff = 'quan' = quan.f = h.alpha.n(alpha, n, rk)  which is
+                                !                          = (n + p + 1) %/% 2  when alpha= 1/2
+      double precision dat(n, nvad) ! dat   = cbind(x,y)   hence  n x (p+1)
+      integer krep                  ! krep  = nsamp (e.g. = 5000 for "best")
+c             krep := the total number of trial subsamples to be drawn when n exceeds 2*nmini;
+c             krep = 0  :<==>  "exact"  <==>  all possible subsamples
       integer inbest(nhalff)
-      double precision dat(n,nvad)
+      double precision objfct
+      integer intercept, intadjust
       double precision datt(n,nvad)
-
       double precision weights(n)
       integer temp(n)
       integer index1(n)
@@ -77,11 +52,56 @@ cc
       double precision y(n)
       double precision nmahad(n)
       double precision ndist(n)
-      double precision am(n),am2(n),slutn(n)
+      double precision am(n), am2(n), slutn(n)
 
-      integer krep, matz,iseed, seed, tottimes,step
-      integer intercept,intadjust
-      integer pnsel, replow
+      integer jmiss(nvad)
+      double precision xmed(nvad)
+      double precision xmad(nvad)
+      double precision a(nvad), da(nvad)
+      double precision h(nvar,nvad), hvec(nvar*nvad)
+      double precision c(nvar,nvad)
+      double precision cstock(10, nvar*nvar)
+      double precision mstock(10, nvar)
+
+c     parameters for array sizes :
+      integer km10      ! := 10*kmini
+     *     , kmini
+     *     , nmini
+     *     , nmaxi      ! := nmini*kmini
+      parameter (kmini = 5)
+      parameter (km10  = 10*kmini)
+      parameter (nmini = 300)
+      parameter (nmaxi = nmini*kmini)
+
+      double precision c1stock(km10, nvar*nvar)
+      double precision m1stock(km10, nvar)
+      double precision dath(nmaxi, nvad)
+      double precision sd(nvar)
+      double precision means(nvar)
+      double precision bmeans(nvar)
+      integer i_trace
+c     --------------------- end {arguments} ----------------------
+
+      integer k1,k2,k3, maxmini
+      integer i_aux(4) ! just for printing when i_trace > 0
+c
+ccc   parameter (nvmax=115)
+ccc   parameter (nmax=57000)
+cc
+      parameter (k1 =  2 )
+      parameter (k2 =  2 )
+      parameter (k3 = 100)
+
+ccc   parameter (nvmax1=nvmax+1)
+ccc   parameter (nvmax2=nvmax*nvmax)
+ccc   parameter (nvm11=nvmax*(nvmax+1))
+
+C--   VT   parameter (maxmini=int((3*nmini-1)/2)+1)
+      parameter (maxmini=450)
+cc
+      integer matz            ! , iseed, seed
+     *     , tottimes, step
+     *     , pnsel, replow
       integer i,ii,iii, j,jj,jjj, jndex, k,kk, lll, m,mm, nn
       integer jmin,jmax, jerd,jnc, jreg, kstep,kount
 c unused      integer jdefaul, jbreak
@@ -89,7 +109,7 @@ c unused      integer jdefaul, jbreak
       integer nfac,nerr, ngroup, nhalf,nlen,nmax,nmore, nmore2, nquant
       integer nvmax1, nvm11, nvmax, nsel, nstop, nrep
 
-      double precision bstd, dist2, eps, factor, objfct, object
+      double precision bstd, dist2, eps, factor, object
       double precision fckw, fckwi, fckw1, percen
       double precision MADeps
 
@@ -107,41 +127,13 @@ c unused      integer rfnbreak
 c     Function
       double precision rffindq
 
-ccc   integer jmiss(nvmax1)
-ccc   double precision xmed(nvmax1)
-ccc   double precision xmad(nvmax1)
-ccc   double precision a(nvmax1), da(nvmax1)
-ccc   double precision h(nvmax,nvmax1),hvec(nvm11)
-ccc   double precision c(nvmax,nvmax1)
-ccc   double precision cstock(10,nvmax2)
-ccc   double precision mstock(10,nvmax)
-ccc   double precision c1stock(km10,nvmax2)
-ccc   double precision m1stock(km10,nvmax)
-ccc   double precision dath(nmaxi,nvmax1)
-ccc   double precision sd(nvmax)
-ccc   double precision means(nvmax)
-ccc   double precision bmeans(nvmax)
-
-      integer jmiss(nvad)
-      double precision xmed(nvad)
-      double precision xmad(nvad)
-      double precision a(nvad), da(nvad)
-      double precision h(nvar,nvad),hvec(nvar*nvad)
-      double precision c(nvar,nvad)
-      double precision cstock(10,nvar*nvar)
-      double precision mstock(10,nvar)
-      double precision c1stock(km10,nvar*nvar)
-      double precision m1stock(km10,nvar)
-      double precision dath(nmaxi,nvad)
-      double precision sd(nvar)
-      double precision means(nvar)
-      double precision bmeans(nvar)
-
       data faclts/2.6477,2.5092,2.3826,2.2662,2.1587,
      *     2.0589,1.9660,1.879,1.7973,1.7203,1.6473/
 
+      nrep = krep
       if(i_trace .ge. 2) then
-         call intpr('Entering rfltsreg() - krep: ',-1,krep,1)
+         i_aux(1) = nrep
+         call intpr('Entering rfltsreg() - krep: ',-1, i_aux, 1)
       endif
 
       call rndstart
@@ -153,7 +145,6 @@ CCCC  10.10.2005 - substitute the parameters nmax and nvmax
       nvmax1 = nvmax+1
       nvm11 = nvmax*(nvmax+1)
 
-      nrep = krep
 
       if(nvar .lt.5 ) then
          eps=1.0D-12
@@ -179,7 +170,7 @@ c unused      jdefaul=(n+nvar+1)/2
       if(nvad.eq.1) goto 9000
 cc
 CDDD  CALL INTPR('>>> Enter RFLTSREG ... iseed=',-1,iseed,1)
-      seed=iseed
+c      seed=iseed
       matz=1
       nsel=nvar
       ngroup=1
@@ -257,7 +248,8 @@ cc
         if(ngroup.gt.kmini) ngroup=kmini
         nrep=int(dble(krep)/ngroup)
         minigr=mini(1)+mini(2)+mini(3)+mini(4)+mini(5)
-        if(i_trace .ge. 2) call intpr(' rftls.... minigr=',-1,minigr,1)
+        if(i_trace .ge. 2)
+     +       call intpr(' rftls.... minigr=',-1,[minigr],1)
         call rfrdraw(subdat,n,minigr,mini,ngroup,kmini)
       else
 c          krep == 0  or   n <=  2*nmini-1  ( = 599 by default)
@@ -270,16 +262,14 @@ C VT::25.11.2010 - added krep==0 means "exact" (all combinations)
         if(krep.eq.0 .or. n.le.replow(nsel)) then
 c		use all combinations; happens iff  nsel = nvar = p <= 6
            nrep=rfncomb(nsel,n)
-           if(i_trace .ge. 2) then
-               call intpr('will use *all* combinations: ',-1,nrep,1)
-           endif
+           if(i_trace .ge. 2)  call prallc(nrep)
         else
           nrep = krep
           all=.false.
         endif
       endif
 
-      seed=iseed
+c      seed=iseed
 cc
 
 CDDD  CALL INTPR('>>> Start initialization ... nrep=',-1,nrep,1)
@@ -344,7 +334,7 @@ CDDD  CALL INTPR('>>> Start initialization ... nrep=',-1,nrep,1)
       end do
 
       if(i_trace .ge. 2)
-     +    call intpr(' rftls.... initialization ready',-1,0,1)
+     +    call intpr(' rftls.... initialization ready',-1,[0],1)
  9000 continue
 
       if(nvad.eq.1) then
@@ -453,7 +443,7 @@ CDDD  CALL INTPR('>>> MAIN LOOP BY GROUPS: NGROUP= ',-1,ngroup,1)
 
       do 1111 ii = 1,ngroup
          if(i_trace .ge. 3)
-     +        call intpr(' rftls.... looping by group ii=',-1,ii,1)
+     +        call intpr(' rftls.... looping by group ii=',-1,[ii],1)
         if(.not.fine) kount=0
         if(part .and. .not. fine) nn=mini(ii)
         do i=1,nn
@@ -478,7 +468,7 @@ CDDD  CALL INTPR('>>> MAIN LOOP BY GROUPS: NGROUP= ',-1,ngroup,1)
 
         do 1000 i=1,nrep
           if(i_trace .ge. 4)
-     +          call intpr(' rftls.... for(i = 1,nrep): i=',-1,i,1)
+     +          call intpr(' rftls.... for(i = 1,nrep): i=',-1,[i],1)
           pnsel=nsel
           tottimes=tottimes+1
           fckwi=0.D0
@@ -891,30 +881,40 @@ C     ------ == PutRNGstate() in C
       end
 ccccc end {rfltsreg} ===================================================
 
-      subroutine rfstatis(x,xmed,xmad,aw2,intercept,nvad,nvmax1,
-     *     nmax,n,nstop,MADeps,weights,y,nvar,index2)
+      subroutine rfstatis(x, xmed,xmad
+     *     , aw2
+     *     , intercept
+     *     , nvad
+     *     , nvmax1
+     *     , nmax
+     *     , n
+     *     , nstop      ! nstop=0: success;  =1 : "problem": mad ~= 0
+     *     , MADeps
+     *     , weights
+     *     , y
+     *     , nvar
+     *     , index2)
 cc
       implicit none
-      integer intercept, nvad,nvmax1, nmax, n, nstop, nvar
-      double precision xmed(nvmax1), x(n,nvad), xmad(nvmax1)
+
+      integer intercept, nvad, nvmax1,  nmax, n, nstop
+      double precision x(n, nvad), xmed(nvmax1), xmad(nvmax1)
       double precision aw2(nmax)
-      double precision weights(nmax)
-      double precision y(nmax)
-      double precision MADeps
-      double precision rfamdan
-      integer index2(nmax)
-c
+      double precision MADeps, weights(nmax), y(nmax)
+      integer nvar, index2(nmax)
+c Var
       integer j,jnc
+c Function
+      double precision rfamdan
 cc
-      nstop=0
-c     nstop=0: success;  =1 : "problem": mad ~= 0
+      nstop=0 ! == success
 
       if (intercept.eq.0) then
 c       regression without intercept
         do 50 j=1,nvad
           xmed(j)=0.0
           do jnc=1,n
-            aw2(jnc)=abs(x(jnc,j))
+            aw2(jnc) = abs(x(jnc,j))
           end do
 
           xmad(j)=rfamdan(nmax,aw2,n,index2)*1.4826
@@ -974,7 +974,7 @@ c     	regression with intercept
       return
       end
 cc
-      function rfamdan(nmax,aa,n,index2)
+      function rfamdan(nmax, aa, n ,index2)
 cc
       implicit none
       integer nmax, n, index2(nmax)
@@ -992,20 +992,23 @@ cc
       endif
       return
       end
-cc
-      subroutine rflsreg(nvmax1, nvmax,k, n, f, x, w, da, h,fckw,
-     *  hvec,nvm11,jmiss,nvad,nnn)
-cc Arguments
+c     ---
+
+      subroutine rflsreg(nvmax1, nvmax, k, n, f, x, w, da, h,
+     1     fckw, hvec, nvm11,jmiss,nvad,nnn)
+
       implicit none
-      integer nvmax1, nvmax, k, n, nvm11, nvad, nnn
-      integer jmiss(nvmax1)
-      double precision x(n,nvad), f(k), w(n), da(k)
-      double precision hvec(nvm11), h(nvmax,nvmax1), fckw
+cc Arguments
+      integer nvmax1, nvmax, k, n,   nvm11, nvad
+      double precision f(k), x(n,nvad), w(n), da(k), h(nvmax,nvmax1)
+     1     , fckw, hvec(nvm11)
+      integer jmiss(nvmax1), nnn
+
 cc External Functions
       double precision rfqlsrg
 cc Var
-      double precision dfckw,dfact, dwjnc,dyj,dfka
-      double precision ank,anul, hda
+      double precision dfckw, dfact, dwjnc, dyj, dfka
+      double precision ank, anul, hda
       integer j,l, jnc,ka,kplus, mm
 cc
       kplus=k+1
@@ -1056,27 +1059,31 @@ cc
       end
 ccccc
 ccccc
-      subroutine rffcn(k,f,x,jnc,n,nvad)
-cc
+      subroutine rffcn(k, f,x, jnc,n,nvad)
+c
       implicit none
-      integer k, jnc,n,nvad, j
+      integer k,  jnc, n, nvad
       double precision f(k), x(n,nvad)
-cc
-      do 10,j=1,k
+c
+      integer j
+      do j=1,k
         f(j)=x(jnc,j)
- 10   continue
+      end do
       return
       end
 ccccc
 ccccc
-      subroutine rfmatnv(an,nvmax,nvmax1,hvec,nvm11,na,nb, jmiss)
-cc
+      subroutine rfmatnv(an, nvmax,nvmax1, hvec, nvm11, na,nb, jmiss)
+c
       implicit none
-      integer nvmax,nvmax1,nvm11, na,nb
-      integer jmiss(nvmax1)
-      double precision an(nvmax,nvmax1), hvec(nvm11)
-
-      double precision deter,turn,swap
+c
+      integer nvmax,nvmax1
+      double precision an(nvmax,nvmax1)
+      integer nvm11
+      double precision hvec(nvm11)
+      integer na,nb, jmiss(nvmax1)
+c Var
+      double precision deter, turn, swap
       integer j,n, nc, jcl,jdelc,jdla,jdlb,jdm,jhfd,
      *     jnc,jncb,jncc,jncd,jnk,jpaal, nma,npnb, ldel
 
@@ -1095,57 +1102,59 @@ cc
       jdm=nvmax
       nma=n-1
       jdelc=1-jdm
+
       do 130 jhfd=1,n
         turn=0.0D0
         jdelc=jdelc+jdm
         jdla=jdelc+jhfd-1
         jdlb=jdelc+nma
-        do 40 jncb=jdla,jdlb
-          if(dabs(hvec(jncb)) .gt. dabs(turn)) then
-            turn=hvec(jncb)
-            ldel=jncb
-          endif
- 40     continue
+        do jncb=jdla,jdlb
+           if(dabs(hvec(jncb)) .gt. dabs(turn)) then
+              turn=hvec(jncb)
+              ldel=jncb
+           endif
+        end do
         if (turn .eq. 0) goto 180
 
         jpaal=ldel-jdelc+1
         jmiss(jhfd)=jpaal
         if(jpaal .gt. jhfd) then
-          deter=-deter
-          jpaal=jpaal-jdm
-          jncd=jhfd-jdm
-          do 70 jnc=1,npnb
-            jpaal=jpaal+jdm
-            jncd=jncd+jdm
-            swap=hvec(jncd)
-            hvec(jncd)=hvec(jpaal)
-            hvec(jpaal)=swap
- 70       continue
+           deter=-deter
+           jpaal=jpaal-jdm
+           jncd=jhfd-jdm
+           do jnc=1,npnb
+              jpaal=jpaal+jdm
+              jncd=jncd+jdm
+              swap=hvec(jncd)
+              hvec(jncd)=hvec(jpaal)
+              hvec(jpaal)=swap
+           end do
         endif
         deter=deter*turn
         turn=1.0D0/turn
         jncd=jdelc+nma
         do jnc=jdelc,jncd
-          hvec(jnc)=-hvec(jnc)*turn
+           hvec(jnc)=-hvec(jnc)*turn
         end do
         hvec(jdla)=turn
         jncb=jhfd-jdm
         jpaal=1-jdm
-        do 120 jnc=1,npnb
-          jpaal=jpaal+jdm
-          jncb=jncb+jdm
-          if(jnc .ne. jhfd) then
-            jcl=jpaal+nma
-            swap=hvec(jncb)
-            jncd=jdelc-1
-            do jncc=jpaal,jcl
-              jncd=jncd+1
-              hvec(jncc)=hvec(jncc)+swap*hvec(jncd)
-            end do
-            hvec(jncb)=swap*turn
-          endif
- 120    continue
+        do jnc=1,npnb
+           jpaal=jpaal+jdm
+           jncb=jncb+jdm
+           if(jnc .ne. jhfd) then
+              jcl=jpaal+nma
+              swap=hvec(jncb)
+              jncd=jdelc-1
+              do jncc=jpaal,jcl
+                 jncd=jncd+1
+                 hvec(jncc)=hvec(jncc)+swap*hvec(jncd)
+              end do
+              hvec(jncb)=swap*turn
+           endif
+        end do
  130  continue
+
       do 160 jncb=1,n
         jhfd=n+1-jncb
         ldel=jmiss(jhfd)
@@ -1227,14 +1236,16 @@ c  Var
       end
 ccccc
 ccccc
-      subroutine rftrc(h,da,nvmax,nvmax1,nvar,jcst,nfac,nvad,
-     *  xmed,xmad)
-cc
+      subroutine rftrc(h, da, nvmax,nvmax1, nvar,jcst,nfac,nvad,
+     *     xmed,xmad)
+c
       implicit none
-      integer nvmax,nvmax1,nvar,jcst,nfac,nvad
-      double precision h(nvmax,nvmax1), da(nvmax)
-      double precision xmed(nvmax1),xmad(nvmax1)
 
+      integer nvmax, nvmax1
+      double precision h(nvmax,nvmax1), da(nvmax)
+      integer nvar,jcst,nfac,nvad
+      double precision xmed(nvmax1), xmad(nvmax1)
+c Var
       double precision xmp2,hnn
       integer j,k, k2
 cc
@@ -1299,12 +1310,15 @@ cc
       end
 ccccc
 ccccc
-      subroutine rfequat(am,nvmax,nvmax1, hvec,nvm11,na,nb,nerr)
+      subroutine rfequat(am, nvmax,nvmax1, hvec,nvm11, na,nb, nerr)
 
       implicit none
-      integer nvmax,nvmax1, nvm11, na,nb,nerr
-      double precision am(nvmax,nvmax1), hvec(nvm11)
-
+      integer nvmax,nvmax1
+      double precision am(nvmax,nvmax1)
+      integer nvm11
+      double precision hvec(nvm11)
+      integer na,nb, nerr
+c Var
       double precision turn,swap,deter
       integer j,n, ldel, jbegc,jbegx,jdel,jdm,jendc,jendx,jhfd,jmat,
      *     jnc,jncb,jncc,jncd,jnce,jncf,jnk,jrow, lclpl, nc,neqa,nznde

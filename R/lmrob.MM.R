@@ -148,42 +148,29 @@ lmrob.control <-
 ##' \code{\link{lmrob}()} call, or the result of  \code{\link{lmrob.control}()}.
 ##' @return list: the (typically) modified \code{control}
 ##' @author Martin Maechler {from Manuel's original code}
-lmrob.control.neededOnly <- function(control) {
-    if(is.null(control)) return(control)
-    switch(sub("^(S|M-S).*", "\\1", control$method),
-	   S = {                       # remove all M-S specific control pars
-	       control$k.m_s <- NULL
-	       control$split.type <- NULL
+lmrob.control.minimal <- function(cl) {
+    if(is.null(cl)) return(cl)
+    p.MS <- c("k.m_s", "split.type")
+    p.nonLrg <- c("groups", "n.group")
+    p.fastS <- c(p.nonLrg, "refine.tol", "best.r.s", "k.fast.s")
+    switch(sub("^(S|M-S).*", "\\1", cl$method),
+	   "S" = {                       # remove all M-S specific control pars
+	       cl[p.MS] <- NULL
 					# if large_n is not used, remove corresp control pars
-	       if (length(residuals) <= control$fast.s.large.n) {
-		   control$groups <- NULL
-		   control$n.group <- NULL
-	       }
+	       if (length(residuals) <= cl$fast.s.large.n)
+		   cl[p.nonLrg] <- NULL
 	   },
-	   `M-S` = {                # remove all fast S specific control pars
-	       control$refine.tol <- NULL
-	       control$groups <- NULL
-	       control$n.group <- NULL
-	       control$best.r.s <- NULL
-	       control$k.fast.s <- NULL
-	   }, { # else: do not keep parameters used by initial ests. only
-	       control$tuning.chi <- NULL
-	       control$bb <- NULL
-	       control$refine.tol <- NULL
-	       control$nResample <- NULL
-	       control$groups <- NULL
-	       control$n.group <- NULL
-	       control$best.r.s <- NULL
-	       control$k.fast.s <- NULL
-	       control$k.max <- NULL
-	       control$k.m_s <- NULL
-	       control$split.type <- NULL
-	       control$mts <- NULL
-	       control$subsampling <- NULL
-	   } )
-    if (!grepl("D", control$method)) control$numpoints <- NULL
-    if (control$method == 'SM') control$method <- 'MM'
-    control
+	   "M-S" = # remove all fast S specific control pars
+	       cl[p.fastS] <- NULL,
+           ## else: do not keep parameters used by initial ests. only
+           cl[c("tuning.chi", "bb", "nResample", p.fastS,
+                "k.max", p.MS, "mts", "subsampling")] <- NULL
+	   )
+    if (!grepl("D", meth <- cl$method)) {
+        cl$numpoints <- NULL
+        if(meth == 'SM') cl$method <- 'MM'
+    }
+    cl
 }
 
 lmrob.fit.MM <- function(x, y, control) ## defunct

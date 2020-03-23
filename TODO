@@ -10,6 +10,7 @@
 *** DONE change defaults for clower & cupper (E-mail from P.Segaert).
 *** DONE But there is more: +/- swap ==> results not back compatible
 ** DONE colMedians() -> ask Henrik/ <maintainer@bioconductor.org> about "License: Artistic-2.0"
+** DONE splitFrame() [important for lmrob(.. method = "M-S") --> lmrob.M.S()]: *character* should be treated *as* factors
 ** TODO nlrob()
 *** TODO summary(nlrob(*)) fails for new methods; better error message or *work*
 **** TODO for "MM" we are close to done; ideally want '$ rweights' (robustness weights) for all meth

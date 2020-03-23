@@ -128,36 +128,36 @@ SEXP R_wgt_flex(SEXP x_, SEXP c_, SEXP h_);
 SEXP R_rowMedians(SEXP x, SEXP naRm, SEXP hasNA, SEXP byRow, SEXP keepNms);
 
 /* ------- ./rffastmcd.f ------------ */
-int F77_NAME(rffastmcd)(
-    double *dat, int *n, int *nvar, int *nhalff, int *krep,
-    double *initcov, double *initmean, int *inbest, double *det,
-    int *weight, int *fit, double *coeff, int *kount, double *adcov,
-    int *iseed, int *temp, int *index1, int *index2, double *nmahad,
-    double *ndist, double *am, double *am2,
-    double *slutn, double *med, double *mad, double *sd,
-    double *means, double *bmeans, double *w, double *fv1,
-    double *fv2, double *rec, double *sscp1, double *cova1,
-    double *corr1, double *cinv1, double *cova2,
-    double *cinv2, double *z__, double *cstock, double *mstock,
-    double *c1stock, double *m1stock, double *dath,
-    double *cutoff, double *chimed);
+void F77_NAME(rffastmcd)(
+    double *dat, int *n, int *nvar, int *nhalff, int *krep,          //  5
+    int *nmini, int *kmini,                                          //  7
+    double *initcov, double *initmean, int *inbest, double *det,     // 11
+    int *weight, int *fit, double *coeff, int *kount, double *adcov, // 16
+    int *temp, int *index1, int *index2, int *indexx, double *nmahad,// 21
+    double *ndist, double *am, double *am2,                          // 24
+    double *slutn, double *med, double *mad, double *sd,             // 28
+    double *means, double *bmeans, double *w, double *fv1,           // 32
+    double *fv2, double *rec, double *sscp1, double *cova1,          // 36
+    double *corr1, double *cinv1, double *cova2,                     // 39
+    double *cinv2, double *z__, double *cstock, double *mstock,      // 43
+    double *c1stock, double *m1stock, double *dath,                  // 46
+    double *cutoff, double *chimed, int *i_trace);                   // 49 args
 
 /* ------- ./rfltsreg.f ------------ */
-int F77_NAME(rfltsreg)(
+void F77_NAME(rfltsreg)(
     double *dat, int *n, int *nvar,
     int *nhalff, int *krep, int *inbest, double *objfct,
-    int *intercept, int *intadjust, int *nvad, double *datt,
-    int *iseed, double *weights, int *temp, int *index1, int *index2,
-    double *aw2, double *aw, double *residu, double *y,
-    double *nmahad, double *ndist,
-    double *am, double *am2, double *slutn, int *jmiss,
+    int *intercept, int *intadjust, int *nvad, double *datt, double *weights,
+    int *temp, int *index1, int *index2, double *aw2, double *aw,
+    double *residu, double *y, double *nmahad, double *ndist,
+    double *am, double *am2, double *slutn,   int *jmiss,
     double *xmed, double *xmad, double *a, double *da,
-    double *h__, double *hvec, double *c__,
-    double *cstock, double *mstock, double *c1stock, double *m1stock,
-    double *dath, double *sd, double *means, double *bmeans);
+    double *h__, double *hvec,
+    double *c__, double *cstock, double *mstock, double *c1stock, double *m1stock,
+    double *dath, double *sd, double *means, double *bmeans, int *i_trace);
 
 /* ------- ./rllarsbi.f -------------- */
-void  F77_NAME(rllarsbi)(
+void F77_NAME(rllarsbi)(
     double *X, double *Y, int *N, int *NP, int *MDX, int *MDT,
     double *TOL, int *NIT, int *K, int *KODE, double *SIGMA, double *THETA,
     double *RS, double *SC1, double *SC2, double *SC3, double *SC4,

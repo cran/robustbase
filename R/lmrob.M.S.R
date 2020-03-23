@@ -54,7 +54,7 @@ splitFrame <- function(mf, x = model.matrix(mt, mf),
     ## --- split categorical and interactions of categorical vars.
     ##     from continuous variables
     factors <- attr(mt, "factors")
-    factor.idx <- attr(mt, "dataClasses") == "factor"
+    factor.idx <- attr(mt, "dataClasses") %in% c("factor", "character")
     if (!any(factor.idx)) ## There are no factors
         return(list(x1.idx = rep.int(FALSE, p), x1=matrix(NA_real_,nrow(x),0L), x2=x))
     switch(type,

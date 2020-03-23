@@ -1,4 +1,9 @@
-### lmrob()  with "real data"
+### lmrob()  with "real data" -----------------------
+
+## testing functions:
+source(system.file("test-tools-1.R",  package = "Matrix", mustWork=TRUE))# -> assert.EQ(), ..
+(doExtras <- robustbase:::doExtras())
+showProc.time()
 
 library(robustbase)
 
@@ -19,6 +24,7 @@ m2 <- update(m0.sali, ~ . -X3)
 cX3 <- c(Estimate = -0.627327396, `Std. Error` = 0.15844971,
          `t value` = -3.9591577, `Pr(>|t|)` = 0.000584156)
 stopifnot(all.equal(cX3, coef(summary(m0.sali))["X3",], tolerance = 1e-6))
+showProc.time()
 
 
 ##  example(lmrob)
@@ -40,6 +46,7 @@ summary(RlmST)
 stopifnot(coef(lmST)[["log.Te"]] < 0,
           all.equal(coef(RlmST), c("(Intercept)" = -4.969, log.Te=2.253), tol = 1e-3),
           c(11,20,30,34) == which(RlmST$w < 0.01))
+showProc.time()
 ## ==> Now see that  "KS2011" and "KS2014" both break down -- and it is the fault of "lqq" *only* :
 (RlmST.11 <- update(RlmST, control = lmrob.control("KS2011",                             trace= 1)))
 (RlmST.14 <- update(RlmST, control = lmrob.control("KS2014",                             trace= 1)))
@@ -47,6 +54,21 @@ stopifnot(coef(lmST)[["log.Te"]] < 0,
 (RlmSTM14 <- update(RlmST, control = lmrob.control("KS2014", method="MM",                trace= 1)))
 ## using "biweight" instead of "lqq"  fixes the problem :
 (RlmSTbM11 <- update(RlmST,control = lmrob.control("KS2011", method="MM", psi="biweight",trace= 1)))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 (RlmSTbM14 <- update(RlmST,control = lmrob.control("KS2014", method="MM", psi="biweight",trace= 1)))
 (RlmSTb.11 <- update(RlmST,control = lmrob.control("KS2011",              psi="biweight",trace= 1)))
 (RlmSTb.14 <- update(RlmST,control = lmrob.control("KS2014",              psi="biweight",trace= 1)))
@@ -54,6 +76,8 @@ stopifnot(coef(lmST)[["log.Te"]] < 0,
 R.ini.cf <- t(sapply(mget(ls(patt = "^RlmST")), function(OB) OB$init$coef))
 R..cf    <- t(sapply(mget(ls(patt = "^RlmST")), coef))
 cbind(R.ini.cf, R..cf) ##---> "lqq" is *NOT* robust enough here -- but "biweight" is !!
+
+showProc.time()
 
 options(digits = 5)# less platform dependence
 ## Directly look at init.S():
@@ -84,7 +108,7 @@ RlmST.MM <- lapply(setNames(,PSIs), function(PSI)
     update(RlmST, init=ini.14, control = lmrob.control(method="MM", psi = PSI)))
 cf.MM <- t(sapply(RlmST.MM, coef))
 cf.MM[order(cf.MM[,1], cf.MM[,2]),] ## only 'bisquare' and 'optimal' are robust enough
-
+showProc.time()
 
 
 ##=== Werner's analysis: Sensitivity curves for the most-left obs  =========================================
@@ -104,23 +128,24 @@ leg.s <- c("default, biweight"
            ,"KS14, Welsh"
            )
 nEst <- length(leg.s) # == number of estimators used below
-nn <- length(y1 <- c(NA, seq(2,9, length=64)))
+nn <- length(y1 <- c(NA, seq(2,9, length=if(doExtras) 64 else 8)))
 nCf <- length(coef(rr)) + 1 # +1: sigma
 r.coef <- matrix(NA, length(y1), nEst*nCf)
 t.d <- dd
 oo <- options(warn = 1)
+showProc.time()
 ## vary the left-most observation and fit all three
 for (i in seq_along(y1)) {
-  cat(sprintf("%3d: %11.6g -- ", i, y1[i]))
+  cat(sprintf("i=%3d, y1[i]=%11.6g: -- ", i, y1[i]))
   t.d[1,2] <- y1[i]
   ## the (old) default does not converge in 4 cases
-  lr    <- update(rr,   data=t.d, control = lmrob.control(maxit=500))                 ; cat("1")
-  lr14  <- update(rr14, data=t.d, control = lmrob.control("KS2014", psi="lqq") )      ; cat("2")
-  lr14b <- update(rr14, data=t.d, control = lmrob.control("KS2014", psi="biweight") ) ; cat("3")
-  lr14o <- update(rr14, data=t.d, control = lmrob.control("KS2014", psi="optimal" ) ) ; cat("4")
-  lr14h <- update(rr14, data=t.d, control = lmrob.control("KS2014", psi="hampel"  ) ) ; cat("5")
-  lr14g <- update(rr14, data=t.d, control = lmrob.control("KS2014", psi="ggw"     ) ) ; cat("6")
-  lr14a <- update(rr14, data=t.d, control = lmrob.control("KS2014", psi="welsh"   ) ) ; cat("7")
+  lr    <- update(rr,   data=t.d, control = lmrob.control(maxit=500))                ; cat(" 1")
+  lr14  <- update(rr14, data=t.d, control = lmrob.control("KS2014", psi="lqq") )     ; cat(" 2")
+  lr14b <- update(rr14, data=t.d, control = lmrob.control("KS2014", psi="biweight") ); cat(" 3")
+  lr14o <- update(rr14, data=t.d, control = lmrob.control("KS2014", psi="optimal" ) ); cat(" 4")
+  lr14h <- update(rr14, data=t.d, control = lmrob.control("KS2014", psi="hampel"  ) ); cat(" 5")
+  lr14g <- update(rr14, data=t.d, control = lmrob.control("KS2014", psi="ggw"     ) ); cat(" 6")
+  lr14a <- update(rr14, data=t.d, control = lmrob.control("KS2014", psi="welsh"   ) ); cat(" 7")
   r.coef[i,] <- c(coef(lr   ), sigma(lr),
                   coef(lr14 ), sigma(lr14),
                   coef(lr14b), sigma(lr14b),
@@ -130,6 +155,7 @@ for (i in seq_along(y1)) {
                   coef(lr14a), sigma(lr14a))
   cat("\n")
 }
+showProc.time()
 options(oo)
 
 ## cbind(y=y.1, r.coef)
@@ -150,6 +176,7 @@ sfsmisc::mult.fig(2)$old.par -> op
 pMat(j = 2+jj0, main = quote("slope" ~~ hat(beta[2])), "bottomleft")
 pMat(j = 3+jj0, main = quote(hat(sigma)), "topleft")
 par(op)
+showProc.time()
 ## --------------------------------
 
 set.seed(47)
@@ -183,10 +210,11 @@ stopifnot(
    ,
     identical(iNAr, is.na(r.mN0 <- residuals(mhNx0)))
 )
+showProc.time()
 
 data(stackloss)
 mSL <- lmrob(stack.loss ~ ., data = stackloss)
 summary(mSL)
 
+showProc.time()
 
-cat('Time elapsed: ', proc.time(),'\n') # "stats"

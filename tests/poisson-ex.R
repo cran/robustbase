@@ -2,9 +2,8 @@
 library(robustbase)
 
 source(system.file("test-tools-1.R", package="Matrix", mustWork=TRUE))
-## -> assertError(), showSys.time(), ...
-source(system.file("xtraR/ex-funs.R", package = "robustbase"))
-## -> newer assert.EQ()  {TODO: no longer needed in 2015}
+## -> assertError(), assert.EQ(), showSys.time(), ...
+
 
 #### Poisson examples from Eva Cantoni's paper
 
@@ -30,7 +29,24 @@ glm.cr <- glmrob(y ~ X, family = "poisson", tcc = Inf.)
 
 scl <- summary(glm.cl <- glm   (Diversity ~ . , data=possumDiv, family=poisson))
 sc2 <- summary(glm.c2 <- glmrob(Diversity ~ . , data=possumDiv, family=poisson, tcc = Inf.))
+MMg <- model.matrix(glm.cl)
+
 assert.EQ(coef(scl), coef(sc2), tol = 6e-6, giveRE=TRUE) # 1.37e-6
+dnms <- list(colnames(MMg), c("Estimate", "Std. Error", "z value", "Pr(>|z|)"))
+cf.sc <- array(c(-0.9469439, 0.01192096, -0.2724059, 0.04022862, 0.03988606, 0.07173483,
+                 0.01763833, -0.01534376, 0.1149216, 0.06675529, 0.1169463, -0.4889071,
+                 ## SE
+                 0.2655031, 0.02194661, 0.2859216, 0.01120463, 0.01438884, 0.03814053,
+                 0.01059779, 0.1916126, 0.2724202, 0.1901612, 0.1902903, 0.2474653,
+                 ## z val
+                 -3.566603, 0.5431798, -0.9527294, 3.590356, 2.772014, 1.880803,
+                 1.664341, -0.08007701, 0.421854, 0.3510457, 0.6145675, -1.975659,
+                 ## P val
+                 0.0003616393, 0.587006, 0.3407272, 0.0003302263, 0.00557107, 0.05999869,
+                 0.09604432, 0.936176, 0.6731316, 0.7255541, 0.5388404, 0.04819339),
+               dim = c(12L, 4L), dimnames = dnms)
+assert.EQ(cf.sc, coef(sc2), tol = 4e-7, giveRE=TRUE) # 8.48e-8
+
 
 ## c = 2.0
 summary(g2 <- glmrob(Diversity ~ . , data=possumDiv, family=poisson, tcc = 2.0, trace=TRUE))
@@ -40,7 +56,7 @@ glm.r <- glmrob(Diversity ~ . , data=possumDiv, family=poisson, tcc = 1.6, trace
 (s.16 <- summary(glm.r))
 str(glm.r)
 
-## Now with *smaller* X (two variablesless):
+## Now with *smaller* X (two variables less):
 glm.c2 <- glmrob(y ~ X., family = "poisson", tcc = Inf.)
 summary(glm.c2)
 
@@ -54,6 +70,7 @@ glm.r2 <- glmrob(y ~ X., family = "poisson",
 glm.r2. <- glmrob(Diversity ~ ., family = "poisson", data=possumDiv,
                   tcc = 1.6, weights.on.x = "hat", acc = 1e-15)
 ## here iterate till convergence (acc = 10^(-15))
+
 (sglm.r2 <- summary(glm.r2.))
 ## This is too accurate for S.E. (but we have converged to end)
 cf2 <- matrix(c(-0.898213938628341, 0.269306882951903,
@@ -68,8 +85,7 @@ cf2 <- matrix(c(-0.898213938628341, 0.269306882951903,
                 0.0503262879663932, 0.191675979065398,
                 0.0909870068741749, 0.192192515800464,
                 -0.512247626309172, 0.250763990619973), 12,2, byrow=TRUE)
-cfE <- unname(coef(sglm.r2)[, 1:2])
-assert.EQ(cfE, cf2, tol = 1e-9, giveRE=TRUE)#-> show : ~ 1.46e-11
+assert.EQ(cf2, unname(coef(sglm.r2)[, 1:2]), tol = 1e-9, giveRE=TRUE)#-> show : ~ 1.46e-11
 stopifnot(abs(glm.r2.$iter - 18) <= 1) # 18 iterations on 32-bit (2008)
 
 ## MT estimator -- "quick" examples
@@ -83,7 +99,8 @@ if(!robustbase:::doExtras()) {
 X1 <- cbind(1, X.)
 
 if(FALSE) ## for debugging ...
-options(warn = 1, error=recover)
+    options(warn = 1, error=recover)
+options(nwarnings = 1000) # def. 50
 
 RNGversion("3.5.0") ## [TODO: adapt to "current" RNG settings]
 set.seed(57)
@@ -91,7 +108,7 @@ showSys.time(
     ## m1 <- glmrobMT(x=X1, y=y)
     m1 <- glmrob(Diversity ~ ., data=possumDiv, family=poisson, method="MT")
 )
-writeLines(tail(capture.output(warnings())))
+summary(warnings())
 
 stopifnot(m1$converged)
 assert.EQ(m1$initial,
@@ -104,8 +121,12 @@ c(-0.851594294907422, -0.0107066895370536, -0.226958540075445, 0.035590662533830
 
 (arch <- Sys.info()[["machine"]])
 .M <- .Machine; str(.M[grep("^sizeof", names(.M))]) ## differentiate long-double..
-if(arch == "x86_64" && .M$sizeof.longdouble != 16)
-    arch <- paste0(arch, "--no-long-double")
+if(arch == "x86_64") {
+    if(.M$sizeof.longdouble != 16)
+        arch <- paste0(arch, "--no-long-double")
+    else if(osVersion == "Fedora 30 (Thirty)")
+        arch <- paste0(arch, "_F30")
+}
 
 dput(signif(unname(coef(m1)), 11)) ## -->
 ## Something strange going on: R CMD check is different from interactive R, here.
@@ -137,6 +158,10 @@ c(-0.83723213945, 0.0085385261915, -0.16697112315, 0.040985126003,
 c(-0.83710423989, 0.0085428949874, -0.16713845989, 0.040973904414,
   0.042391910971, 0.063159426394, 0.018629240073, -0.006362108938,
   0.1145563969, 0.091490891317, -0.025378427464, -0.66943593439)
+, "x86_64_F30" =
+c(-0.83703991366, 0.008536691385, -0.16707196217, 0.040980171987,
+  0.042388781206, 0.063132162167, 0.018634264818, -0.0064298708197,
+  0.11486525895, 0.091433901799, -0.025384338265, -0.66920847831)
 )
 ## just FYI: difference 32-bit vs 64-bit:
 assert.EQ(beta1[[1]], beta1[[2]], tol = 0.004, check.attributes=FALSE, giveRE=TRUE)
@@ -154,7 +179,7 @@ showSys.time(
     ## m2 <- glmrobMT(x=X1, y=y)
     m2 <- glmrob(Diversity ~ ., data=possumDiv, family=poisson, method="MT")
 )
-writeLines(tail(capture.output(warnings())))
+summary(warnings())
 
 stopifnot(m2$converged)
 if(FALSE)
@@ -187,6 +212,10 @@ c(-0.83687097624, 0.0085341676033, -0.1674299545, 0.040968820903,
 c(-0.8370370234, 0.008538975248, -0.1671607287, 0.040976013861,
   0.042393702043, 0.06314300867, 0.018631172062, -0.0063382132536,
   0.11445827857, 0.091409918881, -0.025308999173, -0.66935766843)
+, "x86_64_F30" = ## Fedora 30, R-devel (2019-06-13):
+c(-0.83651130836, 0.0085272636623, -0.16777225909, 0.040958046751,
+  0.042398611622, 0.063169934556, 0.018622060538, -0.0067041556052,
+  0.11358762483, 0.090950270043, -0.025393966426, -0.66916946118)
 )
 ## just FYI: difference 32-bit vs 64-bit:
 assert.EQ(beta2[[1]], beta2[[2]], tol = 0.001, check.attributes=FALSE, giveRE=TRUE)
@@ -198,6 +227,8 @@ assert.EQ(beta2[[2]], beta2[[3]], tol = 0.001, check.attributes=FALSE, giveRE=TR
 assert.EQ(coef(m2), beta2[[arch]], tol = 0.001, # typically 1e-10 is ok !!
           check.attributes=FALSE, giveRE=TRUE)
 ## slight changes of algorithm often change the above by ~ 4e-4 !!!
+
+summary(warnings())
 
 ###---- Model Selection -----
 

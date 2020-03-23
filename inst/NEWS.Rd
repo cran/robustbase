@@ -4,6 +4,25 @@
 \title{News for \R Package \pkg{robustbase}}
 \encoding{UTF-8}
 
+\section{CHANGES in robustbase VERSION 0.93-6 (2020-03-20, svn r854)}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item \code{splitFrame()} now treats \code{character} columns also as
+      categorical (the same as \code{factor}s).
+    }
+  }
+  \subsection{Tweaks}{
+    \itemize{
+      \item Small updates, also in checks for newer compiler settings,
+      e.g., \code{FCLEN} macro; also F77_*() etc, in order to fix 'LTO'
+      issues.
+
+      \item More careful or \emph{less} calling \code{intpr()}: correct "Rank" of array
+      (for gfortran/gcc 10, when \code{-fallow-argument-mismatch} is not set).
+    }
+  }
+}
+
 \section{CHANGES in robustbase VERSION 0.93-5 (2019-05-09, svn r840)}{
   \subsection{Tweaks}{
     \itemize{

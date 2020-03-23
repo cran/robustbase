@@ -2,18 +2,9 @@ stopifnot(require("robustbase"))
 source(system.file("xtraR", "platform-sessionInfo.R", # moreSessionInfo() etc
                              package = "robustbase", mustWork=TRUE))
 ## testing functions:
-source(system.file("test-tools-1.R",  package = "Matrix", mustWork=TRUE))# assert.EQ
-
-c.time <- function(...) cat('Time elapsed: ', ..., '\n')
-S.time <- function(expr) c.time(system.time(expr))
-showProc.time <- local({ ## function + 'pct' variable
-    pct <- proc.time()
-    function(final="\n") { ## CPU elapsed __since last called__
-	ot <- pct ; pct <<- proc.time()
-	## 'Time ..' *not* to be translated:  tools::Rdiff() skips its lines!
-	cat('Time elapsed: ', (pct - ot)[1:3], final)
-    }
-})
+source(system.file("test-tools-1.R",  package = "Matrix", mustWork=TRUE))# -> assert.EQ(),
+## showProc.time(), showSys.time() ...
+S.time <- showSys.time # "back compatible"
 
 mS <- moreSessionInfo(print.=TRUE)
 
@@ -89,7 +80,7 @@ S.time(Rfit.CM <- nlrob.CM( y ~ Expo(x, a, b), data = d.exp30,
 S.time(Rfit.mtl <- nlrob.mtl(y ~ Expo(x, a, b), data = d.exp30,
 			     lower = c(a = -10, b = -2, sigma = 0),
 			     upper = c(	    10,	     2,		3),
-			     NP = NP+10, # <- higher prob. to get close
+			     NP = ceiling(NP*1.33), # <- higher prob. to get close
                              tol = tol,
                              trace=TRUE, details=TRUE,
                              add_to_init_pop = init_p_sigma ))
@@ -367,7 +358,7 @@ all.equal(coef(fM), coef(fMM), tolerance = 1e-4)
 ## FIXME:  nlrob( "M")  should allow to keep specify an initial sigma *and* keep that fixed
 showProc.time()
 
-
+if(doExtras) {
 ### Now call the above methods via nlrob():
 set.seed(47) # (same as above)
 ## without "sigma"
@@ -385,6 +376,5 @@ showProc.time()
 ## list {and test print(<nlrob>) for these}:
 (mod2 <- list(MM=gMM, tau=gtau, CM=gCM, MTL=gmtl))
 
-if(doExtras) {
     stopifnot(mapply(all.eq.mod, mods, mod2, sub=TRUE))
-}
+}# only if(doExtras)
