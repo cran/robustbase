@@ -1,6 +1,12 @@
-\name{internals}
-\alias{internals}
+\name{robustbase-internals}
 \title{Internal Functions of Package 'robustbase'}
+%% Formality: everything in \usage{} "needs" \alias{}
+\alias{internals}
+%
+\alias{print.glmrob}
+\alias{glmrobMqle}
+\alias{glmrobMqleDiffQuasiDevB}
+\alias{glmrobMqleDiffQuasiDevPois}
 %
 \alias{robMD}
 \alias{mahalanobisD}

@@ -20,7 +20,7 @@ rankMM(A, tol = NULL, sv = svd(A, 0, 0)$d)
 \seealso{
   There are more sophisticated proposals for computing the rank of a
   matrix; for a couple of those, see \code{\link[Matrix]{rankMatrix}} in the
-  \pkg{Matrix} package.
+  \CRANpkg{Matrix} package.
 }
 \value{
   an integer from the set \code{0:min(dim(A))}.

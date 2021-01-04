@@ -2,7 +2,8 @@
 \usepackage[a4paper, text={16cm,25cm}]{geometry}
 
 %\VignetteIndexEntry{Simulations for Robust Regression Inference in Small Samples}
-%\VignetteDepends{robustbase, xtable, ggplot2,GGally, RColorBrewer, grid, reshape2}
+%\VignettePackage{robustbase}
+%\VignetteDepends{xtable,ggplot2,GGally,RColorBrewer,grid,reshape2}
 
 \usepackage{amsmath}
 \usepackage{natbib}
@@ -223,6 +224,7 @@ tbl[,2:3] <- apply(tbl[,2:3], 1:2, function(x) {
 tbl[,1] <- paste('\\texttt{', tbl[,1], '}', sep='')
 colnames(tbl) <- paste('\\texttt{', c('psi', 'tuning.chi', 'tuning.psi'),
                        '}', sep='')
+require("xtable") # need also print() method:
 print(xtable(tbl), sanitize.text.function=identity,
       include.rownames = FALSE, floating=FALSE)
 @ %def

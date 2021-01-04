@@ -1,6 +1,6 @@
 
-R version 3.4.2 Patched (2017-11-09 r73697) -- "Short Summer"
-Copyright (C) 2017 The R Foundation for Statistical Computing
+R version 4.0.3 Patched (2020-12-26 r79698) -- "Bunny-Wunnies Freak Out"
+Copyright (C) 2020 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -230,7 +230,7 @@ seed : int(0)
 > class(m4a) <- class(m4)
 > m4a$call <- m4$call
 > 
-> all.equal(m4, m4a)
+> all.equal(m4, m4a, check.environment = FALSE)
 [1] "Component \"control\": Component \"method\": 1 string mismatch"                                
 [2] "Component \"init\": Component \"control\": Component \"method\": 1 string mismatch"            
 [3] "Component \"cov\": Attributes: < Component \"corrfact\": Mean relative difference: 0.1167673 >"
@@ -335,7 +335,7 @@ seed : int(0)
 > m5a <- m5a[names(m5)]
 > class(m5a) <- class(m5)
 > 
-> all.equal(m5, m5a)
+> all.equal(m5, m5a, check.environment = FALSE) #-> 3 string mismatch
 [1] "Component \"control\": Component \"method\": 1 string mismatch"                                        
 [2] "Component \"init\": Component \"control\": Component \"method\": 1 string mismatch"                    
 [3] "Component \"init\": Component \"init\": Component \"control\": Component \"method\": 1 string mismatch"
@@ -355,9 +355,11 @@ In lmrob.S(model.matrix(model, NOxEmissions)[1:682, ], NOxEmissions$LNOx[1:682],
 > try(ret <- lmrob.S(model.matrix(model, NOxEmissions)[1:682,], NOxEmissions$LNOx[1:682], control))
 Error in lmrob.S(model.matrix(model, NOxEmissions)[1:682, ], NOxEmissions$LNOx[1:682],  : 
   DGEEQU: column 30 of the design matrix is exactly zero.
-> ## this still fails, but this error is to be expected since only a part
+> ##-> Error ......  DGEEQU: column 30 of the design matrix is exactly zero.
+> ##
+> ## still fails, but this error is to be expected since only a part
 > ## of the design matrix is given
 > 
 > proc.time()
    user  system elapsed 
-  0.203   0.043   0.240 
+  0.249   0.047   0.376 

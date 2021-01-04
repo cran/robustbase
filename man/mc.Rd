@@ -27,8 +27,12 @@ mc(x, na.rm = FALSE, doReflect = (length(x) <= 100),
     median which is unrobust and numerically dangerous); scaling has been
     the hardwired default in the original algorithm and in \R's
     \code{mc()} till summer 2018.}
-  \item{eps1, eps2}{tolerance in the algorithm; only change with care!}
-  \item{maxit}{maximul number of iterations; typically a few should be
+  \item{eps1, eps2}{tolerance in the algorithm; \code{eps1} is used as a  for
+    convergence tolerance, where \code{eps2} is only used in the internal
+    \code{h_kern()} function to prevent underflow to zero, so could be
+    considerably smaller.  The original code implicitly \emph{hard
+      coded} in C \code{eps1 := eps2 := 1e-13};  only change with care!}
+  \item{maxit}{maximal number of iterations; typically a few should be
     sufficient.}
   \item{trace.lev}{integer specifying how much diagnostic output the
     algorithm (in C) should produce.  No output by default, most output
@@ -57,7 +61,8 @@ mc(x, na.rm = FALSE, doReflect = (length(x) <= 100),
   \cr
   For others, with pecular values, notably many almost-ties with the
   median, it can help extremely to replace \code{mc(x, *)} by
-  \code{mc(jitter(x), *)}.% MM: see also ~/R/MM/Pkg-ex/robustbase/Robnik-mc.R
+  \code{mc(jitter(x), *)}, % MM: see also ~/R/MM/Pkg-ex/robustbase/Robnik-mc.R
+  or also just \code{mc(signif(x), *)}, %
 
   Also, the algorithm not only centers the data around the median but
   also scales them by the extremes which may have a negative effect

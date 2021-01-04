@@ -42,7 +42,8 @@ mc <- function(x, na.rm = FALSE, doReflect = (length(x) <= 100)
              if(!conv1) paste("in", rr[["iter"]], "iterations"),
              if(doReflect && !conv2)
              paste(if(!conv1)" *and*",
-                   "'reflect part' in", rr[["iter2"]], "iterations"))
+                   "'reflect part' in", rr[["iter2"]], "iterations"),
+             "; try enlarging eps1, eps2 !?\n")
     }
 
     m <- if (doReflect) (rr[["medc"]] - rr[["medc2"]]) / 2  else rr[["medc"]]

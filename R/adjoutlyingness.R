@@ -26,8 +26,14 @@
 
 
 adjOutlyingness <- function(x, ndir = 250, p.samp = p, clower=4, cupper=3,
-                            alpha.cutoff = 0.75, coef = 1.5, qr.tol = 1e-12, keep.tol = 1e-12,
-                           only.outlyingness = FALSE, maxit.mult = max(100, p), trace.lev = 0)
+                            alpha.cutoff = 0.75, coef = 1.5,
+                            qr.tol = 1e-12, keep.tol = 1e-12,
+                            only.outlyingness = FALSE, maxit.mult = max(100, p),
+                            trace.lev = 0,
+                            ## these are all passed to mc() {when applied to the projected data}
+                            mcReflect = n <= 100, mcScale = TRUE, mcMaxit = 2*maxit.mult,
+                            mcEps1 = 1e-12, mcEps2 = 1e-15,
+                            mcTrace = max(0, trace.lev-1))
 ## Skewness-Adjusted Outlyingness
 {
     x <- data.matrix(x)
@@ -36,7 +42,7 @@ adjOutlyingness <- function(x, ndir = 250, p.samp = p, clower=4, cupper=3,
     stopifnot(n >= 1, p >= 1, p.samp >= p, is.numeric(x))
     if (p <= n) {
         B <- matrix(0, p, ndir)
-        E <- matrix(1, p, 1)
+        E <- matrix(1, p.samp, 1)
         x. <- unname(x) # for speed in subsequent subsetting and solve
         maxit <- as.integer(maxit.mult * ndir)
         ## ^^ original code had 'Inf', i.e. no iter.count check;
@@ -45,10 +51,11 @@ adjOutlyingness <- function(x, ndir = 250, p.samp = p, clower=4, cupper=3,
 	i <- 1L
 	it <- 0L
 	while (i <= ndir  &&  (it <- it+1L) < maxit) {
-            P <- x.[sample.int(n, p.samp), , drop=FALSE]
+            ## we sort to get *identical* projections instead of "almost"
+            P <- x.[sort(sample.int(n, p.samp)), , drop=FALSE]
             if ((qrP <- qr(P, tol = qr.tol))$rank == p) {
                 B[,i] <- solve(qrP, E, tol = qr.tol)
-                if(trace.lev) cat(" it=",it,"; found direction # ", i,"\n", sep="")
+                ## if(trace.lev >= 2) cat(" it=",it,"; found direction # ", i,"\n", sep="")
 		i <- i+1L
             } else if(trace.lev >= 2) {
                 if(it %% p10 == 0)
@@ -66,10 +73,14 @@ adjOutlyingness <- function(x, ndir = 250, p.samp = p, clower=4, cupper=3,
         Bnorm <- sqrt(colSums(B^2))
         Nx <- mean(abs(x.)) ## so the comparison is scale-equivariant:
         keep <- Bnorm*Nx > keep.tol
-        Bnormr <- Bnorm[  keep ]
-        B      <-     B[, keep , drop=FALSE]
+        if(!all(keep)) {
+            if(trace.lev)
+                cat("keeping ", sum(keep), "(out of", length(keep),") normalized directions\n")
+            Bnorm <- Bnorm[  keep ]
+            B     <-     B[, keep , drop=FALSE]
+        } else if(trace.lev) cat("keeping *all* ",length(keep)," normalized directions\n")
 
-        A <- B / rep(Bnormr, each = nrow(B))
+        B <- B / rep(Bnorm, each = nrow(B)) # normalized B {called 'A' in orig.code}
     }
     else {
         stop('More dimensions than observations: not yet implemented')
@@ -84,23 +95,35 @@ adjOutlyingness <- function(x, ndir = 250, p.samp = p, clower=4, cupper=3,
         ##    for i=1:size(B,1)
         ##        Bnorm(i)=norm(B(i,:),2);
         ##    end
-        ##    Bnormr=Bnorm(Bnorm > 1.e-12); %ndirect*1
+        ##    Bnorm=Bnorm(Bnorm > 1.e-12); %ndirect*1
         ##    B=B(Bnorm > 1.e-12,:);       %ndirect*n
-        ##    A=diag(1./Bnormr)*B;         %ndirect*n
+        ##    A=diag(1./Bnorm)*B;         %ndirect*n
 
     }
-    Y <- x %*% A # (n x p) %*% (p, nd') == (n x nd');
+    ## NB:  colSums( B^2 ) == 1
+    Y <- x %*% B # (n x p) %*% (p, nd') == (n x nd');
     ##  nd' = ndir.final := ndir - {those not in 'keep'}
 
     ## Compute and sweep out the median
     med <- colMedians(Y)
+    if(trace.lev) {
+        cat("med <- colMedians(Y): ", length(med), " values; summary():\n")
+        print(summary(med))
+    }
     Y <- Y - rep(med, each=n)
     ## central :<==> non-adjusted  <==> "classical" outlyingness
     central <- clower == 0 && cupper == 0
-    if(!central)
+    if(!central) {
         ## MM: mc() could be made faster if we could tell it that med(..) = 0
-        tmc <- apply(Y, 2, mc) ## original Antwerpen *wrongly*: tmc <- mc(Y)
-    ##                     ==
+        ##                  vv
+        tmc <- apply(Y, 2L, mc, doReflect=mcReflect, doScale=mcScale,
+                     maxit=mcMaxit, eps1=mcEps1, eps2=mcEps2, trace.lev = mcTrace)
+        ## original Antwerpen *wrongly*: tmc <- mc(Y)
+        if(trace.lev) {
+            cat("Columnwise mc() got ", length(tmc), " values; summary():\n")
+            print(summary(tmc))
+        }
+    }
     Q13 <- apply(Y, 2, quantile, c(.25, .75), names=FALSE)
     Q1 <- Q13[1L,]; Q3 <- Q13[2L,]
     IQR <- Q3 - Q1
@@ -111,6 +134,9 @@ adjOutlyingness <- function(x, ndir = 250, p.samp = p, clower=4, cupper=3,
     tlo <- Q1 - coef*
 	(if(central) IQR else IQR*exp(-clower*tmc*(tmc >= 0) - cupper*tmc*(tmc < 0)))
     ## Note: all(tlo < med & med < tup) # where med = 0
+    if(trace.lev >= 3) {
+        print( cbind(tlo, Q1, Q3, tup) )
+    }
 
     ## Instead of the loop:
     ##  for (i in 1:ndir) {
@@ -123,25 +149,47 @@ adjOutlyingness <- function(x, ndir = 250, p.samp = p, clower=4, cupper=3,
     Yup <- Ylo <- Y
     Yup[!(Y < rep(tup, each=n))] <- -Inf
     Ylo[!(Y > rep(tlo, each=n))] <-  Inf
-    tup <-  apply(Yup, 2, max) # =  max{ Y[i,] ; Y[i,] < tup[i] }
-    tlo <- -apply(Ylo, 2, min) # = -min{ Y[i,] ; Y[i,] > tlo[i] }
-
+    y.up <-  apply(Yup, 2, max) # =  max{ Y[i,] ; Y[i,] < tup[i] }
+    y.lo <- -apply(Ylo, 2, min) # = -min{ Y[i,] ; Y[i,] > tlo[i] }
+    if(trace.lev) {
+        cat(length(y.up), "lower & upper Y (:= X - med(.)) values:\n")
+        print(summary(y.lo))
+        print(summary(y.up))
+    }
     tY <- t(Y)
     ## Note: column-wise medians are all 0 : "x_i > m" <==> y > 0
     ## Note: this loop is pretty fast
     for (j in 1:n) { # when y = (X-med) = 0  ==> adjout = 0 rather than
 	## 0 / 0 --> NaN; e.g, in  set.seed(3); adjOutlyingness(longley)
 	non0 <- 0 != (y <- tY[,j]); y <- y[non0]; I <- (y > 0)
-	tY[non0, j] <- abs(y) / (I*tup[non0] + (1 - I)*tlo[non0])
+	D <- I*y.up[non0] + (1 - I)*y.lo[non0]
+        if(trace.lev >= 3) {
+            cat(sprintf("j=%2d: #{non0}= %2d; quantile(D)=\n", j, sum(non0)))
+            print(quantile(D), digits=3)
+        }
+	tY[non0, j] <- abs(y) / D
     }
     ## We get +Inf above for "small n"; e.g. set.seed(11); adjOutlyingness(longley)
+    if(trace.lev) {
+        cat("outlyingnesses for all directions (of which max(.) will be chosen:\n")
+        print(quantile(tY, digits=3))
+    }
     adjout <- apply(tY, 2, function(x) max(x[is.finite(x)]))
+    ##----                             ---
+    if(abs(trace.lev %% 1  - 0.7) < 1e-3) { ## really not for the end user ..
+        cat("Plotting outlyingnesses vs. observation i:\n")
+        matplot(t(tY), log="y"); axis(2, at=1); abline(h=1, lty=3)
+        Sys.sleep(2)
+        ## somewhat revealing: 3  groups:  very large |  medium | very small (incl. 0 which are *not* plotted)
+        matplot(t(tY), log="y", type="b"); axis(2, at=1); abline(h=1, lty=3)
+        browser()  ## <<<<<<<<<<<<<<<<<<<
+    }
 
     if(only.outlyingness)
 	adjout
     else {
 	Qadj <- quantile(adjout, probs = c(1 - alpha.cutoff, alpha.cutoff))
-	mcadjout <- if(cupper != 0) mc(adjout) else 0
+	mcadjout <- if(cupper != 0) mc(adjout, doScale=mcScale, eps1=mcEps1, eps2=mcEps2) else 0
 	##			    ===
 	cutoff <- Qadj[2] + coef * (Qadj[2] - Qadj[1]) *
 	    (if(mcadjout > 0) exp(cupper*mcadjout) else 1)

@@ -43,7 +43,7 @@ tolEllipsePlot(x, m.cov = covMcd(x), cutoff = NULL, id.n = NULL,
   \code{\link{covPlot}} which calls \code{tolEllipsePlot()} when
   desired.
   \code{\link[cluster]{ellipsoidhull}} and
-  \code{\link[cluster]{predict.ellipsoid}} from package \pkg{cluster}.
+  \code{\link[cluster]{predict.ellipsoid}} from package \CRANpkg{cluster}.
 }
 \examples{
 data(hbk)

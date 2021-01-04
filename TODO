@@ -20,6 +20,10 @@
 **** DONE shouldn't we rename jde() to jdeopt() or even jdeoptim(), jDEoptim(), or JDEoptim()
 R users already know optim() etc.. so the name seems more logical for them.
 * Short Term
+** TODO sc.1) scaleTau2(), Qn(), Sn()  should work with 'NA' (via 'na.rm=FALSE' argument, as mad())
+** TODO sc.2) scaleTau2(), Qn(), Sn()  should work with Inf and "large x", see example(mc)
+** TODO sc.2) mc() should work better with "large x", see example(mc)
+** TODO Try  scaleTau2(*, iterate=TRUE) or 'iter=TRUE' (which can have 'iter = 10' etc)
 ** TODO [Peter Filzmoser, Geneva 2016-07-07 talk]: covMcd() warns when n < 2*p .. should not *warn* but give message()
 ** TODO [Peter Filzmoser, Geneva 2016-07-07 talk]: solve.default(getCov(mcd)) error  with CovControlOgk() init
 *** INSTEAD it should report the (theoretical) breakdown point (p ...) / (n - h ... ) [from the MCD theory]

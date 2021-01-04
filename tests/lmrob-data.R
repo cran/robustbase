@@ -7,6 +7,9 @@ showProc.time()
 
 library(robustbase)
 
+##' short form to get "pure" robustness weights
+rw <- function(fm) unname(weights(fm, type="robustness"))
+
 set.seed(0)
 data(salinity)
 summary(m0.sali  <- lmrob(Y ~ . , data = salinity))
@@ -31,7 +34,7 @@ showProc.time()
 set.seed(7)
 data(coleman)
 summary( m1 <- lmrob(Y ~ ., data=coleman) )
-stopifnot(c(3,18) == which(m1$w < 0.2))
+stopifnot(identical(which(rw(m1) < 0.2), c(3L, 18L)))
 
 if(FALSE) # to find out *why setting = "KS201x" fails
 trace(lmrob.S, exit = quote({cat("coef:\n"); print(b$coefficients)}))
@@ -43,9 +46,11 @@ data(starsCYG)
 (RlmST <- lmrob(log.light ~ log.Te, data = starsCYG, control=lmrob.control(trace = 1)))
 summary(RlmST)
 ## Least Sq. w/ negative slope, where robust has slope ~= 2.2 :
-stopifnot(coef(lmST)[["log.Te"]] < 0,
-          all.equal(coef(RlmST), c("(Intercept)" = -4.969, log.Te=2.253), tol = 1e-3),
-          c(11,20,30,34) == which(RlmST$w < 0.01))
+stopifnot(exprs =  {
+    coef(lmST)[["log.Te"]] < 0
+    all.equal(coef(RlmST), c("(Intercept)" = -4.969, log.Te=2.253), tol = 1e-3)
+    identical(which(rw(RlmST) < 0.01), as.integer( c(11,20,30,34) ))
+})
 showProc.time()
 ## ==> Now see that  "KS2011" and "KS2014" both break down -- and it is the fault of "lqq" *only* :
 (RlmST.11 <- update(RlmST, control = lmrob.control("KS2011",                             trace= 1)))
@@ -172,7 +177,14 @@ pMat <- function(j, main, x.legend, col = 1:8, lty=1:6, lwd = 2, ylab=NA, ...) {
 }
 
 (jj0 <- nCf*(seq_len(nEst)-1L))
-sfsmisc::mult.fig(2)$old.par -> op
+op <- {
+    if(requireNamespace("sfsmisc", quietly=TRUE))
+        sfsmisc::mult.fig(2)$old.par
+    else
+        par(mfrow = 2:1, mar = .1+ c(4,4,2,1), mgp = c(1.5, 0.6, 0))
+}
+
+
 pMat(j = 2+jj0, main = quote("slope" ~~ hat(beta[2])), "bottomleft")
 pMat(j = 3+jj0, main = quote(hat(sigma)), "topleft")
 par(op)
@@ -183,13 +195,13 @@ set.seed(47)
 data(hbk)
 m.hbk <- lmrob(Y ~ ., data = hbk)
 summary(m.hbk)
-stopifnot(1:10 == which(m.hbk$w < 0.01))
+stopifnot(1:10 == which(rw(m.hbk) < 0.01))
 
 data(heart)
 summary(mhrt <- lmrob(clength ~ ., data = heart)) # -> warning 'maxit.scale=200' too small
-stopifnot(8  == which(mhrt$w < 0.15),
-          11 == which(0.61 < mhrt$w & mhrt$w < 0.62),
-          c(1:7,9:10,12) == which(mhrt$w > 0.90))
+stopifnot(8  == which(rw(mhrt) < 0.15),
+          11 == which(0.61 < rw(mhrt) & rw(mhrt) < 0.62),
+          c(1:7,9:10,12) == which(rw(mhrt) > 0.90))
 
 iN <- c(3,5,7,11)
 heartN <- heart; heartN[iN, "clength"] <- NA

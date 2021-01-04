@@ -1,4 +1,3 @@
-\newcommand{\CRANpkg}{\href{https://CRAN.R-project.org/package=#1}{\pkg{#1}}}
 \name{covMcd}
 \title{Robust Location and Scatter Estimation via MCD}
 \alias{covMcd}
@@ -98,7 +97,7 @@ covMcd(x, cor = FALSE, raw.only = FALSE,
 \details{
   The minimum covariance determinant estimator of location and scatter
   implemented in \code{covMcd()} is similar to \R function
-  \code{\link[MASS]{cov.mcd}()} in \pkg{MASS}.  The MCD method looks for
+  \code{\link[MASS]{cov.mcd}()} in \CRANpkg{MASS}.  The MCD method looks for
   the \eqn{h (> n/2)} (\eqn{h = h(\alpha,n,p) =}
   \code{\link{h.alpha.n}(alpha,n,p)}) observations (out of \eqn{n})
   whose classical covariance matrix has the lowest possible determinant.

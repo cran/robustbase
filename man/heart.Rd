@@ -29,7 +29,7 @@ data(heart)
   }
 }
 \note{There are other \code{heart} datasets in other \R packages,
-  notably \pkg{survival}, hence considering using
+  notably \CRANpkg{survival}, hence considering using
   \code{package = "robustbase"}, see examples.
 }
 \source{

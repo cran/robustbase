@@ -23,7 +23,7 @@
   Data description and first analysis: Stefanski et al.(1986) who
   indicate Rizek(1978) as original source of the larger study.
 
-  Electronic version from CRAN package \pkg{catdata}.
+  Electronic version from CRAN package \CRANpkg{catdata}.
   % which wrongly labeled 'income' (='INC') as "log(1 + income)"
 }
 \references{

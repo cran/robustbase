@@ -5,7 +5,9 @@ if(FALSE) {##MM
     findExternalDeps("robustbase")
 }
 importFrom("grDevices", dev.interactive, extendrange)
-importFrom("graphics", abline, box, legend, lines, matplot, mtext,
+importFrom("graphics",
+           abline, axis,
+           box, legend, lines, matplot, mtext,
            panel.smooth, par, plot, points, strheight, text, title)
 importFrom("stats",
            aggregate, alias, as.formula, binomial,

@@ -32,12 +32,12 @@ Animals2
   \emph{Modern Applied Statistics with S.} Forth Edition. Springer.
 }
 \note{
-  After loading the \pkg{MASS} package, the data set is simply constructed by
+  After loading the \CRANpkg{MASS} package, the data set is simply constructed by
   \code{Animals2 <- local({D <- rbind(Animals, mammals);
       unique(D[order(D$body,D$brain),])})}.
 
   Rousseeuw and Leroy (1987)'s \sQuote{brain} data is the same as
-  \pkg{MASS}'s \code{Animals} (with Rat and Brachiosaurus interchanged,
+  \CRANpkg{MASS}'s \code{Animals} (with Rat and Brachiosaurus interchanged,
   see the example below).
 }
 \examples{

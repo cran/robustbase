@@ -47,7 +47,7 @@
 ##'                     mahalanobis (x, rep(0,p), diag(sd^2)))
 mahalanobisD <- function(x, center, sd) {
     ## Compute the mahalanobis distances (for diagonal cov).
-    if(!identical(center, FALSE))
+    if(!isFALSE(center))
         x <- sweep(x, 2L, center, check.margin=FALSE)
     rowSums(sweep(x, 2L, sd, '/', check.margin=FALSE)^2)
 }
@@ -153,10 +153,12 @@ covOGK <- function(X, n.iter = 2,
 ## a version with weights and consistency (but only one tuning const!!)
 ## is in /u/maechler/R/other-people/Mspline/Mspline/R/scaleTau.R
 ##
-scaleTau2 <- function(x, c1 = 4.5, c2 = 3.0, consistency = TRUE,
+scaleTau2 <- function(x, c1 = 4.5, c2 = 3.0, na.rm = FALSE, consistency = TRUE,
                       sigma0 = median(x.), # = MAD(x)  {without consistency factor}
                       mu.too = FALSE)
 {
+    if(na.rm)
+        x <- x[!is.na(x)]
     n <- length(x)
     medx <- median(x)
     x. <- abs(x - medx)
@@ -165,13 +167,15 @@ scaleTau2 <- function(x, c1 = 4.5, c2 = 3.0, consistency = TRUE,
 	return(c(if(mu.too) medx, 0))
     }
     mu <-
-        if(c1 > 0) {
-            ## w <- pmax(0, 1 - (x. / (sigma0 * c1))^2)^2   -- but faster:
-            x. <- x. / (sigma0 * c1)
-            w <- 1 - x.*x.
-            w <- ((abs(w) + w)/2)^2
-
-            sum(x * w) / sum(w) }
+        if(c1 > 0) { # "bi-weight" {now in version that even works with x.=Inf}:
+            w <- pmax(0, 1 - (x. / (sigma0 * c1))^2)^2
+            if(!is.finite(s.xw <- sum(x*w))) { ## x*w \-> NaN when (x,w) = (Inf,0)
+                wpos <- w > 0
+                w <- w[wpos]
+                s.xw <- sum(x[wpos]*w)
+            }
+            s.xw / sum(w)
+        }
         else medx
 
     x <- (x - mu) / sigma0
@@ -179,14 +183,14 @@ scaleTau2 <- function(x, c1 = 4.5, c2 = 3.0, consistency = TRUE,
     rho[rho > c2^2] <- c2^2
     ## sigma2 <- sigma0^2 * sum(rho)/ n
 
-    if(!identical(consistency,FALSE)) {
+    if(!isFALSE(consistency)) {
 	Erho <- function(b)
 	    ## E [ rho_b ( X ) ]   X ~ N(0,1)
 	    2*((1-b^2)*pnorm(b) - b * dnorm(b) + b^2) - 1
 	Es2 <- function(c2)
 	    ## k^2 * E[ rho_{c2} (X' / k) ] , where X' ~ N(0,1), k= qnorm(3/4)
 	    Erho(c2 * qnorm(3/4))
-        ## the asymptotic E[ sigma^2(X) ]  is Es2(c2):
+        ## the asymptotic E[ sigma^2(X) ]  is Es2(c2), {Es2(3) ~= 0.925} :
         ## TODO: 'n-2' below will probably change; therefore not yet documented
         nEs2 <- (if(consistency == "finiteSample") n-2 else n) * Es2(c2)
     } else nEs2 <- n

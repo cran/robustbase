@@ -68,7 +68,7 @@ lmrob.M.S(x, y, control, mf,
   \code{\link{lmrob}}; for a description of the available split types, see
   \code{\link{splitFrame}}.
 
-  \code{\link[robust]{lmRob}} in package \pkg{robust} uses a version of
+  \code{\link[robust]{lmRob}} in package \CRANpkg{robust} uses a version of
   the M-S algorithm automatically when the formula contains factors.
   Our version however follows Maronna and Yohai (2000) more closely.
 }

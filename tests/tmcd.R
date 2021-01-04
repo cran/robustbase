@@ -90,11 +90,12 @@ set.seed(101)
 ## the finite-sample correction is definitely doubtful:
 summary(cc <- covMcd(X, use.correction = FALSE))
 str(cc) ## best = 2 3 4 5
+if(hasMASS <- requireNamespace("MASS", quietly=TRUE)) {
 mcc <- MASS::cov.mcd(X)
 stopifnot(cc$best == mcc$best,
           all.equal(cc$center, mcc$center, tolerance = 1e-10),
           all.equal(c(mcc$cov / cc$raw.cov), rep(0.673549282206, 3*3)))
-
+}
 ## p = 4 -- 6 x 4 & 7 x 4  [ n < 2 p  ! ]
 p <- 4
 n <- 7
@@ -102,17 +103,22 @@ X <- X.[1:n, 1+(1:p)]
 stopifnot(dim(X) == c(n,p))
 (cc <- covMcd(X, use.correction = FALSE))
 str(cc) ## best = 1 2 4 5 6 7
+if(hasMASS) {
 mcc <- MASS::cov.mcd(X)
 stopifnot(cc$best == mcc$best,
           all.equal(cc$center, mcc$center, tolerance = 1e-10),
           all.equal(c(mcc$cov / cc$raw.cov), rep(0.7782486992881, p*p)))
+}
+
 n <- 6
 X <- X[1:n,]
 (cc <- covMcd(X, use.correction = FALSE))
+if(hasMASS) {
 mcc <- MASS::cov.mcd(X)
 stopifnot(cc$best == mcc$best,
           all.equal(cc$center, mcc$center, tolerance = 1e-10),
           all.equal(c(mcc$cov / cc$raw.cov), rep(0.7528695976179, p*p)))
+}
 
 showProc.time()
 

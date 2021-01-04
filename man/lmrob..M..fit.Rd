@@ -45,7 +45,7 @@ lmrob..M..fit(x, y, beta.initial, scale, control, obj,
 }
 \seealso{
   \code{\link{lmrob.fit}}, \code{\link{lmrob}};
-  \code{\link[MASS]{rlm}} from package \pkg{MASS}.
+  \code{\link[MASS]{rlm}} from package \CRANpkg{MASS}.
 }
 \author{Matias Salibian-Barrera and Martin Maechler}
 \examples{

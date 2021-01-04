@@ -52,7 +52,7 @@ r6pack(x, h, full.h, scaled = TRUE, scalefn = rrcov.control()$scalefn)
 }
 \seealso{
   \code{\link{covMcd}(*, nsamp = "deterministic")};
-  \code{\link[rrcov]{CovSest}(*, nsamp = "sdet")} from package \pkg{rrcov}.
+  \code{\link[rrcov]{CovSest}(*, nsamp = "sdet")} from package \CRANpkg{rrcov}.
 }
 \examples{
 data(pulpfiber)

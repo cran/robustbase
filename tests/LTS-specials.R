@@ -6,6 +6,7 @@ library(robustbase)
 .libPaths()
 SysI <- Sys.info()
 structure(Sys.info()[c(4,5,1:3)], class="simple.list")
+library(lib.loc = .libPaths()[1]) # the "R CMD check specific tmp-library"
 sessionInfo()
 c(robustbase = packageDescription("robustbase")$Built,
   DEoptimR   = packageDescription("DEoptimR")$Built)

@@ -22,7 +22,7 @@
 }
 \details{
   For \R \code{<= 3.2.x}, we provide an (S3) generic function (as e.g.,
-  package \pkg{lme4}) and methods for \code{\link{lmrob}},
+  package \CRANpkg{lme4}) and methods for \code{\link{lmrob}},
   \code{\link{nlrob}}, and \code{\link{nls}}.
 
   From \R \code{>= 3.3.0}, we provide methods for our

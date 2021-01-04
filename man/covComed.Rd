@@ -75,7 +75,7 @@ cc0  <- covComed(hbk.x, n.iter=0)
 cc0W <- covComed(hbk.x, n.iter=0, reweight=TRUE)
 
 stopifnot(all.equal(unclass(cc0), # here, the 0-1 weights don't change:
-                    cc0W[names(cc0)], tol=1e-12),
+                    cc0W[names(cc0)], tol=1e-12, check.environment = FALSE),
           which(cc1$weights == 0) == 1:14,
           which(ccW$weights == 0) == 1:14,
           which(cc0$weights == 0) == 1:14)

@@ -1,5 +1,4 @@
 ### R code from vignette source 'lmrob_simulation.Rnw'
-### Encoding: UTF-8
 
 ###################################################
 ### code chunk number 1: initial-setup
@@ -127,6 +126,7 @@ tbl[,2:3] <- apply(tbl[,2:3], 1:2, function(x) {
 tbl[,1] <- paste('\\texttt{', tbl[,1], '}', sep='')
 colnames(tbl) <- paste('\\texttt{', c('psi', 'tuning.chi', 'tuning.psi'),
                        '}', sep='')
+require("xtable") # need also print() method:
 print(xtable(tbl), sanitize.text.function=identity,
       include.rownames = FALSE, floating=FALSE)
 
@@ -188,7 +188,7 @@ print(ggpairs(df.r_25_5, axisLabels="show", title = "rand_25_5: n=25, p=5"))
 
 
 ###################################################
-### code chunk number 7: lmrob_simulation.Rnw:369-370
+### code chunk number 7: lmrob_simulation.Rnw:371-372
 ###################################################
 aggrResultsFile <- file.path(robustDta, "aggr_results.Rdata")
 
@@ -262,7 +262,7 @@ estlist$errs[[1]]
 
 
 ###################################################
-### code chunk number 12: lmrob_simulation.Rnw:447-448
+### code chunk number 12: lmrob_simulation.Rnw:449-450
 ###################################################
 str(estlist$output[1:3], 2)
 

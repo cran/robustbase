@@ -43,7 +43,7 @@ double whimed(double *a, double *w, int n,
 void mc_C(double *z, int *in, double *eps, int *iter, double *out, int *scale);
 
 /* call from C: *iter is both input and output */
-double mc_C_d(double *z, int n, const double eps[], int *iter, int scale);
+double mc_C_d(const double z[], int n, const double eps[], int *iter, int scale);
 
 
 

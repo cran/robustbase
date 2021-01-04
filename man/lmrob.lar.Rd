@@ -5,7 +5,7 @@
   To compute least absolute residuals (LAR) or  \dQuote{L1} regression,
   \code{lmrob.lar} implements the routine L1 in Barrodale and Roberts (1974),
   which is based on the simplex method of linear programming.  It is a
-  copy of \code{lmRob.lar} (in early 2012) from the \pkg{robust} package.
+  copy of \code{lmRob.lar} (in early 2012) from the \CRANpkg{robust} package.
 }
 \usage{
 lmrob.lar(x, y, control, \dots)
@@ -46,7 +46,7 @@ lmrob.lar(x, y, control, \dots)
   Manuel Koller
 }
 \seealso{
-  \code{\link[quantreg]{rq}} from package \pkg{quantreg}.
+  \code{\link[quantreg]{rq}} from CRAN package \CRANpkg{quantreg}.
 }
 \examples{
 data(stackloss)

@@ -35,7 +35,7 @@ DO(0 == sapply(1:100, function(n) mcNaive(seq_len(n), "h.use" )))
 
 x1 <- c(1, 2, 7, 9, 10)
 mcNaive(x1) # = -1/3
-assertEQm12(-1/3, mcNaive(x1))
+assertEQm12(-1/3, mcNaive(x1, "simple"))
 assertEQm12(-1/3, mcNaive(x1, "h.use"))
 assertEQm12(-1/3, mc(x1))
 
@@ -48,6 +48,7 @@ assertEQm12(1/6, mcNaive(x2, "h.use"))
 x4 <- c(1:5,7,10,15,25, 1e15) ## - bombed in orignal algo
 mcNaive(x4,"h.use") # 0.5833333
 assertEQm12( 7/12, mcNaive(x4, "h.use"))
+assertEQm12( 7/12, mcNaive(x4, "simple"))
 assertEQm12( 7/12, mc( x4, doRefl= FALSE))
 assertEQm12(-7/12, mc(-x4, doRefl= FALSE))
 
@@ -69,6 +70,7 @@ for(n in 3:50) {
 ###----  Strict tests of adjOutlyingness():
 ###                      ================= changed after long-standing bug fix in Oct.2014
 ## as this calls, sample.int() and we carefully compare specific seed examples, need
+RNGversion("3.6.0") # == RNGversion("4.0.2") ..
 RNGversion("3.5.0") ## [TODO: adapt to "current" RNG settings]
 
 set.seed(1);  S.time(a1.1 <- adjOutlyingness(longley))
@@ -97,7 +99,7 @@ cat("\nRnk(a4 $ adjout): "); dput(Rnk(a4$adjout), control= {})
     else if(isSun || isMac)
         TRUE
     else
-        all.equal(i.a4Out, c(9:19, 23:27,57, 59, 70, 77))
+        all.equal(i.a4Out, c(9:19, 23:27,57, 59, 70, 77)) # '70' only 64b-Fedora_32, Dec.2020
 }
 
 ## only for ATLAS (BLAS/Lapack), not all are TRUE; which ones?
@@ -158,7 +160,7 @@ sum(abs(d) <= 17) >= 78
 sum(abs(d) <= 13) >= 75
 
 
-
+RNGversion("3.6.0") # == RNGversion("4.0.2") ..
 
 ## check of adjOutlyingness *free* bug
 ## reported by Kaveh Vakili <Kaveh.Vakili@wis.kuleuven.be>
@@ -171,6 +173,29 @@ for (i in 1:10) {
     ## this would produce an error in the 6th iteration
     aa <- adjOutlyingness(x=X,ndir=250)
 }
+
+## Check "high"-dimensional Noise ... typically mc() did *not* converge for some re-centered columns
+## Example by Valentin Todorov:
+n <- 50
+p <- 30
+set.seed(1) # MM
+a <- matrix(rnorm(n * p), nrow=n, ncol=p)
+str(a)
+kappa(a) # 20.42 (~ 10--20 or so; definitely not close to singular)
+a.a <- adjOutlyingness(a, mcScale=FALSE, # <- my own recommendation
+                       trace.lev=1)
+a.s <- adjOutlyingness(a, mcScale=TRUE, trace.lev=1)
+
+str(a.a) # surprisingly high 'adjout' values "all similar" -> no outliers .. hmm .. ???
+stopifnot(exprs = {
+    ## a.a :
+    identical(a.a$nonOut, local({r <- rep(TRUE, 50); r[22] <- FALSE; r}))
+    all.equal(a.a$MCadjout, 0.136839766177, tol = 1e-12) # seen 7.65e-14
+    ## a.s :
+    a.s$nonOut # all TRUE
+    all.equal(a.s$MCadjout, 0.32284906741568, tol = 1e-13) # seen 2.2e-15
+})
+## The adjout values are all > 10^15  !!! ... what's going on ??? (now I know ..)
 
 
 ## "large n" (this did overflow sum_p, sum_q  earlier ==> had inf.loop):

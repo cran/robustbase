@@ -4,6 +4,38 @@
 \title{News for \R Package \pkg{robustbase}}
 \encoding{UTF-8}
 
+\section{CHANGES in robustbase VERSION 0.93-7 (2021-01-03, svn r865)}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item Use \command{\\CRANpkg\{.\}} in most places, providing web
+      links to the respective CRAN package page.
+
+      \item \code{adjOutlyingness()} now gains optional parameters to be
+      passed to \code{mc()}.
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item update the internal man page, so new \code{checkRdContents()}
+      is happy.
+      \item fix several \samp{\\url{.}}'s that now are diagnosed as
+      \sQuote{moved}.
+
+      \item \code{adjOutlyingness()} finally works with \code{p.samp > p}.
+
+      \item \code{scaleTau2()} now works with \code{Inf} and very large
+      values, and obeys new \code{na.rm = FALSE} argument.
+
+      \item add \code{check.environment=FALSE} to some of the
+      \code{all.equal()} calls (for 'R-devel', i.e., future R 4.1.x).
+
+      \item \code{wgt.himedian(numeric())} now returns \code{NA} instead of
+      occasionally seg.faulting or inf.looping.  Ditto for a case when
+      called from \code{Qn()}.
+    }
+  }
+}
+
 \section{CHANGES in robustbase VERSION 0.93-6 (2020-03-20, svn r854)}{
   \subsection{NEW FEATURES}{
     \itemize{
@@ -106,7 +138,7 @@
       \code{data(<..>, package="robustbase")}.
 
       \item The \file{lmrob_simulation} vignette now should continue
-      to work with upcoming \pkg{ggplot2}.
+      to work with upcoming package \CRANpkg{ggplot2}.
     }
   }
   \subsection{BUG FIXES}{
@@ -147,7 +179,7 @@
       %% which also depicts the \dQuote{non-robust} behavior of \code{lmrob(setting="KS2014")}
 
       \item Vignette \file{lmrob_simulation.Rnw}: fixed the wrong
-      \dQuote{emprical power} plots; with faster \pkg{ggplot2}, remove
+      \dQuote{emprical power} plots; with faster \CRANpkg{ggplot2}, remove
       all \code{eval=FALSE} for plots and longer store the
       \file{*.pdf}s.
 

@@ -1,5 +1,7 @@
 library(robustbase)
 
+if(!dev.interactive(orNone=TRUE)) pdf("Qn-Sn-plots.pdf")
+
 n <- 1:50
 (qnn <- sapply(n, function(n)Qn(1:n, const=1)))
 plot(n, qnn, type = 'b', col = 2,
@@ -9,8 +11,9 @@ plot(n, qnn, type = 'b', col = 2,
 plot(n, snn, type = 'b', col = 2,
      ylab = "Sn", main = "Sn(1:n) [unscaled]")
 
-matplot(n, cbind(qnn, snn),type = 'b',
+matplot(n, cbind(qnn, snn), type = 'b',
         ylab = "Qn & Sn", main = "Qn(1:n) & Sn(1:n) [unscaled]")
+legend("topleft", c("Qn", "Sn"), col=1:2, lty=1:2, bty="n", pch=paste(1:2))
 
 (sdn <- c(1, sapply(n[-1], function(n)sd(1:n)/n)))
 ## sd(1) => NA

@@ -3,7 +3,7 @@
 \title{Statistics for Skewness-adjusted Boxplots}
 \description{
   Computes the \dQuote{statistics} for producing boxplots adjusted for
-  skewed distributions as proposed in Hubert and Vandervieren (2004),
+  skewed distributions as proposed in Hubert and Vandervieren (2008),
   see \code{\link{adjbox}}.
 }
 \usage{

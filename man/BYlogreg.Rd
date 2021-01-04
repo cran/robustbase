@@ -17,7 +17,7 @@
   % http://feb.kuleuven.be/public/u0017833/software_donotuse/logreg/BYlogreg.txt
   % but rather use Wiley's book resources
   and also available as file \file{FunctionsRob/BYlogreg.ssc} from
-  \url{http://www.wiley.com/legacy/wileychi/robust_statistics/robust.html}.
+  \url{https://www.wiley.com/legacy/wileychi/robust_statistics/robust.html}.
 
   However instead of using this function, the recommended interface is
   \code{\link{glmrob}(*, method = "BY")} or \code{... method = "WBY" ..},

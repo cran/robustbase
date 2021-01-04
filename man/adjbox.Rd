@@ -5,7 +5,7 @@
 \alias{adjbox.formula}
 \description{
   Produces boxplots adjusted for skewed distributions as proposed in
-  Hubert and Vandervieren (2004).
+  Hubert and Vandervieren (2008).
 }
 \usage{
 adjbox(x, \dots)
@@ -134,6 +134,7 @@ adjbox(x, \dots)
   Hubert, M. and Vandervieren, E. (2008).
   An adjusted boxplot for skewed distributions,
   \emph{Computational Statistics and Data Analysis} \bold{52}, 5186--5201.
+  \doi{10.1016/j.csda.2007.11.008}
 }
 \author{ R Core Development Team, slightly adapted by Tobias Verbeke }
 \note{ The code and documentation only slightly modifies the code of
@@ -144,7 +145,7 @@ adjbox(x, \dots)
 }
 \examples{
 if(require("boot")) {
- ### Hubert and Vandervieren (2006), p. 10, Fig. 4.
+ ### Hubert and Vandervieren (2008), Fig. 5.%(2006): p. 10, Fig. 4.
  data(coal, package = "boot")
  coaldiff <- diff(coal$date)
  op <- par(mfrow = c(1,2))
@@ -153,7 +154,7 @@ if(require("boot")) {
  par(op)
 }
 
-### Hubert and Vandervieren (2006), p. 11, Fig. 6. -- enhanced
+### Hubert and Vandervieren (2008), p. 11, Fig. 7a -- enhanced
 op <- par(mfrow = c(2,2), mar = c(1,3,3,1), oma = c(0,0,3,0))
 with(condroz, {
  boxplot(Ca, main = "Original Boxplot")

@@ -21,13 +21,9 @@ adjbox.default <- function (x, ..., range = 1.5, doReflect=FALSE, width = NULL, 
 	stop("invalid first argument")
     if(length(class(groups)))
 	groups <- unclass(groups)
-    if(!missing(names))
-	attr(groups, "names") <- names
-    else {
-	if(is.null(attr(groups, "names")))
-	    attr(groups, "names") <- 1:n
-	names <- attr(groups, "names")
-    }
+    if(missing(names))
+        names <- 1:n
+    names(groups) <- names
     cls <- sapply(groups, function(x) class(x)[1])
     cl <- if(all(cls == cls[1])) cls[1] # else NULL
     for (i in 1:n)
@@ -85,7 +81,7 @@ adjbox.formula <- function (formula, data = NULL, ..., subset, na.action = NULL)
 adjboxStats <- function(x, coef = 1.5, a = -4, b = 3,
 			do.conf = TRUE, do.out = TRUE, ...)
 {
-    if(coef < 0) stop("'coef' must not be negative")
+   if(coef < 0) stop("'coef' must not be negative")
     nna <- !is.na(x)
     n <- sum(nna)# including +/- Inf
     stats <- fivenum(x, na.rm = TRUE)

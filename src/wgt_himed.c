@@ -28,7 +28,6 @@
  * #include <stdint.h>
  * or #include <sys/types.h> */
 /* --> int64_t ; if people don't have the above, they can forget about it.. */
-/* #include "int64.h" */
 
 #include <Rmath.h> /* -> <math.h> and much more */
 

@@ -72,7 +72,7 @@ MrhoInf(cc, psi)
   \code{.Mwgt.psi1()} mainly a utility for \code{\link{nlrob}()},
   returns a \emph{\code{\link{function}}} with similar semantics as
   \code{\link[MASS]{psi.hampel}}, \code{\link[MASS]{psi.huber}}, or
-  \code{\link[MASS]{psi.bisquare}} from package \pkg{MASS}.  Namely,
+  \code{\link[MASS]{psi.bisquare}} from package \CRANpkg{MASS}.  Namely,
   a function with arguments \code{(x, deriv=0)}, which for
   \code{deriv=0} computes \code{Mwgt(x, cc, psi)} and otherwise computes
   \code{Mpsi(x, cc, psi, deriv=deriv)}.

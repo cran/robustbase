@@ -96,8 +96,8 @@ nlr3. <- update(nlr3, algorithm= "port")
 summary(nlr2.)
 summary(nlr3.)
 i. <- -c(2, 15) # <- drop 'call' and 'iter' components
-stopifnot(all.equal(nlr2[i.], nlr2.[i.], tolerance = 2e-5),
-          all.equal(nlr3[i.], nlr3.[i.], tolerance = 1e-4),
+stopifnot(all.equal(nlr2[i.], nlr2.[i.], tolerance = 2e-5, check.environment = FALSE),
+          all.equal(nlr3[i.], nlr3.[i.], tolerance = 1e-4, check.environment = FALSE),
           ## The redescending psi() give some exact 0 weights :
 	  identical(which(abs(nlr2$rweights) < 1e-9), c(1L, 10 :12)),
 	  identical(which(abs(nlr3$rweights) < 1e-9), c(1L, 10L,12L))
@@ -182,7 +182,7 @@ m1.st <- list(Wm = c(219.8, 265.9, 343.4),
 m.cl <- nls(Biomass ~ Wm[Tillage] * (1 - exp(-(DVS/a[Tillage])^b[Tillage])),
             data = biomassTill, start = m00st, trace=TRUE)
 ## this now fails to converge:
-try(
+try( # "singular gradient"
 m.c2 <- nls(Biom.2 ~ Wm[Tillage] * (1 - exp(-(DVS/a[Tillage])^b[Tillage])),
             data = biomassTill, start = m00st, trace=TRUE)
 )

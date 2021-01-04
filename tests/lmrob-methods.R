@@ -39,7 +39,7 @@ m4a <- m4a[names(m4)]
 class(m4a) <- class(m4)
 m4a$call <- m4$call
 
-all.equal(m4, m4a)
+all.equal(m4, m4a, check.environment = FALSE)
 
 ## SMDM
 set.seed(0)
@@ -51,7 +51,7 @@ summary(m5a <- lmrob..M..fit(obj=m4))
 m5a <- m5a[names(m5)]
 class(m5a) <- class(m5)
 
-all.equal(m5, m5a)
+all.equal(m5, m5a, check.environment = FALSE) #-> 3 string mismatch
 
 ## Fast S large n strategy (sped up)
 model <- model.frame(LNOx ~ . ,data = NOxEmissions)
@@ -61,5 +61,7 @@ try(ret <- lmrob.S(model.matrix(model, NOxEmissions)[1:682,], NOxEmissions$LNOx[
 ## do what the error says
 control <- lmrob.control(fast.s.large.n = Inf)
 try(ret <- lmrob.S(model.matrix(model, NOxEmissions)[1:682,], NOxEmissions$LNOx[1:682], control))
-## this still fails, but this error is to be expected since only a part
+##-> Error ......  DGEEQU: column 30 of the design matrix is exactly zero.
+##
+## still fails, but this error is to be expected since only a part
 ## of the design matrix is given

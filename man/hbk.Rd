@@ -24,7 +24,7 @@
   }
 }
 \note{
-  This data set is also available in package \pkg{wle} as
+  This data set is also available in package \CRANpkg{wle} as
   \code{artificial}.
 }
 \source{

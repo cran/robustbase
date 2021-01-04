@@ -7,6 +7,9 @@ is.all.equal <- function(x,y, tol = 2e-7) {
 
 library(robustbase)
 
+stopifnot(is.na(wgt.himedian(numeric())))
+## hi-median(<empty>)  seg.faulted or inf.looped till Jan.3, 2021
+
 options(digits = 7)# single precision!
 set.seed(15)
 

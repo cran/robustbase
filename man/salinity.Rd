@@ -27,7 +27,7 @@
     \item{\code{Y}:}{Salinity   (\sQuote{SALINITY})}
   }
 }
-\note{The \pkg{boot} package contains another version of this salinity
+\note{The \CRANpkg{boot} package contains another version of this salinity
   data set, also attributed to Ruppert and Carroll (1980), but with two
   clear transcription errors, see the examples.
 }

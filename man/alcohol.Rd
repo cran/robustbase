@@ -26,7 +26,7 @@
 % }
 \source{
   The website accompanying the MMY-book:
-  \url{http://www.wiley.com/legacy/wileychi/robust_statistics}
+  \url{https://www.wiley.com/legacy/wileychi/robust_statistics/}
 }
 \references{
   %% FIXME: I don't think this is the correct reference

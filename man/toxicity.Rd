@@ -30,7 +30,7 @@
 % }
 \source{
   The website accompanying the MMY-book:
-  \url{http://www.wiley.com/legacy/wileychi/robust_statistics}
+  \url{https://www.wiley.com/legacy/wileychi/robust_statistics/}
 }
 \references{
   Maguna, F.P., Núñez, M.B., Okulik, N.B. and Castro, E.A. (2003)

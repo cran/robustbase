@@ -310,7 +310,7 @@ docheck <- function(n, p, eps, ...) {
 ##' did not get zero weight
 check <- function(mcd, xind){
     mymatch <- xind %in% which(mcd@wt == 0)
-    length(xind) - length(which(mymatch))
+    length(xind) - sum(mymatch)
 }
 
 

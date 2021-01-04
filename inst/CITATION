@@ -30,13 +30,13 @@ citEntry(entry = "Article",
   volume       = "32",
   number       = "3",
   pages        = "1--47",
-  url          = "http://www.jstatsoft.org/v32/i03/",
+  url          = "https://www.jstatsoft.org/article/view/v032i03/",
 
   textVersion  =
   paste("Valentin Todorov, Peter Filzmoser (2009).",
         "An Object-Oriented Framework for Robust Multivariate Analysis.",
         "Journal of Statistical Software, 32(3), 1-47.",
-        "URL http://www.jstatsoft.org/v32/i03/."),
+        "URL https://www.jstatsoft.org/article/view/v032i03/."),
   header = "To cite the multivariate class/methods framework use:"
 )
 

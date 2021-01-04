@@ -4,17 +4,19 @@
 \description{
   Computes the robust \eqn{\tau}-estimate of univariate scale, as
   proposed by Maronna and Zamar (2002); improved by a consistency factor,
-  %% FIXME: TODO: and a finite sample correction by Martin Maechler
-  %% (currently have 'n-2' but can be better !!!!
+  %% FIXME: TODO: add a finite sample correction by Martin Maechler
+  %% (currently have 'n-2' but can even be better !!!!
 }
-\usage{
-scaleTau2(x, c1 = 4.5, c2 = 3.0, consistency = TRUE,
+\usage{%--> ../R/OGK.R <<<
+scaleTau2(x, c1 = 4.5, c2 = 3.0, na.rm = FALSE, consistency = TRUE,
           sigma0 = median(x.), mu.too = FALSE)
 }
 \arguments{
   \item{x}{numeric vector}
   \item{c1,c2}{non-negative numbers, specifying cutoff values for the
     biweighting of the mean and the rho function respectively.}
+  \item{na.rm}{a logical value indicating whether \code{NA}
+    values should be stripped before the computation proceeds.}
   \item{consistency}{logical indicating if the consistency correction
     factor (for the scale) should be applied.}
   \item{sigma0}{the initial scale estimate \eqn{s_0}{s0}, defaulting to

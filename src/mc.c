@@ -49,7 +49,7 @@ void mc_C(double *z, int *in, double *eps, int *iter, double *out, int *scale)
  *      eps2: used to check for over- and underflow, respectively
  *      therefore I suggest eps1 = DBL_EPS and eps2 = DBL_MIN
  */
-double mc_C_d(double *z, int n, const double eps[], int *iter, int scale)
+double mc_C_d(const double z[], int n, const double eps[], int *iter, int scale)
 {
 /* NOTE:
     eps	  = c(eps1, eps2)
@@ -133,7 +133,7 @@ double mc_C_d(double *z, int n, const double eps[], int *iter, int scale)
 	j++;
     }
     if(trace_lev >= 2)
-	Rprintf("   x1[] := {x | x_j > x_eps = %g}    has %d (='j-1') entries\n",
+	Rprintf("   x1[] := {x | x_j >= x_eps = %g}    has %d (='j-1') entries\n",
 		x_eps, j-1);
     i = 1;
     double *x2 = x+j-1; /* pointer -- corresponding to  x2[i] = x[j]; */

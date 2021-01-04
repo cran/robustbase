@@ -1,9 +1,10 @@
 ##' @title Simple Matrix Rank ====> ../man/rankMM.Rd
 rankMM <- function(A, tol = NULL, sv = svd(A,0,0)$d) {
     d <- dim(A)
-    stopifnot(length(d)==2, length(sv)==min(d), diff(sv) <= 0) # must be sorted decreasingly
+    stopifnot(length(d)==2, length(sv) == min(d), min(d) >= 1L,
+              all(diff(sv) <= 0)) # must be sorted decreasingly
     if(is.null(tol))
-	tol <- max(d) * .Machine$double.eps * abs(sv[1])
+	tol <- max(d) * .Machine$double.eps * abs(sv[1L])
     else
 	stopifnot(is.numeric(tol), tol >= 0)
     sum(sv >= tol)

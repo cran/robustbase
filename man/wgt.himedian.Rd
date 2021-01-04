@@ -21,7 +21,7 @@ wgt.himedian(x, weights = rep(1, n))
   weighted quantiles.
 }
 \seealso{\code{\link{median}}; %%.....
-  also \code{\link[Hmisc]{wtd.quantile}} from package \pkg{Hmisc}.
+  also \code{\link[Hmisc]{wtd.quantile}} from package \CRANpkg{Hmisc}.
 }
 \examples{
 x <- c(1:6, 20)

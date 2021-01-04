@@ -55,7 +55,7 @@ huberM(x, k = 1.5, weights = NULL, tol = 1e-06,
   Wiley.
 }
 \seealso{
-  \code{\link[MASS]{hubers}} (and \code{huber}) in package \pkg{MASS};
+  \code{\link[MASS]{hubers}} (and \code{huber}) in package \CRANpkg{MASS};
   \code{\link{mad}}.
 }
 \examples{
