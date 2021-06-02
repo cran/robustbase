@@ -1,7 +1,7 @@
 Package: robustbase
-Version: 0.93-7
-VersionNote: Released 0.93-6 on 2020-03-21 to CRAN
-Date: 2021-01-04
+Version: 0.93-8
+VersionNote: Released 0.93-7 on 2021-01-04 to CRAN
+Date: 2021-06-01
 Title: Basic Robust Statistics
 Authors@R: c(person("Martin","Maechler", role=c("aut","cre"), email="maechler@stat.math.ethz.ch", comment = c(ORCID = "0000-0002-8685-9910"))
          , person("Peter", "Rousseeuw", role="ctb", comment = "Qn and Sn")
@@ -26,7 +26,7 @@ Description: "Essential" Robust Statistics.
  regression methodology including model selections and multivariate
  statistics where we strive to cover the book "Robust Statistics,
  Theory and Methods" by 'Maronna, Martin and Yohai'; Wiley 2006.
-Depends: R (>= 3.1.0)
+Depends: R (>= 3.5.0)
 Imports: stats, graphics, utils, methods, DEoptimR
 Suggests: grid, MASS, lattice, boot, cluster, Matrix, robust,
         fit.models, MPV, xtable, ggplot2, GGally, RColorBrewer,
@@ -34,11 +34,10 @@ Suggests: grid, MASS, lattice, boot, cluster, Matrix, robust,
 SuggestsNote: mostly only because of vignette graphics and simulation
 Enhances: robustX, rrcov, matrixStats, quantreg, Hmisc
 EnhancesNote: linked to in man/*.Rd
-ByteCompile: yes
 LazyData: yes
 NeedsCompilation: yes
 License: GPL (>= 2)
-Packaged: 2021-01-04 09:46:00 UTC; maechler
+Packaged: 2021-06-01 19:47:59 UTC; maechler
 Author: Martin Maechler [aut, cre] (<https://orcid.org/0000-0002-8685-9910>),
   Peter Rousseeuw [ctb] (Qn and Sn),
   Christophe Croux [ctb] (Qn and Sn),
@@ -51,4 +50,4 @@ Author: Martin Maechler [aut, cre] (<https://orcid.org/0000-0002-8685-9910>),
   Maria Anna di Palma [ctb] (initial version of Comedian)
 Maintainer: Martin Maechler <maechler@stat.math.ethz.ch>
 Repository: CRAN
-Date/Publication: 2021-01-04 15:30:03 UTC
+Date/Publication: 2021-06-02 10:20:02 UTC

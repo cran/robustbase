@@ -1,7 +1,7 @@
 
-R : Copyright 2006, The R Foundation for Statistical Computing
-Version 2.2.1 Patched (2006-02-01 r37236)
-ISBN 3-900051-07-0
+R version 4.0.3 Patched (2021-01-08 r79818) -- "Bunny-Wunnies Freak Out"
+Copyright (C) 2021 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -23,7 +23,9 @@ Type 'q()' to quit R.
 > 
 > 
 > library(robustbase)
-Loading required package: MASS
+> 
+> stopifnot(is.na(wgt.himedian(numeric())))
+> ## hi-median(<empty>)  seg.faulted or inf.looped till Jan.3, 2021
 > 
 > options(digits = 7)# single precision!
 > set.seed(15)
@@ -145,6 +147,6 @@ Loading required package: MASS
   7  -1.082 1.015     -0.1 
  11  -0.773 2.253   -0.011 
 > 
-> cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  0.92 0.05 0.96 0 0 
-> 
+> proc.time()
+   user  system elapsed 
+  0.163   0.034   0.188 

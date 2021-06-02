@@ -2,8 +2,6 @@
 ### which lead to NA
 
 require(robustbase)
-M <- .Machine$double.xmax
-
 
 stopifnot(exprs = {
     all.equal(scaleTau2(c(-4:4, 10000), consistency=FALSE),
@@ -12,20 +10,44 @@ stopifnot(exprs = {
     all.equal(3.41103800034854, sT, tol = 1e-14) # seen 6.5e-16
 })
 
-exL <- list( xNA  = c(NA, 1:6)
-, xM   = c(-4:4, M)
-, xI   = c(-4:4, Inf)
-, IxI  = c(-Inf, -4:4, Inf)
-, IxI2 = c(-Inf, -4:4, Inf,Inf)
+mkMx <- function(M, ngood = 10, left = floor(ngood/3)) {
+    stopifnot(is.numeric(ngood), ngood >= 3,
+              is.numeric(M), length(M) == 1L, M >= 1000,
+              is.numeric(left), 0 <= left, left <= ngood)
+    right <- ngood-left
+    res <- list(
+        c(rep(-M, left), seq_len(ngood - 1L), rep(M, right)) # < 50% "good"
+      , c(rep(-M, left), seq_len(ngood     ), rep(M, right)) # half  "good"
+      , c(rep(-M, left), seq_len(ngood + 1L), rep(M, right)) # > 50% "good"
+    )
+    nM <- gsub("[-+]", "", formatC(M, digits=2, width=1))
+    names(res) <- paste0("M", nM,"_n", c("m1", "eq", "p1"))
+    res
+}
+
+exL <- c(
+    list( xNA  = c(NA, 1:6)
+       , xMe9 = c(-4:4, 1e9)
+       , xM   = c(-4:4, .Machine$double.xmax)
+       , xI   = c(-4:4, Inf)
+       , IxI  = c(-Inf, -4:4, Inf)
+       , IxI2 = c(-Inf, -4:4, Inf,Inf))
   ##
-, MxM1 = c(rep(-M, 3), 1:9,  rep(M, 7)) # < 50% "good"
-, MxMe = c(rep(-M, 3), 1:10, rep(M, 7)) # half  "good"
-, MxM2 = c(rep(-M, 3), 1:11, rep(M, 7)) # > 50% "good"
+, mkMx(M = .Machine$double.xmax)
+, mkMx(M = 1e6)
+, mkMx(M = 1e9)
+, mkMx(M = 1e12)
+, mkMx(M = 1e14)
+, mkMx(M = 1e16)
+, mkMx(M = 1e20)
+, mkMx(M = 1e40)
 )
 
 madL <- vapply(exL, mad, pi)
-## Initially, scaleTau2() "works" but gives  NaN  everywhere !!
-sT2.L <- vapply(exL, scaleTau2, FUN.VALUE=1, sigma0 = 1, consistency=FALSE)
+## Initially, scaleTau2() "works" but gives  NaN  everywhere -- now fine!
+sT2.L    <- vapply(exL, scaleTau2, FUN.VALUE=1, sigma0 = 1, consistency=FALSE)
+sT2.i2.L <- vapply(exL, scaleTau2, FUN.VALUE=1, sigma0 = 1, consistency=FALSE, iter = 2)
+sT2.i5.L <- vapply(exL, scaleTau2, FUN.VALUE=1, sigma0 = 1, consistency=FALSE, iter = 5)
 
 cbind(madL, sT2.L)
 

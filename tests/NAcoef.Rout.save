@@ -1,6 +1,6 @@
 
-R version 3.5.1 (2018-07-02) -- "Feather Spray"
-Copyright (C) 2018 The R Foundation for Statistical Computing
+R Under development (unstable) (2021-05-25 r80378) -- "Unsuffered Consequences"
+Copyright (C) 2021 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -194,7 +194,7 @@ Largest model fitted by lmrob(), i.e. SM
 > plot(rm1, which=2:4)
 > stopifnot(all.equal(predict(rm1), predict(rm1c), tol=1e-15),
 +           all.equal(predict(rm1,  se.fit=TRUE, interval="confidence"),
-+ 		    predict(rm1c, se.fit=TRUE, interval="confidence"), tol=1e-15))
++ 		    predict(rm1c, se.fit=TRUE, interval="confidence"), tol=4e-15)) # seen 1.3e-15 (ATLAS)
 > predict(rm1, type="terms", se.fit=TRUE, interval="confidence")
 $fit
          x1        x2        x3          x4 x5    x1:x2
@@ -484,4 +484,4 @@ seed : int(0)
 > 
 > proc.time()
    user  system elapsed 
-  0.631   0.094   0.721 
+  0.857   0.073   1.008 

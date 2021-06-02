@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2005--2007	Martin Maechler, ETH Zurich
+ *  Copyright (C) 2005--2007, 2021	Martin Maechler, ETH Zurich
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -83,22 +83,29 @@ See also ../inst/Copyrights
 /* qn0() uses (and for C API:) */
 
 /* Main routines for C API */
-double qn(double *x, int n, int finite_corr);
+double qn(double *x, int n, int h,         int finite_corr);
 double sn(double *x, int n, int is_sorted, int finite_corr);
 /* these have no extra factors (no consistency factor & finite_corr): */
-double qn0(double *x, int n);
+void  qn0(const double x[], int n, const int64_t k[], int len_k, /* ==> */ double *res);
+
 double sn0(double *x, int n, int is_sorted, double *a2);
 
 
 /* ----------- Implementations -----------------------------------*/
 
-void Qn0(double *x, Sint *n, double *res) { *res = qn0(x, (int)*n); }
+// === called from R ( ../R/qnsn.R ) via .C() :
+
+void Qn0(double *x, Sint *n, double *k, Sint *len_k, double *res) {
+    int l_k = (int)*len_k;
+    // "hack" as R / .C() have no int_64 : copy k[] to int64 ik[]:
+    int64_t *ik  = (int64_t *) R_alloc(l_k, sizeof(int64_t));
+    for(int i=0; i < l_k; i++) ik[i] = (int64_t) k[i];
+    qn0(x, (int)*n, ik, l_k, res);
+}
 
 void Sn0(double *x, Sint *n, Sint *is_sorted, double *res, double *a2)
 {
-    char *vmax;
-
-    vmax = vmaxget();
+    char *vmax = vmaxget();
 
     *res = sn0(x, (int)*n, (int)*is_sorted, a2);
 #ifdef DEBUG_Sno
@@ -108,7 +115,7 @@ void Sn0(double *x, Sint *n, Sint *is_sorted, double *res, double *a2)
     vmaxset(vmax);
 }
 
-double qn0(double *x, int n)
+void qn0(const double x[], int n, const int64_t k[], int len_k, /* ==> */ double *res)
 {
 /*--------------------------------------------------------------------
 
@@ -120,7 +127,7 @@ double qn0(double *x, int n)
 
    Parameters of the function Qn :
        x  : double array containing the observations
-       n  : number of observations (n >=2)
+       n  : number of observations (n >= 2)
  */
 
     double *y	  = (double *)R_alloc(n, sizeof(double));
@@ -134,30 +141,49 @@ double qn0(double *x, int n)
     int *q	  = (int *)R_alloc(n, sizeof(int));
     int *weight	  = (int *)R_alloc(n, sizeof(int));
 
-    double trial = R_NaReal;/* -Wall */
-    Rboolean found;
-
-    int h, i, j,jj,jh;
-    /* Following should be `long long int' : they can be of order n^2 */
-    int64_t k, knew, nl,nr, sump,sumq;
-
-    h = n / 2 + 1;
-    k = (int64_t)h * (h - 1) / 2;
-    for (i = 0; i < n; ++i) {
+    const int64_t
+	nn2 = (int64_t) n * (n + 1) / 2, // = choose(n+1, 2)
+	n2  = (int64_t) n * n,
+	// k >= k_L  ==> right[] = n (and smaller k  can start with smaller right[], hence more efficiently)
+	/* NB: The correct k_L seems hard to find, till only from largish simulations and "regression fit":
+	 * 2021, Jan.  3 -- 19       :  k_L = 2 + ((int64_t)(n-1) * (n-2))/2;
+	 * 2021, Jan. 19 -- 27, 11:13:  k_L =     ((int64_t)(n-1) * (n-2))/2;
+	 * 2021, Jan. 27 -- ... : from .../Pkg-ex/robustbase/Qn-multi-k-debugging.R
+                              bnd1 <- function(n) 5 - 1.75*(n %% 2) + (0.3939 - 0.0067*(n %% 2)) * n*(n-1)
+	*/
+	k_L = 5 - 1.75*(n % 2) + (0.3939 - 0.0067*(n % 2)) * (int64_t) n*(n-1) ;
+    int h = n / 2 + 1; // really use, only to set right[] below ?
+    for (int i = 0; i < n; ++i)
 	y[i] = x[i];
-	left [i] = n - i + 1;
-	right[i] = (i <= h) ? n : n - (i - h);
-	/* the n - (i-h) is from the paper; original code had `n' */
-    }
     R_qsort(y, 1, n); /* y := sort(x) */
-    nl = (int64_t)n * (n + 1) / 2;
-    nr = (int64_t)n * n;
-    knew = k + nl;/* = k + (n+1 \over 2) */
-    found = FALSE;
+
 #ifdef DEBUG_qn
-    REprintf("qn0(): h,k= %2d,%2d;  nl,nr= %d,%d\n", h,k, nl,nr);
+    REprintf("qn0(x, n=%2d, .. |k|=%d): \n", n, len_k);
+#endif
+
+    // k = (int64_t)h * (h - 1) / 2;
+  for(int i_k=0; i_k < len_k; i_k++) { // compute k'th quantile k' := k[i_k] ------------------
+    /* Following should be `long long int' : they can be of order n^2 */
+    int64_t nl = nn2, nr = n2, knew = k[i_k] + nl;/* = k + (n+1 \over 2) */
+#ifdef DEBUG_qn
+    REprintf(" qn0(x, ..): nl,nr= %d, %d;  k[%d] = %5d :\n", nl,nr, i_k, k[i_k]);
 #endif
 /* L200: */
+    Rboolean found = FALSE;
+    double trial = R_NaReal;/* -Wall */
+    int i, j;
+
+    for (int i = 0; i < n; ++i)
+	left [i] = n - i + 1;
+    if(k[i_k] >= k_L) { // for these large "quantiles", need "large" right[] boundary
+	for (int i = 0; i < n; ++i)
+	    right[i] = n;
+    } else {
+	for (int i = 0; i < n; ++i)
+	    right[i] = (i <= h) ? n : n - (i - h);
+	/* the n - (i-h) is from the paper (Cr. + Ro. '92 "Time-efficient"); original code had 'n' */
+    }
+
     while(!found && nr - nl > n) {
 	j = 0;
 	/* Truncation to float :
@@ -165,7 +191,7 @@ double qn0(double *x, int n)
 	for (i = 1; i < n; ++i) {
 	    if (left[i] <= right[i]) {
 		weight[j] = right[i] - left[i] + 1;
-		jh = left[i] + weight[j] / 2;
+		int jh = left[i] + weight[j] / 2;
 		work[j] = (float)(y[i] - y[n - jh]);
 		++j;
 	    }
@@ -199,14 +225,15 @@ double qn0(double *x, int n)
 		--j;
 	    q[i] = j;
 	}
-	sump = 0;
-	sumq = 0;
+	int64_t
+	    sump = 0,
+	    sumq = 0;
 	for (i = 0; i < n; ++i) {
 	    sump += p[i];
 	    sumq += q[i] - 1;
 	}
 #ifdef DEBUG_qn
-	REprintf(" f_2 -> j=%2d, sump|q= %lld,%lld", j, sump,sumq);
+	REprintf(" f_2 -> j=%2d, sump|q= %lld,%lld; ", j, sump,sumq);
 #endif
 	if (knew <= sump) {
 	    for (i = 0; i < n; ++i)
@@ -231,29 +258,50 @@ double qn0(double *x, int n)
     } /* while */
 
     if (found)
-	return trial;
+	res[i_k] = trial;
     else {
 #ifdef DEBUG_qn
 	REprintf(".. not fnd -> new work[]");
 #endif
 	j = 0;
 	for (i = 1; i < n; ++i) {
-	    for (jj = left[i]; jj <= right[i]; ++jj) {
+	    for (int jj = left[i]; jj <= right[i]; ++jj) {
 		work[j] = y[i] - y[n - jj];
 		j++;
 	    }/* j will be = sum_{i=2}^n (right[i] - left[i] + 1)_{+}  */
 	}
 #ifdef DEBUG_qn
-	REprintf(" of length %d; knew-nl=%d\n", j, knew-nl);
+	REprintf(" of length %d; k' = knew-nl = %d\n", j, knew-nl);
 #endif
 
 	/* return pull(work, j - 1, knew - nl)	: */
 	knew -= (nl + 1); /* -1: 0-indexing */
+
+	if(knew  > j-1) { // see this happening when the quantile number k[i_k] is close to the right end!
+	    knew = j-1;
+#ifdef DEBUG_qn
+	    REprintf("knew >= j should never happen, setting it to j-1=%d\n", knew);
+#endif
+	} else if(knew < 0) {
+	    knew = 0;
+#ifdef DEBUG_qn
+	    REprintf("knew < 0 should never happen, setting it to 0\n");
+#endif
+	}
 	rPsort(work, j, knew);
-	return(work[knew]);
+	res[i_k] = work[knew];
     }
+  } // for(int i_k=0, i_k < len_k ...) { k_ = k[i_k] ; ....
+  return;
 } /* qn0 */
 
+
+#ifdef __never__ever__
+/* NB: "old version" -- with *wrong* constant and "inaccurate" finite-sample corr
+ * --  equivalent to Qn.old() in ../R/qnsn.R , see also ../man/Qn.Rd
+ *
+ * (This is *not* called from our R code anyway)
+ */
 double qn(double *x, int n, int finite_corr)
 {
 /* Efficient algorithm for the scale estimator:
@@ -285,6 +333,7 @@ double qn(double *x, int n, int finite_corr)
     }
     else return r;
 } /* qn */
+#endif
 
 
 double sn0(double *x, int n, int is_sorted, double *a2)
@@ -292,7 +341,7 @@ double sn0(double *x, int n, int is_sorted, double *a2)
 /*
    Efficient algorithm for the scale estimator:
 
-       S*_n = LOMED_{i} HIMED_{i} |x_i - x_j|
+       S*_n = LOMED_{i} HIMED_{j} |x_i - x_j|
 
    which can equivalently be written as
 
@@ -419,12 +468,14 @@ double sn0(double *x, int n, int is_sorted, double *a2)
     return pull(a2, n, n1_2);
 } /* sn0 */
 
+
+// C API version -- *not* called from our R code :
 double sn(double *x, int n, int is_sorted, int finite_corr)
 {
 /*
    Efficient algorithm for the scale estimator:
 
-       Sn = cn * 1.1926 * LOMED_{i} HIMED_{i} |x_i-x_j|
+       Sn = cn * 1.1926 * LOMED_{i} HIMED_{j} |x_i-x_j|
 
    which can equivalently be written as
 
@@ -456,8 +507,8 @@ double sn(double *x, int n, int is_sorted, int finite_corr)
 } /* sn */
 
 
-/* pull():   auxiliary routine for Qn and Sn
- * ======    ========  ---------------------
+/* pull():   auxiliary routine for (Qn and) Sn
+ * ======    ========  ------------------------
  */
 double pull(double *a_in, int n, int k)
 {

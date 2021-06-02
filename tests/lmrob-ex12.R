@@ -181,13 +181,13 @@ matlines(dd, predict(res2, new.d, interval="confidence")[, 2:3], col=3)
 
 ## Check handling of X of not full rank
 test <- function(n, ...) {
-    X <- matrix(c(rep(1:3, length.out = n), rnorm(2*n)), n, 4)
+    X <- cbind(rep_len(1:3, n), rnorm(n), rnorm(n), NA)
     y <- rnorm(n)
     X[,4] <- X[,2] + X[,3]
     X <- data.frame(X)
     X$X1 <- factor(X$X1)
-    fail <- suppressWarnings(try(lmrob(y ~ ., X, ...), silent=TRUE))
-    stopifnot(is(fail, "lmrob"))
+    fm <- tryCatch(suppressWarnings(lmrob(y ~ ., X, ...)), error=identity)
+    stopifnot(inherits(fm, "lmrob"))
 }
 set.seed(0)
 test(12) ## fast_S()
@@ -200,7 +200,7 @@ coleman16 <- coleman[ -c(2, 7, 16, 19),]
 (m16 <- lmrob(Y ~ ., data = coleman16, tuning.psi = 3.44, trace.lev = TRUE))
 ## failed in 0.9_0
 
-assertWarning(
+assertWarning(verbose = TRUE,
  lmrob(Y ~ ., data = coleman, setting = "KS2011", control = lmrob.control())
 )
 

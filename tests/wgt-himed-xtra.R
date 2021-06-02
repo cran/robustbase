@@ -12,13 +12,13 @@ stopifnot(0.26 == (himR <-  weighted.median(rep(x,iw))),
           himR == wgt.himedian(x, as.integer(iw)))
 
 
-## same result, but *different  wweigted.median() debug output!
+## same result, but *different wweigted.median() debug output!
 ##-- even when having EXACT data (& exact differences!)
 all.equal(Qn(c(2:1,4:3)), 1.1376128)
 
 ###--- another inifinite loop {solved}:
 
-(z4 <- round(qnorm(ppoints(4)), 2))
+(z4 <- round(qnorm(ppoints(4)), 2)) # -1.05 -0.30  0.30  1.05
 
 ## both the same (also wweigted.median debug output)
 (all.equal(weighted.median(z4, 4:1),
@@ -36,6 +36,24 @@ Qn (z4)# --> gave (another) infinite loop
        ##--- DIFFERENT whimed() output!
 stopifnot(all.equal(Qn(z4, const = 1),
                     print(Qn0R(z4))))
+
+set.seed(1)
+n <- length(x <- round(2048*runif(16)))
+n*(n-1)/2 # 120
+xDiff <- local({y <- sort(x); m <- outer(y,y,"-"); m[lower.tri(m)] })
+xDsrt <- unique(sort(xDiff))
+stopifnot(exprs = {
+    ## so all pairwise differences differ :
+    length(xDsrt) == n*(n-1)/2 # 120
+    Qn0R(x, k=1:120) == xDsrt ## *all* the "quantiles" = order stats  do differ indeed
+    Qn(x, constant=1) == 374
+})
+
+##  Bugs in  Qn(x,  k = <multiple values>)
+sapply(1:120, function(k) Qn(x, 1, k=k)) ## ends with 0 0 0 ... for the last ones
+if(FALSE) ## e.g.
+  Qn(x, k=1:10) # enters infinite loop after k[4] = 5
+
 
 ## yet another problem:
 Sn0R(c(1.1, -0.93, -0.11, -0.74))# 0.82
@@ -56,6 +74,8 @@ for(sim in 1:100) { # had '500'
               all.equal(Qn(x, const = 1), Qn0R(x), tolerance = 7e-8))
     if(sim %% 50 == 0) cat(sim, "\n")
 }
+
+
 
 ###---- Last series of problems: when  n^2 > max.integer:
 
@@ -83,7 +103,7 @@ options(digits = 5)
 (Tx <- Res[,, "Tx"])
 stopifnot(abs(range(Tx - 1)) < 0.03)
 
-q()
+q()##============================================================================
 
 ### -- Rest: rather for demo -- keep here for reference
 

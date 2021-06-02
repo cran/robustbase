@@ -26,7 +26,7 @@ s_Sn(x, mu.too = FALSE, \dots)
 }
 \value{
   \code{Sn()} returns a number, the \eqn{S_n}{Sn} robust scale estimator, scaled to be
-  consistent for \eqn{\sigma^2} and i.i.d. Gaussian observatsions,
+  consistent for \eqn{\sigma^2} and i.i.d. Gaussian observations,
   optionally bias corrected for finite samples.
 
   \code{s_Sn(x, mu.too=TRUE)} returns a length-2 vector with location

@@ -101,7 +101,7 @@ par(mfrow=c(2,2))
 plot(rm1, which=2:4)
 stopifnot(all.equal(predict(rm1), predict(rm1c), tol=1e-15),
           all.equal(predict(rm1,  se.fit=TRUE, interval="confidence"),
-		    predict(rm1c, se.fit=TRUE, interval="confidence"), tol=1e-15))
+		    predict(rm1c, se.fit=TRUE, interval="confidence"), tol=4e-15)) # seen 1.3e-15 (ATLAS)
 predict(rm1, type="terms", se.fit=TRUE, interval="confidence")
 #proj(rm1) ## fails "FIXME"
 residuals(rm1)

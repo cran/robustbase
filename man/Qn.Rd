@@ -8,14 +8,21 @@
   Compute the robust scale estimator \eqn{Q_n}{Qn}, an efficient
   alternative to the MAD.
 
-  See the references for more.
+  By default, \eqn{Q_n(x_1, \ldots, x_n)}{Qn(x1, .., xn)} is the \eqn{k}-th
+  order statistic (a quantile) of the \code{choose(n, 2)} absolute
+  differences \eqn{|x_i - x_j|}{abs(x[i] - x[j])},
+  (for \eqn{1 \le i < j \le n}{1 <= i < j <= n}),
+  where by default (originally only possible value) \eqn{k = choose(n\%/\% 2 + 1, 2)}
+  which is about the first quartile (25\% quantile) of these
+  pairwise differences.  See the references for more.
 }
 \usage{
-Qn(x, constant = 2.21914, finite.corr = missing(constant))
+Qn(x, constant = NULL, finite.corr = is.null(constant) && missing(k),
+   k = choose(n \%/\% 2 + 1, 2), warn.finite.corr = TRUE)
 
 s_Qn(x, mu.too = FALSE, \dots)
 }
-\arguments{
+\arguments{% >> ../R/qnsn.R <<
   \item{x}{numeric vector of observations.}
   \item{constant}{number by which the result is multiplied; the default
     achieves consistency for normally distributed data.  Note that until
@@ -33,7 +40,18 @@ s_Qn(x, mu.too = FALSE, \dots)
   }
   \item{finite.corr}{logical indicating if the finite sample bias
     correction factor should be applied.  Defaults to \code{TRUE} unless
-    \code{constant} is specified.}
+    \code{constant} is specified.  Note the for non-default \code{k}, the
+    consistency \code{constant} already depends on \code{n} leading to
+    \emph{some} finite sample correction, but no simulation-based
+    small-\code{n} correction factors are available.}
+  \item{k}{integer, typically half of n, specifying the \dQuote{quantile}, i.e., rather the
+    order statistic that \code{Qn()} should return; for the Qn() proper,
+    this has been hard wired to \code{choose(n\%/\%2 +1, 2)}, i.e.,
+    \eqn{\lfloor\frac{n}{2}\rfloor +1}{floor(n/2) +1}.  Choosing a large \code{k} is less robust but
+    allows to get non-zero results in case the default \code{Qn()} is zero.}
+  \item{warn.finite.corr}{logical indicating if a \code{\link{warning}}
+    should be signalled when \code{k} is non-default, in which case specific
+    small-\eqn{n} correction is not yet provided.}
   \item{mu.too}{logical indicating if the \code{\link[stats]{median}(x)} should
     also be returned for \code{s_Qn()}.}
   \item{\dots}{potentially further arguments for \code{s_Qn()} passed to
@@ -42,7 +60,7 @@ s_Qn(x, mu.too = FALSE, \dots)
 \value{
   \code{Qn()} returns a number, the \eqn{Q_n}{Qn} robust scale
   estimator, scaled to be consistent for \eqn{\sigma^2} and
-  i.i.d. Gaussian observatsions, optionally bias corrected for finite
+  i.i.d. Gaussian observations, optionally bias corrected for finite
   samples.
 
   \code{s_Qn(x, mu.too=TRUE)} returns a length-2 vector with location
@@ -59,7 +77,13 @@ s_Qn(x, mu.too = FALSE, \dots)
   Rousseeuw, P.J. and Croux, C. (1993)
   Alternatives to the Median Absolute Deviation,
   \emph{Journal of the American Statistical Association} \bold{88}, 1273--1283.
+  \doi{10.2307/2291267}% JSTOR
   % MM: ~/save/papers/Rousseeuw/93/R+Croux_MAD_Sn_Qn.pdf
+
+  Christophe Croux and Peter J. Rousseeuw (1992)
+  A class of high-breakdown scale estimators based on subranges ,
+  \emph{Communications in Statistics - Theory and Methods} \bold{21}, 1935--1951;
+  \doi{10.1080/03610929208830889}
 
   Christophe Croux and Peter J. Rousseeuw (1992)
   Time-Efficient Algorithms for Two Highly Robust Estimators of Scale,
@@ -88,6 +112,38 @@ set.seed(153)
 x <- sort(c(rnorm(80), rt(20, df = 1)))
 s_Qn(x, mu.too = TRUE)
 Qn(x, finite.corr = FALSE)
+
+## A simple pure-R version of Qn() -- slow and memory-rich for large n: O(n^2)
+Qn0R <- function(x, k = choose(n \%/\% 2 + 1, 2)) {
+    n <- length(x <- sort(x))
+    if(n == 0) return(NA) else if(n == 1) return(0.)
+    stopifnot(is.numeric(k), k == as.integer(k), 1 <= k, k <= n*(n-1)/2)
+    m <- outer(x,x,"-")# abs not needed as x[] is sorted
+    sort(m[lower.tri(m)], partial = k)[k]
+}
+(Qx1 <- Qn(x, constant=1)) # 0.5498463
+## the C-algorithm "rounds" to 'float' single precision ..
+stopifnot(all.equal(Qx1, Qn0R(x), tol = 1e-6))
+
+
+## -- compute for different 'k' :
+
+n <- length(x) # = 100 here
+(k0 <- choose(floor(n/2) + 1, 2)) # 51*50/2 == 1275
+stopifnot(identical(Qx1, Qn(x, constant=1, k=k0)))
+nn2 <- n*(n-1)/2
+all.k <- 1:nn2
+system.time(Qss <- sapply(all.k, function(k) Qn(x, 1, k=k)))
+system.time(Qs  <- Qn  (x, 1, k = all.k))
+system.time(Qs0 <- Qn0R(x,    k = all.k) )
+stopifnot(exprs = {
+   Qs[1]   == min(diff(x))
+   Qs[nn2] == diff(range(x))
+   all.equal(Qs,  Qss, tol = 1e-15) # even exactly
+   all.equal(Qs0, Qs, tol = 1e-7) # see 2.68e-8, as Qn() C-code rounds to (float)
+})
+
+plot(2:nn2, Qs[-1], type="b", log="y", main = "Qn(*, k),  k = 2..n(n-1)/2")
 }
 \keyword{robust}
 \keyword{univar}

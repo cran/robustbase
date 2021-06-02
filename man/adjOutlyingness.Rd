@@ -10,6 +10,7 @@
 }
 \usage{
 adjOutlyingness(x, ndir = 250, p.samp = p, clower = 4, cupper = 3,
+                IQRtype = 7,
                 alpha.cutoff = 0.75, coef = 1.5,
                 qr.tol = 1e-12, keep.tol = 1e-12,
                 only.outlyingness = FALSE, maxit.mult = max(100, p),
@@ -31,6 +32,11 @@ adjOutlyingness(x, ndir = 250, p.samp = p, clower = 4, cupper = 3,
     \code{clower = 0, cupper = 0} to get the \emph{non}-adjusted,
     i.e., classical (\dQuote{central} or \dQuote{symmetric})
     outlyingness.  In that case, \code{\link{mc}()} is not used.}
+  \item{IQRtype}{a number from \code{1:9}, denoting type of empirical
+    quantile computation for the \code{\link{IQR}()}.  The default 7
+    corresponds to \code{\link{quantile}}'s and \code{\link{IQR}}'s
+    default.  MM has evidence that \code{type=6} would be a bit more stable
+    for small sample size.}
   \item{alpha.cutoff}{number in (0,1) specifying the quantiles
     \eqn{(\alpha, 1-\alpha)} which determine the \dQuote{outlier}
     cutoff.  The default, using quartiles, corresponds to the definition

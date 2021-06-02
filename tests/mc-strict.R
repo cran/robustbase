@@ -67,20 +67,19 @@ for(n in 3:50) {
     }
 };  cat("\n")
 
+
 ###----  Strict tests of adjOutlyingness():
 ###                      ================= changed after long-standing bug fix in Oct.2014
-## as this calls, sample.int() and we carefully compare specific seed examples, need
-RNGversion("3.6.0") # == RNGversion("4.0.2") ..
-RNGversion("3.5.0") ## [TODO: adapt to "current" RNG settings]
 
+## For longley, note n < 4p and hence "random nonsense" numbers
 set.seed(1);  S.time(a1.1 <- adjOutlyingness(longley))
 set.seed(11); S.time(a1.2 <- adjOutlyingness(longley))
 ##
-set.seed(2); S.time(a2 <- adjOutlyingness(hbk))
+set.seed(2); S.time(a2 <- adjOutlyingness(hbk)) # 75 x 4
 set.seed(3); S.time(a3 <- adjOutlyingness(hbk[, 1:3]))# the 'X' space
 set.seed(4); S.time(a4 <- adjOutlyingness(milk)) # obs.63 = obs.64
-set.seed(5); S.time(a5 <- adjOutlyingness(wood))
-set.seed(6); S.time(a6 <- adjOutlyingness(wood[, 1:5]))# the 'X' space
+set.seed(5); S.time(a5 <- adjOutlyingness(wood)) # 20 x 6  ==> n < 4p
+set.seed(6); S.time(a6 <- adjOutlyingness(wood[, 1:5]))# ('X' space) 20 x 5: n = 4p (ok!)
 
 ## 32-bit <-> 64-bit different results {tested on Linux only}
 is32 <- .Machine$sizeof.pointer == 4 ## <- should work for Linux/MacOS/Windows
@@ -91,18 +90,21 @@ Rnk <- function(u) rank(unname(u), ties.method = "first")
 cat("\nRnk(a3 $ adjout): "); dput(Rnk(a3$adjout), control= {})
 cat("\nRnk(a4 $ adjout): "); dput(Rnk(a4$adjout), control= {})
 
-(i.a4Out <- which(!a4$nonOut)) # varies "wildly"
+(i.a4Out <- which( ! a4$nonOut)) # the outliers -- varies "wildly"
+stopifnot(70 %in% i.a4Out)
 {
     if(is32 && !isMac)
         all.equal(i.a4Out, c(1, 2, 41, 70))
     ## and this is "typically" true, but not for a 64-bit Linux version bypassing BLAS in matprod
     else if(isSun || isMac)
         TRUE
+    else if(grepl("^Fedora", osVersion) && !is32)
+        identical(i.a4Out, 70L) # since Dec 2020 (F 32)
     else
-        all.equal(i.a4Out, c(9:19, 23:27,57, 59, 70, 77)) # '70' only 64b-Fedora_32, Dec.2020
+        all.equal(i.a4Out, c(9:19, 23:27,57, 59, 70, 77))
 }
 
-## only for ATLAS (BLAS/Lapack), not all are TRUE; which ones?
+## only for ATLAS (BLAS/Lapack), not all are TRUE; which ones [but n < 4p]
 if(!all(a5$nonOut))
   print(which(!a5$nonOut)) # if we know, enable check below
 
@@ -110,26 +112,26 @@ stopifnot(exprs = {
     which(!a2$nonOut) == 1:14
     which(!a3$nonOut) == 1:14
     ## 'longley', 'wood' have no outliers in the "adjOut" sense:
-    ## FIXME: longley is platform dependent too
-    { if(isMac) TRUE
-      else if(mS$ strictR) sum(a1.2$nonOut) >= 15 # sum(.) = 16 [nb-mm3, Oct.2014]
-      else ## however, openBLAS Fedora Linux /usr/bin/R gives sum(a1.2$nonOut) = 13
-          sum(a1.2$nonOut) >= 13
-    }
-    if(doExtras) {
+    if(doExtras && !isMac) { ## longley also has n < 4p (!)
+        if(mS$ strictR)
+            sum(a1.2$nonOut) >= 15 # sum(.) = 16 [nb-mm3, Oct.2014]
+        else ## however, openBLAS Fedora Linux /usr/bin/R gives sum(a1.2$nonOut) = 13
+            sum(a1.2$nonOut) >= 13
+    } else TRUE
+    if(doExtras) { ## have n < 4p (!)
         if(mS$ strictR) a5$nonOut
         else ## not for ATLAS
             sum(a5$nonOut) >= 18 # 18: OpenBLAS
     } else TRUE
     a6$nonOut[-20]
-    ## hbk (n = 75) :
+    ## hbk (n = 75, p = 3) should be "stable" (but isn't quite)
     abs(Rnk(a3$adjout) -
-             c(62, 64, 68, 71, 70,   65, 66, 63, 69, 67,   73, 75, 72, 74, 25,
-               52, 44,  5, 11, 33,    6, 21, 29, 28, 59,    9, 12, 13, 37, 27,
-               43, 35, 22, 55, 14,    2, 26, 46, 54, 15,   23, 41, 40, 32, 60,
-               30, 61, 19, 16,  8,   39, 53, 51, 48, 20,   47, 50, 42,  7, 38,
-               17, 57, 45, 18, 24,   34,  3, 58, 56,  4,    1, 10, 31, 36, 49)
-	      ) <= 3 ## all 0 on 32-bit Linux
+        c(62, 64, 69, 71, 70,    66, 65, 63, 68, 67,    73, 75, 72, 74, 35,
+          60, 55,  4, 22, 36,     6, 33, 34, 28, 53,    16, 13,  9, 27, 31,
+          49, 39, 20, 50, 14,     2, 24, 40, 54, 21,    17, 37, 52, 23, 58,
+          19, 61, 11, 25,  8,    46, 59, 48, 47, 29,    44, 43, 42,  7, 30,
+          18, 51, 41, 15, 10,    38,  3, 56, 57,  5,     1, 12, 26, 32, 45)
+        ) <= 3 ## all 0 on 64-bit (F 32) Linux
 })
 
 ## milk (n = 86) : -- Quite platform dependent!
@@ -160,18 +162,19 @@ sum(abs(d) <= 17) >= 78
 sum(abs(d) <= 13) >= 75
 
 
-RNGversion("3.6.0") # == RNGversion("4.0.2") ..
-
 ## check of adjOutlyingness *free* bug
 ## reported by Kaveh Vakili <Kaveh.Vakili@wis.kuleuven.be>
 set.seed(-37665251)
-X <- matrix(rnorm(100*5),100,5)
-Z <- matrix(rnorm(100*5,0,1/100),10,5)
-Z <- sweep(Z, 2, c(5,rep(0,4)), FUN="+")
-X[91:100,] <- Z
+X <- matrix(rnorm(100*5),   100, 5)
+Z <- matrix(rnorm(10*5)/100, 10, 5)
+Z[,1] <- Z[,1] + 5
+X[91:100,] <- Z # if anything these should be outliers, but ...
 for (i in 1:10) {
     ## this would produce an error in the 6th iteration
-    aa <- adjOutlyingness(x=X,ndir=250)
+    aa <- adjOutlyingness(x=X, ndir=250)
+    if(any(is.out <- !aa$nonOut))
+        cat("'outliers' at obs.", paste(which(is.out), collapse=", "),"\n")
+    stopifnot(1/4 < aa$adjout & aa$adjout < 16)
 }
 
 ## Check "high"-dimensional Noise ... typically mc() did *not* converge for some re-centered columns
@@ -185,18 +188,24 @@ kappa(a) # 20.42 (~ 10--20 or so; definitely not close to singular)
 a.a <- adjOutlyingness(a, mcScale=FALSE, # <- my own recommendation
                        trace.lev=1)
 a.s <- adjOutlyingness(a, mcScale=TRUE, trace.lev=1)
+## a.a :
+str(a.a) # high 'adjout' values "all similar" -> no outliers .. hmm .. ???
+(hdOut <- which( ! a.a$nonOut)) ## indices of "outlier" -- very platform dependent !
+a.a$MCadjout; all.equal(a.a$MCadjout, 0.136839766177,
+          tol = 1e-12) # seen 7.65e-14   and "big" differences on non-default platforms
+## a.s :
+which(! a.s$nonOut ) # none  [all TRUE]
+a.s$MCadjout # platform dependent; saw
+all.equal(a.s$MCadjout, 0.32284906741568, tol = 1e-13) # seen 2.2e-15 ..
+                                        # and big diffs on non-default platforms
+##
+## The adjout values are all > 10^15  !!!   why ??
+## Now (2021) I know: n < 4*p ==> can find 1D-projection where 1 of the 2 {Q3-Q2, Q2-Q1} is 0 !
+##---------------------------------------------------------------------------------------------
 
-str(a.a) # surprisingly high 'adjout' values "all similar" -> no outliers .. hmm .. ???
-stopifnot(exprs = {
-    ## a.a :
-    identical(a.a$nonOut, local({r <- rep(TRUE, 50); r[22] <- FALSE; r}))
-    all.equal(a.a$MCadjout, 0.136839766177, tol = 1e-12) # seen 7.65e-14
-    ## a.s :
-    a.s$nonOut # all TRUE
-    all.equal(a.s$MCadjout, 0.32284906741568, tol = 1e-13) # seen 2.2e-15
-})
-## The adjout values are all > 10^15  !!! ... what's going on ??? (now I know ..)
 
+###-- Back to  mc()  checks for "hard" cases
+###           =====  -----------------------
 
 ## "large n" (this did overflow sum_p, sum_q  earlier ==> had inf.loop):
 set.seed(3); x <- rnorm(2e5)

@@ -4,6 +4,40 @@
 \title{News for \R Package \pkg{robustbase}}
 \encoding{UTF-8}
 
+\section{CHANGES in robustbase VERSION 0.93-8 (2021-06-01, svn r879)}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item \code{scaleTau2()} gets new optional \code{iter = 1} and
+      \code{tol.iter} arguments; mostly experimentally to see if or when
+      iteration makes sense.
+
+      \item \code{Qn(x, *)} gets new optional \code{k = .} to indicate the
+      \dQuote{quantile} i.e., order statistic to be computed (with default as
+      previously hard-coded).\cr
+      Experimentally to try for cases where more than n/2 observations
+      coincide (with the median), i.e., \code{x[i] == x0 == median(x[])},
+      and hence \code{Qn(x)} and \code{mad(x)} are zero.
+
+      \item \code{adjOutlyingness()} gets new option \code{IQRtype = 7}.
+    }
+  }
+  \subsection{Tweaks}{
+    \itemize{
+      \item For tests: *again* differences found in the non-sensical
+      \code{adjOutlyingness()} example (with large p/n, hence many "random" values
+      in the order of 1e15).
+      Disable the test for now (and record the result in *.Rout).
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item The \code{test()} utility in \file{tests/lmrob-ex12.R} no
+      longer calls \code{matrix(x, n,4)} where the length of x does not
+      match \code{4n}.   Similar change in \file{tests/mc-strict.R}
+    }
+  }
+}
+
 \section{CHANGES in robustbase VERSION 0.93-7 (2021-01-03, svn r865)}{
   \subsection{NEW FEATURES}{
     \itemize{

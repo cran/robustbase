@@ -3,31 +3,31 @@
 #include "robustbase.h"
 
 
-#define CDEF(name)  {#name, (DL_FUNC) &name, sizeof(name ## _t)/sizeof(name ## _t[0]), name ##_t}
+#define CDEF(name)  {#name, (DL_FUNC) &name, sizeof(name ## _typ)/sizeof(name ## _typ[0]), name ##_typ}
 #define CALLDEF(name, n)  {#name, (DL_FUNC) &name, n}
 
 
-static R_NativePrimitiveArgType Qn0_t[] = {
-    REALSXP, INTSXP, REALSXP
+static R_NativePrimitiveArgType Qn0_typ[] = { // ./qn_sn.c
+    REALSXP, INTSXP, REALSXP, INTSXP, REALSXP
 };
 
-static R_NativePrimitiveArgType Sn0_t[] = {
+static R_NativePrimitiveArgType Sn0_typ[] = {
     REALSXP, INTSXP, INTSXP, REALSXP, REALSXP
 };
 
-static R_NativePrimitiveArgType mc_C_t[] = {
+static R_NativePrimitiveArgType mc_C_typ[] = {
     REALSXP, INTSXP, REALSXP, INTSXP, REALSXP, LGLSXP
 };
 
-static R_NativePrimitiveArgType wgt_himed_i_t[] = {
+static R_NativePrimitiveArgType wgt_himed_i_typ[] = {
     REALSXP, INTSXP, INTSXP, REALSXP
 };
-static R_NativePrimitiveArgType wgt_himed_t[] = {
+static R_NativePrimitiveArgType wgt_himed_typ[] = {
     REALSXP, INTSXP, REALSXP, REALSXP
 };
 
 
-static R_NativePrimitiveArgType R_lmrob_S_t[] = {
+static R_NativePrimitiveArgType R_lmrob_S_typ[] = {
     REALSXP, REALSXP, INTSXP, INTSXP, INTSXP, REALSXP, REALSXP,
     /* rrhoc */ REALSXP, INTSXP, REALSXP,
     /* best_r */ INTSXP, INTSXP, INTSXP,
@@ -36,7 +36,7 @@ static R_NativePrimitiveArgType R_lmrob_S_t[] = {
     /* converged */ LGLSXP, INTSXP, INTSXP, INTSXP, INTSXP
 };
 
-static R_NativePrimitiveArgType R_lmrob_MM_t[] = {
+static R_NativePrimitiveArgType R_lmrob_MM_typ[] = {
     REALSXP, REALSXP, INTSXP, INTSXP,
     /* beta_initial */ REALSXP, REALSXP,
     /* beta_m */ REALSXP, REALSXP,
@@ -44,18 +44,18 @@ static R_NativePrimitiveArgType R_lmrob_MM_t[] = {
     /* loss */ REALSXP, REALSXP, LGLSXP, INTSXP, INTSXP, INTSXP
 };
 
-static R_NativePrimitiveArgType R_find_D_scale_t[] = {
+static R_NativePrimitiveArgType R_find_D_scale_typ[] = {
     REALSXP, REALSXP, REALSXP, INTSXP, REALSXP,
     /* c */ REALSXP, INTSXP, INTSXP, REALSXP,
     /* max_k */ INTSXP, LGLSXP
 };
 
-static R_NativePrimitiveArgType R_calc_fitted_t[] = {
+static R_NativePrimitiveArgType R_calc_fitted_typ[] = {
     REALSXP, REALSXP, REALSXP, INTSXP, INTSXP, INTSXP,
     INTSXP, INTSXP
 };
 
-static R_NativePrimitiveArgType R_lmrob_M_S_t[] = {
+static R_NativePrimitiveArgType R_lmrob_M_S_typ[] = {
     REALSXP, REALSXP, REALSXP, REALSXP,
     /* nn */ INTSXP, INTSXP, INTSXP, INTSXP, INTSXP,
     /* scale */ REALSXP, REALSXP, REALSXP,
@@ -66,7 +66,7 @@ static R_NativePrimitiveArgType R_lmrob_M_S_t[] = {
     /* orthogonalize */ LGLSXP, LGLSXP, LGLSXP, INTSXP, INTSXP
 };
 
-static R_NativePrimitiveArgType R_subsample_t[] = {
+static R_NativePrimitiveArgType R_subsample_typ[] = {
     REALSXP, REALSXP, INTSXP, INTSXP,
     REALSXP, INTSXP, INTSXP, INTSXP,
     REALSXP, REALSXP, INTSXP,

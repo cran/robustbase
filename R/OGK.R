@@ -154,51 +154,72 @@ covOGK <- function(X, n.iter = 2,
 ## is in /u/maechler/R/other-people/Mspline/Mspline/R/scaleTau.R
 ##
 scaleTau2 <- function(x, c1 = 4.5, c2 = 3.0, na.rm = FALSE, consistency = TRUE,
+                      mu0 = median(x),
                       sigma0 = median(x.), # = MAD(x)  {without consistency factor}
-                      mu.too = FALSE)
+                      mu.too = FALSE, iter = 1, tol.iter = 1e-7)
 {
     if(na.rm)
         x <- x[!is.na(x)]
     n <- length(x)
-    medx <- median(x)
-    x. <- abs(x - medx)
+    x. <- abs(x - mu0)
+    stopifnot(is.numeric(sigma0), length(sigma0) == 1) # error, not NA ..
+    if(is.na(sigma0))
+	return(c(if(mu.too) mu0, sigma0))
     if(sigma0 <= 0) { # no way to get tau-estim.
 	if(!missing(sigma0)) warning("sigma0 =", sigma0," ==> scaleTau2(.) = 0")
-	return(c(if(mu.too) medx, 0))
+	return(c(if(mu.too) mu0, 0))
     }
-    mu <-
-        if(c1 > 0) { # "bi-weight" {now in version that even works with x.=Inf}:
-            w <- pmax(0, 1 - (x. / (sigma0 * c1))^2)^2
-            if(!is.finite(s.xw <- sum(x*w))) { ## x*w \-> NaN when (x,w) = (Inf,0)
-                wpos <- w > 0
-                w <- w[wpos]
-                s.xw <- sum(x[wpos]*w)
-            }
-            s.xw / sum(w)
+    stopifnot(iter >= 1, iter == as.integer(iter), # incl.  iter=TRUE
+              is.numeric(tol.iter), tol.iter > 0)
+    nEs2 <-
+        if(!isFALSE(consistency)) {
+            Erho <- function(b)
+                ## E [ rho_b ( X ) ]   X ~ N(0,1)
+                2*((1-b^2)*pnorm(b) - b * dnorm(b) + b^2) - 1
+            Es2 <- function(c2)
+                ## k^2 * E[ rho_{c2} (X' / k) ] , where X' ~ N(0,1), k= qnorm(3/4)
+                Erho(c2 * qnorm(3/4))
+            ## the asymptotic E[ sigma^2(X) ]  is Es2(c2), {Es2(3) ~= 0.925} :
+            ## TODO: 'n-2' below will probably change; ==> not yet documented
+            ## ---- ==> ~/R/MM/STATISTICS/robust/1d-scaleTau2-small.R
+            ##   and    ~/R/MM/STATISTICS/robust/1d-scale.R
+            (if(consistency == "finiteSample") n-2 else n) * Es2(c2)
         }
-        else medx
+        else n
 
-    x <- (x - mu) / sigma0
-    rho <- x^2
-    rho[rho > c2^2] <- c2^2
-    ## sigma2 <- sigma0^2 * sum(rho)/ n
+    sTau2 <- function(sig0) { # also depends on (x., x, c1,c2, Es2)
+        mu <-
+            if(c1 > 0) { # "bi-weight" {in a way that works also with x.=Inf}:
+                w <- pmax(0, 1 - (x. / (sig0 * c1))^2)^2
+                if(!is.finite(s.xw <- sum(x*w))) { ## x*w \-> NaN when (x,w) = (Inf,0)
+                    wpos <- w > 0
+                    w <- w[wpos]
+                    s.xw <- sum(x[wpos]*w)
+                }
+                s.xw / sum(w)
+            }
+            else mu0
+        x <- (x - mu) / sig0
+        rho <- x^2
+        rho[rho > c2^2] <- c2^2
+        ## return
+        c(m = mu,
+          ## basically sqrt(sigma2) := sqrt( sigma0^2 / n * sum(rho) ) :
+          s = sig0 * sqrt(sum(rho)/nEs2))
+    } # { sTau2() }
 
-    if(!isFALSE(consistency)) {
-	Erho <- function(b)
-	    ## E [ rho_b ( X ) ]   X ~ N(0,1)
-	    2*((1-b^2)*pnorm(b) - b * dnorm(b) + b^2) - 1
-	Es2 <- function(c2)
-	    ## k^2 * E[ rho_{c2} (X' / k) ] , where X' ~ N(0,1), k= qnorm(3/4)
-	    Erho(c2 * qnorm(3/4))
-        ## the asymptotic E[ sigma^2(X) ]  is Es2(c2), {Es2(3) ~= 0.925} :
-        ## TODO: 'n-2' below will probably change; therefore not yet documented
-        nEs2 <- (if(consistency == "finiteSample") n-2 else n) * Es2(c2)
-    } else nEs2 <- n
-
+    s0 <- sigma0
+    if(isTRUE(iter)) iter <- 100000 # "Inf"
+    repeat {
+        m.s <- sTau2(s0)
+        s. <- m.s[["s"]]
+        if((iter <- iter - 1) <= 0 ||
+           is.na(s.) ||
+           abs(s. - s0) <= tol.iter * s.) break
+        s0 <- s. # and iterate further
+    }
     ## return
-    c(if(mu.too) mu,
-      ## sqrt(sigma2) == sqrt( sigma0^2 / n * sum(rho) ) :
-      sigma0 * sqrt(sum(rho)/nEs2))
+    c(if(mu.too) m.s[["m"]], s.)
 }
 
 ## Two other simple 'scalefun' to be used for covOGK;

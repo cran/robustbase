@@ -18,11 +18,12 @@
 /* --------- ./qn_sn.c : -------- */
 #define Sint int
 
-void Qn0(double *x, Sint *n, double *res);
+void Qn0(double *x, Sint *n, double *k, Sint *len_k, double *res);
+
 void Sn0(double *x, Sint *n, Sint *is_sorted, double *res, double *a2);
 /*
- * void Qn    (double *x, Sint *n, Sint *finite_corr, double *res);
- * void Sn    (double *x, Sint *n, Sint *finite_corr, double *res);
+ * void Qn    (double *x, Sint *n, Sint *h, Sint *finite_corr, double *res);
+ * void Sn    (double *x, Sint *n,          Sint *finite_corr, double *res);
 */
 
 /* call via .C() from R : */

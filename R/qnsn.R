@@ -15,17 +15,39 @@ Qn.finite.c <- function(n)
      else        3.67561 +( 1.9654 +(6.987 - 77/n)/n)/n # n  even
     )/n + 1
 
-Qn <- function(x, constant = 2.21914, finite.corr = missing(constant))
+
+
+Qn <- function(x, constant = NULL, finite.corr = is.null(constant) && missing(k),
+               k = choose(n %/% 2 + 1, 2), warn.finite.corr = TRUE)
 {
     ## Purpose: Rousseeuw and Croux's  Q_n() robust scale estimator
     ## Author: Martin Maechler, Date: 14 Mar 2002, 10:43
     n <- length(x)
     if(n == 0) return(NA) else if(n == 1) return(0.)
-
+    else if(!is.integer(n))
+        stop("not yet implemented for large vectors")
+    nn2 <- choose(n, 2) # = n*(n-1)/2  (double!)
+    dflt.k <- if(dflt.c <- is.null(constant))
+                  missing(k) else FALSE
+    stopifnot(is.numeric(k <- as.double(k)), k == trunc(k), 1 <= k, k <= nn2,
+              ## but k *may* be vector
+              is.integer(l_k <- length(k)))
+    if(missing(finite.corr)) # smarter than "visual default"
+        finite.corr <- dflt.c && (dflt.k <- dflt.k ||
+                                  (l_k == 1 && k == choose(n %/% 2 + 1, 2)))
+    if(dflt.c) # define constant
+        constant <-
+            if(dflt.k)
+                2.21914 # == old default ("true value" rounded to 6 significant digits)
+            else 1/(sqrt(2) * qnorm(((k-1/2)/nn2 + 1)/2))
     r <- constant *
-        .C(Qn0, as.double(x), n, res = double(1))$res
+        .C(Qn0, as.double(x), n, k, l_k, res = double(l_k))$res
 
     if (finite.corr) {
+        if(!dflt.k && warn.finite.corr)
+            warning("finite sample corrections are not corrected for non-default 'k'")
+        ## FIXME: MM--- using the above  qnorm((k-1/2)/nn2 + 1)/2) should need *less* finite correction !!
+        ## -----  ~~  >>> simulation needed
 	if (n <= 12) ## n in 2:12 --> n-1 in 1:11
 	    ## n=2: E[Q_2] = E|X - Y| = sqrt(pi)/2, fc = sqrt(pi)/2/2.21914
 	    r* c(.399356, # ~= fc = 0.3993560233
@@ -47,9 +69,12 @@ Qn.old <- function(x, constant = 2.2219, finite.corr = missing(constant))
     ## Author: Martin Maechler, Date: 14 Mar 2002, 10:43
     n <- length(x)
     if(n == 0) return(NA) else if(n == 1) return(0.)
-
+    else if(!is.integer(n))
+        stop("not yet implemented for large vectors")
+    h <- n %/% 2L + 1L
+    k <- h*(h-1)/2
     r <- constant *
-        .C(Qn0, as.double(x), n, res = double(1))$res
+        .C(Qn0, as.double(x), n, k, 1L, res = double(1))$res
 
     if (finite.corr)
 	(if (n <= 9) { # n in 2:9 --> n-1 in 1:8
