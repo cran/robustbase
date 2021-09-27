@@ -163,7 +163,7 @@ scaleTau2 <- function(x, c1 = 4.5, c2 = 3.0, na.rm = FALSE, consistency = TRUE,
     n <- length(x)
     x. <- abs(x - mu0)
     stopifnot(is.numeric(sigma0), length(sigma0) == 1) # error, not NA ..
-    if(is.na(sigma0))
+    if(is.na(sigma0))# not needed (?)   || (!na.rm && anyNA(x.)))
 	return(c(if(mu.too) mu0, sigma0))
     if(sigma0 <= 0) { # no way to get tau-estim.
 	if(!missing(sigma0)) warning("sigma0 =", sigma0," ==> scaleTau2(.) = 0")

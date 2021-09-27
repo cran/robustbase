@@ -1,0 +1,170 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the robustbase package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: robustbase 0.93-9\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-08-19 20:45+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: lmrob.c:225
+msgid " Problem determining optimal block size, using minimum"
+msgstr ""
+
+#: lmrob.c:262
+#, c-format
+msgid "DGELS: illegal argument in %i. argument."
+msgstr ""
+
+#: lmrob.c:269
+#, c-format
+msgid ""
+"DGELS: weighted design matrix not of full rank (column %d).\n"
+"Use control parameter 'trace.lev = 4' to get diagnostic output."
+msgstr ""
+
+#: lmrob.c:290
+#, c-format
+msgid "DGEEQ: illegal argument in %i. argument"
+msgstr ""
+
+#: lmrob.c:293
+msgid ""
+"Fast S large n strategy failed. Use control parameter 'fast.s.large.n = Inf'."
+msgstr ""
+
+#: lmrob.c:295
+#, c-format
+msgid "DGEEQU: column %i of the design matrix is exactly zero."
+msgstr ""
+
+#: lmrob.c:300
+#, c-format
+msgid " Skipping design matrix equilibration (DGEEQU): row %i is exactly zero."
+msgstr ""
+
+#: lmrob.c:460
+msgid "m_s_subsample() stopped prematurely (scale < 0)."
+msgstr ""
+
+#: lmrob.c:560 lmrob.c:561 lmrob.c:599 lmrob.c:600 lmrob.c:627 lmrob.c:628
+#: rob-utils.c:62
+#, c-format
+msgid "Argument '%s' must be numeric or integer"
+msgstr ""
+
+#: lmrob.c:582 lmrob.c:613
+#, c-format
+msgid "'deriv'=%d is invalid"
+msgstr ""
+
+#: lmrob.c:642
+msgid "Argument 'cc' must be numeric"
+msgstr ""
+
+#: lmrob.c:643
+msgid "Argument 'ipsi' must be integer"
+msgstr ""
+
+#: lmrob.c:655
+#, c-format
+msgid "rho_inf(): ipsi=%d not implemented."
+msgstr ""
+
+#: lmrob.c:685
+#, c-format
+msgid "normcnst(): ipsi=%d not implemented."
+msgstr ""
+
+#: lmrob.c:715
+#, c-format
+msgid "rho(): ipsi=%d not implemented."
+msgstr ""
+
+#: lmrob.c:734
+#, c-format
+msgid "psi(): ipsi=%d not implemented."
+msgstr ""
+
+#: lmrob.c:752
+#, c-format
+msgid "psip(): ipsi=%d not implemented."
+msgstr ""
+
+#: lmrob.c:774
+#, c-format
+msgid "psi2(): ipsi=%d not implemented."
+msgstr ""
+
+#: lmrob.c:1204
+#, c-format
+msgid "rho_ggw(): case (%i) not implemented."
+msgstr ""
+
+#: lmrob.c:1245
+#, c-format
+msgid "Error from Rdqags(psi_ggw*, k, ...): ier = %i"
+msgstr ""
+
+#: lmrob.c:2176
+#, c-format
+msgid "S refinements did not converge (to refine.tol=%g) in %d (= k.max) steps"
+msgstr ""
+
+#: lmrob.c:2335
+#, c-format
+msgid "m_s_descent(): Problem in RLLARSBI (RILARS). KODE=%d. Exiting."
+msgstr ""
+
+#: lmrob.c:2379
+msgid " M-S estimate: maximum number of refinement steps reached."
+msgstr ""
+
+#: lmrob.c:2468
+msgid "subsample(): could not find non-singular subsample."
+msgstr ""
+
+#: lmrob.c:2517
+msgid ""
+"Too many singular resamples. Aborting subsample().\n"
+" See parameter 'subsampling; in help of lmrob.config()."
+msgstr ""
+
+#: lmrob.c:2576
+#, c-format
+msgid "find_scale(*, initial_scale = %g)  -> final scale = 0"
+msgstr ""
+
+#: lmrob.c:2591
+#, c-format
+msgid ""
+"find_scale() did not converge in '%s' (= %d) iterations with tol=%g, last "
+"rel.diff=%g"
+msgstr ""
+
+#: rob-utils.c:63 rob-utils.c:64
+#, c-format
+msgid "Argument '%s' must be numeric or integer of length 1"
+msgstr ""
+
+#: rowMedians.c:42
+msgid "Argument 'x' must be a matrix."
+msgstr ""
+
+#: rowMedians.c:46
+msgid "Argument 'naRm' must be either TRUE or FALSE."
+msgstr ""
+
+#: rowMedians.c:71
+msgid "Argument 'x' must be numeric (integer or double)."
+msgstr ""

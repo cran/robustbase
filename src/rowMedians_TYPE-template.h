@@ -19,11 +19,10 @@
   Adopted from rowQuantiles.c by R. Gentleman.
   Template by Henrik Bengtsson.
 
- Copyright: Henrik Bengtsson, 2007-2013;  Martin Maechler 2014
+ Copyright: Martin Maechler 2014-2021; Henrik Bengtsson, 2007-2013.
  ***********************************************************************/
 #include <R.h>
-// MM{FIXME}: only <Rinternals.h>
-#include <Rdefines.h>
+#include <Rinternals.h>
 #include <Rmath.h>
 
 /* Expand arguments:

@@ -59,7 +59,7 @@ Rboolean is_redescender(int ipsi) {// a simple wrapper for readability
     return TRUE;
 /* if have many more, maybe
     switch(ipsi) {
-    default: error("ipsi=%d not implemented.", ipsi);
+    default: error(_("ipsi=%d not implemented."), ipsi);
     case 0: // huber and future other non-redescenders
 	return FALSE;
     case 1: case 2: case 3: case 4: case 5: case 6:

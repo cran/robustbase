@@ -182,7 +182,7 @@ BYlogreg <- function(x0, y, initwml=TRUE, # w.x=NULL,
     } ## while( kstep )
 
     if(kstep == kmax) {
-        warning("No convergence in ", kstep, " steps.")
+        warning(gettextf("No convergence in %d steps.", kstep), domain=NA)
         list(convergence=FALSE, objective=0, coefficients= rep(NA,p))
     } else {
         gammaest <- xistart/sigma1
@@ -247,7 +247,8 @@ glmrobBY <- function(X, y,
     kmax    <- if(is.null(cc <- control$maxit  )) 1e3 else cc
     maxhalf <- if(is.null(cc <- control$maxhalf))  10 else cc
     if(!identical(weights.on.x, "none"))
-        stop("'weights.on.x' = ", format(weights.on.x)," is not implemented")
+        stop(gettextf("'weights.on.x = \"%s\"' is not implemented",
+                      format(weights.on.x)), domain=NA)
     ## w.x <- robXweights(weights.on.x, X=X, intercept=intercept)
     ##
     ## MM: all(?) the  BY3() functions below would need to work with weights...

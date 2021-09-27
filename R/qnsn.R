@@ -18,10 +18,13 @@ Qn.finite.c <- function(n)
 
 
 Qn <- function(x, constant = NULL, finite.corr = is.null(constant) && missing(k),
-               k = choose(n %/% 2 + 1, 2), warn.finite.corr = TRUE)
+               na.rm = FALSE, k = choose(n %/% 2 + 1, 2), warn.finite.corr = TRUE)
 {
     ## Purpose: Rousseeuw and Croux's  Q_n() robust scale estimator
     ## Author: Martin Maechler, Date: 14 Mar 2002, 10:43
+    if (na.rm)
+        x <- x[!is.na(x)]
+    else if(anyNA(x)) return(NA)
     n <- length(x)
     if(n == 0) return(NA) else if(n == 1) return(0.)
     else if(!is.integer(n))
@@ -40,6 +43,8 @@ Qn <- function(x, constant = NULL, finite.corr = is.null(constant) && missing(k)
             if(dflt.k)
                 2.21914 # == old default ("true value" rounded to 6 significant digits)
             else 1/(sqrt(2) * qnorm(((k-1/2)/nn2 + 1)/2))
+    ## cannot pass +/- Inf to .C()  {"hack"}:
+    if(any(nFin <- is.infinite(x))) x[nFin] <- sign(x[nFin]) * .Machine$double.xmax
     r <- constant *
         .C(Qn0, as.double(x), n, k, l_k, res = double(l_k))$res
 
@@ -90,14 +95,18 @@ Qn.old <- function(x, constant = 2.2219, finite.corr = missing(constant))
 }
 
 
-Sn <- function(x, constant = 1.1926, finite.corr = missing(constant))
+Sn <- function(x, constant = 1.1926, finite.corr = missing(constant), na.rm = FALSE)
 {
     ## Purpose: Rousseeuw and Croux's  S_n() robust scale estimator
     ## Author: Martin Maechler, Date: 14 Mar 2002, 10:43
-
+    if (na.rm)
+        x <- x[!is.na(x)]
+    else if(anyNA(x)) return(NA)
     n <- length(x)
     if(n == 0) return(NA) else if(n == 1) return(0.)
 
+    ## cannot pass +/- Inf to .C()  {"hack"}:
+    if(any(nFin <- is.infinite(x))) x[nFin] <- sign(x[nFin]) * .Machine$double.xmax
     r <- constant * .C(Sn0,
                        as.double(x), n,
                        as.integer(!is.unsorted(x)),# is.sorted

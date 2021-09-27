@@ -18,7 +18,7 @@
 }
 \usage{
 Qn(x, constant = NULL, finite.corr = is.null(constant) && missing(k),
-   k = choose(n \%/\% 2 + 1, 2), warn.finite.corr = TRUE)
+   na.rm = FALSE, k = choose(n \%/\% 2 + 1, 2), warn.finite.corr = TRUE)
 
 s_Qn(x, mu.too = FALSE, \dots)
 }
@@ -44,6 +44,10 @@ s_Qn(x, mu.too = FALSE, \dots)
     consistency \code{constant} already depends on \code{n} leading to
     \emph{some} finite sample correction, but no simulation-based
     small-\code{n} correction factors are available.}
+  \item{na.rm}{logical specifying if missing values (\code{\link{NA}})
+    should be removed from \code{x} before further computation.  If false
+    as by default, and if there are \code{NA}s, i.e., \code{if(anyNA(x))},
+    the result will be \code{NA}.}
   \item{k}{integer, typically half of n, specifying the \dQuote{quantile}, i.e., rather the
     order statistic that \code{Qn()} should return; for the Qn() proper,
     this has been hard wired to \code{choose(n\%/\%2 +1, 2)}, i.e.,
@@ -114,7 +118,7 @@ s_Qn(x, mu.too = TRUE)
 Qn(x, finite.corr = FALSE)
 
 ## A simple pure-R version of Qn() -- slow and memory-rich for large n: O(n^2)
-Qn0R <- function(x, k = choose(n \%/\% 2 + 1, 2)) {
+Qn0R <- function(x, k = choose(n \%/\% 2 + 1, 2)) { %
     n <- length(x <- sort(x))
     if(n == 0) return(NA) else if(n == 1) return(0.)
     stopifnot(is.numeric(k), k == as.integer(k), 1 <= k, k <= n*(n-1)/2)
@@ -125,6 +129,9 @@ Qn0R <- function(x, k = choose(n \%/\% 2 + 1, 2)) {
 ## the C-algorithm "rounds" to 'float' single precision ..
 stopifnot(all.equal(Qx1, Qn0R(x), tol = 1e-6))
 
+
+(qn <- Qn(c(1:4, 10, Inf, NA), na.rm=TRUE))
+stopifnot(is.finite(qn), all.equal(4.075672524, qn, tol=1e-10))
 
 ## -- compute for different 'k' :
 

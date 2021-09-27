@@ -88,6 +88,13 @@ x <- c(1:7, 1000)
 sd(x) # non-robust std.deviation
 scaleTau2(x)
 scaleTau2(x, mu.too = TRUE)
+(sI  <- scaleTau2(c(x,Inf), mu.too = TRUE))
+(sIN <- scaleTau2(c(x,Inf,NA), mu.too = TRUE, na.rm=TRUE))
+stopifnot({
+  identical(sI, sIN)
+  all.equal(scaleTau2(c(x, 999), mu.too = TRUE), sIN,
+            tol = 1e-15)
+})
 
 if(doExtras <- robustbase:::doExtras()) {
  set.seed(11)

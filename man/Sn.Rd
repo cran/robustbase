@@ -8,7 +8,7 @@
   alternative to the MAD.
 }
 \usage{
-Sn(x, constant = 1.1926, finite.corr = missing(constant))
+Sn(x, constant = 1.1926, finite.corr = missing(constant), na.rm = FALSE)
 
 s_Sn(x, mu.too = FALSE, \dots)
 }
@@ -19,6 +19,10 @@ s_Sn(x, mu.too = FALSE, \dots)
   \item{finite.corr}{logical indicating if the finite sample bias
     correction factor should be applied.  Default to \code{TRUE} unless
     \code{constant} is specified.}
+  \item{na.rm}{logical specifying if missing values (\code{\link{NA}})
+    should be removed from \code{x} before further computation.  If false
+    as by default, and if there are \code{NA}s, i.e., \code{if(anyNA(x))},
+    the result will be \code{NA}.}
   \item{mu.too}{logical indicating if the \code{\link[stats]{median}(x)} should
     also be returned for \code{s_Sn()}.}
   \item{\dots}{potentially further arguments for \code{s_Sn()} passed to
@@ -60,6 +64,9 @@ Sn(x[1:18], c=1)# 9
 set.seed(153)
 x <- sort(c(rnorm(80), rt(20, df = 1)))
 s_Sn(x, mu.too=TRUE)
+
+(s <- Sn(c(1:4, 10, Inf, NA), na.rm=TRUE))
+stopifnot(is.finite(s), all.equal(3.5527554, s, tol=1e-10))
 }
 \keyword{robust}
 \keyword{univar}

@@ -2,49 +2,49 @@ msgid ""
 msgstr ""
 "Project-Id-Version: robustbase 0.93-9\n"
 "POT-Creation-Date: 2021-08-19 22:34\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2021-08-19 22:39+0200\n"
+"Last-Translator: Martin Maechler <maechler@r-project.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-
 msgid "some terms will have NAs due to the limits of the method"
-msgstr ""
+msgstr "Einige Terme werden NAs enthalten wegen Beschränkung der Methode"
 
 msgid "y is not onedimensional"
-msgstr ""
+msgstr "y ist nicht eindimensional"
 
 msgid "Number of observations in x and y not equal"
 msgstr ""
 
 msgid "no intercept in the model"
-msgstr ""
+msgstr "Kein Achsenabschnitt ('intercept') im Modell"
 
 msgid "All observations have missing values!"
-msgstr ""
+msgstr "Alle Beobachtungen haben fehlende Werte!"
 
 msgid "Implosion: sigma1=%g became too small"
-msgstr ""
+msgstr "Implosion: sigma1=%g ist zu klein geworden"
 
 msgid "Convergence Achieved"
-msgstr ""
+msgstr "Konvergenz erreicht"
 
 msgid "No convergence in %d steps."
-msgstr ""
+msgstr "Keine Konvergenz in %d Schritten."
 
 msgid "maximum number of \"kstep\" iterations must be > 0"
-msgstr ""
+msgstr "Maximale Anzahl von \"kstep\" Iterationen muss > 0 sein"
 
 msgid "maximal number of *inner* step halvings must be > 0"
-msgstr ""
+msgstr "Maximale Anzahl von *inneren* Schritthalbierungen muss > 0 sein"
 
 msgid "value of the tuning constant c ('const') must be > 0"
-msgstr ""
+msgstr "Die Tuning Konstante c ('const') muss positiv sein"
 
 msgid "non-trivial prior 'weights' are not yet implemented for \"BY\""
-msgstr ""
+msgstr "nicht-triviale apriori Gewichte ('weights') sind noch nicht implementiert for \"BY\""
 
 msgid "'start' cannot yet be passed to glmrobBY()"
 msgstr ""
@@ -74,28 +74,28 @@ msgid "value of the tuning constant c (cw) must be > 0"
 msgstr ""
 
 msgid "Currently, only family 'poisson' is supported for the \"MT\" estimator"
-msgstr ""
+msgstr "Momentan ist nur die 'poisson' Familie unterstützt beim \"MT\" Schätzer"
 
 msgid "All weights must be positive"
-msgstr ""
+msgstr "Alle Gewichte müssen positiv sein"
 
 msgid "non-trivial 'offset' is not yet implemented"
-msgstr ""
+msgstr "nicht-trivialer 'offset' ist noch nicht implementiert"
 
 msgid "NAs in V(mu)"
-msgstr ""
+msgstr "NAs in V(mu)"
 
 msgid "0s in V(mu)"
-msgstr ""
+msgstr "Nullen ('0') in V(mu)"
 
 msgid "'start' must be an initial estimate of beta, of length %d"
-msgstr ""
+msgstr "'start' muss eine Startschätzung sein von beta, der Länge %d"
 
 msgid "optim(.) non-convergence:"
 msgstr ""
 
 msgid "'X' must have at least two columns"
-msgstr ""
+msgstr "'X' muss mindestens zwei Spalten haben"
 
 msgid "sigma0 ="
 msgstr ""
@@ -104,19 +104,19 @@ msgid "==> scaleTau2(.) = 0"
 msgstr ""
 
 msgid "invalid first argument"
-msgstr ""
+msgstr "ungültiges erstes Argument"
 
 msgid "'formula' missing or incorrect"
-msgstr ""
+msgstr "'formula' fehlt oder ist ungültig"
 
 msgid "'coef' must not be negative"
-msgstr ""
+msgstr "'coef' darf nicht negativ sein"
 
 msgid "More dimensions than observations, currently not implemented"
-msgstr ""
+msgstr "Mehr Dimensionen als Beobachtungen; momentan nicht implementiert"
 
 msgid "More dimensions than observations: not yet implemented"
-msgstr ""
+msgstr "Mehr Dimensionen als Beobachtungen; das ist noch nicht implementiert"
 
 msgid "Matrix 'x' is not of full rank: rankM(x) ="
 msgstr ""
@@ -125,9 +125,11 @@ msgid "< p ="
 msgstr ""
 
 msgid "Use fullRank(x) instead"
-msgstr ""
+msgstr "Verwende stattdessen fullRank(x)"
 
-msgid "** direction sampling iterations were not sufficient. Maybe try increasing 'maxit.mult'"
+msgid ""
+"** direction sampling iterations were not sufficient. Maybe try increasing "
+"'maxit.mult'"
 msgstr ""
 
 msgid "the following arguments to 'anova.glmrob' are invalid and"
@@ -143,13 +145,13 @@ msgid "'Anova Table' for a single model object not yet implemented"
 msgstr ""
 
 msgid "Not the same response used in the fitted models"
-msgstr ""
+msgstr "Nicht dieselbe Zielvariable verwendet in den angepassten Modellen"
 
 msgid "models were not all fitted to the same size of dataset"
-msgstr ""
+msgstr "Modelle wurden nicht alle auf die gleich grossen Datensätze angepasst"
 
 msgid "Not the same method used for fitting the models"
-msgstr ""
+msgstr "Nicht die gleiche Methode verwendet um die Modelle anzupassen"
 
 msgid "Not the same tuning constant c used in the robust fits"
 msgstr ""
@@ -259,13 +261,17 @@ msgstr ""
 msgid "Options 'best' and 'exact' not allowed for n greater than  2*nmini-1 ="
 msgstr ""
 
-msgid ".\nUsing default."
+msgid ""
+".\n"
+"Using default."
 msgstr ""
 
 msgid "'nsamp = \"best\"' allows maximally"
 msgstr ""
 
-msgid "subsets;\ncomputing these"
+msgid ""
+"subsets;\n"
+"computing these"
 msgstr ""
 
 msgid "This may take a"
@@ -325,7 +331,8 @@ msgstr ""
 msgid "More than h of the observations lie on a hyperplane."
 msgstr ""
 
-msgid "original detmcd() wrongly declared c-step convergence (obj=%g, i=%d, j=%d)"
+msgid ""
+"original detmcd() wrongly declared c-step convergence (obj=%g, i=%d, j=%d)"
 msgstr ""
 
 msgid "Invalid  scalefn='%s': must be function or a valid string"
@@ -349,7 +356,8 @@ msgstr ""
 msgid "'weights' must be non-negative"
 msgstr ""
 
-msgid "Number of offsets is %d, should rather equal %d (number of observations)"
+msgid ""
+"Number of offsets is %d, should rather equal %d (number of observations)"
 msgstr ""
 
 msgid "'weights.on.x' must be a string, function, list or numeric n-vector"
@@ -373,7 +381,9 @@ msgstr ""
 msgid "setting 'y = FALSE' has no longer any effect"
 msgstr ""
 
-msgid "No weights defined for this object. Use type=\"robustness\" argument to get robustness weights."
+msgid ""
+"No weights defined for this object. Use type=\"robustness\" argument to get "
+"robustness weights."
 msgstr ""
 
 msgid "need non-robust working residuals for this model type"
@@ -388,7 +398,8 @@ msgstr ""
 msgid "is not implemented"
 msgstr ""
 
-msgid "if a list, weights.on.x must contain a covariance function such as covMcd()"
+msgid ""
+"if a list, weights.on.x must contain a covariance function such as covMcd()"
 msgstr ""
 
 msgid "weights.on.x needs %d none-negative values"
@@ -478,7 +489,9 @@ msgstr ""
 msgid "Initial estimator '%s' not supported; using S-estimator instead"
 msgstr ""
 
-msgid ".vcov.avar1 can only be used when initial estimator is S; using .vcov.w instead"
+msgid ""
+".vcov.avar1 can only be used when initial estimator is S; using .vcov.w "
+"instead"
 msgstr ""
 
 msgid "only M and D are steps supported after \"init\" computation"
@@ -535,7 +548,9 @@ msgstr ""
 msgid ".vcov.avar1() supports only SM or MM estimates"
 msgstr ""
 
-msgid "initial estimate residuals length differs from final ones.  Typically must refit w/ lmrob()"
+msgid ""
+"initial estimate residuals length differs from final ones.  Typically must "
+"refit w/ lmrob()"
 msgstr ""
 
 msgid "X'WX is almost singular. Consider using cov = \".vcov.w\""
@@ -553,7 +568,9 @@ msgstr ""
 msgid "])values"
 msgstr ""
 
-msgid ".vcov.avar1: negative diag(<vcov>) fixed up; consider 'cov=\".vcov.w.\"' instead"
+msgid ""
+".vcov.avar1: negative diag(<vcov>) fixed up; consider 'cov=\".vcov.w.\"' "
+"instead"
 msgstr ""
 
 msgid "invalid 'posdef.meth':"
@@ -616,7 +633,9 @@ msgstr ""
 msgid "function incorrectly specified."
 msgstr ""
 
-msgid "Use c(minimal slope, b, efficiency, breakdown point) [6 hard-coded special cases]"
+msgid ""
+"Use c(minimal slope, b, efficiency, breakdown point) [6 hard-coded special "
+"cases]"
 msgstr ""
 
 msgid "or  c(0, a,b,c, max_rho)  as from .psi.const("
@@ -649,7 +668,9 @@ msgstr ""
 msgid "unable to find constants for \"ggw\" psi function: %s"
 msgstr ""
 
-msgid "tuning constants for \"lqq\" psi: both 'eff' and 'bp' specified, ignoring 'bp'"
+msgid ""
+"tuning constants for \"lqq\" psi: both 'eff' and 'bp' specified, ignoring "
+"'bp'"
 msgstr ""
 
 msgid "Error: neither breakdown point nor efficiency specified"
@@ -673,13 +694,17 @@ msgstr ""
 msgid "unknown setting for 'subsampling': %s"
 msgstr ""
 
-msgid "'epsw' must be numeric(1) or a function of nobs(obj.) which returns a numeric(1)"
+msgid ""
+"'epsw' must be numeric(1) or a function of nobs(obj.) which returns a "
+"numeric(1)"
 msgstr ""
 
 msgid "number of rows in 'x' and length of 'object$rweights' must be the same"
 msgstr ""
 
-msgid "'epsx' must be numeric(1) or a function of max(abs(x)) which returns a numeric(1)"
+msgid ""
+"'epsx' must be numeric(1) or a function of max(abs(x)) which returns a "
+"numeric(1)"
 msgstr ""
 
 msgid "Detected possible local breakdown of"
@@ -748,7 +773,9 @@ msgstr ""
 msgid "init must be \"S\", \"M-S\", function or list"
 msgstr ""
 
-msgid "Length of initial coefficients vector does not match rank of singular design matrix x"
+msgid ""
+"Length of initial coefficients vector does not match rank of singular design "
+"matrix x"
 msgstr ""
 
 msgid "unknown init argument"
@@ -760,7 +787,9 @@ msgstr ""
 msgid "are disregarded in"
 msgstr ""
 
-msgid "Failed to compute robust Mahalanobis distances, reverting to robust leverages."
+msgid ""
+"Failed to compute robust Mahalanobis distances, reverting to robust "
+"leverages."
 msgstr ""
 
 msgid "lmrob object does not have a proper 'qr' component. Rank zero?"
@@ -790,7 +819,9 @@ msgstr ""
 msgid "Predictions on current data refer to _future_ responses"
 msgstr ""
 
-msgid "Assuming prediction variance inversely proportional to weights used for fitting"
+msgid ""
+"Assuming prediction variance inversely proportional to weights used for "
+"fitting"
 msgstr ""
 
 msgid "Assuming constant prediction variance even though model fit is weighted"
@@ -805,16 +836,20 @@ msgstr ""
 msgid "Index plot of standardized residuals is not avalable if scale = 0"
 msgstr ""
 
-msgid "Standardized residuals vs Fitted values plot is not avalable if scale = 0"
+msgid ""
+"Standardized residuals vs Fitted values plot is not avalable if scale = 0"
 msgstr ""
 
-msgid "Diagnostic plot is not available for univar\niate location and scale estimation"
+msgid ""
+"Diagnostic plot is not available for univar\n"
+"iate location and scale estimation"
 msgstr ""
 
 msgid "Regression Diagnostic plot is not avalable if scale = 0"
 msgstr ""
 
-msgid "Regression Diagnostic plot is not avalable: option mcd=F was set in ltsReg()."
+msgid ""
+"Regression Diagnostic plot is not avalable: option mcd=F was set in ltsReg()."
 msgstr ""
 
 msgid "The MCD covariance matrix was singular."
@@ -943,7 +978,9 @@ msgstr ""
 msgid "unable to find constants for psi function"
 msgstr ""
 
-msgid "As \"sigma\" is in 'pnames', do not use it as variable or parameter name in 'formula'"
+msgid ""
+"As \"sigma\" is in 'pnames', do not use it as variable or parameter name in "
+"'formula'"
 msgstr ""
 
 msgid "Method"
@@ -961,7 +998,8 @@ msgstr ""
 msgid "The argument 'acc' has been renamed to 'tol'; do adapt your code."
 msgstr ""
 
-msgid "'start' or 'lower' or 'upper' must be fully named (list or numeric vector)"
+msgid ""
+"'start' or 'lower' or 'upper' must be fully named (list or numeric vector)"
 msgstr ""
 
 msgid "specifying 'weights' is not yet supported for method"
@@ -1006,13 +1044,17 @@ msgstr ""
 msgid "', 'parm' must be specified as an integer"
 msgstr ""
 
-msgid "profile() method not yet implemented for \"nlrob\" objects.\n Use  method = \"Wald\"."
+msgid ""
+"profile() method not yet implemented for \"nlrob\" objects.\n"
+" Use  method = \"Wald\"."
 msgstr ""
 
 msgid "Computing profile confidence intervals ..."
 msgstr ""
 
-msgid "\"boot\" method not yet implemented for \"nlrob\" objects.\n Use confint(*, method = \"Wald\")."
+msgid ""
+"\"boot\" method not yet implemented for \"nlrob\" objects.\n"
+" Use confint(*, method = \"Wald\")."
 msgstr ""
 
 msgid "Use only with 'lmrob' objects"
@@ -1075,12 +1117,12 @@ msgstr ""
 msgid "Dimension {= ncol(x)} must be 2!"
 msgstr ""
 
-msgid        "Initial set"
+msgid "Initial set"
 msgid_plural "Initial sets"
-msgstr[0]    ""
-msgstr[1]    ""
+msgstr[0] ""
+msgstr[1] ""
 
-msgid        "For method = \"%s\", argument %s is not made use of"
+msgid "For method = \"%s\", argument %s is not made use of"
 msgid_plural "For method = \"%s\", arguments %s are not made use of"
-msgstr[0]    ""
-msgstr[1]    ""
+msgstr[0] ""
+msgstr[1] ""
