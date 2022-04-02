@@ -29,6 +29,9 @@ huberM <-
 
     if(se && !is.null(weights))
 	stop("Std.error computation not yet available for the case of 'weights'")
+    missS <- missing(s)
+    if(missS && is.na(s)) # e.g. for x = c(-Inf, 1)
+        s <- 0
     if (s <= 0) {
         if(s < 0) stop("negative scale 's'")
         if(warn0scale && n > 1)
@@ -40,7 +43,7 @@ huberM <-
 	    it <- it + 1L
             y <- pmin(pmax(mu - k * s, x), mu + k * s)
 	    mu1 <- wsum(y) / sum.w
-	    if (abs(mu - mu1) < tol * s)
+	    if (is.na(mu1) || abs(mu - mu1) < tol * s)
 		break
 	    mu <- mu1
 	}
@@ -61,7 +64,7 @@ huber <- function (y, k = 1.5, tol = 1e-06)
     if(n == 0) # e.g 'y' was all na
 	return(list(mu = NA, s = NA))# instead of error
     mu <- median(y)
-    s <- mad(y)
+    s <- mad(y, center=mu)
     if (s == 0) { # FIXME?  make this warning optional
 	if(n > 1) warning("scale MAD is zero for this sample")
     }

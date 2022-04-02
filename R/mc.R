@@ -1,22 +1,19 @@
+## These two are not exported (nor documented, nor used internally !) :
+
 ## Left Medcouple
-lmc <- function(x, na.rm = FALSE, ...) {
-    -mc(x[x <= median(x, na.rm = na.rm)], na.rm = na.rm, ...)
+lmc <- function(x, na.rm = FALSE, doReflect = FALSE, ...) {
+    -mc(x[x <= median(x, na.rm=na.rm)], na.rm=na.rm, doReflect=doReflect, ...)
 }
 
 ## Right Medcouple
-rmc <- function(x, na.rm = FALSE, ...) {
-    mc(x[x >= median(x, na.rm = na.rm)], na.rm = na.rm, ...)
+rmc <- function(x, na.rm = FALSE, doReflect = FALSE, ...) {
+    mc(x[x >= median(x, na.rm=na.rm)], na.rm=na.rm, doReflect=doReflect, ...)
 }
 
-
-## ## Generic function
-## mc <- function (x, ...)
-##       UseMethod("mc")
-
-## ## Default method (for numeric vectors):
-## mc.default <- function(x, na.rm = FALSE,
+.optEnv$mc_doScale_msg <- TRUE # initially
 mc <- function(x, na.rm = FALSE, doReflect = (length(x) <= 100)
-             , doScale = TRUE # <- chg default to 'FALSE' ?
+             , doScale = FALSE # was hardwired=TRUE (till 2018-07); then default=TRUE (till 2022-03)
+             , c.huberize = 1e11 # was implicitly = Inf originally
              , eps1 = 1e-14, eps2 = 1e-15 # << new in 0.93-2 (2018-07..)
              , maxit = 100, trace.lev = 0
              , full.result = FALSE
@@ -29,10 +26,17 @@ mc <- function(x, na.rm = FALSE, doReflect = (length(x) <= 100)
     else if (any(ina))
         return(NA_real_)
     ## ==> x is NA-free from here on
+    stopifnot(length(c.huberize) == 1L, c.huberize >= 0)
 
-    ## if(length(l.. <- list(...)))
-    ##     stop("In mc(): invalid argument(s) : ",
-    ##          paste(sQuote(names(l..)), collapse=","), call. = FALSE)
+    ## For robustbase 0.95-0 (March 2022); drop the message eventually:
+    if(missing(doScale) && .optEnv$mc_doScale_msg && !getOption("mc_doScale_quiet", FALSE)) {
+        message("The default of 'doScale' is FALSE now for stability;\n  ",
+                "set options(mc_doScale_quiet=TRUE) to suppress this (once per session) message")
+        .optEnv$mc_doScale_msg <- FALSE
+    }
+
+    if(is.finite(c.huberize))
+        x <- huberize(x, c=c.huberize, warn0 = trace.lev > 0, saveTrim=FALSE)
     rr <- mcComp(x, doReflect, doScale=doScale, eps1=eps1, eps2=eps2,
                  maxit=maxit, trace.lev=trace.lev)
 

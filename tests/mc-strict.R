@@ -6,6 +6,7 @@
 
 library(robustbase)
 for(f in system.file("xtraR", c("mcnaive.R", # -> mcNaive()
+                                "styleData.R",  # -> smallD  list of small datasets
 			      "platform-sessionInfo.R"),
                      package = "robustbase", mustWork=TRUE)) {
     cat("source(",f,"):\n", sep="")
@@ -20,10 +21,26 @@ c.time <- function(...) cat('Time elapsed: ', ..., '\n')
 S.time <- function(expr) c.time(system.time(expr))
 DO <- function(...) S.time(stopifnot(...))
 
+## from {sfsmisc}:
+lseq <- function(from, to, length) exp(seq(log(from), log(to), length.out = length))
+
+
 mS <- moreSessionInfo(print.=TRUE)
 
 (doExtras <- robustbase:::doExtras())# TRUE if interactive() or activated by envvar
 
+if(!dev.interactive(orNone=TRUE)) pdf("mc-strict.pdf")
+
+assertCondition(mc(1:11), "message") # change of default to  doScale=FALSE
+
+smlMC  <- vapply(smallD, mc, pi)
+smlMCo <- vapply(smallD, mc, pi, doScale=TRUE, c.huberize=Inf)
+yI <- c("yI", "yI."); notI  <- setdiff(names(smallD), yI)
+yI2 <- c(yI, "x3I");  notI2 <- setdiff(names(smallD), yI2)
+assert.EQ(smlMC [notI],
+          smlMCo[notI], tol = 4e-11, giveRE=TRUE)
+## above small diff. is from 'x3I';  dropping that, too, leaves no differences
+table(smlMC [notI2] == smlMCo[notI2])
 
 n.set <- c(1:99, 1e5L+ 0:1) # large n gave integer overflow in earlier versions
 DO(0 == sapply(n.set, function(n) mc(seq_len(n))))
@@ -45,13 +62,22 @@ mcNaive(x2, meth="h.use")  # = 1/6 = 0.16666
 assertEQm12(1/6, mc(x2))
 assertEQm12(1/6, mcNaive(x2, "h.use"))
 
-x4 <- c(1:5,7,10,15,25, 1e15) ## - bombed in orignal algo
+x4 <- c(1:5,7,10,15,25, 1e15) ## - bombed in original algo
 mcNaive(x4,"h.use") # 0.5833333
 assertEQm12( 7/12, mcNaive(x4, "h.use"))
 assertEQm12( 7/12, mcNaive(x4, "simple"))
 assertEQm12( 7/12, mc( x4, doRefl= FALSE))
 assertEQm12(-7/12, mc(-x4, doRefl= FALSE))
 
+xx <- c(-3, -3, -2, -2, -1, rep(0, 6), 1, 1, 1, 2, 2, 3, 3, 5)
+stopifnot(exprs = {
+    mc(xx, doScale=TRUE , c.huberize = Inf) == 0 ## old mc()
+    mc(xx) == 0
+    mc(xx,  doReflect=FALSE) == 0
+   -mc(-xx, doReflect=FALSE) == 0
+    mcNaive(xx, "h.use" ) == 0
+    mcNaive(xx, "simple") == 0
+})
 
 set.seed(17)
 for(n in 3:50) {
@@ -262,10 +288,14 @@ mcX <- function(x, Xfun, eps=0, NAiferror=FALSE, doReflect=FALSE, ...) {
 }
 
 X1. <- function(u, eps=0) c(1,2,3, 7+(-10:10)*eps, u + (-1:1)*eps)
-## ==> This *does* breakdown [but points are not "in general position"]:
+## ==> This *did* breakdown [but points not "in general position"]:
+## but now is stable:
 r.mc1 <- curve(mcX(x, X1.), 10, 1e35, log="x", n=1001)
+stopifnot(r.mc1$y == 0) # now stable
+if(FALSE) {
 rt1 <- uniroot(function(x) mcX(exp(x), X1.) - 1/2, lower=0, upper=500)
 exp(rt1$root) #  4.056265e+31
+}
 
 ## eps > 0  ==> No duplicated points ==> theory says breakdown point = 0.25
 ## -------  but get big numerical problems:
@@ -283,44 +313,37 @@ all.equal(r.mc1, r.mc1.16, tol=1e-15)#-> TRUE
 
 ## Quite bad case: Non convergence
 X2. <- function(u) c(1:3, seq(6, 8, by = 1/8), u, u, u)
-try(mc(X2.(4.3e31)))## -> error: no convergence
-if(FALSE) # and the same here -- after longer waiting:
-    mc(X2.(4.3e31), eps1=1e-7, eps2=1e-100, maxit = 1e6)## -> error: no convergence
-
+## try(mc(X2.(4.3e31)))## -> error: no convergence
+## but now
+stopifnot(exprs = {
+    all.equal(1/30, mc(X2.(4.3e31)), tol=1e-12)
+    all.equal(1/30, mc(X2.(4.3e31), eps1=1e-7, eps2=1e-100), tol=1e-12)
+})
 ## related, more direct:
 X3. <- function(u) c(10*(1:3), 60:80, (4:6)*u)
-mc(X3.(1e31), trace=5) # fine convergence in one iter.
-try(
-mc(X3.(1e32), trace=3) # no convergence...
-)# bad
-
-try(mc(X3.(1e32), trace=5, maxit=6)) # no convergence...
+stopifnot(0 == mc(X3.(1e31), trace=5)) # fine convergence in one iter.
+stopifnot(0 == mc(X3.(1e32), trace=3)) # did *not* converge
 
 ### TODO : find example with *smaller* sample size -- with no convergence
 X4. <- function(u, eps, ...) c(10, 70:75, (2:3)*u)
 mc(X4.(1e34))# "fine"
-## whoa: jump down and up:
+## now stable too:
 r.mc4 <- curve(mcX(x, X4.), 100, 1e35, log="x", n=2^12)
+stopifnot(abs(1/3 - r.mc4$y) < 1e-15)
 
 X5. <- function(u) c(10*(1:3), 70:78, (4:6)*u)
-try(mc(X5.(1e32), maxit=1000))
+stopifnot(all.equal(4/15, mc(X5.(1e32), maxit=1000)))
 
 X5. <- function(u, eps,...) c(5*(1:12), (4:6)*u)
-(r.mc5 <- mc(X5.(1e32), doReflect=FALSE, maxit=1000))
-all.equal(1, ## <- i.e. complete breakdown
-          r.mc5) ## platform dependent! yes, on 64-bit
-try(mc(X5.(5e31), maxit=10000)) # no convergence..
+str(r.mc5 <- mc(X5.(1e32), doReflect=FALSE, full.result = TRUE))
+## Now, stable:
+stopifnot(all.equal(1/5, c(r.mc5))) ## was 1; platform dependent ..
+stopifnot(all.equal(4/15, mc(X5.(5e31)))) # had  no convergence w/ maxit=10000
 r.mc5Sml <- curve(mcX(x, X5.), 1,  100, log="x", n=1024) ## quite astonishing
-r.mc5Lrg <- curve(mcX(x, X5.), 1, 1e30, log="x", n=1024) ## ok..
-## but then going higher -- we have problems:
-r.mc5Big <- curve(mcX(x, X5., NAiferror=TRUE), 1, 1e38, log="x",
-                  n = 2^12, type = "o", cex = 1/4)
-warnings()
-summary(r.mc5Big$y)
-## 15 NA's at x :
-with(r.mc5Big, x[is.na(y)])
-## ~= [4.3, 5.8] * 10^31
-
+x <- lseq(1, 1e200, 2^11)
+mc5L <- mcX(x, X5.)
+table(err <- abs(0.2 - mc5L[x >= 24])) # I see all 0!
+stopifnot(abs(err) < 1e-15)
 
 c.time(proc.time())
 

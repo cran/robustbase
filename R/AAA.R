@@ -147,3 +147,8 @@ is.1num <- function(x) is.numeric(x) && length(x) == 1L
         } else  # default
             vc
     }
+
+
+## e.g. for once-per-session warnings:
+.optEnv <- new.env(parent = emptyenv(), hash = FALSE)
+

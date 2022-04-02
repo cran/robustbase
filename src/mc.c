@@ -85,10 +85,17 @@ double mc_C_d(const double z[], int n, const double eps[], int *iter, int scale)
 	xmed = (x[ind] + x[ind+1])/2;
     }
 
-    double x_eps = eps[0] * (do_scale ? eps[0] + fabs(xmed) : fabs(xmed));
+    double x_eps = eps[0] *            (eps[0] + fabs(xmed));
+    // was x_eps = eps[0] * (do_scale ? eps[0] + fabs(xmed) : fabs(xmed));
     if (fabs(x[1] - xmed) <= x_eps) {
+	if(trace_lev)
+	    Rprintf("mc_C_d(z[1:%d],*): |x[1]-med| <= x_eps=%g extreme -> medc := -1\n",
+		    n, x_eps);
 	medc = -1.; goto Finish;
     } else if (fabs(x[n] - xmed) <= x_eps) {
+	if(trace_lev)
+	    Rprintf("mc_C_d(z[1:%d],*): |x[n]-med| <= x_eps=%g extreme -> medc := +1\n",
+		    n, x_eps);
 	medc =	1.; goto Finish;
     }
     /* else : median is not at the border ------------------- */
@@ -133,7 +140,7 @@ double mc_C_d(const double z[], int n, const double eps[], int *iter, int scale)
 	j++;
     }
     if(trace_lev >= 2)
-	Rprintf("   x1[] := {x | x_j >= x_eps = %g}    has %d (='j-1') entries\n",
+	Rprintf("   x1[] := {x | x_j >= x_eps = %g}    has %d ('j-1') entries\n",
 		x_eps, j-1);
     i = 1;
     double *x2 = x+j-1; /* pointer -- corresponding to  x2[i] = x[j]; */
@@ -170,7 +177,7 @@ double mc_C_d(const double z[], int n, const double eps[], int *iter, int scale)
 	right[i] = h1;
     }
     int64_t nr = ((int64_t) h1) * ((int64_t) h2), // <-- careful to *NOT* overflow
-	knew = nr/2 +1;
+	knew = nr/2 +1, nl = 0, neq = 0;
     if(trace_lev >= 2)
 	Rprintf(" (h1,h2, nr, knew) = (%d,%d, %.0f, %.0f)\n",
 		h1,h2, (double)nr, (double)knew);
@@ -179,8 +186,6 @@ double mc_C_d(const double z[], int n, const double eps[], int *iter, int scale)
     double *work= (double *) R_alloc(n, sizeof(double));
     int	   *iwt = (int *)    R_alloc(n, sizeof(int));
     Rboolean IsFound = FALSE;
-    int nl = 0,
-	neq = 0;
     /* MK:  'neq' counts the number of observations in the
      *      inside the tolerance range, i.e., where left > right + 1,
      *      since we would miss those when just using 'nl-nr'.
@@ -227,7 +232,8 @@ double mc_C_d(const double z[], int n, const double eps[], int *iter, int scale)
 
 	j = 1;
 	for (i = h2; i >= 1; i--) {
-	    while (j <= h1 && h_kern(x[j],x2[i],j,i,h1+1,eps[1], do_scale) - trial > eps_trial) {
+	    while (j <= h1 && h_kern(x[j],x2[i],j,i,h1+1,eps[1], do_scale) - trial > eps_trial)
+	    {
 		// while (j <= h1 && h_kern(x[j],x2[i],j,i,h1+1,eps[1], do_scale) > trial) {
 		if (trace_lev >= 5)
 		    Rprintf("\nj=%3d, i=%3d, x[j]=%g, x2[i]=%g, h=%g",
@@ -235,10 +241,6 @@ double mc_C_d(const double z[], int n, const double eps[], int *iter, int scale)
 			    h_kern(x[j],x2[i],j,i,h1+1,eps[1], do_scale));
 		j++;
 	    }
-/* 	    for(; j <= h1; j++) { */
-/* 		register double h = h_kern(x[j],x2[i],j,i,h1+1,eps[1], do_scale); */
-/* 		if(h > trial) break; */
-/* 	    } */
 	    p[i] = j-1;
 	}
 	j = h1;
@@ -360,7 +362,7 @@ double h_kern(double a, double b, int ai, int bi, int ab, double eps, Rboolean d
     // MK added a check '|| b > 0' ("or positive b"), but said "_and_ positive b" (r221)
     /* if (fabs(a-b) < 2.0*eps || b > 0) */
     // MM: don't see why (but it seems needed); the check should be *relative* to |a+b|
-    if (b > 0 || fabs(a-b) <= eps*(do_scale ? 2. : fabs(a+b))) // '<=' since RHS maybe 0
+    if (b > 0 || fabs(a-b) <= eps*(do_scale ? 2. : ldexp(fabs(a+b), 2))) // '<=' since RHS maybe 0
 	return sign((double)(ab - (ai+bi)));
 
     /* else */

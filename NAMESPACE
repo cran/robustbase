@@ -68,6 +68,7 @@ export(Sn, Qn, Qn.old,
        ## NO! ddplot, distplot, chi2qqplot
        rrcov.control,##  << RENAME --- FIXME
        huberM,
+       huberize,
        colMedians, rowMedians,
        covOGK, covGK, hard.rejection, scaleTau2,
        covComed,

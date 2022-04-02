@@ -58,7 +58,7 @@
 
 #include <Rmath.h>
 #include <R_ext/Applic.h>
-
+#include <float.h>
 
 #include "robustbase.h"
 //-> <R.h>, <Rinternals.h>  -> XLENGTH, R_xlen_t
@@ -1226,7 +1226,7 @@ double rho_ggw(double x, const double k[])
     }
     else { // k[0] == 0; k[1:4] = (a, b, c, rho(Inf)) =  "general parameters"
 	x = fabs(x);
-	double a = 0., epsabs = R_pow(DOUBLE_EPS, 0.25), result, abserr;
+	double a = 0., epsabs = R_pow(DBL_EPSILON, 0.25), result, abserr;
 	int neval, ier, last, limit = 100, lenw = 4 * limit;
 	int   *iwork =    (int *) R_alloc(limit, sizeof(int));
 	double *work = (double *) R_alloc(lenw,  sizeof(double));

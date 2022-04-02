@@ -43,10 +43,10 @@ Qn <- function(x, constant = NULL, finite.corr = is.null(constant) && missing(k)
             if(dflt.k)
                 2.21914 # == old default ("true value" rounded to 6 significant digits)
             else 1/(sqrt(2) * qnorm(((k-1/2)/nn2 + 1)/2))
-    ## cannot pass +/- Inf to .C()  {"hack"}:
-    if(any(nFin <- is.infinite(x))) x[nFin] <- sign(x[nFin]) * .Machine$double.xmax
+    ## instead of passing +/- Inf to .C()  {"hack"}:
+    ## if(any(nFin <- is.infinite(x))) x[nFin] <- sign(x[nFin]) * .Machine$double.xmax
     r <- constant *
-        .C(Qn0, as.double(x), n, k, l_k, res = double(l_k))$res
+        .C(Qn0, as.double(x), n, k, l_k, res = double(l_k), NAOK=TRUE)$res
 
     if (finite.corr) {
         if(!dflt.k && warn.finite.corr)
@@ -105,11 +105,12 @@ Sn <- function(x, constant = 1.1926, finite.corr = missing(constant), na.rm = FA
     n <- length(x)
     if(n == 0) return(NA) else if(n == 1) return(0.)
 
-    ## cannot pass +/- Inf to .C()  {"hack"}:
-    if(any(nFin <- is.infinite(x))) x[nFin] <- sign(x[nFin]) * .Machine$double.xmax
+    ## instead of passing +/- Inf to .C()  {"hack"}:
+    ## if(any(nFin <- is.infinite(x))) x[nFin] <- sign(x[nFin]) * .Machine$double.xmax
     r <- constant * .C(Sn0,
                        as.double(x), n,
                        as.integer(!is.unsorted(x)),# is.sorted
+                       NAOK = TRUE,
                        res = double(1), a2 = double(n))$res
     ## NB: a2[] could be used for confidence intervals and other estimates!
     if (finite.corr) (

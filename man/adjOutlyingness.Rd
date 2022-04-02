@@ -20,7 +20,8 @@ adjOutlyingness(x, ndir = 250, p.samp = p, clower = 4, cupper = 3,
                 mcTrace = max(0, trace.lev-1))
 }
 \arguments{
-  \item{x}{a numeric \code{\link{matrix}} or \code{\link{data.frame}},
+  \item{x}{a numeric \eqn{n \times p}{n * p} \code{\link{matrix}} or
+    \code{\link{data.frame}},
     which must be of full rank \eqn{p}.}
   \item{ndir}{positive integer specifying the number of directions that
     should be searched.}
@@ -72,6 +73,16 @@ adjOutlyingness(x, ndir = 250, p.samp = p, clower = 4, cupper = 3,
   \item{mcTrace}{passed as \code{trace.lev} to \code{\link{mc}()}.}
 }
 \note{
+  % During Lukas Graz' Master's thesis (Spring 2021), it finally became clear to MM:
+  If there are too many degrees of freedom for the projections, i.e., when
+  \eqn{n \le 4p}{n <= 4*p}, the current definition of adjusted outlyingness
+  is ill-posed, as one of the projections may lead to a denominator
+  (quartile difference) of zero, and hence formally an adjusted
+  outlyingness of infinity.
+  The current implementation avoids \code{Inf} results, but will return
+  seemingly random \code{adjout} values of around \eqn{10^{14} -- 10^{15}} which may
+  be completely misleading, see, e.g., the \code{longley} data example.
+
   The result is \emph{random} as it depends on the sample of
   \code{ndir} directions chosen; specifically, to get sub samples the algorithm uses
   \code{\link{sample.int}(n, p.samp)}
