@@ -2,8 +2,8 @@
 ### LU decomposition and singular subsamples handling
 require(robustbase)
 source(system.file("xtraR/subsample-fns.R", package = "robustbase", mustWork=TRUE))
-source(system.file("test-tools-1.R", package="Matrix", mustWork=TRUE))
-require(Matrix)
+## instead of relying on  system.file("test-tools-1.R", package="Matrix"):
+source(system.file("xtraR/test-tools.R", package = "robustbase")) # assert.EQ(), showProc.time() ..
 
 cat("doExtras:", doExtras <- robustbase:::doExtras(),"\n")
 showProc.time()

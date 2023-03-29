@@ -314,8 +314,13 @@ case.names.lmrob <- function(object, full = FALSE, ...)
 
 ## use confint.lm instead of confint.default
 ## mainly to get t instead of normal quantiles
-## Either imported from 'stats' or then copy-paste-defined in ./zzz.R :
-confint.lmrob <- confint.lm
+## Now imported from 'stats'  -- and S3 registered in ../NAMESPACE , too,  but
+## these are *still* needed (argh! bug??); otherwise we get
+if(FALSE) "
+Warning message:
+S3 methods 'confint.lm', 'dummy.coef.lm' were declared in NAMESPACE but not found
+"
+   confint.lmrob <-    confint.lm
 dummy.coef.lmrob <- dummy.coef.lm
 
 

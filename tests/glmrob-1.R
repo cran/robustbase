@@ -1,8 +1,7 @@
 library(robustbase)
 
-source(system.file("xtraR/ex-funs.R", package = "robustbase"))
-source(system.file("test-tools-1.R",  package = "Matrix", mustWork=TRUE))# assert.EQ
-
+## instead of relying on  system.file("test-tools-1.R", package="Matrix"):
+source(system.file("xtraR/test-tools.R", package = "robustbase"))
 
 ###>> 1 ------------------- family = poisson ------------------------------------
 

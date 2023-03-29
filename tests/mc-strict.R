@@ -7,12 +7,15 @@
 library(robustbase)
 for(f in system.file("xtraR", c("mcnaive.R", # -> mcNaive()
                                 "styleData.R",  # -> smallD  list of small datasets
-			      "platform-sessionInfo.R"),
+			      "platform-sessionInfo.R"), # -> moreSessionInfo()
                      package = "robustbase", mustWork=TRUE)) {
     cat("source(",f,"):\n", sep="")
     source(f)
 }
-source(system.file("test-tools-1.R",  package="Matrix", mustWork=TRUE))
+
+## instead of relying on  system.file("test-tools-1.R", package="Matrix"):
+source(system.file("xtraR/test-tools.R", package = "robustbase")) # assert.EQ() etc
+
 assertEQm12 <- function(x,y, giveRE=TRUE, ...)
     assert.EQ(x,y, tol = 1e-12, giveRE=giveRE, ...)
 ## ^^ shows *any* difference ("tol = 0") unless there is no difference at all
@@ -31,7 +34,7 @@ mS <- moreSessionInfo(print.=TRUE)
 
 if(!dev.interactive(orNone=TRUE)) pdf("mc-strict.pdf")
 
-assertCondition(mc(1:11), "message") # change of default to  doScale=FALSE
+tools::assertCondition(mc(1:11), "message") # change of default to  doScale=FALSE
 
 smlMC  <- vapply(smallD, mc, pi)
 smlMCo <- vapply(smallD, mc, pi, doScale=TRUE, c.huberize=Inf)

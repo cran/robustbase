@@ -3,8 +3,6 @@
 ## -- what would have to be done if class "lm" was added.
 ## -- general compatibility to class lm.
 require(robustbase)
-source(system.file("test-tools-1.R", package="Matrix", mustWork=TRUE))
-##-> assertError(), etc
 options(digits = 5)# -> higher chance of platform independence
 
 ## generate simple example data (almost as in ./weights.R )
@@ -70,8 +68,8 @@ ci1
 ####
 ## methods that should just drop the NA coefficients
 ## m3 is actually the same as rm1, so anova should raise an error
-assertError(anova(rm1, m3, test="Wald"))
-assertError(anova(rm1, m3, test="Deviance"))
+tools::assertError(anova(rm1, m3, test="Wald"))
+tools::assertError(anova(rm1, m3, test="Deviance"))
 ## but comparing rm1 and rm0 should be ok
 anova(rm1, rm0, test="Wald")
 anova(rm1, rm0, test="Deviance")

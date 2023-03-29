@@ -1,7 +1,5 @@
 
 library(robustbase)
-source(system.file("test-tools-1.R", package="Matrix", mustWork=TRUE))
-##-> assertError(), etc
 
 set.seed(1) # since now .Random.seed is used by default!
 
@@ -200,8 +198,8 @@ coleman16 <- coleman[ -c(2, 7, 16, 19),]
 (m16 <- lmrob(Y ~ ., data = coleman16, tuning.psi = 3.44, trace.lev = TRUE))
 ## failed in 0.9_0
 
-assertWarning(verbose = TRUE,
- lmrob(Y ~ ., data = coleman, setting = "KS2011", control = lmrob.control())
+tools::assertWarning(verbose = TRUE,
+  lmrob(Y ~ ., data = coleman, setting = "KS2011", control = lmrob.control())
 )
 
 cat('Time elapsed: ', proc.time(),'\n') # "stats"

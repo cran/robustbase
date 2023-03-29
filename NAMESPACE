@@ -9,8 +9,9 @@ importFrom("graphics",
            abline, axis,
            box, legend, lines, matplot, mtext,
            panel.smooth, par, plot, points, strheight, text, title)
-importFrom("stats",
+importFrom("stats", .lm.fit,
            aggregate, alias, as.formula, binomial,
+           confint.lm, dummy.coef.lm, # want to register these as S3 {confint}{lmrob} and {dummy.coef}{..}
            coef, cor, cov, cov.wt, cov2cor, delete.response, deviance, dnorm, dpois,
            family, fitted, fivenum, formula,
            gaussian, glm, glm.fit, hatvalues,
@@ -32,8 +33,6 @@ importFrom("stats",
 
 
 ## ^^^^ MASS has a bit more; take it as example
-if(getRversion() >= "3.1.0")
-importFrom("stats", .lm.fit, confint.lm, dummy.coef.lm)
 if(getRversion() >= "3.3.0") {
     importFrom("stats", sigma)
 } else {
@@ -93,6 +92,7 @@ export(Sn, Qn, Qn.old,
        outlierStats,
 
        mc, # Mia Hubers's medcouple
+       lmc, rmc, # left and right mc, robust measures of tail weight
        adjbox,
        adjboxStats,
        adjOutlyingness,
@@ -125,6 +125,10 @@ S3method(anova, glmrob)
 
 S3method(alias, lmrob)
 S3method(case.names, lmrob)
+## S3method(confint,    lmrob, confint.lm)	# fails with  *warning*
+## S3method(dummy.coef, lmrob, dummy.coef.lm)	# S3 methods ‘confint.lm’, ‘dummy.coef.lm’
+						# were declared in NAMESPACE but not found
+## Instead "make copies" <generic>.lmrob in  R/lmrob.R  and register now:
 S3method(confint, lmrob)
 S3method(confint, nlrob)
 S3method(dummy.coef, lmrob)

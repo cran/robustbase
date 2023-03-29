@@ -1,6 +1,6 @@
 
-R Under development (unstable) (2021-05-25 r80378) -- "Unsuffered Consequences"
-Copyright (C) 2021 The R Foundation for Statistical Computing
+R version 4.2.0 Patched (2022-05-09 r82329) -- "Vigorous Calisthenics"
+Copyright (C) 2022 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -21,9 +21,6 @@ Type 'q()' to quit R.
 > ## -- general compatibility to class lm.
 > require(robustbase)
 Loading required package: robustbase
-> source(system.file("test-tools-1.R", package="Matrix", mustWork=TRUE))
-Loading required package: tools
-> ##-> assertError(), etc
 > options(digits = 5)# -> higher chance of platform independence
 > 
 > ## generate simple example data (almost as in ./weights.R )
@@ -144,8 +141,8 @@ x1c:x2C           NA      NA
 > ####
 > ## methods that should just drop the NA coefficients
 > ## m3 is actually the same as rm1, so anova should raise an error
-> assertError(anova(rm1, m3, test="Wald"))
-> assertError(anova(rm1, m3, test="Deviance"))
+> tools::assertError(anova(rm1, m3, test="Wald"))
+> tools::assertError(anova(rm1, m3, test="Deviance"))
 > ## but comparing rm1 and rm0 should be ok
 > anova(rm1, rm0, test="Wald")
 Robust Wald Test Table
@@ -484,4 +481,4 @@ seed : int(0)
 > 
 > proc.time()
    user  system elapsed 
-  0.857   0.073   1.008 
+  0.252   0.056   0.362 

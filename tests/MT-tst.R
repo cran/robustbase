@@ -3,10 +3,8 @@ require("robustbase")
 ##---> ./poisson-ex.R
 ##     ~~~~~~~~~~~~~~  for more glmrobMT() tests
 
-source(system.file("test-tools-1.R", package="Matrix", mustWork=TRUE))
-## -> assertError(), showSys.time(), ...
-source(system.file("xtraR/ex-funs.R", package = "robustbase"))
-## -> newer assert.EQ()  {TODO: no longer needed in 2015}
+source(system.file("xtraR/ex-funs.R",    package = "robustbase"))
+source(system.file("xtraR/test-tools.R", package = "robustbase"))## -> showSys.time(), assert.EQ()
 
 if(!require("sfsmisc")) {
     eaxis <- axis  # so we can use  eaxis() below

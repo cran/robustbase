@@ -1,13 +1,12 @@
-## These two are not exported (nor documented, nor used internally !) :
 
 ## Left Medcouple
-lmc <- function(x, na.rm = FALSE, doReflect = FALSE, ...) {
-    -mc(x[x <= median(x, na.rm=na.rm)], na.rm=na.rm, doReflect=doReflect, ...)
+lmc <- function(x, mx = median(x, na.rm=na.rm), na.rm = FALSE, doReflect = FALSE, ...) {
+    -mc(x[x <= mx], na.rm=na.rm, doReflect=doReflect, ...)
 }
 
 ## Right Medcouple
-rmc <- function(x, na.rm = FALSE, doReflect = FALSE, ...) {
-    mc(x[x >= median(x, na.rm=na.rm)], na.rm=na.rm, doReflect=doReflect, ...)
+rmc <- function(x, mx = median(x, na.rm=na.rm), na.rm = FALSE, doReflect = FALSE, ...) {
+    mc(x[x >= mx], na.rm=na.rm, doReflect=doReflect, ...)
 }
 
 .optEnv$mc_doScale_msg <- TRUE # initially

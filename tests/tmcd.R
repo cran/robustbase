@@ -2,8 +2,8 @@ library(robustbase)
 
 source(system.file("xtraR/test_MCD.R", package = "robustbase"))#-> doMCDdata
 ##          ../inst/xtraR/test_MCD.R
-source(system.file("test-tools-1.R", package="Matrix", mustWork=TRUE))
-## -> assertError(), relErr(), and:
+## instead of relying on  system.file("test-tools-1.R", package="Matrix"):
+source(system.file("xtraR/test-tools.R", package = "robustbase")) # showProc.time(), relErr()
 showProc.time()
 
 ## -- now do it:

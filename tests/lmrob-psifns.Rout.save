@@ -1,6 +1,6 @@
 
-R Under development (unstable) (2018-06-19 r74919) -- "Unsuffered Consequences"
-Copyright (C) 2018 The R Foundation for Statistical Computing
+R version 4.2.0 Patched (2022-05-06 r82323) -- "Vigorous Calisthenics"
+Copyright (C) 2022 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -19,8 +19,7 @@ Type 'q()' to quit R.
 > 
 > library(robustbase)
 > source(system.file("xtraR/plot-psiFun.R", package = "robustbase", mustWork=TRUE))
-> source(system.file("test-tools-1.R",      package = "Matrix",     mustWork=TRUE))# assert.EQ
-Loading required package: tools
+> source(system.file("xtraR/test-tools.R",  package = "robustbase")) # assert.EQ
 > 
 > ### (1) Test the functions themselves --------------------------------
 > if(!dev.interactive(orNone=TRUE)) pdf("rob-psifns.pdf")
@@ -757,7 +756,7 @@ seed : int(0)
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  1.616 0.136 1.756 0.001 0.001 
+Time elapsed:  1.094 0.081 1.176 0.003 0.005 
 > 
 > proc.time()
    user  system elapsed 

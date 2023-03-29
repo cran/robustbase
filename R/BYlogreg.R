@@ -136,7 +136,7 @@ BYlogreg <- function(x0, y, initwml=TRUE, # w.x=NULL,
             newobj <- mean(phiBY3(scores, y,const))
             oldobj <- newobj
             grad.BY <- colMeans((derphiBY3(scores,y,const) %*% matrix(1,ncol=p))*x)
-            h <- -grad.BY + (grad.BY %*% xistart) *xistart
+            h <- -grad.BY + c(grad.BY %*% xistart) * xistart
             finalstep <- h/sqrt(sum(h^2))
 
             if(trace.lev) {

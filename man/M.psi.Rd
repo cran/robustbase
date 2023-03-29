@@ -10,6 +10,7 @@
 \alias{.Mwgt.psi1}
 \alias{.MrhoInf}
 \alias{.psi2ipsi}
+\alias{.regularize.Mpsi}
 \description{
   Compute Psi / Chi / Wgt / Rho functions for M-estimation,
   i.e., including MM, etc.  For definitions and details, please use the
@@ -33,6 +34,7 @@ Mwgt(x, cc, psi)
 MrhoInf(cc, psi)
 
 .Mwgt.psi1(psi, cc = .Mpsi.tuning.default(psi))
+.regularize.Mpsi(psi, redescending = TRUE)
 }
 \arguments{
   \item{x}{numeric (\dQuote{abscissa} values) vector, possibly with
@@ -53,6 +55,8 @@ MrhoInf(cc, psi)
     currently \code{"huber"}, \code{"bisquare"}, \code{"hampel"}, and \code{"lqq"},
     \code{deriv = 2} is implemented, for the other psi's only
     \eqn{d \in \{-1,0,1\}}{d in {-1,0,1\}}.}}
+  \item{redescending}{logical indicating in \code{.regularize.Mpsi(psi,.)}
+    if the \code{psi} function is redescending.}
 }
 \details{
   Theoretically, \code{Mchi()} would not be needed explicitly as it can be computed
@@ -87,6 +91,8 @@ MrhoInf(cc, psi)
   form and must be computed via numerical integration, apart from 6
   special cases including the defaults, see the \sQuote{Details} in
   \code{help(\link{.psi.ggw.findc})}.
+
+  \code{.Mpsi.regularize()} may (rarely) be used to regularize a psi function.
 }
 \value{
   a numeric vector of the same length as \code{x}, with corresponding

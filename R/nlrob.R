@@ -158,9 +158,9 @@ nlrob <-
     fit <- eval(formula[[3]], c(data, start), env)
     y <- eval(formula[[2]], data, env)
     coef <- unlist(start)
-    resid <- y - fit
-    ## if (any(is.na(data)) & options("na.action")$na.action == "na.omit")
-    ##	 stop("if NAs are present, use 'na.exclude' to preserve the residuals length")
+    if(anyNA(data) && (identical(na.action, na.omit) || na.action == "na.omit"))
+	 warning("NA's present in data; consider using 'na.action = na.exclude'")
+    resid <- naresid(na.action, y - fit)
 
     irls.delta <- function(old, new) sqrt(sum((old - new)^2, na.rm = TRUE)/
 					  max(1e-20, sum(old^2, na.rm = TRUE)))
@@ -187,15 +187,16 @@ nlrob <-
 		w <- w * weights
 	    data$._nlrob.w <- w ## use a variable name the user "will not" use
 	    ._nlrob.w <- NULL # workaround for codetools "bug"
-            ## Case distinction against "wrong warning" as long as
-            ## we don't require R > 3.0.2:
+###            ## Case distinction against "wrong warning" as long as
+###            ## we don't require R > 3.0.2:
             out <-
-                if(identical(lower, -Inf) && identical(upper, Inf))
-                    nls(formula, data = data, start = start,
-                        algorithm = algorithm, trace = trace,
-                        weights = ._nlrob.w,
-                        na.action = na.action, control = control)
-                else
+
+###              if(identical(lower, -Inf) && identical(upper, Inf))
+###                 nls(formula, data = data, start = start,
+###                     algorithm = algorithm, trace = trace,
+###                     weights = ._nlrob.w,
+###                     na.action = na.action, control = control)
+###              else
                     nls(formula, data = data, start = start,
                         algorithm = algorithm, trace = trace,
                         lower=lower, upper=upper,
@@ -204,7 +205,9 @@ nlrob <-
 
             coef <- unlist(start <- .nls.get.start(out$m))
 	    ## same sequence as in start! Ok for test.vec:
-            resid <- residuals(out)
+            resid <- if (!is.null(na.action))
+                         naresid(na.action, residuals(out))
+                     else residuals(out)
 	    convi <- irls.delta(previous, get(test.vec))
 	}
 	converged <- convi <= tol

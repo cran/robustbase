@@ -1,5 +1,6 @@
 require(robustbase)
-source(system.file("test-tools-1.R", package="Matrix", mustWork=TRUE))
+## instead of relying on  system.file("test-tools-1.R", package="Matrix"):
+source(system.file("xtraR/test-tools.R", package = "robustbase"))
 showProc.time()
 
 data(hbk); hbk.x <- data.matrix(hbk[, 1:3])

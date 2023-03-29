@@ -28,15 +28,24 @@ ctrl <- lmrob.control(psi="optimal", tuning.chi = 20, bb = 0.0003846154,
                       tuning.psi=20, method="SM", cov=".vcov.w")
 ## SM = MM == the case where  .vcov.avar1  was also defined for
 
-## Classical models start with 'cm', robust just with  'rm' (or just 'm'):
+## Classical models start with 'cm', robust just with  'rm' (or just 'm'),
+## "." - models drop 'x5' (which is aliased / extraneous by construction) :
 (cm0 <- lm   (y ~ x1*x2 + x3 + x4 + x5 + offset(os), data))
+(cm0.<- lm   (y ~ x1*x2 + x3 + x4      + offset(os), data))
 (cm1 <- lm   (y ~ x1*x2 + x3 + x4 + x5 + offset(os), data,  weights=weights))
+(cm1.<- lm   (y ~ x1*x2 + x3 + x4      + offset(os), data,  weights=weights))
 (cm2 <- lm   (y ~ x1*x2 + x3 + x4 + x5,              data2, offset=os))
+(cm2.<- lm   (y ~ x1*x2 + x3 + x4,                   data2, offset=os))
 (rm0 <- lmrob(y ~ x1*x2 + x3 + x4 + x5 + offset(os), data,                   control=ctrl))
+(rm0.<- lmrob(y ~ x1*x2 + x3 + x4      + offset(os), data,                   control=ctrl))
 set.seed(2)
 (rm1 <- lmrob(y ~ x1*x2 + x3 + x4 + x5 + offset(os), data,  weights=weights, control=ctrl))
 set.seed(2)
+(rm1.<- lmrob(y ~ x1*x2 + x3 + x4      + offset(os), data,  weights=weights, control=ctrl))
+set.seed(2)
 (rm2 <- lmrob(y ~ x1*x2 + x3 + x4 + x5,              data2, offset=os,       control=ctrl))
+set.seed(2)
+(rm2.<- lmrob(y ~ x1*x2 + x3 + x4,                   data2, offset=os,       control=ctrl))
 
 sc0 <- summary(cm0)
 sc1 <- summary(cm1)
@@ -46,11 +55,18 @@ sc2 <- summary(cm2)
 (sr2 <- summary(rm2))
 
 ## test Estimates, Std. Errors, ...
-stopifnot(all.equal(coef(cm1), coef(cm2)),
-          all.equal(coef(rm1), coef(rm2)),
-          all.equal(coef(sc0), coef(sr0)),
-          all.equal(coef(sc1), coef(sr1)),
-          all.equal(coef(sc2), coef(sr2)))
+nc <- names(coef(cm1))
+nc. <- setdiff(nc, "x5") # those who are "valid"
+stopifnot(exprs = {
+    all.equal(coef(cm0.),coef(cm0)[nc.])
+    all.equal(coef(cm1.),coef(cm1)[nc.])
+    all.equal(coef(cm2.),coef(cm2)[nc.])
+    all.equal(coef(cm1), coef(cm2))
+    all.equal(coef(rm1), coef(rm2))
+    all.equal(coef(sc0), coef(sr0))
+    all.equal(coef(sc1), coef(sr1))
+    all.equal(coef(sc2), coef(sr2))
+})
 
 ## test class "lm" methods that do not depend on weights
 meths1 <- c("family",
@@ -120,22 +136,24 @@ nd <- expand.grid(x1=letters[1:3], x2=LETTERS[1:4])
 set.seed(3)
 nd$x3 <- rnorm(nrow(nd))
 nd$x4 <- rnorm(nrow(nd))
-nd$x5 <- rnorm(nrow(nd))
+nd$x5 <- rnorm(nrow(nd)) # (*not* the sum x3+x4 !)
 nd$os <- nrow(nd):1
 wts   <- runif(nrow(nd))
-stopifnot(all.equal(predict(cm0, nd, interval="prediction"),
-                    predict(rm0, nd, interval="prediction")),
-          all.equal(predict(cm1, nd, interval="prediction"),
-                    predict(rm1, nd, interval="prediction")),
-          all.equal(predict(cm2, nd, interval="prediction"),
-                    predict(rm2, nd, interval="prediction")),
-          all.equal(predict(cm0, nd, interval="prediction", weights=wts),
-                    predict(rm0, nd, interval="prediction", weights=wts)),
-          all.equal(predict(cm1, nd, interval="prediction", weights=wts),
-                    predict(rm1, nd, interval="prediction", weights=wts)),
-          all.equal(predict(cm2, nd, interval="prediction", weights=wts),
-                    predict(rm2, nd, interval="prediction", weights=wts),
-                    tolerance=1e-7))
+stopifnot(exprs = {
+    all.equal(predict(cm0, nd, interval="prediction"),
+              predict(rm0, nd, interval="prediction"))
+    all.equal(predict(cm1, nd, interval="prediction"),
+              predict(rm1, nd, interval="prediction"))
+    all.equal(predict(cm2, nd, interval="prediction"),
+              predict(rm2, nd, interval="prediction"))
+    all.equal(predict(cm0, nd, interval="prediction", weights=wts),
+              predict(rm0, nd, interval="prediction", weights=wts))
+    all.equal(predict(cm1, nd, interval="prediction", weights=wts),
+              predict(rm1, nd, interval="prediction", weights=wts))
+    all.equal(predict(cm2, nd, interval="prediction", weights=wts),
+              predict(rm2, nd, interval="prediction", weights=wts),
+              tolerance=1e-7)
+})
 
 ## Padding can lead to differing values here
 ## so test only full rank part

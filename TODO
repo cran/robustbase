@@ -24,6 +24,7 @@ R users already know optim() etc.. so the name seems more logical for them.
 ** DONE sc.2) Qn(), Sn()  should work with Inf and "large x", see example(mc)
 ** DONE sc.2) mc() now works better with "large x", see example(mc) --- BSc thesis by Lukas Graz
 ** DONE fixed: mc(x) can *fail* to converge: thesis Lukas Graz {and ~/R/MM/Pkg-ex/robust/Robnik-mc.R }
+** DONE Now that mc() works, also define lmc() and rmc() (left and right tail measures).
 ** TODO Try  scaleTau2(*, iterate=TRUE) or 'iter=TRUE' (which can have 'iter = 10' etc)
 ** TODO [Peter Filzmoser, Geneva 2016-07-07 talk]: covMcd() warns when n < 2*p .. should not *warn* but give message()
 ** TODO [Peter Filzmoser, Geneva 2016-07-07 talk]: solve.default(getCov(mcd)) error  with CovControlOgk() init

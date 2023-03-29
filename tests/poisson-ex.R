@@ -1,9 +1,8 @@
 
 library(robustbase)
 
-source(system.file("test-tools-1.R", package="Matrix", mustWork=TRUE))
-## -> assertError(), assert.EQ(), showSys.time(), ...
-
+## instead of relying on  system.file("test-tools-1.R", package="Matrix"):
+source(system.file("xtraR/test-tools.R", package = "robustbase")) # assert.EQ() etc
 
 #### Poisson examples from Eva Cantoni's paper
 

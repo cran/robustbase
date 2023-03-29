@@ -2,7 +2,7 @@ stopifnot(require("robustbase"))
 source(system.file("xtraR", "platform-sessionInfo.R", # moreSessionInfo() etc
                              package = "robustbase", mustWork=TRUE))
 ## testing functions:
-source(system.file("test-tools-1.R",  package = "Matrix", mustWork=TRUE))# -> assert.EQ(),
+source(system.file("xtraR/test-tools.R",  package = "robustbase"))
 ## showProc.time(), showSys.time() ...
 S.time <- showSys.time # "back compatible"
 

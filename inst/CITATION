@@ -10,7 +10,8 @@ authNms <- sapply(aut.gf, paste, collapse = " ")
 collNms <- function(nms)
     paste(paste(nms[-length(nms)], collapse = ", "), "and", nms[length(nms)])
 
-citEntry(entry = "Manual", title = fullTitle,
+bibentry(bibtype = "Manual",
+         title = fullTitle,
          author = authors, year = year, note = note,
          url = "http://robustbase.r-forge.r-project.org/",
          url = "http://CRAN.R-project.org/package=robustbase",
@@ -21,9 +22,9 @@ citEntry(entry = "Manual", title = fullTitle,
   header = paste("To cite package", sQuote(meta$Package), "in publications use:")
   )
 
-citEntry(entry = "Article",
+bibentry(bibtype = "Article",
   title        = "An Object-Oriented Framework for Robust Multivariate Analysis",
-  author       = personList(as.person("Valentin Todorov"),
+  author       = c(as.person("Valentin Todorov"),
                    as.person("Peter Filzmoser")),
   journal      = "Journal of Statistical Software",
   year         = "2009",

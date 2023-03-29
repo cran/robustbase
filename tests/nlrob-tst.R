@@ -1,7 +1,52 @@
+commandArgs()
 library(robustbase)
 
-source(system.file("test-tools-1.R",  package = "Matrix", mustWork=TRUE))
+## for now: ----------------------------------------
+if(file.exists(fil <- system.file("xtraR/test-tools.R",  package = "robustbase"))) {
+    source(fil)
+} else {
+  identical3 <- function(x,y,z)	  identical(x,y) && identical (y,z)
+  identical4 <- function(a,b,c,d)   identical(a,b) && identical3(b,c,d)
+  assert.EQ <- function(target, current, tol = if(showOnly) 0 else 1e-15,
+                      giveRE = FALSE, showOnly = FALSE, ...) {
+    ## Purpose: check equality *and* show non-equality
+    ## ----------------------------------------------------------------------
+    ## showOnly: if TRUE, return (and hence typically print) all.equal(...)
+    T <- isTRUE(ae <- all.equal(target, current, tolerance = tol, ...))
+    if(showOnly) return(ae) else if(giveRE && T) { ## don't show if stop() later:
+	ae0 <- if(tol == 0) ae else all.equal(target, current, tolerance = 0, ...)
+	if(!isTRUE(ae0)) writeLines(ae0)
+    }
+    if(!T) stop("all.equal() |-> ", paste(ae, collapse=sprintf("%-19s","\n")))
+    else if(giveRE) invisible(ae0)
+  }
+}
+if(FALSE) ## in future: ----------------------------------------
+source(system.file("xtraR/test-tools.R",  package = "robustbase"))
+##
 ## -> assert.EQ(), identical3(), ..
+
+
+## From  <Rsrc>/tests/reg-tests-1d.R  (2022-08-09):
+## A good guess if we have _not_ translated error/warning/.. messages:
+## (should something like this be part of package tools ?)
+englishMsgs <- {
+    ## 1. LANGUAGE takes precedence over locale settings:
+    if(nzchar(lang <- Sys.getenv("LANGUAGE")))
+        lang == "en"
+    else { ## 2. Query the  locale
+        if(!onWindows) {
+            ## sub() :
+            lc.msgs <- sub("\\..*", "", print(Sys.getlocale("LC_MESSAGES")))
+            lc.msgs == "C" || substr(lc.msgs, 1,2) == "en"
+        } else { ## Windows
+            lc.type <- sub("\\..*", "", sub("_.*", "", print(Sys.getlocale("LC_CTYPE"))))
+            lc.type == "English" || lc.type == "C"
+        }
+    }
+}
+cat(sprintf("English messages: %s\n", englishMsgs))
+
 
 DNase1 <- DNase[ DNase$Run == 1, ]
 Y <- DNase1[,"density"] # for convenience below
@@ -41,6 +86,137 @@ wr1. <- update(rm1, weights = ww,         trace=FALSE)
 ii <- names(rm1) != "call"
 stopifnot(all.equal(rm1[ii], rm.[ii], tol = 1e-15),
           all.equal(wr1[ii],wr1.[ii], tol = 1e-15))
+
+## When y has NA's: Add them to the end of DNase1
+n <- nrow(DNase1)
+DNAnase <- DNase1[c(1:n,1:3), ]
+DNAnase$density[n+(1:3)] <- NA
+
+naExp <- expression(na.fail = na.fail, # << the default in model.frame() which most use
+                    na.omit = na.omit,
+                    na.pass = na.pass,
+                    na.exclude= na.exclude)
+
+noAction <- function(fm) {
+    if(("call" %in% names(fm)) && !is.null(fm$call))
+        fm$call <- noAction(fm$call)
+    if(!is.na(H <- match("na.action", names(fm))))
+        fm[-H]
+    else
+        fm
+}
+
+rNls <- lapply(naExp, function(naAct)
+    tryCatch(error = identity,
+       nls(formula(fm1), data = DNAnase,
+           na.action = eval(naAct),
+           start = list(Asym = 3, xmid = 0, scal = 1))
+       )
+    )
+
+str(sapply(rNls, class))
+## $ na.fail   : chr [1:3] "simpleError" "error" "condition"
+## $ na.omit   : chr "nls"
+## $ na.pass   : chr [1:3] "simpleError" "error" "condition"
+## $ na.exclude: chr "nls"
+
+stopifnot(exprs = {
+    inherits(rNls$na.pass, "simpleError")
+    inherits(rNls$na.fail, "simpleError")
+})
+
+if(englishMsgs) stopifnot(exprs = {
+    conditionMessage(rNls$na.fail) == "missing values in object"
+    grepl("NA.*foreign function call", conditionMessage(rNls$na.pass))
+})
+
+sO <- summary(rNls$na.omit)
+sX <- summary(rNls$na.exclude)
+stopifnot(exprs = {
+    identical(noAction(sO),
+              noAction(sX))
+    all.equal(coef(sm1), coef(sX), tol = 0.10) # 0.0857
+})
+
+
+robNls <- lapply(c(noCov=FALSE,doCov=TRUE), function(doCov)
+    lapply(naExp, function(naAct)
+        tryCatch(error = identity,
+                 nlrob(formula(fm1), data = DNAnase,
+                       na.action = eval(naAct),
+                       doCov = doCov, ## <--
+                       start = list(Asym = 3, xmid = 0, scal = 1))
+                 )
+        )
+    )
+## gives
+## Warning messages:
+## In old - new :
+##   longer object length is not a multiple of shorter object length
+
+str(sapply(robNls[["noCov"]], class))
+## List of 4
+##  $ na.fail   : chr [1:3] "simpleError" "error" "condition"
+##  $ na.omit   : chr [1:3] "simpleError" "error" "condition"  <<< FIXME, should work as nls() does
+##  $ na.pass   : chr [1:3] "simpleError" "error" "condition"
+##  $ na.exclude: chr [1:2] "nlrob" "nls"
+stopifnot(identical(sapply(robNls[["noCov"]], class),
+                    sapply(robNls[["doCov"]], class)))
+
+## same checks as for nls():
+lapply(robNls, function(LL)
+    stopifnot(exprs = {
+        inherits(LL$na.pass, "simpleError")
+        inherits(LL$na.fail, "simpleError")
+    })) -> .tmp
+
+if(englishMsgs) lapply(robNls, function(LL)
+    stopifnot(exprs = {
+        conditionMessage(LL$na.fail) == "missing values in object"
+        ## different message than nls():
+        grepl("missing.*weights not allowed", conditionMessage(LL$na.pass))
+    })
+    ) -> .tmp
+
+## the only one which works currently:
+robNxcl <- robNls[["noCov"]]$na.exclude
+
+## Fix these : ===================
+.t <- try( s.no <- summary(robNxcl) )
+.t <- try( v.no <- vcov(robNxcl) )
+## both give *same* error:
+## Error in .vcov.m(object, Scale = sc, resid.sc = as.vector(object$residuals)/sc) :
+##   length(resid.sc) == nobs(object) is not TRUE
+
+
+
+## Fix these : ===================
+str( s.do <- summary(robNls[["doCov"]]$na.exclude) )
+
+try(## the "doCov" -- fails "only" when printing:
+    print(s.do) #-> error
+) -> .tmp
+## Call:
+## ....
+## Residuals:
+## Error in if (rdf > 5L) { : missing value where TRUE/FALSE needed
+
+vcov(robNls[["doCov"]]$na.exclude)
+##      Asym xmid scal
+## Asym   NA   NA   NA
+## xmid   NA   NA   NA
+## scal   NA   NA   NA
+
+
+
+try( ## debug this one
+rmNAo <- nlrob(formula(fm1), data = DNAnase,
+               na.action = na.omit,
+               trace = TRUE,
+               start = list(Asym = 3, xmid = 0, scal = 1)) ### fails
+## Error in (function (..., row.names = NULL, check.rows = FALSE, check.names = TRUE,  :
+##   arguments imply differing number of rows: 19, 16
+)
 
 
 ## From: "Pascal A. Niklaus" <pascal.niklaus@ieu.uzh.ch>

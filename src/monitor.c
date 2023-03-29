@@ -12,7 +12,7 @@
 #endif
 // but  'int *' gives warnings with  LTO ?
 
-void F77_SUB(println)() { Rprintf("\n"); }
+void F77_SUB(println)(void) { Rprintf("\n"); }
 void F77_SUB(prallc)(int *nrep) { Rprintf("will use *all* combinations: %d\n", *nrep); }
 
 void F77_SUB(pr1mcd)(int *i_trace, int *n, int *nvar, int *nhallf, int *krep,

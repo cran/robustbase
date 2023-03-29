@@ -1,6 +1,6 @@
 
-R version 3.5.1 Patched (2018-07-24 r75005) -- "Feather Spray"
-Copyright (C) 2018 The R Foundation for Statistical Computing
+R Under development (unstable) (2023-03-22 r84023) -- "Unsuffered Consequences"
+Copyright (C) 2023 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -46,7 +46,8 @@ Loading required package: robustbase
 +                       tuning.psi=20, method="SM", cov=".vcov.w")
 > ## SM = MM == the case where  .vcov.avar1  was also defined for
 > 
-> ## Classical models start with 'cm', robust just with  'rm' (or just 'm'):
+> ## Classical models start with 'cm', robust just with  'rm' (or just 'm'),
+> ## "." - models drop 'x5' (which is aliased / extraneous by construction) :
 > (cm0 <- lm   (y ~ x1*x2 + x3 + x4 + x5 + offset(os), data))
 
 Call:
@@ -59,6 +60,19 @@ Coefficients:
    -0.01655     -0.02388           NA      1.05416     -0.32889      0.69954  
     x1c:x2C      x1b:x2D      x1c:x2D  
    -0.73949      1.08478     -1.31578  
+
+> (cm0.<- lm   (y ~ x1*x2 + x3 + x4      + offset(os), data))
+
+Call:
+lm(formula = y ~ x1 * x2 + x3 + x4 + offset(os), data = data)
+
+Coefficients:
+(Intercept)          x1b          x1c          x2B          x2C          x2D  
+    0.01008     -1.14140      0.48156      0.01357      0.86985      0.15178  
+         x3           x4      x1b:x2B      x1c:x2B      x1b:x2C      x1c:x2C  
+   -0.01655     -0.02388      1.05416     -0.32889      0.69954     -0.73949  
+    x1b:x2D      x1c:x2D  
+    1.08478     -1.31578  
 
 > (cm1 <- lm   (y ~ x1*x2 + x3 + x4 + x5 + offset(os), data,  weights=weights))
 
@@ -74,6 +88,20 @@ Coefficients:
     x1c:x2C      x1b:x2D      x1c:x2D  
          NA     1.099090    -1.371953  
 
+> (cm1.<- lm   (y ~ x1*x2 + x3 + x4      + offset(os), data,  weights=weights))
+
+Call:
+lm(formula = y ~ x1 * x2 + x3 + x4 + offset(os), data = data, 
+    weights = weights)
+
+Coefficients:
+(Intercept)          x1b          x1c          x2B          x2C          x2D  
+  -0.002961    -1.132857     0.492904     0.017959     0.858031     0.208510  
+         x3           x4      x1b:x2B      x1c:x2B      x1b:x2C      x1c:x2C  
+  -0.021632    -0.079147     1.040529           NA     0.736944           NA  
+    x1b:x2D      x1c:x2D  
+   1.099090    -1.371953  
+
 > (cm2 <- lm   (y ~ x1*x2 + x3 + x4 + x5,              data2, offset=os))
 
 Call:
@@ -87,6 +115,19 @@ Coefficients:
     x1c:x2C      x1b:x2D      x1c:x2D  
          NA     1.099090    -1.371953  
 
+> (cm2.<- lm   (y ~ x1*x2 + x3 + x4,                   data2, offset=os))
+
+Call:
+lm(formula = y ~ x1 * x2 + x3 + x4, data = data2, offset = os)
+
+Coefficients:
+(Intercept)          x1b          x1c          x2B          x2C          x2D  
+  -0.002961    -1.132857     0.492904     0.017959     0.858031     0.208510  
+         x3           x4      x1b:x2B      x1c:x2B      x1b:x2C      x1c:x2C  
+  -0.021632    -0.079147     1.040529           NA     0.736944           NA  
+    x1b:x2D      x1c:x2D  
+   1.099090    -1.371953  
+
 > (rm0 <- lmrob(y ~ x1*x2 + x3 + x4 + x5 + offset(os), data,                   control=ctrl))
 
 Call:
@@ -99,6 +140,19 @@ Coefficients:
    -0.01655     -0.02388           NA      1.05416     -0.32889      0.69954  
     x1c:x2C      x1b:x2D      x1c:x2D  
    -0.73949      1.08478     -1.31578  
+
+> (rm0.<- lmrob(y ~ x1*x2 + x3 + x4      + offset(os), data,                   control=ctrl))
+
+Call:
+lmrob(formula = y ~ x1 * x2 + x3 + x4 + offset(os), data = data, control = ctrl)
+ \--> method = "MM"
+Coefficients:
+(Intercept)          x1b          x1c          x2B          x2C          x2D  
+    0.01008     -1.14140      0.48156      0.01357      0.86985      0.15178  
+         x3           x4      x1b:x2B      x1c:x2B      x1b:x2C      x1c:x2C  
+   -0.01655     -0.02388      1.05416     -0.32889      0.69954     -0.73949  
+    x1b:x2D      x1c:x2D  
+    1.08478     -1.31578  
 
 > set.seed(2)
 > (rm1 <- lmrob(y ~ x1*x2 + x3 + x4 + x5 + offset(os), data,  weights=weights, control=ctrl))
@@ -115,6 +169,20 @@ Coefficients:
          NA     1.099090    -1.371953  
 
 > set.seed(2)
+> (rm1.<- lmrob(y ~ x1*x2 + x3 + x4      + offset(os), data,  weights=weights, control=ctrl))
+
+Call:
+lmrob(formula = y ~ x1 * x2 + x3 + x4 + offset(os), data = data, weights = weights,     control = ctrl)
+ \--> method = "MM"
+Coefficients:
+(Intercept)          x1b          x1c          x2B          x2C          x2D  
+  -0.002961    -1.132857     0.492904     0.017959     0.858031     0.208510  
+         x3           x4      x1b:x2B      x1c:x2B      x1b:x2C      x1c:x2C  
+  -0.021632    -0.079147     1.040529           NA     0.736944           NA  
+    x1b:x2D      x1c:x2D  
+   1.099090    -1.371953  
+
+> set.seed(2)
 > (rm2 <- lmrob(y ~ x1*x2 + x3 + x4 + x5,              data2, offset=os,       control=ctrl))
 
 Call:
@@ -127,6 +195,20 @@ Coefficients:
   -0.021632    -0.079147           NA     1.040529           NA     0.736944  
     x1c:x2C      x1b:x2D      x1c:x2D  
          NA     1.099090    -1.371953  
+
+> set.seed(2)
+> (rm2.<- lmrob(y ~ x1*x2 + x3 + x4,                   data2, offset=os,       control=ctrl))
+
+Call:
+lmrob(formula = y ~ x1 * x2 + x3 + x4, data = data2, offset = os, control = ctrl)
+ \--> method = "MM"
+Coefficients:
+(Intercept)          x1b          x1c          x2B          x2C          x2D  
+  -0.002961    -1.132857     0.492904     0.017959     0.858031     0.208510  
+         x3           x4      x1b:x2B      x1c:x2B      x1b:x2C      x1c:x2C  
+  -0.021632    -0.079147     1.040529           NA     0.736944           NA  
+    x1b:x2D      x1c:x2D  
+   1.099090    -1.371953  
 
 > 
 > sc0 <- summary(cm0)
@@ -292,11 +374,18 @@ compute.outlier.stats
 seed : int(0) 
 > 
 > ## test Estimates, Std. Errors, ...
-> stopifnot(all.equal(coef(cm1), coef(cm2)),
-+           all.equal(coef(rm1), coef(rm2)),
-+           all.equal(coef(sc0), coef(sr0)),
-+           all.equal(coef(sc1), coef(sr1)),
-+           all.equal(coef(sc2), coef(sr2)))
+> nc <- names(coef(cm1))
+> nc. <- setdiff(nc, "x5") # those who are "valid"
+> stopifnot(exprs = {
++     all.equal(coef(cm0.),coef(cm0)[nc.])
++     all.equal(coef(cm1.),coef(cm1)[nc.])
++     all.equal(coef(cm2.),coef(cm2)[nc.])
++     all.equal(coef(cm1), coef(cm2))
++     all.equal(coef(rm1), coef(rm2))
++     all.equal(coef(sc0), coef(sr0))
++     all.equal(coef(sc1), coef(sr1))
++     all.equal(coef(sc2), coef(sr2))
++ })
 > 
 > ## test class "lm" methods that do not depend on weights
 > meths1 <- c("family",
@@ -395,22 +484,24 @@ Largest model fitted by lmrob(), i.e. SM
 > set.seed(3)
 > nd$x3 <- rnorm(nrow(nd))
 > nd$x4 <- rnorm(nrow(nd))
-> nd$x5 <- rnorm(nrow(nd))
+> nd$x5 <- rnorm(nrow(nd)) # (*not* the sum x3+x4 !)
 > nd$os <- nrow(nd):1
 > wts   <- runif(nrow(nd))
-> stopifnot(all.equal(predict(cm0, nd, interval="prediction"),
-+                     predict(rm0, nd, interval="prediction")),
-+           all.equal(predict(cm1, nd, interval="prediction"),
-+                     predict(rm1, nd, interval="prediction")),
-+           all.equal(predict(cm2, nd, interval="prediction"),
-+                     predict(rm2, nd, interval="prediction")),
-+           all.equal(predict(cm0, nd, interval="prediction", weights=wts),
-+                     predict(rm0, nd, interval="prediction", weights=wts)),
-+           all.equal(predict(cm1, nd, interval="prediction", weights=wts),
-+                     predict(rm1, nd, interval="prediction", weights=wts)),
-+           all.equal(predict(cm2, nd, interval="prediction", weights=wts),
-+                     predict(rm2, nd, interval="prediction", weights=wts),
-+                     tolerance=1e-7))
+> stopifnot(exprs = {
++     all.equal(predict(cm0, nd, interval="prediction"),
++               predict(rm0, nd, interval="prediction"))
++     all.equal(predict(cm1, nd, interval="prediction"),
++               predict(rm1, nd, interval="prediction"))
++     all.equal(predict(cm2, nd, interval="prediction"),
++               predict(rm2, nd, interval="prediction"))
++     all.equal(predict(cm0, nd, interval="prediction", weights=wts),
++               predict(rm0, nd, interval="prediction", weights=wts))
++     all.equal(predict(cm1, nd, interval="prediction", weights=wts),
++               predict(rm1, nd, interval="prediction", weights=wts))
++     all.equal(predict(cm2, nd, interval="prediction", weights=wts),
++               predict(rm2, nd, interval="prediction", weights=wts),
++               tolerance=1e-7)
++ })
 There were 14 warnings (use warnings() to see them)
 > 
 > ## Padding can lead to differing values here
@@ -521,4 +612,4 @@ Coefficients:
 > 
 > proc.time()
    user  system elapsed 
-  0.329   0.049   0.371 
+  0.329   0.106   0.442 

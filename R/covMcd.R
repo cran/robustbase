@@ -270,7 +270,12 @@ covMcd <- function(x,
         ## the MCD location and scatter matrix, the latter being singular
         ## (as it should be), as well as the equation of the hyperplane.
 
-        dim(mcd$coeff) <- c(5, p)
+        ## VT::31.08.2022 - raw.only was not implemeted for the case nsamp="deterministic"
+        ##   (if the FORTRAN code is not called mcd$coeff and mcd$weights do not exist).
+        ##  Reported by Aurore Archimbaud <archimbaud@ese.eur.nl>
+        if(!is.null(mcd$coeff))
+            dim(mcd$coeff) <- c(5, p)
+
         ans$cov <- ans$raw.cov <- mcd$initcovariance
         ans$center <- ans$raw.center <- as.vector(mcd$initmean)
 
@@ -280,9 +285,7 @@ covMcd <- function(x,
         }
         ans$n.obs <- n
 
-	if(raw.only) {
-	    ans$raw.only <- TRUE
-	} else {
+	if(mcd$exactfit != 0) {
 	    ## no longer relevant:
 	    ##      if(mcd$exactfit == -1)
 	    ##      stop("The program allows for at most ", mcd$kount, " observations.")
@@ -297,6 +300,20 @@ covMcd <- function(x,
 	    ans$singularity <-
 		list(kind = "on.hyperplane", exactCode = mcd$exactfit,
 		     p = p, h = h, count = mcd$kount, coeff = mcd$coeff[1,])
+
+        ans$crit <- -Inf # = log(0)
+        weights <- mcd$weights
+
+	} else {
+        ## VT::31.08.2022 - raw.only was not implemeted for the case nsamp="deterministic"
+	    ans$raw.only <- TRUE
+        ans$crit <- mcd$mcdestimate
+        weights <- mcd$weights
+        if(is.null(mcd$weights)) {
+        ## FIXME? here, we assume that mcd$initcovariance is not singular:
+        mah <- mahalanobis(x, mcd$initmean, mcd$initcovariance, tol = tolSolve)
+        weights <- wgtFUN(mah)
+        }
 	}
         ans$alpha <- alpha
         ans$quan <- h
@@ -304,8 +321,6 @@ covMcd <- function(x,
             names(ans$raw.center) <- nms
             dimnames(ans$raw.cov) <- list(nms,nms)
         }
-        ans$crit <- -Inf # = log(0)
-        weights <- mcd$weights
 
       } ## end (raw.only || exact fit)
 

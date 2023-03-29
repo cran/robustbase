@@ -4,9 +4,39 @@
 \title{News for \R Package \pkg{robustbase}}
 \encoding{UTF-8}
 
+\section{CHANGES in robustbase VERSION 0.95-1 (2023-03-28, svn r903)}{
+  % --- 1.0-0  once we fix  adjOutlyingness() properly !
+  %     =====
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item Fixed \code{covMcd()}: \code{raw.only=TRUE} does not work in the case \code{nsamp="deterministic"}
+    }
+  }
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item New \code{lmc()} and \code{rmc()} for robust tail weight
+      (\dQuote{robust kurtosis}). % ../man/lmc-rmc.Rd
+    }
+  }
+  \subsection{Misc}{
+    \itemize{
+      \item Our \file{tests/*.R} no longer rely on the \CRANpkg{Matrix}
+      \file{test-tools.R} collection but rather use our much smaller own
+      one in \file{xtraR/test-tools.R}.
+
+      \item fixed \code{\\} escape in \file{man/aircraft.Rd}.
+
+      \item initialize \var{equed} in \file{src/lmrob.c} to avoid
+      false positive compiler warning.
+
+      \item document "internal" \code{.regularize.Mpsi()}.
+
+      \item replace \code{()} by \code{(void)} arguments for \code{F77_SUB(println)}.
+    }
+  }
+}
+
 \section{CHANGES in robustbase VERSION 0.95-0 (2022-04-02, svn r894)}{
-  % --- 1.0-0  if we fix  adjOutlyingness() properly !
-  %     =====  *and* fix  mc()  nicely according to Lukas Graz' BSc thesis !!
   \subsection{BUG FIXES}{
     \itemize{
       \item \code{huberM(x, k)} now also works in small sample cases with

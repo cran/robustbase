@@ -1,7 +1,7 @@
 ### lmrob()  with "real data" -----------------------
 
 ## testing functions:
-source(system.file("test-tools-1.R",  package = "Matrix", mustWork=TRUE))# -> assert.EQ(), ..
+source(system.file("xtraR/test-tools.R", package = "robustbase"))
 (doExtras <- robustbase:::doExtras())
 showProc.time()
 
