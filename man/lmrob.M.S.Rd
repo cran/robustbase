@@ -13,7 +13,7 @@ lmrob.M.S(x, y, control, mf,
   \item{x}{numeric matrix (a \code{\link{model.matrix}}) of the
     predictors.}
   \item{y}{numeric vector for the response }
-  \item{control}{ list as returned by \code{\link{lmrob.control}}.}
+  \item{control}{\code{\link{list}} as returned by \code{\link{lmrob.control}}.}
   \item{mf}{a model frame as returned by \code{\link{model.frame}}.}
   \item{split}{(optional) list as returned by \code{\link{splitFrame}}.}
 }
@@ -54,6 +54,8 @@ lmrob.M.S(x, y, control, mf,
   \item{control}{the same list as the \code{control} argument.}
   \item{converged}{Convergence status (always \code{TRUE}), needed for
     \code{\link{lmrob.fit}}.}
+  \item{descent.cov}{\code{\link{logical}} with the true \code{m_s_descent}
+    convergence status.}
 }
 \references{
   Maronna, R. A., and Yohai, V. J. (2000).

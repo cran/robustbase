@@ -1,6 +1,6 @@
 
-R version 3.5.1 (2018-07-02) -- "Feather Spray"
-Copyright (C) 2018 The R Foundation for Statistical Computing
+R version 4.3.0 Patched (2023-06-03 r84496) -- "Already Tomorrow"
+Copyright (C) 2023 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -57,10 +57,10 @@ Robustness weights:
 Algorithmic parameters: 
        tuning.chi                bb        tuning.psi        refine.tol 
         1.548e+00         5.000e-01         4.685e+00         1.000e-07 
-          rel.tol         scale.tol         solve.tol       eps.outlier 
-        1.000e-07         1.000e-10         1.000e-07         5.000e-03 
-            eps.x warn.limit.reject warn.limit.meanrw 
-        1.819e-12         5.000e-01         5.000e-01 
+          rel.tol         scale.tol         solve.tol          zero.tol 
+        1.000e-07         1.000e-10         1.000e-07         1.000e-10 
+      eps.outlier             eps.x warn.limit.reject warn.limit.meanrw 
+        5.000e-03         1.819e-12         5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
@@ -103,10 +103,10 @@ Robustness weights:
 Algorithmic parameters: 
        tuning.chi                bb        tuning.psi        refine.tol 
         1.548e+00         5.000e-01         4.685e+00         1.000e-07 
-          rel.tol         scale.tol         solve.tol       eps.outlier 
-        1.000e-07         1.000e-10         1.000e-07         5.000e-03 
-            eps.x warn.limit.reject warn.limit.meanrw 
-        1.569e-10         5.000e-01         5.000e-01 
+          rel.tol         scale.tol         solve.tol          zero.tol 
+        1.000e-07         1.000e-10         1.000e-07         1.000e-10 
+      eps.outlier             eps.x warn.limit.reject warn.limit.meanrw 
+        5.000e-03         1.569e-10         5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
@@ -150,10 +150,10 @@ Robustness weights:
 Algorithmic parameters: 
        tuning.chi                bb        tuning.psi        refine.tol 
         1.548e+00         5.000e-01         4.685e+00         1.000e-07 
-          rel.tol         scale.tol         solve.tol       eps.outlier 
-        1.000e-07         1.000e-10         1.000e-07         5.000e-03 
-            eps.x warn.limit.reject warn.limit.meanrw 
-        1.569e-10         5.000e-01         5.000e-01 
+          rel.tol         scale.tol         solve.tol          zero.tol 
+        1.000e-07         1.000e-10         1.000e-07         1.000e-10 
+      eps.outlier             eps.x warn.limit.reject warn.limit.meanrw 
+        5.000e-03         1.569e-10         5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
@@ -173,9 +173,9 @@ Call:
 lmrob(formula = Y ~ . - 1, data = coleman, weights = wts, model = FALSE, 
     x = FALSE, y = FALSE)
  \--> method = "MM"
-Residuals:
+Weighted Residuals:
      Min       1Q   Median       3Q      Max 
--4.53960 -0.03032  0.10984  1.55271  6.36480 
+-1.01509 -0.04288  0.04892  0.38289  9.00119 
 
 Coefficients:
           Estimate Std. Error t value Pr(>|t|)    
@@ -199,10 +199,10 @@ Robustness weights:
 Algorithmic parameters: 
        tuning.chi                bb        tuning.psi        refine.tol 
         1.548e+00         5.000e-01         4.685e+00         1.000e-07 
-          rel.tol         scale.tol         solve.tol       eps.outlier 
-        1.000e-07         1.000e-10         1.000e-07         5.000e-03 
-            eps.x warn.limit.reject warn.limit.meanrw 
-        2.219e-10         5.000e-01         5.000e-01 
+          rel.tol         scale.tol         solve.tol          zero.tol 
+        1.000e-07         1.000e-10         1.000e-07         1.000e-10 
+      eps.outlier             eps.x warn.limit.reject warn.limit.meanrw 
+        5.000e-03         2.219e-10         5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
@@ -258,4 +258,4 @@ seed : int(0)
 > 
 > proc.time()
    user  system elapsed 
-  0.277   0.039   0.311 
+  0.723   0.152   0.894 

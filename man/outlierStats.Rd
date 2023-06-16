@@ -4,21 +4,23 @@
 \description{
   Simple statistics about observations with robustness
   weight of almost zero for models that include factor
-  terms. The number of rejected observations and the mean
+  terms.  The number of rejected observations and the mean
   robustness weights are computed for each level of each
   factor included in the model.
 }
 \usage{
-outlierStats(object, x = object$x, control = object$control,
-             epsw = control$eps.outlier, epsx = control$eps.x,
-             warn.limit.reject = control$warn.limit.reject,
-             warn.limit.meanrw = control$warn.limit.meanrw)
+outlierStats(object, x = object$x, control = object$control
+           , epsw = control$eps.outlier
+           , epsx = control$eps.x
+           , warn.limit.reject = control$warn.limit.reject
+           , warn.limit.meanrw = control$warn.limit.meanrw
+           , shout = NA)
 }
 \arguments{
   \item{object}{object of class \code{"lmrob"}, typically the result of a call
     to \code{\link{lmrob}}.}
   \item{x}{design matrix}
-  \item{control}{list as returned by \code{\link{lmrob.control}}.}
+  \item{control}{list as returned by \code{\link{lmrob.control}()}.}
   \item{epsw}{limit on the robustness weight below which an observation is considered
     to be an outlier.  Either a \code{numeric(1)} or a
     \code{\link{function}} that takes the number of observations as an argument.}
@@ -33,6 +35,12 @@ outlierStats(object, x = object$x, control = object$control,
   \item{warn.limit.meanrw}{limit of the mean robustness per factor level
     below which (\eqn{\leq}{<=}) a warning is produced.  Set to
     \code{NULL} to disable warning.}
+  \item{shout}{a \code{\link{logical}} (scalar) indicating if large
+    \code{"Ratio"} or small \code{"Mean.RobWeight"} should lead to
+    corresponding \code{\link{warning}()}s; cutoffs are determined by
+    \code{warn.limit.reject} and \code{warn.limit.meanrw}, above.  By
+    default, \code{NA}; setting it to \code{FALSE} or \code{TRUE} disables
+    or unconditionally enables \dQuote{shouting}.}
 }
 \details{
   For models that include factors, the fast S-algorithm used by
@@ -54,9 +62,9 @@ outlierStats(object, x = object$x, control = object$control,
   is computed).
 }
 \value{
-  A data frames for each column with any zero elementes as well as an
-  overall statistic. The data frame consist of the names of the
-  coefficients in question, the number of non-zero observation in that
+  A data frame for each column with any zero elements as well as an
+  overall statistic.  The data frame consist of the names of the
+  coefficients in question, the number of non-zero observations in that
   level (\code{N.nonzero}), the number of rejected observations
   (\code{N.rejected}), the ratio of rejected observations to the
   number of observations in that level (\code{Ratio}) and the mean
@@ -69,7 +77,7 @@ outlierStats(object, x = object$x, control = object$control,
   \emph{Computational Statistics} \bold{32}(2): 631--646.
   \doi{10.1007/s00180-016-0679-x}
 }
-\author{Manuel Koller}
+\author{Manuel Koller}% 'share', tweaks: Martin Maechler
 \seealso{
   \code{\link{lmrob.control}} for the default values of the control
   parameters;  \code{\link{summarizeRobWeights}}.

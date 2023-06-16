@@ -21,7 +21,7 @@ lmrob.fit(x, y, control, init = NULL, mf = NULL)
     and the subsequent M- and D-estimates.}
   \item{init}{optional \code{\link{list}} of initial estimates.  See
     \emph{Details}.}
-  \item{mf}{unused and deprecated.}
+  \item{mf}{defunct.}
 }
 \details{This function is the basic fitting function for MM-type estimation,
   called by \code{\link{lmrob}} and typically not to be used on its own.

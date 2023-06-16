@@ -357,13 +357,12 @@ c          group numbers j > jj := k - r :
          if(i_trace .ge. 2)
      +        call prp1mcd (n,ngroup,minigr,nhalf,nrep, mini)
          call rfrdraw(subdat,n,minigr,mini,ngroup,kmini)
-      else
-c  "not part" : not partitioning; either  krep == 0  or   n <= 2*nmini-1 ( = 599 by default)
+      else !  all=.true. : .not.part : not partitioning; either  krep == 0  or   n <= 2*nmini-1 ( = 599 by default)
          minigr=n
          nhalf=nhalff
          kstep=k1
          if(krep.eq.0 .or. n.le.replow(nsel)) then
-c             use all combinations; happens iff  nsel = nvar+1 = p+1 <= 6
+c             use all combinations; happens also when  nsel = nvar+1 = p+1 <= 6
             nrep = rfncomb(nsel,n)
          else
             nrep=krep
@@ -570,6 +569,7 @@ c	    ksteps jumps down to at most 10 <<- "discontinuous!" FIXME
          index1(i)=i
          indexx(i)=i
       end do
+c     i[p] := p-1 such that "next index" will be (1, 2, ..., p):
       index1(nsel)=nsel-1
       indexx(nsel)=nsel-1
 cc

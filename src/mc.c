@@ -58,12 +58,11 @@ double mc_C_d(const double z[], int n, const double eps[], int *iter, int scale)
 */
     int trace_lev = iter[1], it = 0;
     Rboolean converged = TRUE, do_scale = (Rboolean) scale;
-    double medc; // "the" result
     static const double Large = DBL_MAX / 4.;
+    double medc = 0; // "the" result
 
-    if (n < 3) {
-	medc = 0.; goto Finish;
-    }
+    if (n < 3) goto Finish;
+
     /* copy data before sort()ing in place, also reflecting it -- dealing with +-Inf.
        NOTE: x[0] "empty" so we can use 1-indexing below */
     double *x  = (double *) R_alloc(n+1, sizeof(double));
@@ -321,7 +320,7 @@ double mc_C_d(const double z[], int n, const double eps[], int *iter, int scale)
 		    " -> (knew-nl, j) = (%d,%d)\n",
 		    it, nr, nl, knew-nl, j);
 	/* using rPsort(work, n,k), since we don't need work[] anymore:*/
-	rPsort(work, /* n = */ j, /* k = */ knew-nl-1);
+	rPsort(work, /* n = */ j, /* k = */ (int)(knew-nl-1));
 	medc = - work[knew-nl-1];
     }
 

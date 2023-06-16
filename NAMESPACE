@@ -125,13 +125,9 @@ S3method(anova, glmrob)
 
 S3method(alias, lmrob)
 S3method(case.names, lmrob)
-## S3method(confint,    lmrob, confint.lm)	# fails with  *warning*
-## S3method(dummy.coef, lmrob, dummy.coef.lm)	# S3 methods ‘confint.lm’, ‘dummy.coef.lm’
-						# were declared in NAMESPACE but not found
-## Instead "make copies" <generic>.lmrob in  R/lmrob.R  and register now:
-S3method(confint, lmrob)
+S3method(confint,    lmrob, confint.lm)## -> R bug (see below) & in R/lmrob.R
 S3method(confint, nlrob)
-S3method(dummy.coef, lmrob)
+S3method(dummy.coef, lmrob, dummy.coef.lm)# (R bug ...)
 S3method(estimethod, nlrob)
 S3method(family, lmrob)
 S3method(hatvalues, lmrob)
@@ -142,7 +138,12 @@ S3method(nobs, lmrob)
 S3method(nobs, lmrob.S, nobs.lmrob)# use the same as "lmrob"
 S3method(nobs, mcd)
 S3method(residuals, lmrob)
+S3method(residuals, lmrob.S)
 S3method(variable.names, lmrob)
+S3method(print, lmrobCtrl)
+S3method(update, lmrobCtrl)
+## R Bug {fixed in svn rev 84463}: needs within.list in our NS:
+S3method(within, lmrobCtrl, within.list)
 S3method(weights, glmrob)
 S3method(weights, lmrob)
 S3method(weights, lmrob.S, weights.lmrob)# use the same as "lmrob"

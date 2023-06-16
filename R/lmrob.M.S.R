@@ -108,13 +108,12 @@ lmrob.M.S <- function(x, y, control, mf, split = splitFrame(mf, x, control$split
         return(lmrob.lar(x, y, control))
     }
     ## this is the same as in lmrob.S():
-    if (length(seed <- control$seed) > 0) {
-        if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-            seed.keep <- get(".Random.seed", envir = .GlobalEnv,
-                             inherits = FALSE)
-            on.exit(assign(".Random.seed", seed.keep, envir = .GlobalEnv))
-        }
-        assign(".Random.seed", seed, envir = .GlobalEnv) ## why not set.seed(seed)
+    if (length(seed <- control$seed) > 0) { # not by default
+	if(length(seed) < 3L || seed[1L] < 100L)
+	    stop("invalid 'seed'. Must be compatible with .Random.seed !")
+	if(!is.null(seed.keep <- get0(".Random.seed", envir = .GlobalEnv, inherits = FALSE)))
+	    on.exit(assign(".Random.seed", seed.keep, envir = .GlobalEnv))
+	assign(".Random.seed", seed, envir = .GlobalEnv)
     }
     x1 <- split$x1
     x2 <- split$x2
@@ -127,34 +126,37 @@ lmrob.M.S <- function(x, y, control, mf, split = splitFrame(mf, x, control$split
 	    x1,
 	    x2,
 	    y,
-            res=double(length(y)),
-            n=length(y),
-            p1=ncol(x1),
-            p2=ncol(x2),
-            nResample = as.integer(control$nResample),
-            max_it_scale=as.integer(control$maxit.scale),
-            scale=double(1),
-            b1=double(ncol(x1)),
-            b2=double(ncol(x2)),
-            tuning_chi=as.double(c.chi),
-	    ipsi = .psi2ipsi(control$psi),
-            bb=as.double(control$bb),
-            K_m_s=as.integer(control$k.m_s),
-            max_k=as.integer(control$k.max),
-            rel_tol=as.double(control$rel.tol),
-	    inv_tol=as.double(control$solve.tol),
-	    scale_tol=as.double(control$scale.tol),
+            res = double(length(y)),
+            n  =  length(y),
+            p1 =  ncol(x1),
+            p2 =  ncol(x2),
+            nResample   = as.integer(control$nResample),
+            max_it_scale= as.integer(control$maxit.scale),
+            scale = double(1),
+            b1 = double(ncol(x1)),
+            b2 = double(ncol(x2)),
+            tuning_chi = as.double(c.chi),
+	    ipsi  =  .psi2ipsi(control$psi),
+            bb    =  as.double(control$bb),
+            K_m_s = as.integer(control$k.m_s),
+            max_k = as.integer(control$k.max),
+            rel_tol =   as.double(control$rel.tol),
+	    inv_tol =   as.double(control$solve.tol),
+	    scale_tol = as.double(control$scale.tol),
+            zero.tol =  as.double(control$zero.tol),
             converged = logical(1),
             trace_lev = traceLev,
+            ## well, these 3 are for the experts ... still why not arguments?
             orthogonalize=TRUE,
             subsample=TRUE,
             descent=TRUE,
-            mts=as.integer(control$mts),
-            ss=.convSs(control$subsampling)
+            mts = as.integer(control$mts),
+            ss = .convSs(control$subsampling)
             )[c("b1","b2", "res","scale", "converged")]
 
     conv <- z$converged
-    ## FIXME? warning if 'conv' is not ok ??
+    ## FIXME? warning  in any case if 'conv' is not ok ??
+    if(!conv && traceLev) warning("M-S estimator did *not* converge")
     ## coefficients :
     idx <- split$x1.idx
     cf <- numeric(length(idx))
@@ -165,7 +167,9 @@ lmrob.M.S <- function(x, y, control, mf, split = splitFrame(mf, x, control$split
     obj <- list(coefficients = cf, scale = z$scale, residuals = z$res,
                 rweights = lmrob.rweights(z$res, z$scale, control$tuning.chi, control$psi),
                 ## ../src/lmrob.c : m_s_descent() notes that convergence is *not* guaranteed
-                converged = TRUE, descent.conv = conv, control = control)
+                converged = TRUE,
+                descent.conv = conv, # the real truth ..
+                control = control)
     if (control$method %in% control$compute.outlier.stats)
         obj$ostats <- outlierStats(obj, x, control)
     obj

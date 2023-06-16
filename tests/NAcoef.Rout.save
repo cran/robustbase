@@ -1,6 +1,6 @@
 
-R version 4.2.0 Patched (2022-05-09 r82329) -- "Vigorous Calisthenics"
-Copyright (C) 2022 The R Foundation for Statistical Computing
+R version 4.3.1 beta (2023-06-05 r84504) -- "Beagle Scouts"
+Copyright (C) 2023 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -390,9 +390,9 @@ Coefficients:
 Call:
 lmrob(formula = y ~ 1 + x1 + x2 + offset(os), data = data, weights = w)
  \--> method = "MM"
-Residuals:
-   Min     1Q Median     3Q    Max 
--4.641 -2.391 -0.141  2.109  4.359 
+Weighted Residuals:
+    Min      1Q  Median      3Q     Max 
+-3.6412 -1.8110 -0.0473  2.0093  4.3588 
 
 Coefficients: (2 not defined because of singularities)
             Estimate Std. Error t value Pr(>|t|)   
@@ -411,10 +411,10 @@ Robustness weights:
 Algorithmic parameters: 
        tuning.chi                bb        tuning.psi        refine.tol 
          1.55e+00          5.00e-01          4.69e+00          1.00e-07 
-          rel.tol         scale.tol         solve.tol       eps.outlier 
-         1.00e-07          1.00e-10          1.00e-07          1.00e-02 
-            eps.x warn.limit.reject warn.limit.meanrw 
-         1.82e-12          5.00e-01          5.00e-01 
+          rel.tol         scale.tol         solve.tol          zero.tol 
+         1.00e-07          1.00e-10          1.00e-07          1.00e-10 
+      eps.outlier             eps.x warn.limit.reject warn.limit.meanrw 
+         1.00e-02          1.82e-12          5.00e-01          5.00e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
@@ -455,8 +455,8 @@ Robustness weights:
 Algorithmic parameters: 
        tuning.psi           rel.tol         scale.tol         solve.tol 
          4.69e+00          1.00e-07          1.00e-10          1.00e-07 
-      eps.outlier warn.limit.reject warn.limit.meanrw 
-         1.00e-02          5.00e-01          5.00e-01 
+         zero.tol       eps.outlier warn.limit.reject warn.limit.meanrw 
+         1.00e-10          1.00e-02          5.00e-01          5.00e-01 
         max.it    maxit.scale      trace.lev     compute.rd fast.s.large.n 
             50            200              0              0           2000 
          eps.x 
@@ -481,4 +481,4 @@ seed : int(0)
 > 
 > proc.time()
    user  system elapsed 
-  0.252   0.056   0.362 
+  0.730   0.133   0.901 

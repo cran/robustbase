@@ -103,7 +103,7 @@ n <- 2500 ; n0 <- n %/% 10
 a2 <- gen(n=n, p = 3, n0= n0, y0=10, x0=10)
 plot(a2$x[,1], a2$y, col = c(rep(2, n0), rep(1, n-n0)))
 rs <- .Random.seed
-system.time( m3 <- lmrob(y~x, data = a2) )
+system.time( m3 <- lmrob(y~x, data = a2, trace.lev=2) )
 m3
 nrs <- .Random.seed # <-- to check that using 'seed' keeps .Random.seed
 system.time( m4 <- lmrob(y~x, data = a2, seed = rs, compute.rd = FALSE))

@@ -1,6 +1,6 @@
 
-R Under development (unstable) (2017-05-19 r72698) -- "Unsuffered Consequences"
-Copyright (C) 2017 The R Foundation for Statistical Computing
+R version 4.3.0 Patched (2023-05-17 r84446) -- "Already Tomorrow"
+Copyright (C) 2023 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -34,13 +34,13 @@ Robust Estimate of Location:
 0.1922  
 Robust Estimate of Covariance:
         x
-x  0.7483
+x  0.5978
 > str(r1)
 List of 15
  $ call      : language covMcd(x = x)
  $ nsamp     : num 500
  $ method    : chr "Univariate Fast MCD(alpha=0.5 ==> h=27); nsamp = 500; (n,k)mini = (300,5)"
- $ cov       : num [1, 1] 0.748
+ $ cov       : num [1, 1] 0.598
   ..- attr(*, "dimnames")=List of 2
   .. ..$ : chr "x"
   .. ..$ : chr "x"
@@ -62,7 +62,7 @@ List of 15
   .. ..$ : chr [1:52] "1" "2" "3" "4" ...
   .. ..$ : NULL
  $ raw.cnp2  : num [1:2] 6.45 1.14
- $ cnp2      : num [1:2] 1.47 1.01
+ $ cnp2      : num [1:2] 1.17 1.01
  - attr(*, "class")= chr "mcd"
 > summary(r1)
 Minimum Covariance Determinant (MCD) estimator approximation.
@@ -76,10 +76,10 @@ Robust Estimate of Location:
 0.1922  
 Robust Estimate of Covariance:
         x
-x  0.7483
+x  0.5978
 
 Eigenvalues:
-[1] 0.7483
+[1] 0.5978
 Robustness weights: 
  4 observations c(14,24,51,52) are outliers with |weight| = 0 ( < 0.0019); 
  48 weights are ~= 1.
@@ -401,8 +401,8 @@ Robustness weights:
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  0.211 0.038 0.31 0.002 0 
+Time elapsed:  0.179 0.043 0.231 0.003 0.004 
 > 
 > proc.time()
    user  system elapsed 
-  0.515   0.072   0.664 
+  0.182   0.047   0.231 

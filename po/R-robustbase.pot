@@ -1,14 +1,15 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: robustbase 0.93-9\n"
-"POT-Creation-Date: 2021-08-19 22:34\n"
+"Project-Id-Version: robustbase 0.99-0\n"
+"POT-Creation-Date: 2023-06-09 09:09\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
-
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
 msgid "some terms will have NAs due to the limits of the method"
 msgstr ""
@@ -445,6 +446,9 @@ msgstr ""
 msgid "scale MAD is zero for this sample"
 msgstr ""
 
+msgid "Qn(x) == 0 and tmad(x, trim=%g) == 0"
+msgstr ""
+
 msgid "calculations stopped prematurely in rllarsbi"
 msgstr ""
 
@@ -460,6 +464,9 @@ msgstr ""
 msgid "No continuous variables found in model. Reverting to L1-estimator."
 msgstr ""
 
+msgid "M-S estimator did *not* converge"
+msgstr ""
+
 msgid "'psi' should be one of %s"
 msgstr ""
 
@@ -472,7 +479,7 @@ msgstr ""
 msgid "'. Using defaults."
 msgstr ""
 
-msgid "'mf' is unused and deprecated"
+msgid "update(*, setting = <changed setting>) is not allowed"
 msgstr ""
 
 msgid "Initial estimator '%s' not supported; using S-estimator instead"
@@ -485,6 +492,9 @@ msgid "only M and D are steps supported after \"init\" computation"
 msgstr ""
 
 msgid "%s-step did NOT converge. Returning unconverged %s-estimate"
+msgstr ""
+
+msgid "initial estim. 'init' not converged -- will be return()ed basically unchanged"
 msgstr ""
 
 msgid ":.vcov.w: cov.hubercorr must be logical (or NULL)"
@@ -566,6 +576,9 @@ msgid "'groups * n.group' must be smaller than 'n' for 'large_n' algorithm"
 msgstr ""
 
 msgid "'control$n.group' is not much larger than 'p', probably too small"
+msgstr ""
+
+msgid "invalid 'seed'.  Must be a valid .Random.seed !"
 msgstr ""
 
 msgid "C function R_lmrob_S() exited prematurely"
@@ -673,13 +686,10 @@ msgstr ""
 msgid "unknown setting for 'subsampling': %s"
 msgstr ""
 
-msgid "'epsw' must be numeric(1) or a function of nobs(obj.) which returns a numeric(1)"
-msgstr ""
-
 msgid "number of rows in 'x' and length of 'object$rweights' must be the same"
 msgstr ""
 
-msgid "'epsx' must be numeric(1) or a function of max(abs(x)) which returns a numeric(1)"
+msgid "'%s' must be a number or a function of %s which returns a number"
 msgstr ""
 
 msgid "Detected possible local breakdown of"
@@ -751,7 +761,7 @@ msgstr ""
 msgid "Length of initial coefficients vector does not match rank of singular design matrix x"
 msgstr ""
 
-msgid "unknown init argument"
+msgid "invalid 'init' argument"
 msgstr ""
 
 msgid "arguments"
@@ -874,6 +884,12 @@ msgstr ""
 msgid "out of"
 msgstr ""
 
+msgid "The default of 'doScale' is FALSE now for stability;"
+msgstr ""
+
+msgid "set options(mc_doScale_quiet=TRUE) to suppress this (once per session) message"
+msgstr ""
+
 msgid "mc(): not 'converged'"
 msgstr ""
 
@@ -980,6 +996,9 @@ msgid "Do not use '%s' as a variable name or as a parameter name"
 msgstr ""
 
 msgid "'weights' must be nonnegative and not contain NAs"
+msgstr ""
+
+msgid "NA's present in data; consider using 'na.action = na.exclude'"
 msgstr ""
 
 msgid "could not compute scale of residuals"

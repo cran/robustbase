@@ -182,12 +182,14 @@ table(ao.hbk$nonOut)## 14 outliers, 61 non-outliers:
 ## outliers are :
 which(! ao.hbk$nonOut) # 1 .. 14   --- but not for all random seeds!
 
-## here, they are the same as found by (much faster) MCD:
+## here, they are(*) the same as found by (much faster) MCD:
+## *) only "almost", since the 2023-05 change to covMcd() 
 cc <- covMcd(hbk)
-stopifnot(all(cc$mcd.wt == ao.hbk$nonOut))
+table(cc = cc$mcd.wt, ao = ao.hbk$nonOut)# one differ..:
+stopifnot(sum(cc$mcd.wt != ao.hbk$nonOut) <= 1)
 
 ## This is revealing: About 1--2 cases, where outliers are *not* == 1:14
-##  but needs almost 1 [sec] per call:
+## (2023: ~ 1/8 [sec] per call)
 if(interactive()) {
   for(i in 1:30) {
     print(system.time(ao.hbk <- adjOutlyingness(hbk)))

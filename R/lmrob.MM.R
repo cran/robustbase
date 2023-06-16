@@ -59,21 +59,24 @@ lmrob.control <-
     function(setting, seed = NULL, nResample = 500,
 	     tuning.chi = NULL, bb = 0.5,
 	     tuning.psi = NULL, max.it = 50,
-	     groups = 5, n.group = 400, k.fast.s = 1, best.r.s = 2,
-	     k.max = 200, maxit.scale = 200, k.m_s = 20,
-	     ##           ^^^^^^^^^^^ had MAX_ITER_FIND_SCALE 200 in ../src/lmrob.c
-	     refine.tol = 1e-7, rel.tol = 1e-7,
+	     groups = 5, n.group = 400, k.fast.s = 1L, best.r.s = 2L,
+	     k.max = 200L, maxit.scale = 200L, k.m_s = 20L,
+	     ##            ^^^^^^^^^^^ had MAX_ITER_FIND_SCALE 200 in ../src/lmrob.c
+	     refine.tol= 1e-7,
+             rel.tol   = 1e-7,
              scale.tol = 1e-10, # new, was hardcoded to EPS_SCALE = 1e-10 in C code
-	     solve.tol = 1e-7,
-	     ## had  ^^^^^^^^  TOL_INVERSE 1e-7 in ../src/lmrob.c
-	     trace.lev = 0, mts = 1000,
+	     solve.tol = 1e-7,	# hardcoded to  TOL_INVERSE 1e-7 in ../src/lmrob.c
+             zero.tol  = 1e-10, # new, was hardcoded to EPS_SCALE = 1e-10 in C code
+	     trace.lev = 0, # both for init.est. lmrob.S() *and* lmrob.fit
+	     mts = 1000L,
 	     subsampling = c("nonsingular", "simple"),
 	     compute.rd = FALSE,
 	     method = 'MM',
 	     psi = 'bisquare',
-	     numpoints = 10, cov = NULL,
+	     numpoints = 10L, cov = NULL,
 	     split.type = c("f", "fi", "fii"),
 	     fast.s.large.n = 2000,
+             ## only for outlierStats() [2014]:
              eps.outlier = function(nobs) 0.1 / nobs,
              eps.x = function(maxx) .Machine$double.eps^(.75)*maxx,
              compute.outlier.stats = method,
@@ -86,13 +89,13 @@ lmrob.control <-
         if (setting %in% c('KS2011', 'KS2014')) {
             if (missing(method)) method <- 'SMDM'
 	    psi <- if(p.ok) 'lqq' else .regularize.Mpsi(psi) ; p.ok <- TRUE
-            if (missing(max.it)) max.it <- 500
-            if (missing(k.max)) k.max <- 2000
+            if (missing(max.it)) max.it <- 500L
+            if (missing(k.max)) k.max <- 2000L
             if (missing(cov) || is.null(cov)) cov <- '.vcov.w'
             if (setting == 'KS2014') {
-                if (missing(best.r.s)) best.r.s <- 20
-                if (missing(k.fast.s)) k.fast.s <- 2
-                if (missing(nResample)) nResample <- 1000
+                if (missing(best.r.s)) best.r.s <- 20L
+                if (missing(k.fast.s)) k.fast.s <- 2L
+                if (missing(nResample)) nResample <- 1000L
             }
         } else {
             warning("Unknown setting '", setting, "'. Using defaults.")
@@ -117,17 +120,18 @@ lmrob.control <-
     if(is.null(tuning.psi))
 	tuning.psi <- .Mpsi.tuning.default(psi)
     else ## wd like to compute.const *always* -- but slightly changes KS2011/14 !!
-    if(compute.const)
-	tuning.psi <- .psi.const(tuning.psi, psi)
+        if(compute.const)
+            tuning.psi <- .psi.const(tuning.psi, psi)
 
-    c(list(setting = if (missing(setting)) NULL else setting,
+    `class<-`(
+        c(list(setting = if (missing(setting)) NULL else setting,
            seed = as.integer(seed), nResample=nResample, psi=psi,
            tuning.chi=tuning.chi, bb=bb, tuning.psi=tuning.psi,
            max.it=max.it, groups=groups, n.group=n.group,
            best.r.s=best.r.s, k.fast.s=k.fast.s,
            k.max=k.max, maxit.scale=maxit.scale, k.m_s=k.m_s, refine.tol=refine.tol,
-           rel.tol=rel.tol, scale.tol = scale.tol,
-           solve.tol=solve.tol, trace.lev=trace.lev, mts=mts,
+           rel.tol=rel.tol, scale.tol=scale.tol, solve.tol=solve.tol, zero.tol=zero.tol,
+           trace.lev=trace.lev, mts=mts,
            subsampling=subsampling,
            compute.rd=compute.rd, method=method, numpoints=numpoints,
            cov=cov, split.type = match.arg(split.type),
@@ -136,7 +140,67 @@ lmrob.control <-
            compute.outlier.stats = sub("^MM$", "SM", compute.outlier.stats),
            warn.limit.reject = warn.limit.reject,
            warn.limit.meanrw = warn.limit.meanrw),
-      list(...))
+      list(...)), "lmrobCtrl")
+}
+
+## base within.list, used in ../NAMESPACE :
+## S3method(within, lmrobCtrl, within.list)  fails unless it is in *our* namespace:
+## R bug fixed in svn rev 84463 - for R 4.4.0
+within.list <- within.list
+
+print.lmrobCtrl <- function(x, ...) {
+    cat("lmrob.control() --> \"lmrobCtrl\" object with", length(x),"components:\n")
+    str(x, no.list=TRUE, ...)
+    invisible(x)
+}
+
+##' e.g.  update(<lmrobCtrl>, maxit.scale = 400)
+update.lmrobCtrl <- function(object, ...) {
+    stopifnot(is.list(object)
+              ## all updating args must be named:
+            , length(dNms <- ...names()) == ...length()
+              ## all updating names must exist in lmrobCtrl object
+            , dNms %in% names(object)
+              )
+    dots <- list(...)
+    if("setting" %in% dNms && !identical(object[["setting"]], dots[["setting"]]))
+        stop("update(*, setting = <changed setting>) is not allowed")
+    do.psi <- (hPsi <- "psi" %in% dNms) && object[["psi"]] != (psi <- dots[["psi"]])
+    if("method" %in% dNms && object[["method"]] != (method <- dots[["method"]])) {
+        ## new method --> possibly update psi *and* cov
+	if(!do.psi && grepl('D', method)) {
+            psi <- 'lqq'
+            do.psi <- TRUE
+        }
+        do.cov <- any(ic <- dNms == "cov") && object[["cov"]] != (cov <- dots[["cov"]])
+	if (!do.cov || is.null(cov))
+	    cov <- if(method %in% c('SM', 'MM')) ".vcov.avar1" else ".vcov.w"
+        object[["cov"]] <- cov # and drop from "to do":
+        dNms <- dNms[!ic]
+        dots <- dots[!ic]
+    }
+    if(do.psi) { # new psi --> update
+        compute.const <- (psi %in% c('ggw', 'lqq'))
+        if(!("tuning.chi" %in% dNms)) { # update
+            tuning.chi <- .Mchi.tuning.default(psi)
+            if(compute.const)
+                tuning.chi <- .psi.const(tuning.chi, psi)
+            object[["tuning.chi"]] <- tuning.chi
+        }
+        if(!("tuning.psi" %in% dNms)) {
+            tuning.psi <- .Mpsi.tuning.default(psi)
+            if(compute.const)
+                tuning.psi <- .psi.const(tuning.psi, psi)
+            object[["tuning.psi"]] <- tuning.psi
+        }
+        object[["psi"]] <- psi # and possibly drop from "to do":
+        if(hPsi) {
+            dNms <- dNms[i <- dNms != "psi"]
+            dots <- dots[i]
+        }
+    }
+    object[dNms] <- dots
+    object
 }
 
 ##' Modify a \code{\link{lmrob.control}} list to contain only parameters that
@@ -144,21 +208,27 @@ lmrob.control <-
 ##' objects.
 ##'
 ##' @title Minimize lmrob control to non-redundant parts
-##' @param control a list, typically the 'control' component of a
+##' @param cl a list, typically the 'control' component of a
 ##' \code{\link{lmrob}()} call, or the result of  \code{\link{lmrob.control}()}.
-##' @return list: the (typically) modified \code{control}
+##' @param n number of observations == nobs(<fitted model) == length(residuals(<fit>)) ..
+##' @return list: the (typically) modified \code{cl}
 ##' @author Martin Maechler {from Manuel's original code}
-lmrob.control.minimal <- function(cl) {
-    if(is.null(cl)) return(cl)
+lmrob.control.minimal <- function(cl, nobs, oStats = TRUE) {
+    if(!length(cl)) return(cl)
+    shrtM <- sub("^(S|M-S).*", "\\1", cl$method)
     p.MS <- c("k.m_s", "split.type")
-    p.nonLrg <- c("groups", "n.group")
-    p.fastS <- c(p.nonLrg, "refine.tol", "best.r.s", "k.fast.s")
-    switch(sub("^(S|M-S).*", "\\1", cl$method),
+    p.Lrg.n <- c("groups", "n.group")
+    p.fastS <- c(p.Lrg.n, "refine.tol", "best.r.s", "k.fast.s")
+    ## outlierStats() parts:
+    p.oStat <- c("eps.outlier", "eps.x", "compute.outlier.stats", "warn.limit.reject", "warn.limit.meanrw")
+    if(!oStats) ## e.g., for lmrob.S() but *NOT* for lmrob(*, method="S")
+        cl[p.oStat] <- NULL
+    switch(shrtM,
 	   "S" = {                       # remove all M-S specific control pars
 	       cl[p.MS] <- NULL
 					# if large_n is not used, remove corresp control pars
-	       if (length(residuals) <= cl$fast.s.large.n)
-		   cl[p.nonLrg] <- NULL
+	       if (nobs <= cl$fast.s.large.n)
+		   cl[p.Lrg.n] <- NULL
 	   },
 	   "M-S" = # remove all fast S specific control pars
 	       cl[p.fastS] <- NULL,
@@ -180,7 +250,7 @@ lmrob.fit.MM <- function(x, y, control) ## defunct
 
 lmrob.fit <- function(x, y, control, init=NULL, mf=NULL) {
     if(!is.matrix(x)) x <- as.matrix(x)
-    if(!missing(mf)) warning("'mf' is unused and deprecated")
+    if(!missing(mf)) .Defunct("'mf' argument is now defunct")
     ## old notation: MM -> SM
     if (control$method == "MM") control$method <- "SM"
     ## Assumption:  if(is.null(init))  method = "S..."   else  method = "..."
@@ -224,7 +294,7 @@ lmrob.fit <- function(x, y, control, init=NULL, mf=NULL) {
             init <- switch(step, ## 'control' may differ from 'init$control' when both (init, control) are spec.
                            ## D(AS)-Step
 			   D = lmrob..D..fit(init, x,
-					     control=control, method = init$control$method),
+                                             control=control, method = init$control$method),
 			   ## M-Step
 			   M = lmrob..M..fit(x = x, y = y, obj = init,
 					     control=control, method = init$control$method),
@@ -239,6 +309,13 @@ lmrob.fit <- function(x, y, control, init=NULL, mf=NULL) {
                 break
             }
         }
+    } else {
+        if(trace.lev) {
+            cat(sprintf("init *NOT* converged; init$scale = %g, init$coef:\n  ",
+                        init$scale))
+            print(init$coef)
+        }
+        warning("initial estim. 'init' not converged -- will be return()ed basically unchanged")
     }
     ## << FIXME? qr(.)  should be available from earlier
     if (is.null(init$qr)) init$qr <- qr(x * sqrt(init$rweights))
@@ -544,13 +621,13 @@ globalVariables("r", add=TRUE) ## below and in other lmrob.E() expressions
 lmrob..M..fit <- function (x = obj$x, y = obj$y, beta.initial = obj$coef,
                            scale = obj$scale, control = obj$control,
                            obj,
-                           mf = obj$model,
+                           mf,
 			   method = obj$control$method) #<- also when 'control' is not obj$control
 {
     c.psi <- .psi.conv.cc(control$psi, control$tuning.psi)
     ipsi <- .psi2ipsi(control$psi)
     stopifnot(is.matrix(x))
-    if(!missing(mf)) warning("'mf' is unused and deprecated")
+    if(!missing(mf)) .Defunct("'mf' argument is now defunct")
     n <- nrow(x)
     p <- ncol(x)
     if (is.null(y) && !is.null(obj$model))
@@ -573,10 +650,8 @@ lmrob..M..fit <- function (x = obj$x, y = obj$y, beta.initial = obj$coef,
               ipsi = as.integer(ipsi),
               loss = double(1),
               rel.tol = as.double(control$rel.tol),
-              converged = logical(1),
-              trace.lev = trace.lev,
-              mts = as.integer(control$mts),
-              ss =  .convSs(control$subsampling)
+              converged = logical(1)
+            , trace.lev = trace.lev
               )[c("coefficients",  "scale", "residuals", "loss", "converged", "iter")]
     ## FIXME?: Should rather warn *here* in case of non-convergence
     ret$fitted.values <- drop(x %*% ret$coefficients)
@@ -637,31 +712,34 @@ lmrob..M..fit <- function (x = obj$x, y = obj$y, beta.initial = obj$coef,
 
 ##' Compute  S-estimator for linear model -- using  "fast S" algorithm --> ../man/lmrob.S.Rd
 lmrob.S <- function (x, y, control, trace.lev = control$trace.lev,
-                     only.scale = FALSE, mf = NULL)
+                     only.scale = FALSE, mf)
 {
     if (!is.matrix(x)) x <- as.matrix(x)
     n <- nrow(x)
     p <- ncol(x)
-    if(!missing(mf)) warning("'mf' is unused and deprecated")
+    if(!missing(mf)) .Defunct("'mf' argument is now defunct")
     nResample <- if(only.scale) 0L else as.integer(control$nResample)
     groups <- as.integer(control$groups)
-    nGr <- as.integer(control$n.group)
+    nGr    <- as.integer(control$n.group)
     large_n <- (n > control$fast.s.large.n)
     if (large_n) {
         if (nGr <= p)
             stop("'control$n.group' must be larger than 'p' for 'large_n' algorithm")
-        if (nGr * groups > n)
+        if (nGr * groups > n) # {NB: integer overflow here *also* signals error}
             stop("'groups * n.group' must be smaller than 'n' for 'large_n' algorithm")
         if (nGr <= p + 10) ## FIXME (be smarter ..)
             warning("'control$n.group' is not much larger than 'p', probably too small")
     }
-    if (length(seed <- control$seed) > 0) {
-        if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-            seed.keep <- get(".Random.seed", envir = .GlobalEnv,
-                             inherits = FALSE)
+    if (length(seed <- control$seed) > 0) { # not by default
+	if(length(seed) < 3L || seed[1L] < 100L)
+	    stop("invalid 'seed'.  Must be a valid .Random.seed !")
+	if(!is.null(seed.keep <- get0(".Random.seed", envir = .GlobalEnv, inherits = FALSE)))
             on.exit(assign(".Random.seed", seed.keep, envir = .GlobalEnv))
+        assign(".Random.seed", seed, envir = .GlobalEnv)
+        if(trace.lev) {
+            cat("Assigning .Random.seed to .GlobalEnv: "); str(seed)
+            stopifnot(identical(seed, globalenv()$.Random.seed))
         }
-        assign(".Random.seed", seed, envir = .GlobalEnv) ## why not set.seed(seed)
     }
 
     bb <- as.double(control$bb)
@@ -670,7 +748,7 @@ lmrob.S <- function (x, y, control, trace.lev = control$trace.lev,
     stopifnot(length(c.chi) > 0, c.chi >= 0, length(bb) > 0,
               length(best.r) > 0, best.r >= 1, length(y) == n, n > 0)
 
-    b <- .C(R_lmrob_S,
+    b <- .C(R_lmrob_S, # --> ../src/lmrob.c
             x = as.double(x),
             y = as.double(y),
             n = as.integer(n),
@@ -688,9 +766,10 @@ lmrob.S <- function (x, y, control, trace.lev = control$trace.lev,
             k.fast.s = as.integer(control$k.fast.s),
             k.iter = as.integer(control$k.max),
             maxit.scale = as.integer(control$maxit.scale),
-            refine.tol = as.double(control$refine.tol),
-            inv.tol = as.double(control$solve.tol),
+            refine.tol= as.double(control$refine.tol),
+            inv.tol   = as.double(control$solve.tol),
             scale.tol = as.double(control$scale.tol),
+            zero.tol  = as.double(control$zero.tol),
             converged = logical(1),
             trace.lev = as.integer(trace.lev),
             mts = as.integer(control$mts),
@@ -725,18 +804,18 @@ lmrob.S <- function (x, y, control, trace.lev = control$trace.lev,
     if (identical(parent.frame(), .GlobalEnv))
         b$call <- match.call()
     class(b) <- 'lmrob.S'
-    if ("S" %in% control$compute.outlier.stats)
+    if ("S" %in% control$compute.outlier.stats)# not by default
         b$ostats <- outlierStats(b, x, control)
     b
 }## --- lmrob.S()
 
-lmrob..D..fit <- function(obj, x=obj$x, control = obj$control, mf = obj$model,
+lmrob..D..fit <- function(obj, x=obj$x, control = obj$control, mf,
 			  method = obj$control$method) #<- also when 'control' is not obj$control
 {
     if (is.null(control)) stop('lmrob..D..fit: control is missing')
     if (!obj$converged)
         stop('lmrob..D..fit: prior estimator did not converge, stopping')
-    if(!missing(mf)) warning("'mf' is unused and deprecated")
+    if(!missing(mf)) .Defunct("'mf' argument is now defunct")
     if (is.null(x)) x <- model.matrix(obj)
     w <- obj$rweights
     if (is.null(w)) stop('lmrob..D..fit: robustness weights undefined')
@@ -1237,7 +1316,7 @@ lmrob.rweights <- function(resid, scale, cc, psi, eps = 16 * .Machine$double.eps
     stopifnot(is.numeric(scale), length(scale) == 1L, scale >= 0)
     if (scale == 0) { ## exact fit
 	m <- max(ar <- abs(resid), na.rm=TRUE)
-	if(m == 0) numeric(seq_len(ar)) else as.numeric(ar < eps * m)# 1 iff res ~= 0
+	if(m == 0) numeric(seq_len(ar)) else as.numeric(ar <= eps * m)# 1 iff res ~= 0
     } else
 	Mwgt(resid / scale, cc, psi)
 }
@@ -1323,10 +1402,13 @@ ghq <- function(n = 1, modify = TRUE) {
 outlierStats <- function(object, x = object$x,
                          control = object$control,
                          epsw = control$eps.outlier,
-                         epsx = control$eps.x,
-                         warn.limit.reject = control$warn.limit.reject,
-                         warn.limit.meanrw = control$warn.limit.meanrw
-                         ) {
+                         epsx = control$eps.x
+                       , warn.limit.reject = control$warn.limit.reject
+                       , warn.limit.meanrw = control$warn.limit.meanrw
+                       , shout = NA)
+{
+    stopifnot(is.logical(shout), length(shout) == 1L) # should we "shout"?
+
     ## look at all the factors in the model and count
     ## for each level how many observations were rejected.
     ## Issue a warning if there is any level where more than
@@ -1336,19 +1418,20 @@ outlierStats <- function(object, x = object$x,
     rw <- object$rweights
     ##    ^^^^^^^^^^^^^^^ not weights(..., type="robustness") as we
     ##                    don't want naresid() padding here.
-    if (is.function(epsw)) epsw <- epsw(nobs(object, use.fallback = TRUE))
-    if (!is.numeric(epsw) || length(epsw) != 1)
-        stop("'epsw' must be numeric(1) or a function of nobs(obj.) which returns a numeric(1)")
-    rj <- abs(rw) < epsw
     if (NROW(x) != length(rw))
         stop("number of rows in 'x' and length of 'object$rweights' must be the same")
+    if (is.function(epsw)) epsw <- epsw(nobs(object, use.fallback = TRUE))
+    if (!is.numeric(epsw) || length(epsw) != 1)
+        stop(gettextf("'%s' must be a number or a function of %s which returns a number",
+                      "epsw", "nobs(obj.)"), domain = NA)
     if (is.function(epsx)) epsx <- epsx(max(abs(x)))
     if (!is.numeric(epsx) || length(epsx) != 1)
-        stop("'epsx' must be numeric(1) or a function of max(abs(x)) which returns a numeric(1)")
-    xnz <- abs(x) > epsx
+        stop(gettextf("'%s' must be a number or a function of %s which returns a number",
+                      "epsx", "max(abs(x))"), domain = NA)
 
-    cc <- function(idx) {
+    cc <- function(idx) { # (rw, epsw)
         nnz <- sum(idx) ## <- if this is zero, 'Ratio' and 'Mean.RobWeight' will be NaN
+        rj <- abs(rw) < epsw
         Fr <- sum(rj[idx])
 	c(N.nonzero = nnz,
 	  N.rejected = Fr,
@@ -1356,19 +1439,20 @@ outlierStats <- function(object, x = object$x,
 	  Mean.RobWeight = mean(rw[idx]))
     }
 
+    xnz <- abs(x) > epsx
     report <- t(apply(cbind(Overall=TRUE, xnz[, colSums(xnz) < NROW(xnz)]), 2, cc))
 
-    shout <- FALSE # should we "shout"? -- scalar logical, never NA
-    lbr <- rep.int(FALSE, nrow(report))
-    if (!is.null(warn.limit.reject)) {
+    if(!isFALSE(shout)) { ## NA or TRUE
+      lbr <- logical(nrow(report)) # == rep(FALSE, ..)
+      if (!is.null(warn.limit.reject)) {
 	lbr <- report[, "Ratio"] >= warn.limit.reject
-	shout <- any(lbr & !is.na(lbr))
-    }
-    if (!is.null(warn.limit.meanrw)) {
+	shout <- shout || any(lbr & !is.na(lbr))
+      }
+      if (!is.null(warn.limit.meanrw)) {
 	lbr <- lbr | report[, "Mean.RobWeight"] <= warn.limit.meanrw
 	shout <- shout || any(lbr & !is.na(lbr))
-    }
-    if (shout) {
+      }
+      if(!is.na(shout)) { # is true
         nbr <- rownames(report)[lbr]
         attr(report, "warning") <- paste("Possible local breakdown of",
                                          paste0("'", nbr, "'", collapse=", "))
@@ -1378,7 +1462,7 @@ outlierStats <- function(object, x = object$x,
                 if ("KS2014" %in% control$setting) "" else
                 "\nUse lmrob argument 'setting=\"KS2014\"' to avoid this problem."
                 )
+      }
     }
-
     report
 }

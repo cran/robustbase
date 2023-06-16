@@ -2,7 +2,8 @@
 require(robustbase)
 
 ## generate simple example data  (extension of the one in ./NAcoef.R )
-data <- expand.grid(x1=letters[1:3], x2=LETTERS[1:4], rep=1:3)
+data <- expand.grid(x1=letters[1:3], x2=LETTERS[1:4], rep=1:3,
+                    KEEP.OUT.ATTRS = FALSE)
 ## generate offset column
 data$os <- 1:nrow(data)
 set.seed(1)

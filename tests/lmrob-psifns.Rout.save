@@ -1,6 +1,6 @@
 
-R version 4.2.0 Patched (2022-05-06 r82323) -- "Vigorous Calisthenics"
-Copyright (C) 2022 The R Foundation for Statistical Computing
+R version 4.3.0 Patched (2023-06-03 r84496) -- "Already Tomorrow"
+Copyright (C) 2023 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -60,7 +60,7 @@ Type 'q()' to quit R.
 +                   lmrob.control(psi = "ggw", tuning.psi = cc)$tuning.psi)
 + )
 > cat('Time for constants computation of tuning.psi: ', st,'\n')
-Time for constants computation of tuning.psi:  0.16 0.001 0.161 0 0 
+Time for constants computation of tuning.psi:  0.455 0.05 0.508 0 0 
 > cGct <- t(sapply(cG.cnst, attr, "constants"))[,-1]
 > colnames(cGct) <- c("a","b","c", "rhoInf")
 > signif(cGct, 4)
@@ -244,10 +244,10 @@ Robustness weights:
 Algorithmic parameters: 
        tuning.chi                bb        tuning.psi        refine.tol 
         1.548e+00         5.000e-01         4.685e+00         1.000e-07 
-          rel.tol         scale.tol         solve.tol       eps.outlier 
-        1.000e-07         1.000e-10         1.000e-07         4.348e-03 
-            eps.x warn.limit.reject warn.limit.meanrw 
-        8.399e-08         5.000e-01         5.000e-01 
+          rel.tol         scale.tol         solve.tol          zero.tol 
+        1.000e-07         1.000e-10         1.000e-07         1.000e-10 
+      eps.outlier             eps.x warn.limit.reject warn.limit.meanrw 
+        4.348e-03         8.399e-08         5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
@@ -290,10 +290,10 @@ Robustness weights:
 Algorithmic parameters: 
        tuning.chi                bb        tuning.psi        refine.tol 
         4.047e-01         5.000e-01         1.060e+00         1.000e-07 
-          rel.tol         scale.tol         solve.tol       eps.outlier 
-        1.000e-07         1.000e-10         1.000e-07         4.348e-03 
-            eps.x warn.limit.reject warn.limit.meanrw 
-        8.399e-08         5.000e-01         5.000e-01 
+          rel.tol         scale.tol         solve.tol          zero.tol 
+        1.000e-07         1.000e-10         1.000e-07         1.000e-10 
+      eps.outlier             eps.x warn.limit.reject warn.limit.meanrw 
+        4.348e-03         8.399e-08         5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
@@ -342,10 +342,10 @@ Algorithmic parameters:
         5.000e-01        -5.000e-01         1.500e+00         9.500e-01 
       tuning.psi4        refine.tol           rel.tol         scale.tol 
                NA         1.000e-07         1.000e-07         1.000e-10 
-        solve.tol       eps.outlier             eps.x warn.limit.reject 
-        1.000e-07         4.348e-03         8.399e-08         5.000e-01 
-warn.limit.meanrw 
-        5.000e-01 
+        solve.tol          zero.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-10         4.348e-03         8.399e-08 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
@@ -390,10 +390,10 @@ Robustness weights:
 Algorithmic parameters: 
        tuning.chi                bb        tuning.psi        refine.tol 
         5.774e-01         5.000e-01         2.110e+00         1.000e-07 
-          rel.tol         scale.tol         solve.tol       eps.outlier 
-        1.000e-07         1.000e-10         1.000e-07         4.348e-03 
-            eps.x warn.limit.reject warn.limit.meanrw 
-        8.399e-08         5.000e-01         5.000e-01 
+          rel.tol         scale.tol         solve.tol          zero.tol 
+        1.000e-07         1.000e-10         1.000e-07         1.000e-10 
+      eps.outlier             eps.x warn.limit.reject warn.limit.meanrw 
+        4.348e-03         8.399e-08         5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
@@ -444,10 +444,10 @@ Algorithmic parameters:
         5.000e-01        -5.000e-01         1.500e+00         8.500e-01 
       tuning.psi4        refine.tol           rel.tol         scale.tol 
                NA         1.000e-07         1.000e-07         1.000e-10 
-        solve.tol       eps.outlier             eps.x warn.limit.reject 
-        1.000e-07         4.348e-03         8.399e-08         5.000e-01 
-warn.limit.meanrw 
-        5.000e-01 
+        solve.tol          zero.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-10         4.348e-03         8.399e-08 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
@@ -498,10 +498,10 @@ Algorithmic parameters:
         5.000e-01        -5.000e-01         1.000e+00         9.500e-01 
       tuning.psi4        refine.tol           rel.tol         scale.tol 
                NA         1.000e-07         1.000e-07         1.000e-10 
-        solve.tol       eps.outlier             eps.x warn.limit.reject 
-        1.000e-07         4.348e-03         8.399e-08         5.000e-01 
-warn.limit.meanrw 
-        5.000e-01 
+        solve.tol          zero.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-10         4.348e-03         8.399e-08 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
@@ -548,10 +548,10 @@ Algorithmic parameters:
         3.179e-01         7.417e-01         1.695e+00         5.000e-01 
       tuning.psi1       tuning.psi2       tuning.psi3        refine.tol 
         1.352e+00         3.156e+00         7.213e+00         1.000e-07 
-          rel.tol         scale.tol         solve.tol       eps.outlier 
-        1.000e-07         1.000e-10         1.000e-07         4.348e-03 
-            eps.x warn.limit.reject warn.limit.meanrw 
-        8.399e-08         5.000e-01         5.000e-01 
+          rel.tol         scale.tol         solve.tol          zero.tol 
+        1.000e-07         1.000e-10         1.000e-07         1.000e-10 
+      eps.outlier             eps.x warn.limit.reject warn.limit.meanrw 
+        4.348e-03         8.399e-08         5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
@@ -607,10 +607,10 @@ Algorithmic parameters:
         5.000e-01        -3.000e-01         1.400e+00         9.500e-01 
       tuning.psi4        refine.tol           rel.tol         scale.tol 
                NA         1.000e-07         1.000e-07         1.000e-10 
-        solve.tol       eps.outlier             eps.x warn.limit.reject 
-        1.000e-07         4.348e-03         8.399e-08         5.000e-01 
-warn.limit.meanrw 
-        5.000e-01 
+        solve.tol          zero.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-10         4.348e-03         8.399e-08 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
@@ -620,9 +620,11 @@ warn.limit.meanrw
 compute.outlier.stats 
                  "SM" 
 seed : int(0) 
-Warning message:
-In lmrob.S(x, y, control = control) :
+Warning messages:
+1: In lmrob.S(x, y, control = control) :
   S refinements did not converge (to refine.tol=1e-07) in 200 (= k.max) steps
+2: In lmrob.fit(x, y, control, init = init) :
+  initial estim. 'init' not converged -- will be return()ed basically unchanged
 > 
 > set.seed(9)
 > summary(mp8 <- update(mp0, psi = 'lqq'))
@@ -660,10 +662,10 @@ Algorithmic parameters:
         5.000e-01        -5.000e-01         1.500e+00         9.500e-01 
       tuning.psi4        refine.tol           rel.tol         scale.tol 
                NA         1.000e-07         1.000e-07         1.000e-10 
-        solve.tol       eps.outlier             eps.x warn.limit.reject 
-        1.000e-07         4.348e-03         8.399e-08         5.000e-01 
-warn.limit.meanrw 
-        5.000e-01 
+        solve.tol          zero.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-10         4.348e-03         8.399e-08 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd      numpoints 
@@ -740,10 +742,10 @@ Algorithmic parameters:
         5.000e-01        -3.000e-01         1.400e+00         9.500e-01 
       tuning.psi4        refine.tol           rel.tol         scale.tol 
                NA         1.000e-07         1.000e-07         1.000e-10 
-        solve.tol       eps.outlier             eps.x warn.limit.reject 
-        1.000e-07         4.348e-03         8.399e-08         5.000e-01 
-warn.limit.meanrw 
-        5.000e-01 
+        solve.tol          zero.tol       eps.outlier             eps.x 
+        1.000e-07         1.000e-10         4.348e-03         8.399e-08 
+warn.limit.reject warn.limit.meanrw 
+        5.000e-01         5.000e-01 
      nResample         max.it       best.r.s       k.fast.s          k.max 
            500             50              2              1            200 
    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
@@ -756,8 +758,8 @@ seed : int(0)
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  1.094 0.081 1.176 0.003 0.005 
+Time elapsed:  2.712 0.339 3.104 0.009 0.01 
 > 
 > proc.time()
    user  system elapsed 
-  1.617   0.137   1.756 
+  2.722   0.349   3.104 

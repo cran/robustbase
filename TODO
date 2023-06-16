@@ -1,6 +1,17 @@
 				-*- org -*- C-c C-o follows link[MM: grep-r -e '\(FIXME\|TODO\)']
 
 * Before next release
+** TODO when lmrob.S() detects exact fit (in C code), it *should* return it, incl scale = 0
+    *and* it should have correct rweights[] in {0,1} and residuals[];
+    (fitted[] computed in R code after .C() call);
+    ==> ~/R/MM/Pkg-ex/robustbase/ThMang_lmrob.R
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ and >>> tests/subsample.R (bottom) <<<-------
+
+*** in src/lmrob.c: Currently there *two* such situations the first explicit when
+      #{zero resid} >=  ~ (n + p)/2 {--> theory of *modified* MAD
+      ==> ~/R/MM/STATISTICS/robust/tmad.R
+*** lmrob() calling lmrob..M.. after that should "work", optionally/always ?? using a non-zero scale,
+    ------- it might use Martin's tmad() {trimmed mean of absolute deviations from the median}
 ** DONE print(<covMcd>) and print(summary(<covMcd>)): 'method' almost twice; show iBest
    for "deterministic"
 ** DONE covMcd(): allow 'hsets.ini' argument to covMcd(), and *return* them (optionally) as 'Hsubsets'
@@ -20,6 +31,9 @@
 **** DONE shouldn't we rename jde() to jdeopt() or even jdeoptim(), jDEoptim(), or JDEoptim()
 R users already know optim() etc.. so the name seems more logical for them.
 * Short Term
+** TODO lmrob.S() -> lmrob.control() should get nResample = "exact" -- as covMcd() / ltsReg() :
+***    use Fortran routines rfncomb() and rfgenp() [in src/rf-common.f -> need F77_name(.) / F77_CALL(.)] from C
+****    or even just right a version for C indices in {0, 1, ..., p-1}  instead of Fortran {1, 2, ...., p}
 ** DONE sc.1) Qn(), Sn()  should work with 'NA' (via 'na.rm=FALSE' argument, as mad())
 ** DONE sc.2) Qn(), Sn()  should work with Inf and "large x", see example(mc)
 ** DONE sc.2) mc() now works better with "large x", see example(mc) --- BSc thesis by Lukas Graz

@@ -7,7 +7,8 @@
 }
 \usage{
 lmrob..D..fit(obj, x=obj$x, control = obj$control,
-              mf = obj$model, method = obj$control$method)
+              mf,
+              method = obj$control$method)
 }
 \arguments{
   \item{obj}{\code{lmrob}-object based on which the estimate is to be
@@ -16,7 +17,7 @@ lmrob..D..fit(obj, x=obj$x, control = obj$control,
     to get it from \code{obj$x} and if this fails from \code{obj$model}.}
   \item{control}{list of control parameters, as returned
     by \code{\link{lmrob.control}}.}
-  \item{mf}{unused and deprecated.}
+  \item{mf}{defunct.}
   \item{method}{optional; the \code{method} used for \emph{obj} computation.}
 }
 \details{

@@ -6,7 +6,7 @@ lmrob <-
 	     singular.ok = TRUE, contrasts = NULL, offset = NULL,
 	     control = NULL, init = NULL, ...)
 {
-    ## to avoid problems with setting argument
+    ## to avoid problems with 'setting' argument
     ## call lmrob.control here either with or without method arg.
     if (miss.ctrl <- missing(control))
 	control <- if (missing(method))
@@ -29,7 +29,7 @@ lmrob <-
 
     mt <- attr(mf, "terms") # allow model.frame to update it
     y <- model.response(mf, "numeric")
-    w <- as.vector(model.weights(mf))
+    w <- as.vector(model.weights(mf)) # NULL if unspecified in call
     if(!is.null(w) && !is.numeric(w))
 	stop("'weights' must be a numeric vector")
     offset <- as.vector(model.offset(mf))
@@ -148,7 +148,7 @@ lmrob <-
 			if (length(init$coef) != ncol(x))
 			    stop("Length of initial coefficients vector does not match rank of singular design matrix x")
 		    }
-		} else stop("unknown init argument")
+		} else stop("invalid 'init' argument")
 		stopifnot(is.numeric(init$coef), is.numeric(init$scale))
 		## modify (default) control$method, possibly dropping first letter:
 		if (control$method == "MM" || substr(control$method, 1, 1) == "S")
@@ -156,7 +156,7 @@ lmrob <-
 		## check for control$cov argument
 		if (class(init)[1] != "lmrob.S" && control$cov == '.vcov.avar1')
 		    control$cov <- ".vcov.w"
-	    }
+	    } # else pass on  init=NULL :
 	    z <- lmrob.fit(x, y, control, init=init) #-> ./lmrob.MM.R
 	    ##   ---------
             if(is.character(ini) && !grepl(paste0("^", ini), control$method))
@@ -315,13 +315,9 @@ case.names.lmrob <- function(object, full = FALSE, ...)
 ## use confint.lm instead of confint.default
 ## mainly to get t instead of normal quantiles
 ## Now imported from 'stats'  -- and S3 registered in ../NAMESPACE , too,  but
-## these are *still* needed (argh! bug??); otherwise we get
-if(FALSE) "
-Warning message:
-S3 methods 'confint.lm', 'dummy.coef.lm' were declared in NAMESPACE but not found
-"
-   confint.lmrob <-    confint.lm
-dummy.coef.lmrob <- dummy.coef.lm
+## still needed for now (R bug fixed in svn rev 84463 - for R 4.4.0)
+   confint.lm <-    confint.lm
+dummy.coef.lm <- dummy.coef.lm
 
 
 family.lmrob <- function(object, ...) gaussian() ## == stats:::family.lm
@@ -372,7 +368,7 @@ print.summary.lmrob <-
     cat("\nCall:\n",
 	paste(deparse(x$call, width.cutoff=72), sep = "\n", collapse = "\n"),
 	"\n", sep = "")
-    control <- lmrob.control.minimal(x$control)
+    control <- lmrob.control.minimal(x$control, nobs = nobs(x, use.fallback = TRUE))
     cat(" \\--> method = \"", control$method, '"\n', sep = "")
     ## else cat("\n")
     resid <- x$residuals
@@ -443,7 +439,8 @@ print.summary.lmrob <-
 		       }
 		}
 	    }
-	    cat("Convergence in", x$iter, "IRWLS iterations\n")
+	    if(is.numeric(it <- x$iter) && length(it))
+                cat("Convergence in", it, "IRWLS iterations\n")
 	}
 	cat("\n")
 
@@ -466,7 +463,7 @@ print.summary.lmrob <-
 print.lmrob <- function(x, digits = max(3, getOption("digits") - 3), ...)
 {
     cat("\nCall:\n", cl <- deparse(x$call, width.cutoff=72), "\n", sep = "")
-    control <- lmrob.control.minimal(x$control)
+    control <- lmrob.control.minimal(x$control, nobs=nobs(x, use.fallback = TRUE))
     if(!any(grepl("method *= *['\"]", cl)))## 'method = ".."' not explicitly visible above
 	cat(" \\--> method = \"", control$method, '"\n', sep = "") else cat("\n")
     if(length((cf <- coef(x)))) {
@@ -506,8 +503,10 @@ print.lmrob.S <- function(x, digits = max(3, getOption("digits") - 3),
     cat("scale = ",format(x$scale, digits=digits), "; ",
 	if(x$converged)"converged" else "did NOT converge",
 	" in ", x$k.iter, " refinement steps\n")
-    if (showAlgo && !is.null(x$control))
-        printControl(x$control, digits = digits, drop. = "method")
+    if (showAlgo && !is.null(ctrl <- x$control))
+	printControl(lmrob.control.minimal(ctrl, nobs = nobs(x, use.fallback = TRUE),
+                                           oStats = !is.null(ctrl$ostats)),
+		     digits = digits, drop. = "method")
     invisible(x)
 }
 
@@ -522,7 +521,7 @@ qr.lmrob <- function (x, ...) {
 residuals.lmrob <- function(object, ...) residuals.lm(object, ...)
 
 ## even simpler than residuals.default():
-residuals.lmrob.S <- function(obj) obj$residuals
+residuals.lmrob.S <- function(object, ...) object$residuals
 
 summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...)
 {
@@ -539,8 +538,9 @@ summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...
 	se <- sqrt(if(length(object$cov) == 1L) object$cov else diag(object$cov))
 	est <- object$coefficients[object$qr$pivot[p1]]
 	tval <- est/se
-	ans <- object[c("call", "terms", "residuals", "scale", "rweights", "na.action",
+	ans <- object[c("call", "terms", "residuals", "weights", "scale", "rweights", "na.action",
 			"converged", "iter", "control")]
+        ans[is.na(names(ans))] <- NULL # e.g. {"na.action", "iter"} for  method = "S"
 	if (!is.null(ans$weights))
 	    ans$residuals <- ans$residuals * sqrt(object$weights)
 	## 'df' vector, modeled after summary.lm() : ans$df <- c(p, rdf, NCOL(Qr$qr))
@@ -603,12 +603,9 @@ summary.lmrob <- function(object, correlation = FALSE, symbolic.cor = FALSE, ...
     }
     ans$aliased <- aliased # used in print method
     ans$sigma <- sigma # 'sigma': in summary.lm() & 'fit.models' pkg
-    if (is.function(ans$control$eps.outlier))
-        ans$control$eps.outlier <- ans$control$eps.outlier(nobs(object))
-    if (is.function(ans$control$eps.x))
-	ans$control$eps.x <-
-	    if(!is.null(o.x <- object[['x']]))
-                ans$control$eps.x(max(abs(o.x))) ## else NULL
+    if (is.function(epsO <- ans$control$eps.outlier)) ans$control$eps.outlier <- epsO(nobs(object))
+    if (is.function(epsX <- ans$control$eps.x))
+        ans$control$eps.x <- if(!is.null(o.x <- object[['x']])) epsX(max(abs(o.x))) ## else NULL
     structure(ans,
 	      class = "summary.lmrob")
 }
@@ -661,14 +658,30 @@ printControl <-
 {
     ## Purpose: nicely and sensibly print a 'control' structure
     ##		currently  for lmrob(), glmrob()
-    ## Author: Martin Maechler, Date: 31 May 2006
-    PR <- function(LST, ...) if(length(LST)) print(unlist(LST), ...)
+    ## Author: Martin Maechler, 2006 ff
+    force(ctrl) # ->> better error msg
+
+    ## NB: unlist() drops setting=NULL  [ok]
+    PR <- function(LST, ...) {
+        if(length(LST)) {
+            if(any(L <- !vapply(LST, function(.) is.atomic(.) || is.null(.), NA))) {
+                ## treat non-{atomic|NULL}:
+                LST[L] <- lapply(LST[L], str2simpLang)
+            }
+            print(unlist(LST), ...)
+        }
+    }
+    ##' maybe generally useful  TODO? ---> {utils} or at least {sfsmisc} ?
+    str2simpLang <-  function(x) {
+        r <- if(is.null(x)) quote((NULL)) else str2lang(deparse1(x))
+        if(is.call(r)) format(r) else r
+    }
 
     cat(header,"\n")
     is.str <- (nc <- names(ctrl)) %in% str.names
     do. <- !is.str & !(nc %in% drop.)
     is.ch <- vapply(ctrl, is.character, NA)
-    real.ctrl <- vapply(ctrl, function(x)
+    real.ctrl <- vapply(ctrl, function(x) # real, *not* integer-valued
 			length(x) > 0 && is.numeric(x) && any(x %% 1 != 0), NA)
     PR(ctrl[do. & real.ctrl], digits = digits, ...)
     ## non-real, non-char ones (typically integers), but dropping 0-length ones

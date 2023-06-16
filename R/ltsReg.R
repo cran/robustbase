@@ -125,13 +125,11 @@ ltsReg.default <- function (x, y, intercept = TRUE,
     if(missing(wgtFUN)) getDefCtrl("wgtFUN", defCtrl)
 
     if(length(seed) > 0) {
-	if(length(seed) < 3 || seed[1L] < 100)
+	if(length(seed) < 3L || seed[1L] < 100L)
 	    stop("invalid 'seed'. Must be compatible with .Random.seed !")
-	if(exists(".Random.seed", envir=.GlobalEnv, inherits=FALSE))  {
-	    seed.keep <- get(".Random.seed", envir=.GlobalEnv, inherits=FALSE)
-	    on.exit(assign(".Random.seed", seed.keep, envir=.GlobalEnv))
-	}
-	assign(".Random.seed", seed, envir=.GlobalEnv)
+	if(!is.null(seed.keep <- get0(".Random.seed", envir = .GlobalEnv, inherits = FALSE)))
+	    on.exit(assign(".Random.seed", seed.keep, envir = .GlobalEnv))
+	assign(".Random.seed", seed, envir = .GlobalEnv)
     }
 
     if(alpha < 1/2 || alpha > 1)

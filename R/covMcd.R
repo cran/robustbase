@@ -50,13 +50,11 @@ covMcd <- function(x,
     logdet.Lrg <- 50 ## <-- FIXME add to  rrcov.control() and then use that
     ##   Analyze and validate the input parameters ...
     if(length(seed) > 0) {
-	if(length(seed) < 3 || seed[1L] < 100)
+	if(length(seed) < 3L || seed[1L] < 100L)
 	    stop("invalid 'seed'. Must be compatible with .Random.seed !")
-        if(exists(".Random.seed", envir=.GlobalEnv, inherits=FALSE))  {
-            seed.keep <- get(".Random.seed", envir=.GlobalEnv, inherits=FALSE)
-            on.exit(assign(".Random.seed", seed.keep, envir=.GlobalEnv))
-        }
-        assign(".Random.seed", seed, envir=.GlobalEnv)
+	if(!is.null(seed.keep <- get0(".Random.seed", envir = .GlobalEnv, inherits = FALSE)))
+	    on.exit(assign(".Random.seed", seed.keep, envir = .GlobalEnv))
+	assign(".Random.seed", seed, envir = .GlobalEnv)
     }
 
     ## For back compatibility, as some new args did not exist pre 2013-04,
@@ -238,7 +236,13 @@ covMcd <- function(x,
             ans <- c(ans, cov.wt(x, wt = weights, cor=cor))
 
 	    if(sum.w != n) {
-		cdelta.rew <- .MCDcons(p, sum.w/n) ## VT::19.3.2007
+		##  VT::05.04.2023
+		## The correct consistency correction factor for the reweighted estimate
+		##  would be .MCDcons(p, 0.975) and not .MCDcons(p, sum.w/n) - see mail from
+		##  Andreas Alfons from 29.01.2020 and Croux and Haesbroeck (1999), equations 4.1 and 4.2.
+		##  cdelta.rew <- .MCDcons(p, sum.w/n) ## VT::19.3.2007
+		cdelta.rew <- .MCDcons(p, 0.975)
+
 		correct.rew <- if(use.correction) .MCDcnp2.rew(p, n, alpha) else 1.
 		cnp2 <- c(cdelta.rew, correct.rew)
 		ans$cov <- cdelta.rew * correct.rew * ans$cov
@@ -337,7 +341,12 @@ covMcd <- function(x,
         ## Compute and apply the consistency correction factor for
         ## the reweighted cov
         if(!sing.rewt && sum.w != n) {
-	    cdelta.rew <- .MCDcons(p, sum.w/n) ## VT::19.3.2007
+        ##  VT::05.04.2023
+        ## The correct consistency correction factor for the reweighted estimate
+        ##  would be .MCDcons(p, 0.975) and not .MCDcons(p, sum.w/n) - see mail from
+        ##  Andreas Alfons from 29.01.2020 and Croux and Haesbroeck (1999), equations 4.1 and 4.2.
+        ##  cdelta.rew <- .MCDcons(p, sum.w/n) ## VT::19.3.2007
+        cdelta.rew <- .MCDcons(p, 0.975)
 	    correct.rew <- if(use.correction) .MCDcnp2.rew(p, n, alpha) else 1.
 	    cnp2 <- c(cdelta.rew, correct.rew)
 	    ans$cov <- cdelta.rew * correct.rew * ans$cov
@@ -534,11 +543,11 @@ print.mcd <- function(x, digits = max(3, getOption("digits") - 3), print.gap = 2
             "\n", sep="")
     ## VT::29.03.2007 - solve a conflict with fastmcd() in package robust -
     ##      also returning an object of class "mcd"
-    xx <- NA
-    if(!is.null(x$crit))
-	xx <- format(x$crit, digits = digits)
-    else if (!is.null(x$raw.objective))
-	xx <- format(log(x$raw.objective), digits = digits)
+    xx <- if(!is.null(x$crit))
+              format(x$crit, digits = digits)
+          else if (!is.null(x$raw.objective))
+              format(log(x$raw.objective), digits = digits)
+          else NA
     cat("Log(Det.): ", xx , "\n\nRobust Estimate of Location:\n")
     print(x$center, digits = digits, print.gap = print.gap, ...)
     cat("Robust Estimate of Covariance:\n")
@@ -588,7 +597,7 @@ print.summary.mcd <-
 ##'    (see calfa in Croux and Haesbroeck)
 ##' @param p
 ##' @param alpha alpha ~= h/n = quan/n
-##'    also use for the reweighted MCD, calling with alpha = 'sum(weights)/n'
+##'    also use for the reweighted MCD, calling with alpha = 0.975
 MCDcons <- # <- *not* exported, but currently used in pkgs rrcov, rrcovNA
 .MCDcons <- function(p, alpha)
 {

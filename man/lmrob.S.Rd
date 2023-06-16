@@ -4,17 +4,33 @@
 \description{
   Computes an S-estimator for linear regression,
   using the \dQuote{fast S} algorithm.% of Matias Salibian & Victor Yohai ...
-
 }
 \usage{
 lmrob.S(x, y, control,
         trace.lev = control$trace.lev,
-        only.scale = FALSE, mf = NULL)
+        only.scale = FALSE, mf)
 }
 \arguments{
   \item{x}{design matrix (\eqn{n \times p}{n * p})}
   \item{y}{numeric vector of responses (or residuals for \code{only.scale=TRUE}).}
-  \item{control}{ list as returned by \code{\link{lmrob.control}} }
+  \item{control}{ list as returned by \code{\link{lmrob.control}}; the
+    following components are used for \code{lmrob.S()}:
+    \code{"trace.lev"}, % as default for direct arg {trace.lev}, see below
+    \code{"nResample"},
+    \code{"groups"},
+    \code{"n.group"},
+    \code{"fast.s.large.n"},
+    \code{"seed"},
+    \code{"bb"},
+    \code{"psi"}, \code{"tuning.chi"},% c.chi
+    \code{"best.r.s"},
+    \code{"k.fast.s"},
+    \code{"k.max"},
+    \code{"maxit.scale"},
+    \code{"refine.tol"}, \code{"solve.tol"}, \code{"scale.tol"},
+    \code{"mts"},
+    \code{"subsampling"}.
+  }
   \item{trace.lev}{integer indicating if the progress of the algorithm
     should be traced (increasingly); default \code{trace.lev = 0} does
     no tracing.}
@@ -22,7 +38,7 @@ lmrob.S(x, y, control,
     of \code{y} should be computed.  In this case, \code{y} will
     typically contain \emph{residuals}.}%% FIXME: explain
   %% namely, s, fulfilling the \sum_i chi(i) = 1/2  equation.
-  \item{mf}{unused and deprecated.}
+  \item{mf}{defunct.}
 }
 \details{
   This function is used by \code{\link{lmrob.fit}} and typically not

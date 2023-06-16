@@ -237,18 +237,19 @@ ltsPlot <- function(x,
     ## - axis line.
     ## The default is 'c(3, 1, 0)'.
     if(!classic)
-	par(mfrow = c(1,1), pty = "m")
+	par(pty = "m")
     else {
-	par(mfrow = c(1,2), pty = "m")
-
+	opar <- par(mfrow = c(1,2), pty = "m")
+    on.exit(par(opar))
+    
 	## calculate the LS regression (using LTS with alpha = 1)
 	## if intercept, obj$X is augmented with a column of 1s - remove it
 
 	if(x$intercept &&		# model with intercept
 	   length(dim(x$X)) == 2 &&	# X is 2-dimensional
 	   (nc <- ncol(x$X)) > 1 &&	# X has more than 1 column
-	   all(x$X[,nc] == 1)) # the last column of X is all 1s
-	    X <- x$X[, -nc]
+	   all(x$X[,1] == 1))       # the first column of X is all 1s
+	    X <- x$X[, -1]
 	else
 	    X <- x$X
 	obj.cl <- ltsReg(X, x$Y, intercept = x$intercept, alpha = 1)

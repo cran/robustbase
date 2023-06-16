@@ -82,17 +82,21 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
     }
     \item{Initial Estimator \code{init}:}{
       The initial estimator may be specified using the argument
-      \code{init}.  This can either be a string, a function or a list.
-      A \emph{string} can be used to specify built in internal
-      estimators (currently \code{S} and \code{M-S}, see \emph{See also}
-      below).  A \code{\link{function}} taking arguments \code{x, y,
-      control, mf} (where \code{mf} stands for \code{model.frame}) and
-      returning a list containing at least the initial coefficients as
-      \code{coefficients} and the initial scale estimate \code{scale}.
-      Or a \emph{list} giving the initial coefficients and scale as
-      \code{coefficients} and \code{scale}.  See also \emph{Examples}.
-
-      Note that if the \code{init} argument is a function or list, the
+      \code{init}.  This can either be
+      \itemize{
+	\item a \emph{string} used to specify built in internal
+	estimators (currently \code{"S"} and \code{"M-S"}, see \emph{See also}
+	below);
+	\item a \code{\link{function}} taking arguments \code{x, y,
+	  control, mf} (where \code{mf} stands for \code{model.frame}) and
+	returning a \code{\link{list}} containing at least the initial coefficients as
+	component \code{"coefficients"} and the initial scale estimate as
+	\code{"scale"}.
+	\item Or a \code{\link{list}} giving the initial coefficients and
+	scale as components \code{"coefficients"} and \code{"scale"}.  See also
+	\emph{Examples}.
+      }
+      Note that when \code{init} is a function or list, the
       \code{method} argument must \emph{not} contain the initial estimator, e.g.,
       use \code{MDM} instead of \code{SMDM}.
 
@@ -213,6 +217,7 @@ lmrob(formula, data, subset, weights, na.action, method = "MM",
   Salibian-Barrera, M. and Yohai, V.J. (2006)
   A fast algorithm for S-regression estimates,
   \emph{Journal of Computational and Graphical Statistics} \bold{15}(2), 414--427.
+  \doi{10.1198/106186006X113629}
 
   Yohai, V.J. (1987)
   High breakdown-point and high efficiency estimates for regression.

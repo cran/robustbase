@@ -3,15 +3,18 @@
 library(robustbase)
 
 data(stackloss)
+cat("doExtras:", doExtras <- robustbase:::doExtras(),"\n")
+
+str(ctrl2 <- lmrob.control(trace.lev = if(doExtras) 2 else 0))
 
 ## S
 set.seed(0)
 summary(m0 <- lmrob(stack.loss ~ ., data = stackloss, method = "S",
                     compute.outlier.stats = "S"))
 set.seed(0)
-m0a <- lmrob.S(m0$x, stack.loss, lmrob.control())
+m0a <- lmrob.S(m0$x, stack.loss, ctrl2)
 
-all.equal(m0[c('coefficients', 'scale', 'rweights')],
+all.equal(m0 [c('coefficients', 'scale', 'rweights')],
           m0a[c('coefficients', 'scale', 'rweights')])
 
 ## MM

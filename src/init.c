@@ -32,7 +32,7 @@ static R_NativePrimitiveArgType R_lmrob_S_typ[] = {
     /* rrhoc */ REALSXP, INTSXP, REALSXP,
     /* best_r */ INTSXP, INTSXP, INTSXP,
     /* K_s */ INTSXP, INTSXP, INTSXP,
-    /* rel_tol*/ REALSXP, REALSXP, REALSXP,
+    /* rel_tol*/ REALSXP, REALSXP, REALSXP, REALSXP,
     /* converged */ LGLSXP, INTSXP, INTSXP, INTSXP, INTSXP
 };
 
@@ -41,7 +41,7 @@ static R_NativePrimitiveArgType R_lmrob_MM_typ[] = {
     /* beta_initial */ REALSXP, REALSXP,
     /* beta_m */ REALSXP, REALSXP,
     /* max_it */ INTSXP, REALSXP, INTSXP,
-    /* loss */ REALSXP, REALSXP, LGLSXP, INTSXP, INTSXP, INTSXP
+    /* loss */ REALSXP, REALSXP, LGLSXP, INTSXP
 };
 
 static R_NativePrimitiveArgType R_find_D_scale_typ[] = {
@@ -61,7 +61,7 @@ static R_NativePrimitiveArgType R_lmrob_M_S_typ[] = {
     /* scale */ REALSXP, REALSXP, REALSXP,
     /* rho_c */ REALSXP, INTSXP, REALSXP,
     /* K_m_s */ INTSXP, INTSXP,
-    /* rel_tol */ REALSXP, REALSXP, REALSXP,
+    /* rel_tol */ REALSXP, REALSXP, REALSXP, REALSXP,
     /* converged */ LGLSXP, INTSXP,
     /* orthogonalize */ LGLSXP, LGLSXP, LGLSXP, INTSXP, INTSXP
 };

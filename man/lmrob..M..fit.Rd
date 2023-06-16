@@ -7,8 +7,11 @@
   \code{beta.initial}, this results in an MM-estimator.
 }
 \usage{
-lmrob..M..fit(x, y, beta.initial, scale, control, obj,
-              mf = obj$model, method = obj$control$method)
+lmrob..M..fit(x = obj$x, y = obj$y,
+              beta.initial = obj$coef, scale = obj$scale, control = obj$control,
+              obj,
+              mf,
+              method = obj$control$method)
 }
 \arguments{
   \item{x}{design matrix (\eqn{n \times p}{n x p}) typically including a
@@ -24,7 +27,7 @@ lmrob..M..fit(x, y, beta.initial, scale, control, obj,
     are accessed.}
   \item{obj}{an optional \code{lmrob}-object.  If specified, this is
     typically used to set values for the other arguments.}
-  \item{mf}{unused and deprecated.}
+  \item{mf}{defunct.}
   \item{method}{optional; the \code{method} used for \emph{obj} computation.}
 }
 \details{

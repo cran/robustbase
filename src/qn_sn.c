@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2005--2007, 2021	Martin Maechler, ETH Zurich
+ *  Copyright (C) 2005--2023	Martin Maechler, ETH Zurich
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -151,7 +151,7 @@ void qn0(const double x[], int n, const int64_t k[], int len_k, /* ==> */ double
 	 * 2021, Jan. 27 -- ... : from .../Pkg-ex/robustbase/Qn-multi-k-debugging.R
                               bnd1 <- function(n) 5 - 1.75*(n %% 2) + (0.3939 - 0.0067*(n %% 2)) * n*(n-1)
 	*/
-	k_L = 5 - 1.75*(n % 2) + (0.3939 - 0.0067*(n % 2)) * (int64_t) n*(n-1) ;
+	k_L = (int64_t) (5 - 1.75*(n % 2) + (0.3939 - 0.0067*(n % 2)) * ((int64_t) n)*(n-1));
     int h = n / 2 + 1; // really use, only to set right[] below ?
     for (int i = 0; i < n; ++i)
 	y[i] = x[i];
@@ -288,7 +288,7 @@ void qn0(const double x[], int n, const int64_t k[], int len_k, /* ==> */ double
 	    REprintf("knew < 0 should never happen, setting it to 0\n");
 #endif
 	}
-	rPsort(work, j, knew);
+	rPsort(work, j, (int)knew);
 	res[i_k] = work[knew];
     }
   } // for(int i_k=0, i_k < len_k ...) { k_ = k[i_k] ; ....

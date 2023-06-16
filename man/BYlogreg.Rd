@@ -103,8 +103,9 @@ head(cbind(vX, vY))# 'X' does include the intercept
 
 vWBY <- BYlogreg(x0 = vX, y = vY, addIntercept=FALSE) # as 'vX' has it already
 v.BY <- BYlogreg(x0 = vX, y = vY, addIntercept=FALSE, initwml=FALSE)
-## they are relatively close:
-stopifnot( all.equal(vWBY, v.BY, tolerance = 2e-4) )
+## they are relatively close, well used to be closer than now,
+## with the (2023-05, VT) change of covMcd() scale-correction
+stopifnot( all.equal(vWBY, v.BY, tolerance = 0.008) ) # was ~ 1e-4 till 2023-05
 }
 \keyword{robust}
 \keyword{regression}

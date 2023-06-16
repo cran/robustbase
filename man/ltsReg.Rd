@@ -113,9 +113,6 @@ ltsReg(x, \dots)
   removed either by \code{y ~ x - 1} or \code{y ~ 0 + x}.  See
   \code{\link{formula}} for more details.
 }
-\note{We strongly recommend using \code{\link{lmrob}()} instead of
-  \code{ltsReg} (\emph{See also} below)!
-}
 \value{
   The function \code{ltsReg} returns an object of class \code{"lts"}.
   The \code{\link{summary}} method function is used to obtain (and
@@ -197,13 +194,9 @@ ltsReg(x, \dots)
 }
 
 \seealso{
-  \code{\link{lmrob.S}()} provides a fast S estimator with similar
-  breakdown point as \code{ltsReg()} but better efficiency.\cr
-  For data analysis, rather use \code{\link{lmrob}} which is based on
-  \code{\link{lmrob.S}}.
-
   \code{\link{covMcd}};
-  \code{\link{summary.lts}} for summaries.
+  \code{\link{summary.lts}} for summaries,
+  \code{\link{lmrob}()} for alternative robust estimator with HBDP.
 
   The generic functions \code{\link{coef}}, \code{\link{residuals}},
   \code{\link{fitted}}.

@@ -38,8 +38,12 @@ testFun(Y ~ Region:X1:X2 + X1*X2, c(1:1, 4:7))
 
 
 control <- lmrob.control()
+cntrlT1 <- lmrob.control(trace.lev=1)
 f.lm <- lm(Y ~ Region + X1 + X2 + X3, education)
 splt <- splitFrame(f.lm$model)
+stopifnot(identical(names(splt$x1.idx), names(coef(f.lm))),
+          unname(splt$x1.idx) == c(rep(TRUE, 4), rep(FALSE, 3))
+          )
 y <- education$Y
 
 ## test orthogonalizing
@@ -55,12 +59,14 @@ for (i in 1:ncol(x2)) {
     x2.tilde[,i] <- tmp$resid
     T2[,i] <- tmp$coef
 }
+T2
 
 set.seed(10)
-mss1 <- m_s_subsample(x1, x2.tilde, y.tilde, control, orth = FALSE)
+mss1 <- m_s_subsample(x1, x2.tilde, y.tilde, cntrlT1, orth = FALSE)
 mss1 <- within(mss1, b1 <- drop(t1 + b1 - T2 %*% b2))
+stopifnot(all.equal(30.81835, mss1$scale, tol=1e-7))
 set.seed(10)
-mss2 <- m_s_subsample(x1, x2,       y,       control, orth = TRUE)
+mss2 <- m_s_subsample(x1, x2,       y,       cntrlT1, orth = TRUE)
 stopifnot(all.equal(mss1, mss2))
 
 res <- vector("list", 100)

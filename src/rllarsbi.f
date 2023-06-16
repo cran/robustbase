@@ -1,13 +1,14 @@
 c--- For lmrob.lar()  in  ../R/lmrob.M.S.R
 c---     ~~~~~~~~~~~
 C=======================================================================
-      SUBROUTINE rlSTORm2(Y,N,J,YJ)
+      SUBROUTINE rlSTORm2(Y,N, J, YJ)
 C.......................................................................
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       DIMENSION Y(N)
 C-----------------------------------------------------------------------
-C     rlSTORm2 SEARCHES THE J-TH VALUE IN ORDER OF MAGNITUDE IN
-C     A VECTOR OF LENGTH N.
+C     rlSTORm2() searches the J-th value in order of magnitude in a vector Y() of length N,
+C     ---------- functionally, YJ := rlSTORm2(Y(1..N), J);  YJ = Y_(j) {the j-th order statist.}
+C     is only called in one place with J = N/2+1  i.e.,  to compute the {high-}Median(Y[]).
 C-----------------------------------------------------------------------
 C--- copied from robust package: src/lmrobmm.f -------------------------
       L=1
@@ -41,7 +42,9 @@ C=======================================================================
 C.......................................................................
       DOUBLE PRECISION V1(M),V2(M),MLT
 C-----------------------------------------------------------------------
-C     AUXILIARY ROUTINE FOR rlLARSbi
+C     V1 := V1 - m*V2  *apart* from index [IOUT] where V1[] remains unchanged
+C                      for  vectors V1[], V2[]; scalar m=MLT
+C     Auxiliary for rlLARSbi
 C-----------------------------------------------------------------------
 C--- copied from robust package: src/lmrobbi.f -------------------------
       DO 220 I=1,M
@@ -51,9 +54,9 @@ C--- copied from robust package: src/lmrobbi.f -------------------------
       RETURN
       END
 C=======================================================================
-      SUBROUTINE rlICHGbi(A,B)
+      SUBROUTINE rlSWAP(A,B) ! was rlICHGbi
 C.......................................................................
-C     AUXILIARY ROUTINE FOR rlLARSbi
+C     Swap A <--> B  -- Auxiliary routine for rlLARSbi() 
 C-----------------------------------------------------------------------
 C--- copied from robust package: src/lmrobbi.f -------------------------
       DOUBLE PRECISION A,B,C
@@ -63,12 +66,20 @@ C--- copied from robust package: src/lmrobbi.f -------------------------
       RETURN
       END
 C=======================================================================
-      SUBROUTINE rlLARSbi(X,Y,N,NP,MDX,MDT,TOL,NIT,K,
-     +     KODE,SIGMA,THETA,RS,SC1,SC2,SC3,SC4,BET0)
+      SUBROUTINE rlLARSbi(X, Y, N, NP, MDX,MDT,
+     +     TOL,
+     +     NIT,   ! --> final #{pivoting steps}
+     +     K,     ! --> ("scratch"?? ; maybe interesting for debugging)
+     +     KODE,  ! --> return code in {0, 1, 2}
+     +     SIGMA, ! --> high-median(rs[i]) / bet0
+     +     THETA, ! --> theta[1:nP] = the \hat{\beta} vector
+     +     RS, ! --> residuals
+     +     SC1,SC2,SC3,SC4,
+     +     BET0)
 C.......................................................................
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
-      DIMENSION X(MDX,NP),Y(N),THETA(MDT),RS(N),SC1(N),SC2(NP),
-     +     SC3(NP),SC4(NP)
+      DIMENSION X(MDX,NP), Y(N), THETA(MDT), RS(N),
+     +     SC1(N), SC2(NP), SC3(NP), SC4(NP)
       INTEGER OUT
       LOGICAL STAGE,TEST
       DATA ZERO,TWO,EPS,BIG/0.D0,2.D0,1.0D-10,3.401D38/
@@ -175,10 +186,10 @@ C-----------------------------------------------------------------------
 c     150
       IF (.not.TEST .and. STAGE) then
          DO I=1,N
-            CALL rlICHGbi(X(I,KR),X(I,IN))
+            CALL rlSWAP(X(I,KR),X(I,IN))
          end do
-         CALL rlICHGbi(SC3(KR),SC3(IN))
-         CALL rlICHGbi(SC4(KR),SC4(IN))
+         CALL rlSWAP(SC3(KR),SC3(IN))
+         CALL rlSWAP(SC4(KR),SC4(IN))
          KR=KR+1
 c     GOTO 260
       else
@@ -226,7 +237,7 @@ C-----------------------------------------------------------------------
          end do
          SC3(IN)=-SC3(IN)/PIVOT
          X(OUT,IN)=1.D0/PIVOT
-         CALL rlICHGbi(SC1(OUT),SC4(IN))
+         CALL rlSWAP(SC1(OUT),SC4(IN))
          KOUNT=KOUNT+1
          IF (.NOT. STAGE) GOTO 270
 C-----------------------------------------------------------------------
@@ -234,10 +245,10 @@ C     INTERCHANGE ROWS IN STAGE I.
 C-----------------------------------------------------------------------
          KL=KL+1
          DO J=KR,NP
-            CALL rlICHGbi(X(OUT,J),X(KOUNT,J))
+            CALL rlSWAP(X(OUT,J),X(KOUNT,J))
          enddo
-         CALL rlICHGbi(THETA(OUT),THETA(KOUNT))
-         CALL rlICHGbi(SC1(OUT),SC1(KOUNT))
+         CALL rlSWAP(THETA(OUT),THETA(KOUNT))
+         CALL rlSWAP(SC1(OUT),SC1(KOUNT))
       endif
 
       IF (KOUNT+KR .NE. NP+1) GOTO 70
@@ -307,21 +318,24 @@ c---
             RS(K)=D
          endif
       end do
-      K=NP+1-KR
-      SUM=ZERO
-      DO I=KL,N
-         SUM=SUM+THETA(I)
-      end do
-      SUMIN=SUM
-      NIT=KOUNT
+c      K=NP+1-KR
+c      SUM=ZERO
+c      DO I=KL,N
+c         SUM=SUM+THETA(I)
+c      end do
+c      SUMIN=SUM
+      NIT=KOUNT ! final #{pivoting steps}
       DO J=1,NP
          THETA(J)=SC2(J)
       end do
+C     Y := |resid|
       DO I=1,N
          Y(I)=DABS(RS(I))
       end do
       N2=N/2+1
-      CALL RLSTORM2(Y,N,N2,SIGMA)
+C     SIGMA := high-median( Y[1:N] ) == high-median( |res[i]| )
+      CALL rlSTORm2(Y,N,N2,SIGMA)
+c     BET0 = 0.773372647623 = pnorm(0.75)  always
       SIGMA=SIGMA/BET0
       RETURN
       END

@@ -1,4 +1,4 @@
-c
+
 c--   Routines common to
 c--   fastLTS ( ./rfltsreg.f )  and
 c--   fastMCD ( ./rffastmcd.f )
@@ -50,9 +50,13 @@ cOLD    end
 c     ---------------------------------------------------------
 
       subroutine rfgenpn(n,nsel,index)
-cc
-cc    Constructs all subsets of nsel cases out of n cases.
-cc
+c
+c     Constructs all subsets of nsel cases out of n cases:
+c     given last index[1..nsel] produce (alphabetically) next one
+c
+c     NB: The *caller* makes sure this called exactly choose(n, nsel) == rfncomb(nsel, n) times,
+c         starting with (1, 2, .., p-1, p-1)  -> return (1 2 .. p) after first call.
+
       implicit none
       integer n,nsel,index(nsel)
 cc

@@ -2,7 +2,7 @@
 \title{Tuning Parameters for lmrob() and Auxiliaries}
 \encoding{utf8}
 \alias{lmrob.control}
-\alias{lmrob.control}
+\alias{update.lmrobCtrl}
 \alias{.Mchi.tuning.default}
 \alias{.Mpsi.tuning.default}
 \alias{.Mchi.tuning.defaults}
@@ -25,16 +25,20 @@ lmrob.control(setting, seed = NULL, nResample = 500,
               k.fast.s = 1, best.r.s = 2,
               k.max = 200, maxit.scale = 200, k.m_s = 20,
               refine.tol = 1e-7, rel.tol = 1e-7, scale.tol = 1e-10, solve.tol = 1e-7,
+              zero.tol = 1e-10,
               trace.lev = 0,
               mts = 1000, subsampling = c("nonsingular", "simple"),
               compute.rd = FALSE, method = "MM", psi = "bisquare",
               numpoints = 10, cov = NULL,
               split.type = c("f", "fi", "fii"), fast.s.large.n = 2000,
+              # only for outlierStats() :
               eps.outlier = function(nobs) 0.1 / nobs,
               eps.x = function(maxx) .Machine$double.eps^(.75)*maxx,
               compute.outlier.stats = method,
               warn.limit.reject = 0.5,
-              warn.limit.meanrw = 0.5, ...)
+              warn.limit.meanrw = 0.5, \dots)
+
+\method{update}{lmrobCtrl}(object, \dots)
 
 .Mchi.tuning.defaults
 .Mchi.tuning.default(psi)
@@ -77,7 +81,7 @@ lmrob.control(setting, seed = NULL, nResample = 500,
     local improvement steps (\dQuote{\emph{I-steps}}) for each
     re-sampling candidate.}
   \item{k.m_s}{(for the M-S algorithm): specifies after how many
-    unsucessful refinement steps the algorithm stops.}
+    unsuccessful refinement steps the algorithm stops.}
   \item{best.r.s}{(for the fast-S algorithm): Number of
     of best candidates to be iterated further (i.e.,
     \dQuote{\emph{\bold{r}efined}}); is denoted \eqn{t} in
@@ -85,7 +89,7 @@ lmrob.control(setting, seed = NULL, nResample = 500,
   \item{k.max}{(for the fast-S algorithm): maximal number of
     refinement steps for the \dQuote{fully} iterated best candidates.}
   \item{maxit.scale}{integer specifying the maximum number of C level
-    \code{find_scale()} iterations.}
+    \code{find_scale()} iterations (in fast-S and M-S algorithms).}
   \item{refine.tol}{(for the fast-S algorithm): relative convergence
     tolerance for the fully iterated best candidates.}
   \item{rel.tol}{(for the RWLS iterations of the MM algorithm): relative
@@ -95,7 +99,15 @@ lmrob.control(setting, seed = NULL, nResample = 500,
   \item{solve.tol}{(for the S algorithm): relative
     tolerance for inversion.  Hence, this corresponds to
     \code{\link{solve.default}()}'s \code{tol}.}
+  \item{zero.tol}{for checking 0-residuals in the S algorithm, non-negative number
+    \eqn{\epsilon_z}{ez} such that
+    \eqn{\{i; \left|\tilde{R}_i\right| \le \epsilon_z\}}{{i; |R~[i]| <= ez}}
+    correspond to \eqn{0}-residuals, where \eqn{\tilde{R}_i}{R~[i]} are standardized residuals,
+    \eqn{\tilde{R}_i = R_i/s_y}{R~[i] = R[i]/sy} and
+    \eqn{s_y = \frac{1}{n} \sum_{i=1}^n \left|y_i\right|}{%
+          sy = ave_i |y[i]| = 1/n sum(i=1..n, |y[i]|)}.}
   \item{trace.lev}{integer indicating if the progress of the MM-algorithm
+    and the fast-S algorithms, see \code{\link{lmrob.S}},
     should be traced (increasingly); default \code{trace.lev = 0} does
     no tracing.}
   \item{mts}{maximum number of samples to try in subsampling
@@ -129,17 +141,22 @@ lmrob.control(setting, seed = NULL, nResample = 500,
     \dQuote{large n} strategy.}
   \item{eps.outlier}{limit on the robustness weight below which an observation
     is considered to be an outlier.
-    Either a numeric(1) or a function that takes the number of observations as
-    an argument.  Used in \code{\link{summary.lmrob}} and
+    Either a \code{numeric(1)} or a function that takes the number of observations as
+    an argument.  Used only in \code{\link{summary.lmrob}} and
     \code{\link{outlierStats}}.}
   \item{eps.x}{limit on the absolute value of the elements of the design matrix
     below which an element is considered zero.
-    Either a numeric(1) or a function that takes the maximum absolute value in
+    Either a \code{numeric(1)} or a function that takes the maximum absolute value in
     the design matrix as an argument.}
   \item{compute.outlier.stats}{vector of \code{\link{character}}
     strings, each valid to be used as \code{method} argument.  Used to
     specify for which estimators outlier statistics (and warnings)
-    should be produced.  Set to empty string if none are required.}
+    should be produced.  Set to empty (\code{NULL} or \code{character(0)})
+    if none are required.
+    \cr Note that the default is \code{method} which by default is either
+    \code{"MM"}, \code{"SM"}, or \code{"SMDM"}; hence using
+    \code{compute.outlier.stats = "S"} provides \code{\link{outlierStats}()}
+    to a \code{\link{lmrob.S}()} result.}
   \item{warn.limit.reject}{limit of ratio
     \eqn{\#\mbox{rejected} / \#\mbox{obs in level}}{# rejected / # obs in level}
     above (\eqn{\geq}{>=}) which a warning is produced.
@@ -147,8 +164,16 @@ lmrob.control(setting, seed = NULL, nResample = 500,
   \item{warn.limit.meanrw}{limit of the mean robustness per factor level
     below which (\eqn{\leq}{<=}) a warning is produced.
     Set to \code{NULL} to disable warning.}
-  \item{...}{further arguments to be added as \code{\link{list}}
-    components to the result, e.g., those to be used in \code{.vcov.w()}.}
+
+  \item{object}{an \code{"lmrobCtrl"} object, as resulting from a
+    \code{lmrob.control(*)} or an \code{update(<lmrobCtrl>, *)} call.}
+  \item{\dots}{for \describe{
+      \item{\code{lmrob.control()}:}{further arguments to be added as
+	\code{\link{list}} components to the result, e.g., those to be used in
+	\code{.vcov.w()}.}
+      \item{\code{update(object, *)}:}{(named) components from
+	\code{object}, to be \emph{modified}, \bold{not} \code{setting = *}.}
+  }}
 }
 \value{
   \code{.Mchi.tuning.default(psi)} and \code{.Mpsi.tuning.default(psi)}
@@ -163,6 +188,11 @@ lmrob.control(setting, seed = NULL, nResample = 500,
   \code{tuning.psi} and \code{tuning.chi} are typically computed, as
   \code{.Mpsi.tuning.default(psi)} or \code{.Mchi.tuning.default(psi)},
   respectively.
+  It is of \code{\link{class}} \code{"lmrobCtrl"} and we provide
+  \code{print()}, \code{\link{update}()} and \code{\link{within}} methods.
+
+  \code{update(<lmrobCtrl>, ....)} does \emph{not} allow a
+  \code{setting="<...>"} in \code{....}.
 }
 \details{The option \code{setting="KS2011"} alters the default
   arguments.  They are changed to \code{method = "SMDM"}, \code{psi = "lqq"},
@@ -264,17 +294,51 @@ stopifnot(identical(.Mpsi.tuning.defaults,
 str(.Mchi.tuning.defaults)
 
 ## Difference between settings:
+Cdef <- lmrob.control()
 C11 <- lmrob.control("KS2011")
 C14 <- lmrob.control("KS2014")
 str(C14)
-## Apart from `setting` itself, they only differ in three places:
-diffC <- names(which(!mapply(identical, C11,C14, ignore.environment=TRUE)))
+## Differences:
+diffD <- names(which(!mapply(identical, Cdef,C11, ignore.environment=TRUE)))
+diffC <- names(which(!mapply(identical, C11, C14, ignore.environment=TRUE)))
+## KS2011 vs KS2014:  Apart from `setting` itself, they only differ in three places:
 cbind(KS11 = unlist(C11[diffC[-1]]),
       KS14 = unlist(C14[diffC[-1]]))
 ##           KS11 KS14
 ## nResample  500 1000
 ## best.r.s     2   20
 ## k.fast.s     1    2
+## default vs KS2011: a bit more: setting + 8
+str2simpLang <-  function(x) {
+    r <- if(is.null(x)) quote((NULL)) else str2lang(deparse(x))
+    if(is.call(r)) format(r) else r
+}
+cbind(deflt= lapply(Cdef[diffD], str2simpLang),
+      KS11 = lapply(C11 [diffD], str2simpLang))
+
+## update()ing a lmrob.control() , e.g.,
+C14mod <- update(C14, trace.lev = 2) # the same as
+C14m.d <- C14; C14m.d$trace.lev <- 2
+stopifnot(identical(C14mod, C14m.d))
+## changing psi --> updates tuning.{psi,chi}:
+C14mp <- update(C14, psi = "hampel", seed=101)
+## updating 'method' is "smart" :
+C.SMDM <- update(Cdef, method="SMDM")
+all.equal(Cdef, C.SMDM) # changed also psi, tuning.{psi,chi} and cov !
+chgd <- c("method", "psi", "tuning.chi",  "tuning.psi", "cov")
+str(Cdef  [chgd])
+str(C.SMDM[chgd])
+C14m <- update(C14, method="SMM")
+(ae <- all.equal(C14, C14mp))# changed tuning.psi & tuning.chi, too
+stopifnot(exprs = {
+    identical(C14, update(C14, method="SMDM")) # no change!
+    identical(c("psi", "seed", "tuning.chi", "tuning.psi"),
+              sort(gsub("[^.[:alpha:]]", "", sub(":.*", "", sub("^Component ", "", ae)))))
+    identical(C14m, local({C <- C14; C$method <- "SMM"; C}))
+})
+##
+try( update(C14, setting="KS2011") ) #--> Error: .. not allowed
+\dontshow{tools::assertError(update(C14, setting="KS2011"))}
 }
 \keyword{robust}
 \keyword{regression}
