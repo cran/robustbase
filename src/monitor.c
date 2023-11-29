@@ -69,7 +69,7 @@ void F77_SUB(prgrmcd)(int *ii, int *nn, int *i_trace)
 	    (*i_trace >= 4) ? ": i=1..nrep loop: " : "");
 }
 
-void F77_SUB(pr4mcd)(int *i) { Rprintf(" i = %d "); }
+void F77_SUB(pr4mcd)(int *i) { Rprintf(" i = %d ", *i); }
 
 void F77_SUB(pr5mcd)(int *step, int *ntot) {
     Rprintf("(step %d, tot=%d)", *step, *ntot);

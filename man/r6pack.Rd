@@ -28,12 +28,12 @@ r6pack(x, h, full.h, scaled = TRUE, scalefn = rrcov.control()$scalefn)
 \details{%% --> ../R/detmcd.R
   The six initial estimators are
   \enumerate{
-    \item{Hyperbolic tangent of standardized data}
-    \item{Spearmann correlation matrix}
-    \item{Tukey normal scores}
-    \item{Spatial sign covariance matrix}
-    \item{BACON}
-    \item{Raw OGK estimate for scatter}
+    \item Hyperbolic tangent of standardized data
+    \item Spearmann correlation matrix
+    \item Tukey normal scores
+    \item Spatial sign covariance matrix
+    \item BACON
+    \item Raw OGK estimate for scatter
   }
 }
 \references{

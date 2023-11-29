@@ -24,28 +24,35 @@ nlrob.control(method,
     Currently, that is \code{\link[DEoptimR]{JDEoptim}} from package
     \CRANpkg{DEoptimR}.
   }
-  \item{\dots}{
-    %%     ~~Describe \code{\dots} here~~
+  \item{\dots}{optional arguments depending on \code{method}, such as
+    \code{fnscale}, \code{tuning.chi} or both \code{tuning.chi.tau}  and
+    \code{tuning.chi.scale}; for \code{method = "MM"} also \code{optim.control}
+    to be passed to the \code{\link{optim}(.., hessian=TRUE)} call.
+    %%
+    Internally, \code{nlrob.control()} will choose (or check) defaults for
+    the psi/rho/chi related tuning parameters, also depending on the \code{method}
+    chosen; see e.g., the \sQuote{Examples}.
   }
 }
-%% \details{
+%% Code in >>> ../R/nlregrob.R <<<
 %%
-%% }
 \value{
   a \code{\link{list}} with several named components.
   The contents depend quite a bit on the \code{method}.
 }
 %\author{Martin Maechler}
-%% \note{
-%% }
 \seealso{
-  \code{\link{nlrob}},   \code{\link{nlrob}},
-
+  \code{\link{nlrob}}; for some details, \code{\link{nlrob.algorithms}}.
 }
 \examples{
+## Show how the different 'method's  have different smart defaults :
 str(nlrob.control("MM"))
+str(nlrob.control("MM", psi = "hampel"))# -> other tuning.psi.M and tuning.chi.scale defaults
+str(nlrob.control("MM", psi = "lqq", tol = 1e-10))# other tuning.psi.M & tuning.chi.scale defaults
 str(nlrob.control("tau"))
-str(nlrob.control("CM"))
+str(nlrob.control("tau",psi= "lqq"))
+str(nlrob.control("CM")) # tuning.chi undefined, unneeded
+str(nlrob.control("CM", psi= "optimal"))
 str(nlrob.control("mtl"))
 }
 \keyword{utilities}

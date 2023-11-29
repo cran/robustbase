@@ -1552,7 +1552,8 @@ Rboolean rwls(const double X[], const double y[], int n, int p,
 	/* compute weights for WLS */
 	get_weights_rhop(resid, scale, n, rho_c, ipsi, weights);
 	if(trace_lev >= 5) {
-	    Rprintf("  it %4d: scale=%g, resid = "); disp_vec(resid,   n);
+	    Rprintf("  it %4d: scale=%g, resid = ", iterations, scale);
+	                                             disp_vec(resid,   n);
 	    Rprintf("              new weights = "); disp_vec(weights, n);
 	}
 	/* solve weighted least squares problem */
@@ -2301,7 +2302,7 @@ void m_s_subsample(double *X1, double *y, int n, int p1, int p2,
 	    COPY(t1, b1, p1);
 	    COPY(t2, b2, p2);
 	    if (sc < zero_tol) {
-		REprintf("\nScale too small\n",
+		REprintf("\nScale too small\n"
 			 "Aborting m_s_subsample()\n\n");
 		*sscale = -1.;
 		goto cleanup_and_return;

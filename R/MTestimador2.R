@@ -350,7 +350,7 @@ glmrobMT <- function(x,y, weights = NULL, start = NULL, offset = NULL,
     n <- nrow(x)
     p <- ncol(x)
     if (is.null(weights))
-	weights <- rep.int(1, n)
+	weights <- 1 # rep.int(1, n)  {are not stored, nor used apart from 'sni / *' }
     else if(any(weights <= 0))
 	stop("All weights must be positive")
     if(!is.null(offset)) stop("non-trivial 'offset' is not yet implemented")
@@ -358,20 +358,16 @@ glmrobMT <- function(x,y, weights = NULL, start = NULL, offset = NULL,
     ##     offset <- rep.int(0, n) else if(!all(offset==0))
     ##         warning("'offset' not fully implemented")
 
-    linkinv <- family$linkinv
-    variance <- family$variance
 
-    ## Copy-paste from ./glmrobMqle.R    [overkill currently: Poisson has  sni == ni == 1]
-    ni <- as.vector(weights)
-    sni <- sqrt(ni)
-    comp.V.resid <- expression({
-	Vmu <- variance(mu)
-	if (any(is.na(Vmu)))  stop("NAs in V(mu)")
-	if (any(Vmu == 0))    stop("0s in V(mu)")
-	sVF <- sqrt(Vmu)   # square root of variance function
-	residP <- (y - mu)* sni/sVF  # Pearson residuals
-    })
-
+    ## Copy-paste from ./glmrobMqle.R    [overkill currently: Poisson has  sni == 1]
+    sni <- sqrt(as.vector(weights))
+    V_resid <- function(mu, y) {
+	Vmu <- family$variance(mu)
+	if (anyNA(Vmu))    stop("NAs in V(mu)")
+	if (any(Vmu == 0)) stop( "0s in V(mu)")
+        ## return Pearson residuals :
+	(y - mu)* sni/sqrt(Vmu)
+    }
 
     m.approx <- mk.m_rho(cw)
     w <- robXweights(weights.on.x, x, intercept=intercept)
@@ -404,8 +400,8 @@ glmrobMT <- function(x,y, weights = NULL, start = NULL, offset = NULL,
     beta <- estim2$par
     cov <- covasin(x,y, beta=beta, cw=cw, m.approx=m.approx, w=w)
     eta <- as.vector(x %*% beta) # + offset
-    mu <- linkinv(eta)
-    eval(comp.V.resid)#-> residP ==(here!) == residPS
+    mu <- family$linkinv(eta)
+    residP <- V_resid(mu, y)# residP == (here!) residPS
 
     ## As sumaConPesos() computes
     ##     eta <- x %*% beta

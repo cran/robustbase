@@ -98,15 +98,9 @@ lmrob <-
 	}
 	## check for singular fit
 
-	if(getRversion() >= "3.1.0") {
-	    z0 <- .lm.fit(x, y, tol = control$solve.tol)
-	    piv <- z0$pivot
-	} else {
-	    z0 <- lm.fit(x, y, tol = control$solve.tol)
-	    piv <- z0$qr$pivot
-	}
+        z0 <- .lm.fit(x, y, tol = control$solve.tol)
+        piv <- z0$pivot
 	rankQR <- z0$rank
-
 	singular.fit <- rankQR < p
 	if (rankQR > 0) {
 	    if (singular.fit) {

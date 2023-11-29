@@ -1,6 +1,10 @@
 				-*- org -*- C-c C-o follows link[MM: grep-r -e '\(FIXME\|TODO\)']
 
 * Before next release
+** TODO  glmrob() -- bug = R-forge bug : *warn* when family = "gaussian":
+     they should rather use  lmrob() !!
+    ==> ~/R/MM/Pkg-ex/robustbase/glmrob_ChrSchoetz-ex.R
+
 ** TODO when lmrob.S() detects exact fit (in C code), it *should* return it, incl scale = 0
     *and* it should have correct rweights[] in {0,1} and residuals[];
     (fitted[] computed in R code after .C() call);
@@ -31,6 +35,7 @@
 **** DONE shouldn't we rename jde() to jdeopt() or even jdeoptim(), jDEoptim(), or JDEoptim()
 R users already know optim() etc.. so the name seems more logical for them.
 * Short Term
+** TODO lmrob.tau.fast.coefs() calls `coef(lmrob( <y> ~ <x> -1))` ... should use `lmrob.fit()` !
 ** TODO lmrob.S() -> lmrob.control() should get nResample = "exact" -- as covMcd() / ltsReg() :
 ***    use Fortran routines rfncomb() and rfgenp() [in src/rf-common.f -> need F77_name(.) / F77_CALL(.)] from C
 ****    or even just right a version for C indices in {0, 1, ..., p-1}  instead of Fortran {1, 2, ...., p}

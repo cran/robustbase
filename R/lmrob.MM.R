@@ -1017,6 +1017,7 @@ lmrob.tau.fast.coefs <- function(cc, psi) {
     tfact <- 2 - ta/tb^2
     taus.0 <- sqrt(1 - tfact * levs)
     ## calculate correction factor
+### FIXME: use lmrob.fit() directly :
     tcorr <- coef(lmrob(taus / taus.0 - 1 ~ levs - 1))
     c(tfact = tfact, tcorr = tcorr)
 }

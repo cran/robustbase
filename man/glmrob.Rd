@@ -115,7 +115,7 @@ glmrob(formula, family, data, weights, subset, na.action,
   for \code{"BY"}.
   \cr
   \code{method="MT"}, currently only implemented for \code{family = poisson},
-  computes an \dQuote{[M]-Estimator based on [T]ransformation},
+  computes an \dQuote{[M]-Estimator based on [T]ransformation}, % -> ../R/MTestimador2.R
   by Valdora and Yohai (2013), via (hidden internal) \code{glmrobMT()}; as
   that uses \code{\link{sample}()}, from \R version 3.6.0 it depends on
   \code{\link{RNGkind}(*, sample.kind)}.  Exact reproducibility of results

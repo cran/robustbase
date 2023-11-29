@@ -315,12 +315,15 @@ double mc_C_d(const double z[], int n, const double eps[], int *iter, int scale)
 		}
 	    }
 	}
+	neq = knew-nl-1;
+	if(!(INT_MIN <= neq && neq <= INT_MAX))
+	    warning("mc_C_d(): knew-nl-1 is outside int-range -- will fail in rPsort()");
 	if(trace_lev)
-	    Rprintf("  not found [it=%d,  (nr,nl) = (%d,%d)],"
-		    " -> (knew-nl, j) = (%d,%d)\n",
-		    it, nr, nl, knew-nl, j);
+	    Rprintf("  not found [it=%d,  (nr,nl) = (%lld,%lld)],"
+		    " -> (knew-nl-1, j) = (%d, %d)\n",
+		    it, (long long)nr, (long long)nl, (int)neq, j);
 	/* using rPsort(work, n,k), since we don't need work[] anymore:*/
-	rPsort(work, /* n = */ j, /* k = */ (int)(knew-nl-1));
+	rPsort(work, /* n = */ j, /* k = */ (int)neq);
 	medc = - work[knew-nl-1];
     }
 

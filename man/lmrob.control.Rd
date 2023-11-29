@@ -262,7 +262,7 @@ lmrob.control(setting, seed = NULL, nResample = 500,
   \emph{Computational Statistics & Data Analysis} \bold{55}(8), 2504--2515.
 
   Koller, M. and Stahel, W.A. (2017)
-  Nonsingular subsampling for regression {S}~estimators with categorical predictors,
+  Nonsingular subsampling for regression S estimators with categorical predictors,
   \emph{Computational Statistics} \bold{32}(2): 631--646.
   \doi{10.1007/s00180-016-0679-x}.
   Referred as \code{"KS2014"} everywhere in \pkg{robustbase};  A shorter first
