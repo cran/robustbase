@@ -198,8 +198,19 @@ coleman16 <- coleman[ -c(2, 7, 16, 19),]
 (m16 <- lmrob(Y ~ ., data = coleman16, tuning.psi = 3.44, trace.lev = TRUE))
 ## failed in 0.9_0
 
+ctrl <- lmrob.control()
 tools::assertWarning(verbose = TRUE,
-  lmrob(Y ~ ., data = coleman, setting = "KS2011", control = lmrob.control())
+  lmrob(Y ~ ., data = coleman, setting = "KS2011", control = ctrl)
 )
+
+## perfect fit ex. from Thomas Wang, Jan.26, 2024:
+x <- c(8, 16, 4, 24)
+y <- c(3328, 6656, 1664, 9984)
+tools::assertWarning(verbose = TRUE,
+   fmS <- lmrob.S(x, y, ctrl)# gave a bad error in robustbase 0.99-{0,1}
+)
+stopifnot(all.equal(416, fmS$coeff, tolerance = 1e-15),
+          fmS$scale == 0, fmS$residuals == 0)
+
 
 cat('Time elapsed: ', proc.time(),'\n') # "stats"

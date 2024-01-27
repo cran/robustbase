@@ -7,6 +7,15 @@
   % --- 1.0-0  once we fix  adjOutlyingness() properly !
   %     =====
 
+\section{CHANGES in robustbase VERSION 0.99-2 (2023-01-27, svn r9..)}{
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item fix thinko bug introduced exact fit checking in 0.99-0; thanks
+      to the report by Thomas Mang.
+    }
+  }
+}
+
 \section{CHANGES in robustbase VERSION 0.99-1 (2023-11-28, svn r988)}{
   \subsection{Misc}{
     \itemize{

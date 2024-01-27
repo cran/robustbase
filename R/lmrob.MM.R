@@ -1317,7 +1317,7 @@ lmrob.rweights <- function(resid, scale, cc, psi, eps = 16 * .Machine$double.eps
     stopifnot(is.numeric(scale), length(scale) == 1L, scale >= 0)
     if (scale == 0) { ## exact fit
 	m <- max(ar <- abs(resid), na.rm=TRUE)
-	if(m == 0) numeric(seq_len(ar)) else as.numeric(ar <= eps * m)# 1 iff res ~= 0
+	if(m == 0) numeric(length(ar)) else as.numeric(ar <= eps * m)# 1 iff res ~= 0
     } else
 	Mwgt(resid / scale, cc, psi)
 }
