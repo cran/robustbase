@@ -19,13 +19,13 @@
 \newtheorem{definition}{Definition}
 %% The following is R's share/texmf/Rd.sty
 \usepackage{color}
-\usepackage{hyperref}
 \definecolor{Blue}{rgb}{0,0,0.8}
 \definecolor{Red}{rgb}{0.7,0,0}
+\usepackage{hyperref}
 \hypersetup{%
-  hyperindex,%
+%  hyperindex,%
   colorlinks={true},%
-  pagebackref,%
+%  pagebackref,%
   linktocpage,%
   plainpages={false},%
   linkcolor={Blue},%
@@ -154,7 +154,7 @@ above, for which $\rho(x)$ is unbounded even though $\rho' = \psi$ tends to zero
 %%     for all piecewise polynomial  psi()/rho()        ~~~~~~~~~~~~~~~~~~~~~~
 
 %%\clearpage
-\section{Monotone $\psi$-Functions}
+\section{Monotone \texorpdfstring{$\psi$}{psi}-Functions}
 
 Montone $\psi$-functions lead to convex $\rho$-functions such that the
 corresponding M-estimators are defined uniquely.

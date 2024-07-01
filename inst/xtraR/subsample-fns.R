@@ -167,6 +167,11 @@ tstSubsample <- function(x, y=rnorm(n), compareMatrix = TRUE,
     if (compareMatrix && z$status == 0) {
         xsub <- x[idc, ]
 	stopifnot(require("Matrix"))
+        if(!exists(".shown.Matrix") || !.shown.Matrix) {
+            Mdesc <- packageDescription("Matrix")
+            print.simple.list(c(Mdesc[c("Version", "Date")], c(file = attr(Mdesc, "file"))))
+            .shown.Matrix <<- TRUE
+        }
 	tmp <- lu(t(xsub))
 	## idx <- upper.tri(xsub, diag=TRUE)
 	stopifnot(all.equal(tmp@x, as.vector(z$lu), tol=eq.tol))

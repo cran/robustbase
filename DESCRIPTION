@@ -1,7 +1,7 @@
 Package: robustbase
-Version: 0.99-2
-VersionNote: Released 0.99-1 on 2023-11-28 to CRAN
-Date: 2024-01-27
+Version: 0.99-3
+VersionNote: Released 0.99-2 on 2024-01-27 to CRAN
+Date: 2024-07-01
 Title: Basic Robust Statistics
 Authors@R: c(person("Martin","Maechler", role=c("aut","cre"), email="maechler@stat.math.ethz.ch", comment = c(ORCID = "0000-0002-8685-9910"))
          , person("Peter", "Rousseeuw", role="ctb", comment = "Qn and Sn")
@@ -41,7 +41,7 @@ EnhancesNote: linked to in man/*.Rd
 LazyData: yes
 NeedsCompilation: yes
 License: GPL (>= 2)
-Packaged: 2024-01-27 14:39:19 UTC; maechler
+Packaged: 2024-07-01 13:07:54 UTC; maechler
 Author: Martin Maechler [aut, cre] (<https://orcid.org/0000-0002-8685-9910>),
   Peter Rousseeuw [ctb] (Qn and Sn),
   Christophe Croux [ctb] (Qn and Sn),
@@ -54,4 +54,4 @@ Author: Martin Maechler [aut, cre] (<https://orcid.org/0000-0002-8685-9910>),
   Maria Anna di Palma [ctb] (initial version of Comedian)
 Maintainer: Martin Maechler <maechler@stat.math.ethz.ch>
 Repository: CRAN
-Date/Publication: 2024-01-27 16:30:02 UTC
+Date/Publication: 2024-07-01 14:10:02 UTC

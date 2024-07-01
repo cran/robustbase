@@ -7,7 +7,22 @@
   % --- 1.0-0  once we fix  adjOutlyingness() properly !
   %     =====
 
-\section{CHANGES in robustbase VERSION 0.99-2 (2023-01-27, svn r9..)}{
+\section{CHANGES in robustbase VERSION 0.99-3 (2024-07-01, svn r992)}{
+  \subsection{Misc}{
+    \itemize{
+      \item Again adapt \file{../vignettes/lmrob_simulation.Rnw} to
+      \pkg{ggplot2} changes (\code{ s/ fun.y / fun / }).
+
+      \item \file{tests/subsample.R} now shows "Matrix" info (as that gave
+      confusing error during Matrix / R-devel changes).
+
+      \item Latest LaTeX does not like math in \verb{\section{.}}; hence
+      replacing \verb{\psi} by \verb{\texorpdfstring{$\psi$}{psi}}.
+    }
+  }
+}
+
+\section{CHANGES in robustbase VERSION 0.99-2 (2024-01-27, svn r989)}{
   \subsection{BUG FIXES}{
     \itemize{
       \item fix thinko bug introduced exact fit checking in 0.99-0; thanks

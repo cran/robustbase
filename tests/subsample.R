@@ -4,7 +4,7 @@ require(robustbase)
 source(system.file("xtraR/subsample-fns.R", package = "robustbase", mustWork=TRUE))
 ## instead of relying on  system.file("test-tools-1.R", package="Matrix"):
 source(system.file("xtraR/test-tools.R", package = "robustbase")) # assert.EQ(), showProc.time() ..
-options(nwarnings = 4e4)
+options(nwarnings = 4e4, warnPartialMatchArgs = FALSE)
 
 cat("doExtras:", doExtras <- robustbase:::doExtras(),"\n")
 showProc.time()
@@ -12,7 +12,10 @@ showProc.time()
 A <- rbind(c(0.001, 1),
            c(1,     2))
 set.seed(11)
-str(sa <- tstSubsample(A))
+## IGNORE_RDIFF_BEGIN
+sa <- tstSubsample(A) # (now typically also shows Matrix version ..)
+## IGNORE_RDIFF_END
+str(sa)
 
 A <- rbind(c(3, 17, 10),
            c(2,  4, -2),
@@ -38,7 +41,7 @@ x <- model.matrix(y ~ ., data)
 y <- data$y
 ## this should produce a warning and return status == 2
 showSys.time(z <- Rsubsample(x, y, mts=2))
-stopifnot(z$status == 2)
+stopifnot(identical(2L, z$status)) # (z$status may be NULL; stopifnot(NULL) does not trigger)
 
 
 ## test equilibration
@@ -68,8 +71,9 @@ with(possumDiv, table(eucalyptus, aspect))
 
 mf <- model.frame(Diversity ~ .^2, possumDiv)
 X <- model.matrix(mf, possumDiv)
+ncol(X) # 63
 y <- model.response(mf)
-stopifnot(qr(X)$rank == ncol(X))
+stopifnot(identical(qr(X)$rank, ncol(X)))
 
 ## this used to fail: different pivots in step 37
 str(s1 <- tstSubsample(X, y))
@@ -110,7 +114,6 @@ idc <- 1 + c(140, 60, 12, 13, 89, 90, 118, 80, 17, 134, 59, 94, 36,
          33, 147, 105, 115, 92, 61, 91, 104, 141, 138, 129, 130, 84,
          119, 132, 6, 135, 112, 16, 67, 41, 102, 76, 111, 82, 148, 24,
          131, 10, 96, 0, 87, 21, 127, 56, 124)
-
 rc <- lm(Diversity ~ .^2 , data = possumDiv, subset = idc)
 
 X <- model.matrix(rc)
@@ -118,9 +121,9 @@ y <- possumDiv$Diversity[idc]
 tstSubsample(X, y)## have different pivots ... could not find non-singular
 
 lu <- LU.gaxpy(t(X))
-stopifnot(lu$sing)
+stopifnot(length(lusi <- lu$sing) >= 1, lusi)
 zc <- Rsubsample(X, y)
-stopifnot(zc$status > 0)
+stopifnot(length(st <- zc$status) > 0, st > 0)
 ## column 52 is linearly dependent and should have been discarded
 ## qr(t(X))$pivot
 
