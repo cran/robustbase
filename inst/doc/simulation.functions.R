@@ -1237,14 +1237,14 @@ f.prediction.points <- function(design, type = c('pc', 'grid'),
              ## calculate distances to boundaries and take the minimal one
              lmin <- which.min(sapply(lfct, function(x) sum((rpc$loadings[,id] * x)^2)))
              ## create sequence of multiplicands
-             lmult <- seq(0,lfct[lmin],length.out=length.out/NCOL(rpc$loadings))
+             lmult <- seq(0,lfct[lmin], length.out=length.out/NCOL(rpc$loadings))
              rdf <- rbind(rdf, rep(rob$center,each=length(lmult)-1) +
                           direction*lmult[-1] %*% t(rpc$loadings[,id]))
            }
          },
          grid = {
            ## generate sequences for every dimension
-           lval <- as.data.frame(apply(lrange,2,f.seq,
+           lval <- as.data.frame(apply(lrange, 2L, f.seq,
                                        length.out = round(length.out^(1/NCOL(design))) ))
            ## return if 1 dimension, otherwise create all combinations
            rdf <- if (NCOL(design) > 1)

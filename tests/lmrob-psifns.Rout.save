@@ -1,7 +1,7 @@
 
-R version 4.3.0 Patched (2023-06-03 r84496) -- "Already Tomorrow"
-Copyright (C) 2023 The R Foundation for Statistical Computing
-Platform: x86_64-pc-linux-gnu (64-bit)
+R Under development (unstable) (2024-08-11 r86993) -- "Unsuffered Consequences"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -20,6 +20,11 @@ Type 'q()' to quit R.
 > library(robustbase)
 > source(system.file("xtraR/plot-psiFun.R", package = "robustbase", mustWork=TRUE))
 > source(system.file("xtraR/test-tools.R",  package = "robustbase")) # assert.EQ
+> ## NB: Code to compute some of the constants/tuning parameters (e.g. in ../R/lmrob.MM.R ):
+> ## --  MM's ~/R/MM/Pkg-ex/robustbase/lmrob-check-const.R and .../psi-tuning-hampel.R
+> 
+> (doExtras <- robustbase:::doExtras())
+[1] TRUE
 > 
 > ### (1) Test the functions themselves --------------------------------
 > if(!dev.interactive(orNone=TRUE)) pdf("rob-psifns.pdf")
@@ -60,7 +65,7 @@ Type 'q()' to quit R.
 +                   lmrob.control(psi = "ggw", tuning.psi = cc)$tuning.psi)
 + )
 > cat('Time for constants computation of tuning.psi: ', st,'\n')
-Time for constants computation of tuning.psi:  0.455 0.05 0.508 0 0 
+Time for constants computation of tuning.psi:  0.143 0.029 0.172 0 0 
 > cGct <- t(sapply(cG.cnst, attr, "constants"))[,-1]
 > colnames(cGct) <- c("a","b","c", "rhoInf")
 > signif(cGct, 4)
@@ -177,6 +182,47 @@ chkPsi..(): Not checking psi''() := Mpsi(*, deriv=2)
 ------------------------
 
 > 
+> ## Demonstrate lmrob.tau.fast.coefs() computations (well, to 5--7 digits accuracy):
+> ## a) values from the if(fast && ..)  switch(control$psi, .....) in lmrob.tau() { --> ../R/lmrob.MM.R }
+> lmrob.tauFC <- list(optimal = list(c = 1.060158, tfc = c(tfact = 0.94735878, tcorr = -0.09444537)),
++                     bisquare= list(c = 4.685061, tfc = c(tfact = 0.9473684 , tcorr = -0.0900833 )),
++                     welsh   = list(c = 2.11,     tfc = c(tfact = 0.94732953, tcorr = -0.07569506)),
++                     ggw_1   = list(c = c(-.5, 1.0, 0.95, NA),     tfc = c(tfact = 0.9473787 , tcorr = -0.1143846)),
++                     ggw_2   = list(c = c(-.5, 1.5, 0.95, NA),     tfc = c(tfact = 0.94741036, tcorr = -0.08424648)),
++                     lqq     = list(c = c(-.5, 1.5, 0.95, NA),     tfc = c(tfact = 0.94736359, tcorr = -0.08594805)),
++                     hampel  = list(c = c(1.5, 3.5, 8)* 0.9016085, tfc = c(tfact = 0.94739770, tcorr = -0.04103958)))
+> lmrob.tau.fast.coefs <- robustbase:::lmrob.tau.fast.coefs
+> rr <- sapply(names(lmrob.tauFC), function(nm) { L <- lmrob.tauFC[[nm]]
++     tfc <- lmrob.tau.fast.coefs(cc = L$c, psi = sub("_[0-9]*$", '', nm))
++     ## workaround (for older robustbase:) names(tfc)[2] <- "tcorr"
++     Dif <- all.equal(L$tfc, tfc, tolerance = 0)
++     cat(nm,": 'true' vs lmrob.tau.fast.coefs()-computed: ", Dif, "\n")
++     stopifnot(all.equal(L$tfc, tfc, tol = 4e-5)) # default tol 1.49e-8  is way too small
++     if(doExtras) { ## compute "slow coefs"
++         ## Signature:  lmrob.tau(obj, x=obj$x, control = obj$control, h, fast=TRUE)
++         ##   h = hatvalues  {are made from 'obj' if missing}
++ ### TODO
++         if(FALSE) tau <- lmrob.tau(list(), x=, control=lmrob.control(psi = nm ), fast=FALSE)
++         ## .. and now ?
++     }
++     c(tfc, rel.diff = as.numeric(sub(".*:", '', Dif)))
++     })
+optimal : 'true' vs lmrob.tau.fast.coefs()-computed:  Mean relative difference: 7.030091e-07 
+bisquare : 'true' vs lmrob.tau.fast.coefs()-computed:  Mean relative difference: 1.127089e-07 
+welsh : 'true' vs lmrob.tau.fast.coefs()-computed:  Mean relative difference: 7.957021e-09 
+ggw_1 : 'true' vs lmrob.tau.fast.coefs()-computed:  Mean relative difference: 5.127632e-06 
+ggw_2 : 'true' vs lmrob.tau.fast.coefs()-computed:  Mean relative difference: 1.814587e-05 
+lqq : 'true' vs lmrob.tau.fast.coefs()-computed:  Mean relative difference: 1.722337e-05 
+hampel : 'true' vs lmrob.tau.fast.coefs()-computed:  Mean relative difference: 3.291664e-05 
+> t(rr)
+             tfact       tcorr     rel.diff
+optimal  0.9473584 -0.09444571 7.030091e-07
+bisquare 0.9473684 -0.09008338 1.127089e-07
+welsh    0.9473295 -0.07569506 7.957021e-09
+ggw_1    0.9473812 -0.11438166 5.127632e-06
+ggw_2    0.9474191 -0.08423651 1.814587e-05
+lqq      0.9473721 -0.08593877 1.722337e-05
+hampel   0.9473817 -0.04105608 3.291664e-05
 > 
 > ## Nice plots -- and check derivatives ----
 > 
@@ -758,8 +804,8 @@ seed : int(0)
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # for ``statistical reasons''
-Time elapsed:  2.712 0.339 3.104 0.009 0.01 
+Time elapsed:  1.658 0.212 1.934 0.006 0.003 
 > 
 > proc.time()
    user  system elapsed 
-  2.722   0.349   3.104 
+  1.664   0.215   1.934 

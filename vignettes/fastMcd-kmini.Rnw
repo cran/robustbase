@@ -12,9 +12,9 @@
 \usepackage[utf8]{inputenc}
 %% The following is partly R's share/texmf/Rd.sty
 \usepackage{color}
-\usepackage{hyperref}
 \definecolor{Blue}{rgb}{0,0,0.8}
 \definecolor{Red}{rgb}{0.7,0,0}
+\usepackage{hyperref}
 \hypersetup{%
   hyperindex,%
   colorlinks={true},%

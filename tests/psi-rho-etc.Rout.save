@@ -1,7 +1,7 @@
 
-R version 3.0.2 Patched (2014-01-26 r64896) -- "Frisbee Sailing"
-Copyright (C) 2014 The R Foundation for Statistical Computing
-Platform: x86_64-unknown-linux-gnu (64-bit)
+R Under development (unstable) (2024-08-12 r87000) -- "Unsuffered Consequences"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -17,7 +17,7 @@ Type 'q()' to quit R.
 
 > require(robustbase)
 Loading required package: robustbase
-> ## see also ./lmrob-psifns.R <<<<<<<<
+> ## see also ./lmrob-psifns.R <<<<<<<<  *and* ../misc/
 > source(system.file("xtraR/plot-psiFun.R", package = "robustbase", mustWork=TRUE))
 > 
 > EQ <- function(x,y) all.equal(x,y, tolerance = 1e-13)
@@ -173,9 +173,10 @@ function (u, k)
 + }
 > 
 > ## Print & Check the result of  aeff.P() or bp.P()
-> chkP <- function(rp, tol = 1e-9) {
+> chkP <- function(rp, tol = 1e-9, ...) {
 +     print(rp)
-+     ae <- all.equal(rp[[1]], rp[[2]], tolerance=tol)
++     ae <- all.equal(target = rp[["form"]],
++                     current = rp[["int"]], tolerance = tol, ...)
 +     if(isTRUE(ae)) invisible(rp) else stop(ae)
 + }
 > 
@@ -191,17 +192,6 @@ function (u, k)
 > chkP(aeff.P(huberPsi, k = 2.5))
       int      form 
 0.9977041 0.9977041 
-> 
-> chkP(aeff.P(hampelPsi))
-      int      form 
-0.9613126 0.9613126 
-> chkP(aeff.P(hampelPsi, k = c(1.5, 3, 8)))
-      int      form 
-0.9632396 0.9632396 
-> chkP(aeff.P(hampelPsi, k = c(2,   4, 8), tol=1e-10),# fails with tol=1e-11
-+      tol = 1e-4)
-     int     form 
-0.989679 0.989679 
 > 
 > ## Now works too:
 > chkP(bp.P(hampelPsi))
@@ -226,4 +216,4 @@ function (u, k)
 > 
 > proc.time()
    user  system elapsed 
-  1.167   0.079   1.301 
+  0.370   0.073   0.484 

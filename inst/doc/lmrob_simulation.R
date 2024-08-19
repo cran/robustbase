@@ -38,6 +38,7 @@ stopifnot(require(ggplot2),
           require(grid),
           require(reshape2))
 source(file.path(robustDoc, 'graphics.functions.R'))
+if(getRversion() < "4.4.0")
 `%||%` <- function (x, orElse) if (!is.null(x)) x else orElse
 
 ## set ggplot theme
@@ -124,8 +125,7 @@ tbl[,2:3] <- apply(tbl[,2:3], 1:2, function(x) {
   gsub('\\$NA\\$', '\\\\texttt{NA}',
        paste('$', unlist(x), collapse=', ', '$', sep='')) })
 tbl[,1] <- paste('\\texttt{', tbl[,1], '}', sep='')
-colnames(tbl) <- paste('\\texttt{', c('psi', 'tuning.chi', 'tuning.psi'),
-                       '}', sep='')
+colnames(tbl) <- paste0('\\texttt{', c('psi', 'tuning.chi', 'tuning.psi'), '}')
 require("xtable") # need also print() method:
 print(xtable(tbl), sanitize.text.function=identity,
       include.rownames = FALSE, floating=FALSE)
@@ -650,12 +650,11 @@ print(ggplot(test.4,
       stat_summary(aes(x=ratio), fun = median, geom='line') +
       geom_point(aes(shape = Error), alpha = alpha.error) +
       facet_wrap(~ Psi) +
-      ## "FIXME" (?): the next 'test.lm' one  give warnings
-      geom_point  (data=test.lm, aes(color = Est.Scale), alpha=alpha.n) +
-      ##-> Warning: Removed 108 rows containing missing values    (geom_point).
+      geom_point  (data=test.lm, aes(color = Est.Scale), alpha=alpha.n, na.rm = TRUE) +
+      ##-> na.rm=T: avoid  Warning: Removed 108 rows containing missing values    (geom_point).
       stat_summary(data=test.lm, aes(x = ratio, color = Est.Scale),
-                   fun = median, geom='line') +
-      ##-> Warning: Removed 108 rows containing non-finite values (stat_summary).
+                   fun = median, geom='line', na.rm = TRUE) +
+      ##-> na.rm=T: avoid  Warning: Removed 108 rows containing non-finite values (stat_summary).
       g.scale_shape(labels=lab(test.4$Error)) +
       scale_colour_discrete("Scale Est.",
                             labels=lab(test.4 $Est.Scale,
@@ -808,7 +807,7 @@ getOption("SweaveHooks")[["fig"]]()
 t.2en0 <- droplevels(subset(test.2, emplev_1 != 0))
 print(ggplot(t.2en0,
              aes(p/n, f.truncate(emplev_1), color = method.cov)) +
-      g.truncate.lines + g.truncate.areas +
+      g.truncate.line + g.truncate.area +
       geom_point(aes(shape = factor(n)), alpha = alpha.n) +
       scale_shape_discrete(quote(n)) +
       stat_summary(aes(x=ratio), fun = median, geom='line') +
@@ -825,7 +824,6 @@ print(ggplot(t.2en0,
 getOption("SweaveHooks")[["fig"]]()
 tmp <- droplevels(subset(test.1, Psi == 'lqq' & emplev_1 != 0))
 print(ggplot(tmp, aes(p/n, f.truncate(emplev_1), color = method.cov)) +
-      ylab(quote("empirical level "~ list (H[0] : beta[1] == 0) )) +
       g.truncate.line + g.truncate.area +
       geom_point(aes(shape = factor(n)), alpha = alpha.n) +
       stat_summary(aes(x=ratio), fun = median, geom='line') +
@@ -833,6 +831,7 @@ print(ggplot(tmp, aes(p/n, f.truncate(emplev_1), color = method.cov)) +
       g.scale_y_log10_0.05() +
       g.scale_shape(quote(n)) +
       scale_colour_discrete(name = "Estimator", labels=lab(tmp$method.cov)) +
+      ylab(quote("empirical level "~ list (H[0] : beta[1] == 0) )) +
       facet_wrap(~ Error)
      ,
       legend.mod = legend.mod

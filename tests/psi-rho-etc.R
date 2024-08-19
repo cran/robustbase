@@ -1,5 +1,5 @@
 require(robustbase)
-## see also ./lmrob-psifns.R <<<<<<<<
+## see also ./lmrob-psifns.R <<<<<<<<  *and* ../misc/
 source(system.file("xtraR/plot-psiFun.R", package = "robustbase", mustWork=TRUE))
 
 EQ <- function(x,y) all.equal(x,y, tolerance = 1e-13)
@@ -143,9 +143,10 @@ bp.P <- function(psiF, k, ...) {
 }
 
 ## Print & Check the result of  aeff.P() or bp.P()
-chkP <- function(rp, tol = 1e-9) {
+chkP <- function(rp, tol = 1e-9, ...) {
     print(rp)
-    ae <- all.equal(rp[[1]], rp[[2]], tolerance=tol)
+    ae <- all.equal(target = rp[["form"]],
+                    current = rp[["int"]], tolerance = tol, ...)
     if(isTRUE(ae)) invisible(rp) else stop(ae)
 }
 
@@ -153,11 +154,6 @@ chkP(aeff.P(huberPsi))
 chkP(aeff.P(huberPsi, k = 1.5))
 chkP(aeff.P(huberPsi, k = 2))
 chkP(aeff.P(huberPsi, k = 2.5))
-
-chkP(aeff.P(hampelPsi))
-chkP(aeff.P(hampelPsi, k = c(1.5, 3, 8)))
-chkP(aeff.P(hampelPsi, k = c(2,   4, 8), tol=1e-10),# fails with tol=1e-11
-     tol = 1e-4)
 
 ## Now works too:
 chkP(bp.P(hampelPsi))

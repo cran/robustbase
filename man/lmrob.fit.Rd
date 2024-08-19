@@ -10,7 +10,7 @@
   calculated.
 }
 \usage{
-lmrob.fit(x, y, control, init = NULL, mf = NULL)
+lmrob.fit(x, y, control, init = NULL, mf = NULL, bare.only = FALSE)
 }
 \arguments{
   \item{x}{design matrix (\eqn{n \times p}{n x p}) typically including a
@@ -22,6 +22,9 @@ lmrob.fit(x, y, control, init = NULL, mf = NULL)
   \item{init}{optional \code{\link{list}} of initial estimates.  See
     \emph{Details}.}
   \item{mf}{defunct.}
+  \item{bare.only}{logical indicating if the result should be
+    \code{\link{return}()}ed after the bare computation steps are done.
+    Useful, e.g., when you only need the \code{coefficients}.}
 }
 \details{This function is the basic fitting function for MM-type estimation,
   called by \code{\link{lmrob}} and typically not to be used on its own.
@@ -32,7 +35,7 @@ lmrob.fit(x, y, control, init = NULL, mf = NULL)
   as initial estimator.
 }
 \value{
-  A list with components
+  A list with components (some missing in case \code{bare.only} is true)
   \item{fitted.values}{\eqn{X \beta}{X beta}, i.e., \code{X \%*\% coefficients}.}
   \item{residuals}{the raw residuals, \code{y - fitted.values}}
   \item{rweights}{robustness weights derived from the final M-estimator

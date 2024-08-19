@@ -7,6 +7,30 @@
   % --- 1.0-0  once we fix  adjOutlyingness() properly !
   %     =====
 
+\section{CHANGES in robustbase VERSION 0.99-4 (2024-08-19, svn 1001)}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item \code{lmrob.fit()} gets new option \code{bare.only} for some
+      speed up, in case a relatively \dQuote{bare} result is sufficient.
+    }
+  }
+  \subsection{Misc}{
+    \itemize{
+      \item fix another LaTeX no more wanting math in section
+      titles (same problem as 0.99-3), now for \file{lmrob_simulation.Rnw}.
+      Now also use \verb{\texorpdfstring} inside \verb{\title{}} of
+      \file{psi_functions.Rnw} \emph{and} use \verb{newtheorem{..}}
+      \emph{after} \verb{\hypersetup{...}} (thanks to Kurt).
+
+      \item avoid some \pkg{ggplot2} warnings (about omitting obs.)
+
+      \item do not warn about skipping equilibration for p=1.
+
+      \item define \code{STRICT_R_HEADERS} now (src/*.[ch]).
+    }
+  }
+}
+
 \section{CHANGES in robustbase VERSION 0.99-3 (2024-07-01, svn r992)}{
   \subsection{Misc}{
     \itemize{

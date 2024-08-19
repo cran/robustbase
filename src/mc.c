@@ -6,6 +6,7 @@
 
 #include <stdlib.h>
 #include <math.h>
+#include <float.h>
 
 #include <inttypes.h>
 // -> int64_t

@@ -35,7 +35,7 @@
 **** DONE shouldn't we rename jde() to jdeopt() or even jdeoptim(), jDEoptim(), or JDEoptim()
 R users already know optim() etc.. so the name seems more logical for them.
 * Short Term
-** TODO lmrob.tau.fast.coefs() calls `coef(lmrob( <y> ~ <x> -1))` ... should use `lmrob.fit()` !
+** DONE lmrob.tau.fast.coefs() calls `coef(lmrob( <y> ~ <x> -1))` ... should use `lmrob.fit()` !
 ** TODO lmrob.S() -> lmrob.control() should get nResample = "exact" -- as covMcd() / ltsReg() :
 ***    use Fortran routines rfncomb() and rfgenp() [in src/rf-common.f -> need F77_name(.) / F77_CALL(.)] from C
 ****    or even just right a version for C indices in {0, 1, ..., p-1}  instead of Fortran {1, 2, ...., p}

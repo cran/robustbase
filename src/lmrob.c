@@ -310,7 +310,7 @@ static const int one = 1;
 	    } else {						\
                 error(_("DGEEQU: column %i of the design matrix is exactly zero."), info - _n_); \
 	    }                                                   \
-	} else {                                                \
+	} else if (_p_ > 1) { /* p = 1 & x[1] = 0 is "ok" */ 	\
 	/* FIXME: replace dgeequ by our own version */          \
 	/* that does not treat this as error */                 \
 	    warning(_(" Skipping design matrix equilibration (DGEEQU): row %i is exactly zero."), info); \
@@ -1670,7 +1670,7 @@ void fast_s_large_n(double *X, double *y, double s_y,
 	*ind_space = (int *)    R_alloc(n,   sizeof(int));
 
 #define CALLOC_MAT(_M_, _n_, _d_)			\
-    _M_ = (double **) Calloc(_n_, double *);		\
+    _M_ = (double **) R_Calloc(_n_, double *);		\
     for(int i=0; i < _n_; i++)				\
 	_M_[i] = (double *) R_alloc(_d_, sizeof(double))
 
@@ -1837,8 +1837,8 @@ void fast_s_large_n(double *X, double *y, double s_y,
   cleanup_and_return:
     PutRNGstate();
 
-    Free(best_betas);
-    Free(final_best_betas);
+    R_Free(best_betas);
+    R_Free(final_best_betas);
 
 #undef X
 #undef xsamp
@@ -1974,8 +1974,7 @@ void fast_s(double *X, double *y, double s_y,
     double sc, best_sc, aux;
     double INF_sc = s_y * INFI; // may overflow to 'Inf'
 
-    /* Rprintf("fast_s %d\n", ipsi); */
-
+    if(trace_lev >= 2) Rprintf("fast_s(*, s_y=%g, n=%d, p=%d, ipsi=%d, ..)", s_y, n, p, ipsi);
     int info;
     SETUP_SUBSAMPLE(n, p, X, 0);
 
@@ -1988,12 +1987,13 @@ void fast_s(double *X, double *y, double s_y,
 	*beta_ref    = (double *) R_alloc(p, sizeof(double)),
 	*best_scales = (double *) R_alloc(best_r, sizeof(double)),
 	// matrix:
-	**best_betas = (double **) Calloc(best_r, double *);
+	**best_betas = (double **) R_Calloc(best_r, double *);
     for(int i=0; i < best_r; i++) {
 	best_betas[i] = (double*) R_alloc(p, sizeof(double));
 	best_scales[i] = INF_sc;
     }
 
+    if(trace_lev >= 2) Rprintf(" before INIT_WLS():\n");
     INIT_WLS(wx, wy, n, p); // (re-setting 'info')
 
     /* disp_mat(x, n, p); */
@@ -2112,7 +2112,7 @@ void fast_s(double *X, double *y, double s_y,
 
     PutRNGstate();
 
-    Free(best_betas);
+    R_Free(best_betas);
 
     return;
 } /* fast_s() */

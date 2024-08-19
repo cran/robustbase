@@ -62,7 +62,7 @@ chkPsi.. <- function(x, psi, par, tol = 1e-4, doD2, quiet=FALSE)
     stopifnot(length(tol) > 0, tol >= 0, is.numeric(x), is.finite(x))
     is.redesc <- isPsi.redesc(psi)
     if(length(x) == 2) ## it is a *range* -> produce vector
-	x <- seq(x[1], x[2], length = 1025L)
+	x <- seq(x[1], x[2], length.out = 1025L)
     dx <- diff(x)
     x0 <- sort(x)
     x <- c(-Inf, Inf, NA, NaN, x0)

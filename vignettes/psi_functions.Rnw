@@ -16,7 +16,6 @@
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand*{\pkg}[1]{\texttt{#1}}
-\newtheorem{definition}{Definition}
 %% The following is R's share/texmf/Rd.sty
 \usepackage{color}
 \definecolor{Blue}{rgb}{0,0,0.8}
@@ -34,6 +33,8 @@
   pdfstartview={Fit},%
   pdfview={XYZ null null null}%
 }
+% *after* the hypersetup (necessary for Debian TeX Live Aug.2024):
+\newtheorem{definition}{Definition}
 
 
 <<init, fig=FALSE>>=
@@ -41,7 +42,7 @@
 options(SweaveHooks=list(fig=function() par(mar=c(3,3,1.4,0.7),
                          mgp=c(1.5, 0.5, 0))))
 ## x axis for plots:
-x. <- seq(-5, 10, length=1501)
+x. <- seq(-5, 10, length.out = 1501)
 require(robustbase)
 <<source-p-psiFun, fig=FALSE>>=
 source(system.file("xtraR/plot-psiFun.R", package = "robustbase", mustWork=TRUE))
@@ -52,7 +53,7 @@ source(system.file("xtraR/plot-psiFun.R", package = "robustbase", mustWork=TRUE)
 \setkeys{Gin}{width=0.9\textwidth}
 \setlength{\abovecaptionskip}{-5pt}
 
-\title{Definitions of $\psi$-Functions Available in Robustbase}
+\title{Definitions of \texorpdfstring{$\psi$}{psi}-Functions Available in Robustbase}
 \author{Manuel Koller and Martin M\"achler}
 \maketitle
 \tableofcontents
@@ -101,8 +102,8 @@ Note that $\rho(\infty) = \rho(x_r) \equiv \rho(x) \ \forall \abs{x} >= x_r$.
 $\tilde\rho$ is a $\rho$-function as defined in
 \citet{MarRMY06} and has been called $\chi$ function in other contexts. For
 example, in package \pkg{robustbase}, \code{Mchi(x, *)} computes
-$\tilde\rho(x)$, whereas \code{Mpsi(x, *, deriv=-1)} (``(-1)-st
-derivative'' is the primitive or antiderivative)) computes $\rho(x)$,
+$\tilde\rho(x)$, whereas \code{Mpsi(x, *, deriv=-1)}
+(``(-1)-st derivative'' is the primitive or antiderivative) computes $\rho(x)$,
 both according to the above definitions.
 
 \textbf{Note:} An alternative slightly more general definition of

@@ -79,7 +79,7 @@ str(Hx2 <- huberM(x, se=TRUE), digits = 7)## somewhat different, since 's' diffe
 \donttest{
 system.time(
 SS <- replicate(10000, vapply(huberM(rnorm(400), se=TRUE), as.double, 1.))
-) # ~ 12.2 seconds
+) # ~ 2.8 seconds (was 12.2 s)
 rbind(mean(SS["SE",]), sd(SS["mu",]))# both ~ 0.0508
 stopifnot(all.equal(mean(SS["SE",]),
                     sd ( SS["mu",]), tolerance= 0.002))

@@ -17,19 +17,21 @@
 		  psi)
     nms <- if(redescending) .Mpsi.R.names else .Mpsi.names
     if (is.na(i <- pmatch(psi, nms)))
-	stop(gettextf("'psi' should be one of %s", pasteK(dQuote(nms))),
+	stop(gettextf("'psi' should be one of %s",
+		      pasteK(dQuote(c('tukey', 'biweight', nms)))),
 	     domain = NA)
     nms[i]
 }
 
 .Mpsi.tuning.defaults <- list(
     'huber' = 1.345
+    ## NB: These must be the same values as used in lmrob.tau(*, fast=TRUE), see below !
     , 'bisquare' = 4.685061
     , 'welsh' = 2.11
     , 'ggw' = c(-0.5, 1.5, .95, NA) ## (min{slope}, b ,  eff, bp)
     , 'lqq' = c(-0.5, 1.5, .95, NA) ## (min{slope}, b/c, eff, bp)
     , 'optimal' = 1.060158
-    , 'hampel' = c(1.5, 3.5, 8) * 0.9016085 ## a, b, r
+    , 'hampel' = c(1.5, 3.5, 8) * 0.9016085 ## a, b, r  [NB: "true" factor = 0.9014437818636579; ../misc/experi-psi-rho-funs.R]
     )
 .Mpsi.tuning.default <- function(psi) {
     if(is.null(p <- .Mpsi.tuning.defaults[[psi]]))
@@ -248,7 +250,7 @@ lmrob.fit.MM <- function(x, y, control) ## defunct
 ## .Deprecated() till robustbase 0.92-6 (2016-05-28)
 
 
-lmrob.fit <- function(x, y, control, init=NULL, mf=NULL) {
+lmrob.fit <- function(x, y, control, init=NULL, mf=NULL, bare.only=FALSE) {
     if(!is.matrix(x)) x <- as.matrix(x)
     if(!missing(mf)) .Defunct("'mf' argument is now defunct")
     ## old notation: MM -> SM
@@ -317,6 +319,8 @@ lmrob.fit <- function(x, y, control, init=NULL, mf=NULL) {
         }
         warning("initial estim. 'init' not converged -- will be return()ed basically unchanged")
     }
+    if(bare.only) # e.g. when we only need $coefficients
+        return(init)
     ## << FIXME? qr(.)  should be available from earlier
     if (is.null(init$qr)) init$qr <- qr(x * sqrt(init$rweights))
     if (is.null(init$rank)) init$rank <- init$qr$rank
@@ -895,8 +899,12 @@ lmrob.kappa <- function(obj, control = obj$control)
 }
 
 ## "FIXME" How to get \hat{tau} for a simple *M* estimate here ??
-## lmrob.tau() is used in lmrob..D..fit()
-lmrob.tau <- function(obj, x=obj$x, control = obj$control, h, fast = TRUE)
+
+## lmrob.tau() is called from lmrob..D..fit() {above}
+##             and also  from ../vignettes/lmrob_simulation.Rnw  {if all is recomputed!}
+## 2024-08-12: new arg. 'rel.tol' (left at default eps_C^{1/4} = 0.000122.. for now
+lmrob.tau <- function(obj, x = obj$x, control = obj$control, h, fast = TRUE,
+                      subdivisions = 100L, rel.tol = .Machine$double.eps^0.25, ...)
 {
     if(is.null(control)) stop("'control' is missing")
     if(missing(h))
@@ -905,10 +913,11 @@ lmrob.tau <- function(obj, x=obj$x, control = obj$control, h, fast = TRUE)
 	else
 	    .lmrob.hat(wqr = obj$qr)
 
-    ## speed up: use approximation if possible
+    ## speed up - use approximation {pre-computed via lmrob.tau.fast.coefs()} if possible:
     if (fast && !control$method %in% c('S', 'SD')) {
         c.psi <- control$tuning.psi
         tfact <- tcorr <- NA
+        ## NB: {psi, c.psi} combinations must correspond to those in .Mpsi.tuning.defaults (above)
         switch(control$psi,
                optimal = if (isTRUE(all.equal(c.psi, 1.060158))) {
                    tfact <- 0.94735878
@@ -924,7 +933,7 @@ lmrob.tau <- function(obj, x=obj$x, control = obj$control, h, fast = TRUE)
                },
                ggw = if (isTRUE(all.equal(c.psi, c(-.5, 1.0, 0.95, NA)))) {
                    tfact <- 0.9473787
-                    tcorr <- -0.1143846
+                   tcorr <- -0.1143846
                } else if (isTRUE(all.equal(c.psi, c(-.5, 1.5, 0.95, NA)))) {
                    tfact <- 0.94741036
                    tcorr <- -0.08424648
@@ -933,7 +942,7 @@ lmrob.tau <- function(obj, x=obj$x, control = obj$control, h, fast = TRUE)
                    tfact <- 0.94736359
                    tcorr <- -0.08594805
                },
-               hampel = if (isTRUE(all.equal(c.psi, c(1.35241275, 3.15562975, 7.212868)))) {
+               hampel = if (isTRUE(all.equal(c.psi, c(1.5, 3.5, 8) * 0.9016085))) {
                    tfact <- 0.94739770
                    tcorr <- -0.04103958
                },
@@ -956,12 +965,12 @@ lmrob.tau <- function(obj, x=obj$x, control = obj$control, h, fast = TRUE)
     ipsi <- .psi2ipsi(psi)
 
     ## constant for stderr of u_{-i} part and other constants
-    inta <- function(r) .Mpsi(r, cpsi, ipsi)^2          * dnorm(r)
-    intb <- function(r) .Mpsi(r, cpsi, ipsi, deriv = 1) * dnorm(r)
+    intA <- function(r) .Mpsi(r, cpsi, ipsi)^2          * dnorm(r)
+    intB <- function(r) .Mpsi(r, cpsi, ipsi, deriv = 1) * dnorm(r)
     ## intc <- function(r) .Mpsi(r, cpsi, ipsi) * r        * dnorm(r)
                                         # changed from psi/e to psi*e
-    ta <- integrate(inta, -Inf,Inf)$value
-    tb <- integrate(intb, -Inf,Inf)$value
+    tA <- integrate(intA, -Inf,Inf, subdivisions=subdivisions, rel.tol=rel.tol, ...)$value
+    tB <- integrate(intB, -Inf,Inf, subdivisions=subdivisions, rel.tol=rel.tol, ...)$value
     ## tE <- integrate(intc, -Inf,Inf)$value
 
     ## calculate tau for unique h
@@ -971,7 +980,7 @@ lmrob.tau <- function(obj, x=obj$x, control = obj$control, h, fast = TRUE)
     ## Initialize tau vector
     tau <- numeric(length=nu)
 
-    tc <- ta/tb^2
+    tc <- tA/tB^2 # = asymp. variance = "avar"
     ## --- Gauss-Hermite integration
     gh <- ghq(control$numpoints)
     ghz <- gh$nodes
@@ -980,7 +989,7 @@ lmrob.tau <- function(obj, x=obj$x, control = obj$control, h, fast = TRUE)
     for (i in 1:nu) {
         ## stderr of u_{-i} part
         s <- sqrt(tc*(hu[i]-hu[i]^2))
-        tc2 <- hu[i]/tb
+        tc2 <- hu[i]/tB
         ## function to be integrated
         fun <- function(w, v, sigma.i) {
 	    t <- (v - tc2*.Mpsi(v, cpsi, ipsi) + w*s)/sigma.i
@@ -999,26 +1008,26 @@ lmrob.tau <- function(obj, x=obj$x, control = obj$control, h, fast = TRUE)
         }
 
         ## find tau
-        tau[i] <- uniroot(vint, c(if (hu[i] < 0.9) 3/20 else 1/16, 1.1))$root
+        tau[i] <- uniroot(vint, c(if (hu[i] < 0.9) 3/20 else 1/16, 1.1), tol = rel.tol)$root
     }
 
     tau[match(h, hu)]
 }
 
-lmrob.tau.fast.coefs <- function(cc, psi) {
+lmrob.tau.fast.coefs <- function(cc, psi, trace.lev = 0, ...) {
     ## function that calculates the coefficients for 'fast' mode of lmrob.tau
     ctrl <- lmrob.control(tuning.psi = cc, psi = psi)
     levs <- seq(0, 0.8, length.out = 80)
     ## calculate taus
     taus <- lmrob.tau(list(), control=ctrl, h=levs, fast=FALSE)
     ## calculate asymptotic approximation of taus
-    ta <- lmrob.E(psi(r)^2,  ctrl, use.integrate = TRUE)
-    tb <- lmrob.E(psi(r, 1), ctrl, use.integrate = TRUE)
-    tfact <- 2 - ta/tb^2
+    A <- lmrob.E(psi(r)^2,  ctrl, use.integrate = TRUE, ...)
+    B <- lmrob.E(psi(r, 1), ctrl, use.integrate = TRUE, ...)
+    tfact <- 2 - A/B^2
     taus.0 <- sqrt(1 - tfact * levs)
     ## calculate correction factor
-### FIXME: use lmrob.fit() directly :
-    tcorr <- coef(lmrob(taus / taus.0 - 1 ~ levs - 1))
+    tcorr <- lmrob.fit(x = levs, y = taus / taus.0 - 1, bare.only = TRUE,
+                       control = lmrob.control(trace.lev = trace.lev))$coefficients
     c(tfact = tfact, tcorr = tcorr)
 }
 

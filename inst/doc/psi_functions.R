@@ -7,7 +7,7 @@
 options(SweaveHooks=list(fig=function() par(mar=c(3,3,1.4,0.7),
                          mgp=c(1.5, 0.5, 0))))
 ## x axis for plots:
-x. <- seq(-5, 10, length=1501)
+x. <- seq(-5, 10, length.out = 1501)
 require(robustbase)
 
 

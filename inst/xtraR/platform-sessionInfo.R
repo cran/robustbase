@@ -1,6 +1,7 @@
 ## <---> sync with ~/R/Pkgs/CLA/inst/xtraR/platform-sessionInfo.R
 ##                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+if(getRversion() < "4.4.0")
 ##' return 'x' unless it is NULL where you'd use 'orElse'
 `%||%` <- function(x, orElse) if(!is.null(x)) x else orElse
 

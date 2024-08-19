@@ -1,5 +1,7 @@
 /* External and interal  API  of  C and Fortran routines in robustbase */
 
+#define STRICT_R_HEADERS
+
 #include <R.h>
 // for SEXP
 #include <Rinternals.h>
