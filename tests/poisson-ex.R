@@ -2,7 +2,30 @@
 library(robustbase)
 
 ## instead of relying on  system.file("test-tools-1.R", package="Matrix"):
-source(system.file("xtraR/test-tools.R", package = "robustbase")) # assert.EQ() etc
+doExtras <- robustbase:::doExtras()
+SysI <- Sys.info()
+## IGNORE_RDIFF_BEGIN
+for(f in system.file("xtraR", c("test-tools.R",
+                                "platform-sessionInfo.R"), # -> moreSessionInfo()
+                     package = "robustbase", mustWork=TRUE)) {
+    cat("source(",f,"):\n", sep="") ; source(f)
+}
+doExtras
+moreSessionInfo(print. = "all")
+(arch <- SysI[["machine"]]) # needed to distinguish platforms  further down
+isMac <- SysI[["sysname"]] == "Darwin"
+isSun <- SysI[["sysname"]] == "SunOS"
+.M <- .Machine; str(.M[grep("^sizeof", names(.M))]) ## differentiate long-double..
+noLD16 <- (.M$sizeof.longdouble != 16)
+if(arch == "x86_64") {
+    if(noLD16)
+        arch <- paste0(arch, "--no-long-double")
+    else if(osVersion == "Fedora 30 (Thirty)")
+        arch <- paste0(arch, "_F30")
+    # else keep  'arch'  unchanged
+}
+## IGNORE_RDIFF_END
+
 
 #### Poisson examples from Eva Cantoni's paper
 
@@ -116,22 +139,14 @@ c(-0.851594294907422, -0.0107066895370536, -0.226958540075445, 0.035590662533830
   0.0270535337324518, 0.146022135657894, -0.00751380783260833, -0.417638086169033)
           , tol = 1e-13, check.attributes=FALSE, giveRE=TRUE)
 
-## MM: I'm shocked how much this changes after every tweak ...
-
-(arch <- Sys.info()[["machine"]])
-.M <- .Machine; str(.M[grep("^sizeof", names(.M))]) ## differentiate long-double..
-if(arch == "x86_64") {
-    if(.M$sizeof.longdouble != 16)
-        arch <- paste0(arch, "--no-long-double")
-    else if(osVersion == "Fedora 30 (Thirty)")
-        arch <- paste0(arch, "_F30")
-}
 
 dput(signif(unname(coef(m1)), 11)) ## -->
 ## Something strange going on: R CMD check is different from interactive R, here.
 ## ???? [I see that the byte compiler is not listed in sessionInfo]
 ## In any case, take the dput(.) output from the *.Rout[.fail] file
 ## 2015-07-21: on 32-bit, the results *change* when re-run ???
+##------- different results on different platforms
+
 beta1 <- list(i686 =
 ## old florence:
 ## c(-0.83715700394, 0.0085488694315, -0.16734609346, 0.040965601691,
@@ -207,10 +222,10 @@ c(-0.83644647378, 0.0085365454367, -0.16770422458, 0.040958113098,
 c(-0.83687097624, 0.0085341676033, -0.1674299545, 0.040968820903,
   0.042397459287, 0.063159075944, 0.018625582804, -0.0063140636571,
   0.11426134017, 0.091317308575, -0.025373078819, -0.66957444238)
-, "x86_64--no-long-double" =
-c(-0.8370370234, 0.008538975248, -0.1671607287, 0.040976013861,
-  0.042393702043, 0.06314300867, 0.018631172062, -0.0063382132536,
-  0.11445827857, 0.091409918881, -0.025308999173, -0.66935766843)
+, "x86_64--no-long-double" = # (2024-09: updated from Lx 64b-noLD)
+c(-0.83708963633, 0.0085786151508, -0.16814236036, 0.040958368946,
+  0.042399661659, 0.063166875696, 0.018634273269, -0.0056619915417,
+  0.1142614614, 0.091055956969, -0.025688991294, -0.66932060023)
 , "x86_64_F30" = ## Fedora 30, R-devel (2019-06-13):
 c(-0.83651130836, 0.0085272636623, -0.16777225909, 0.040958046751,
   0.042398611622, 0.063169934556, 0.018622060538, -0.0067041556052,
@@ -218,12 +233,12 @@ c(-0.83651130836, 0.0085272636623, -0.16777225909, 0.040958046751,
 )
 ## just FYI: difference 32-bit vs 64-bit:
 assert.EQ(beta2[[1]], beta2[[2]], tol = 0.001, check.attributes=FALSE, giveRE=TRUE)
-## Mean relative difference: 0.0009487 [2013-12 approx.]
-assert.EQ(beta2[[2]], beta2[[3]], tol = 0.001, check.attributes=FALSE, giveRE=TRUE)
-## Mean relative difference: 0.0005119 [2014-11]
+## Mean relative difference: 0.0009487 [~2013-12]; .0008741591 [2024-09]
+assert.EQ(beta2[[2]], beta2[[3]], tol = 0.004, check.attributes=FALSE, giveRE=TRUE)
+## Mean relative difference: 0.0005119 [2014-11]; 0.0011933 2024-09
 
-## when bypassing BLAS in matprod()      vvvvv seen 0.0002766 [Lx 64b]:
-assert.EQ(coef(m2), beta2[[arch]], tol = 0.001, # typically 1e-10 is ok !!
+## when bypassing BLAS in matprod()      vvvvv seen 0.0002766 [Lx 64b], 0.001328 [Lx 64b-noLD]
+assert.EQ(coef(m2), beta2[[arch]], tol = 0.0008 * (if(noLD16) 10 else 1), # typically 1e-10 is ok !!
           check.attributes=FALSE, giveRE=TRUE)
 ## slight changes of algorithm often change the above by ~ 4e-4 !!!
 

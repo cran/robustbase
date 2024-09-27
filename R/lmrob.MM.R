@@ -903,6 +903,8 @@ lmrob.kappa <- function(obj, control = obj$control)
 ## lmrob.tau() is called from lmrob..D..fit() {above}
 ##             and also  from ../vignettes/lmrob_simulation.Rnw  {if all is recomputed!}
 ## 2024-08-12: new arg. 'rel.tol' (left at default eps_C^{1/4} = 0.000122.. for now
+##
+## NB: see Koller & Stahel (2014) -- Appendix "Details on the design adapative scale .." (p. 2514)
 lmrob.tau <- function(obj, x = obj$x, control = obj$control, h, fast = TRUE,
                       subdivisions = 100L, rel.tol = .Machine$double.eps^0.25, ...)
 {

@@ -196,7 +196,8 @@ stopifnot(all.equal(vcov(cm0), vcovC(rm0), check.attributes=FALSE),
 cln <- function(vc) structure(vc, weights=NULL, eigen=NULL)
 ## .vcov.avar1() is not recommended here, but also should work with singular / NA coef case:
 ok0 <- !is.na(coef(rm0))
-vr0.NA<- vcov(rm0, cov=".vcov.avar1", complete=NA) # "almost singular" warning
+tools::assertWarning(verbose = TRUE, # on non-M1mac, there is a 2nd warning (not shown here!):
+vr0.NA<- vcov(rm0, cov=".vcov.avar1", complete=NA))
 vr0.T <- vcov(rm0, cov=".vcov.avar1", complete=TRUE)
 vr0.F <- vcov(rm0, cov=".vcov.avar1", complete=FALSE)
 stopifnot(identical(dim(vr0.NA), dim(vr0.T)),

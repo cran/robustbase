@@ -11,6 +11,7 @@ if(getRversion() < "4.4.0")
 ##' Derive more sessionInfo() like information, notably about BLAS, LAPACK, arithmetic, etc
 moreSessionInfo <- function(print. = FALSE) {
     .M <- .Machine
+    if(printAll <- identical(print., "all")) print. <- TRUE
     if(print.) str(.M[grep("^sizeof", names(.M))]) ## differentiate long-double..
     b64 <- .M$sizeof.pointer == 8
     onWindows <- .Platform$OS.type == "windows"
@@ -23,9 +24,10 @@ moreSessionInfo <- function(print. = FALSE) {
         cat(sprintf("%d bit platform type '%s'  ==> onWindows: %s\narch: %s\n",
                     if(b64) 64 else 32, .Platform$OS.type, onWindows, arch))
     sInfo <- sessionInfo()
+    if(printAll) print(sInfo)
     if(!exists("osVersion")) osVersion <- sInfo$running
     if(print.) cat("osVersion (0):", osVersion, "\n")
-    if(is.null(osVersion)) osVersion <- "Fedora" # very last resort
+    if(is.null(osVersion)) osVersion <- "Fedora?" # very last resort
     if(!length(BLAS.is.LAPACK <- sInfo$BLAS == sInfo$LAPACK))
         BLAS.is.LAPACK <- NA # R versions <= 3.3.x
     ## A cheap check (that works on KH's debian-gcc setup, 2019-05):

@@ -10,7 +10,6 @@ if(!require("sfsmisc")) {
     eaxis <- axis  # so we can use  eaxis() below
 }
 
-
 (doExtras <- robustbase:::doExtras())
 
 ## Explore the espRho() function: ---------------------------------------------

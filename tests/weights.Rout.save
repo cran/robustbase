@@ -1,7 +1,7 @@
 
-R version 4.3.0 Patched (2023-06-03 r84496) -- "Already Tomorrow"
-Copyright (C) 2023 The R Foundation for Statistical Computing
-Platform: x86_64-pc-linux-gnu (64-bit)
+R version 4.4.1 Patched (2024-06-15 r86768) -- "Race for Your Life"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -545,12 +545,9 @@ There were 14 warnings (use warnings() to see them)
 > cln <- function(vc) structure(vc, weights=NULL, eigen=NULL)
 > ## .vcov.avar1() is not recommended here, but also should work with singular / NA coef case:
 > ok0 <- !is.na(coef(rm0))
-> vr0.NA<- vcov(rm0, cov=".vcov.avar1", complete=NA) # "almost singular" warning
-Warning messages:
-1: In lf.cov(object, complete = complete, ...) :
-  X'WX is almost singular. Consider using cov = ".vcov.w"
-2: In lf.cov(object, complete = complete, ...) :
-  .vcov.avar1: negative diag(<vcov>) fixed up; consider 'cov=".vcov.w."' instead
+> tools::assertWarning(verbose = TRUE, # on non-M1mac, there is a 2nd warning (not shown here!):
++ vr0.NA<- vcov(rm0, cov=".vcov.avar1", complete=NA))
+Asserted warning: X'WX is almost singular. Consider using cov = ".vcov.w"
 > vr0.T <- vcov(rm0, cov=".vcov.avar1", complete=TRUE)
 > vr0.F <- vcov(rm0, cov=".vcov.avar1", complete=FALSE)
 > stopifnot(identical(dim(vr0.NA), dim(vr0.T)),
@@ -612,4 +609,4 @@ Coefficients:
 > 
 > proc.time()
    user  system elapsed 
-  0.883   0.193   1.100 
+  0.315   0.082   0.450 

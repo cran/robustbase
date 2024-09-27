@@ -7,7 +7,16 @@
   % --- 1.0-0  once we fix  adjOutlyingness() properly !
   %     =====
 
-\section{CHANGES in robustbase VERSION 0.99-4 (2024-08-19, svn 1001)}{
+\section{CHANGES in robustbase VERSION 0.99-4-1 (2024-09-25, svn 1006)}{
+  \subsection{Misc}{
+    \itemize{
+      \item small changes in \file{tests/lmrob-psifns.R} and \file{*.Rout.save}, notably
+      avoiding small diffs on "M1mac" and "noLD" (\command{--disable-long-double}).
+    }
+  }
+}
+
+\section{CHANGES in robustbase VERSION 0.99-4 (2024-08-19, svn 1002)}{
   \subsection{NEW FEATURES}{
     \itemize{
       \item \code{lmrob.fit()} gets new option \code{bare.only} for some
