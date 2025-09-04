@@ -182,7 +182,7 @@ covMcd <- function(x,
             if(length(dimn[[1]]))
                 dimnames(ans$X)[[1]] <- names(ans$mcd.wt)[ok]
             else
-                dimnames(ans$X) <- list(seq(along = ok)[ok], NULL)
+                dimnames(ans$X) <- list(which(ok), NULL)
         }
         if(trace)
             cat(ans$method, "\n")
@@ -390,7 +390,7 @@ covMcd <- function(x,
 	if(length(dimn[[1]]))
 	    dimnames(x)[[1]] <- names(ans$mcd.wt)[ok]
 	else
-	    dimnames(x) <- list(seq(along = ok)[ok], NULL)
+	    dimnames(x) <- list(which(ok), NULL)
     }
     ans$X <- x
     ans$wt <- NULL

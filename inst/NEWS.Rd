@@ -7,6 +7,25 @@
   % --- 1.0-0  once we fix  adjOutlyingness() properly !
   %     =====
 
+\section{CHANGES in robustbase VERSION 0.99-6 (2025-09-03, svn 1011)}{
+  \subsection{Misc}{
+    \itemize{
+      \item small change in vignette \file{lmrob_simulation.Rnw} such that
+      it also works with \CRANpkg{ggplot2} version \code{4.0.0} and newer.
+    }
+  }
+}
+
+\section{CHANGES in robustbase VERSION 0.99-5 (2024-11-01, svn 1007)}{
+  \subsection{Misc}{
+    \itemize{
+      \item small changes in \file{tests/*}, "robustifying" against the
+      possibility of \code{osVersion} being \code{NULL};
+      with thank to Michael Chirico for alerting me.
+    }
+  }
+}
+
 \section{CHANGES in robustbase VERSION 0.99-4-1 (2024-09-25, svn 1006)}{
   \subsection{Misc}{
     \itemize{

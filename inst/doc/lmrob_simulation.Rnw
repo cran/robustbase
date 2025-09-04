@@ -8,7 +8,23 @@
 \usepackage{amsmath}
 \usepackage{natbib}
 \usepackage[utf8]{inputenc}
-
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+  \definecolor{Blue}{rgb}{0,0,0.6}
+  \definecolor{Red}{rgb}{0.5,0,0}
+  \hypersetup{%
+    % hyperindex,%
+    colorlinks={true},%
+    % pagebackref,%
+    linktocpage,%
+    plainpages={false},%
+    linkcolor={Blue},%
+    citecolor={Blue},%
+    urlcolor={Red},%
+    pdfstartview={Fit},%
+    pdfview={XYZ null null null}%
+  }
 \newcommand{\makeright}[2]{\ifx#1\left\right#2\else#1#2\fi}
 \newcommand{\Norm}[2][\left]{\mathcal N   #1( #2 \makeright{#1}{)}}
 \newcommand{\norm}[1]   {\| #1 \|}
@@ -70,8 +86,10 @@ theme <- theme_bw(base_size = 10)
 theme$legend.key.size <- unit(1, "lines")# was 0.9 in pre-v.3 ggplot2
 theme$plot.margin <- unit(c(1/2, 1/8, 1/8, 1/8), "lines")# was (1/2, 0,0,0)
 theme_set(theme)
-## old and new ggplot2:
-stopifnot(is.list(theme_G <- theme$panel.grid.major %||% theme$panel.grid))
+##                 very old      and     new (in 2010)  ggplot2
+theme_G <- theme$panel.grid.major %||% theme$panel.grid
+stopifnot(is_theme_element(theme_G) ## ggplot2 4.0.0
+          || is.list(theme_G)) ## ggplot2 <= 3.y.z
 
 ## set default sizes for lines and points
 update_geom_defaults("point",  list(size = 4/3))
@@ -1467,6 +1485,17 @@ print(ggplot(rmb, aes(x, l, color=psi)) + geom_line() +
   simulation. Solid line: lower bound. Dashed line: upper bound.}
 \label{fig:max-asymptotic-bias}
 \end{figure}
+
+\section{Session Information}
+<<sessionInfo, results=tex>>=
+toLatex(sessionInfo())
+@
+%%
+<<pkg-version>>=
+unlist(packageDescription("robustbase")[c("Package", "Version", "Date")])
+<<finalizing, echo=FALSE>>=
+# options(op.orig)
+@
 
 \bibliographystyle{chicago}
 \bibliography{robustbase}

@@ -46,8 +46,10 @@ theme <- theme_bw(base_size = 10)
 theme$legend.key.size <- unit(1, "lines")# was 0.9 in pre-v.3 ggplot2
 theme$plot.margin <- unit(c(1/2, 1/8, 1/8, 1/8), "lines")# was (1/2, 0,0,0)
 theme_set(theme)
-## old and new ggplot2:
-stopifnot(is.list(theme_G <- theme$panel.grid.major %||% theme$panel.grid))
+##                 very old      and     new (in 2010)  ggplot2
+theme_G <- theme$panel.grid.major %||% theme$panel.grid
+stopifnot(is_theme_element(theme_G) ## ggplot2 4.0.0
+          || is.list(theme_G)) ## ggplot2 <= 3.y.z
 
 ## set default sizes for lines and points
 update_geom_defaults("point",  list(size = 4/3))
@@ -188,7 +190,7 @@ print(ggpairs(df.r_25_5, axisLabels="show", title = "rand_25_5: n=25, p=5"))
 
 
 ###################################################
-### code chunk number 7: lmrob_simulation.Rnw:371-372
+### code chunk number 7: lmrob_simulation.Rnw:389-390
 ###################################################
 aggrResultsFile <- file.path(robustDta, "aggr_results.Rdata")
 
@@ -262,7 +264,7 @@ estlist$errs[[1]]
 
 
 ###################################################
-### code chunk number 12: lmrob_simulation.Rnw:449-450
+### code chunk number 12: lmrob_simulation.Rnw:467-468
 ###################################################
 str(estlist$output[1:3], 2)
 
@@ -1064,5 +1066,23 @@ print(ggplot(rmb, aes(x, l, color=psi)) + geom_line() +
       coord_cartesian(ylim = c(0,10)) +
       scale_y_continuous(breaks = 1:10) +
       scale_colour_hue(quote(psi ~ '-function')))
+
+
+###################################################
+### code chunk number 38: sessionInfo
+###################################################
+toLatex(sessionInfo())
+
+
+###################################################
+### code chunk number 39: pkg-version
+###################################################
+unlist(packageDescription("robustbase")[c("Package", "Version", "Date")])
+
+
+###################################################
+### code chunk number 40: finalizing
+###################################################
+# options(op.orig)
 
 

@@ -1,4 +1,3 @@
-
 library(robustbase)
 
 ## instead of relying on  system.file("test-tools-1.R", package="Matrix"):
@@ -20,7 +19,7 @@ noLD16 <- (.M$sizeof.longdouble != 16)
 if(arch == "x86_64") {
     if(noLD16)
         arch <- paste0(arch, "--no-long-double")
-    else if(osVersion == "Fedora 30 (Thirty)")
+    else if(identical(osVersion, "Fedora 30 (Thirty)"))
         arch <- paste0(arch, "_F30")
     # else keep  'arch'  unchanged
 }

@@ -127,7 +127,7 @@ stopifnot(70 %in% i.a4Out)
     ## and this is "typically" true, but not for a 64-bit Linux version bypassing BLAS in matprod
     else if(isSun || isMac)
         TRUE
-    else if(grepl("^Fedora", osVersion) && !is32)
+    else if(length(osVersion) && grepl("^Fedora", osVersion) && !is32)
         identical(i.a4Out, 70L) # since Dec 2020 (F 32)
     else
         all.equal(i.a4Out, c(9:19, 23:27,57, 59, 70, 77))
